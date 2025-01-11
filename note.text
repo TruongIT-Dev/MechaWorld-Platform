@@ -1,8 +1,9 @@
 *** CÁC THƯ VIỆN NGOÀI MÀ PROJECT DÙNG ***
 1. Thư viện Call API: axios
 2. Thư viện Carousel: owl.Carousel
-3. Thư viện CSS: bootstrap
-4. Thư viện MUI: Material UI
+3. Thư viện CSS: bootstrapcss (cài tay, ko có trong .json)
+4. Thư viện tailwind: tailwindcss
+5. Thư viện Con Kiến: Ant Design
 
 *** CÁC THƯ VIỆN DÙNG ANIMATION *** 
 1. Wow Library: dùng với animate.css Library khi scroll chuột tới thì sẽ cho hoạt ảnh.
