@@ -9,7 +9,7 @@ export default function Navbar() {
           to="/"
           className="navbar-brand d-flex align-items-center px-4 px-lg-5"
         >
-          <h2 className="m-0 text-primary">
+          <h2 className="m-0 text-primary uppercase">
             <i className="fa fa-book me-3"></i>eLEARNING
           </h2>
         </Link>
@@ -21,7 +21,7 @@ export default function Navbar() {
         >
           <span className="navbar-toggler-icon"></span>
         </button>
-        <div className="collapse navbar-collapse" id="navbarCollapse">
+        <div className="navbar-collapse" id="navbarCollapse">
           <div className="navbar-nav ms-auto p-4 p-lg-0">
             <NavLink
               exact
