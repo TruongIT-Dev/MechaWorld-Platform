@@ -18,6 +18,7 @@ import Dsa from "./components/Course/Dsa";
 import Mern from "./components/Course/Mern";
 import Fullstack from "./components/Course/Fullstack";
 import Programming from "./components/Course/Programming";
+import Product1 from "./pages/Product1";
 
 
 function App() {
@@ -34,6 +35,9 @@ function App() {
 
         <Route path="/register" element={<SignUp />} />
         <Route path="/profile" element={<Profile />} />
+
+        {/* Product page */}
+        <Route path="/product-page" element={<Product1 />} />
 
         <Route path="/courses/java" element={<Javaprog />} />
         <Route path="/courses/dsa" element={<Dsa />} />

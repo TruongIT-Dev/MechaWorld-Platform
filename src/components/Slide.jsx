@@ -1,4 +1,3 @@
-import React from "react";
 import "../assets/css/Slide.css";
 import { Link } from "react-router-dom";
 
