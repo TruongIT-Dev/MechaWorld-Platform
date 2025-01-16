@@ -1,12 +1,10 @@
-import React from 'react'
-
 export default function Spinner() {
     var spinner = function () {
         setTimeout(function () {
             if ($('#spinner').length > 0) {
                 $('#spinner').removeClass('show');
             }
-        }, 1);
+        }, 10);
     };
     spinner();
     return (
