@@ -22,12 +22,12 @@ export default function ProductPage() {
                                 title: (
                                     <>
                                         <UserOutlined />
-                                        <span>Product page</span>
+                                        <span>Sản phẩm</span>
                                     </>
                                 ),
                             },
                             {
-                                title: 'High grade',
+                                title: '....',
                             },
                         ]}
                     />
@@ -43,7 +43,7 @@ export default function ProductPage() {
                         <Col span={18}>
                             <div className="product-car">
                                 {/* Top Filter */}
-                                <div className="mt-4 flex justify-between items-center wow fadeInRight" data-wow-delay="0.1s">
+                                <div className="mt-4 flex justify-between items-center wow fadeInDown" data-wow-delay="0.1s">
                                     <h1 className="text-lg font-bold">HG - HIGH GRADE</h1>
                                     <div className="flex items-center space-x-2">
                                         <span className="font-medium">Sắp xếp:</span>

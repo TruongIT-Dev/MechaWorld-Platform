@@ -25,7 +25,7 @@ function App() {
           <Route path="/profile" element={<Profile />} />
 
           {/* Product page */}
-          <Route path="/product-page" element={<Product1 />} />
+          <Route path="/product" element={<Product1 />} />
 
           <Route path="/courses/java" element={<Javaprog />} />
           <Route path="/courses/dsa" element={<Dsa />} />
