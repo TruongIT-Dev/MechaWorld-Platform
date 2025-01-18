@@ -1,55 +1,47 @@
-import "./App.css";
-import { Routes, Route } from "react-router-dom";
+import React from "react";
+import Navbar from "./components/Navbar/Navbar";
+import Hero from "./components/Hero/Hero";
+import ProductsNew from "./components/Products/ProductsNew";
+import AOS from "aos";
+import "aos/dist/aos.css";
+import TopProducts from "./components/TopProducts/TopProducts";
+import Banner from "./components/Banner/Banner";
+import Subscribe from "./components/Subscribe/Subscribe";
+import Testimonials from "./components/Testimonials/Testimonials";
+import Footer from "./components/Footer/Footer";
+import Popup from "./components/Popup/Popup";
+import Products from "./components/Products/Products";
 
-import Home from "./pages/Home";
-import About1 from "./pages/About1";
-import Courses1 from "./pages/Courses1";
-import Team1 from "./pages/Team1";
-import Testimonial1 from "./pages/Testimonial1";
-import Contact1 from "./pages/Contact1";
+const App = () => {
+  const [orderPopup, setOrderPopup] = React.useState(false);
 
-import ErrorPage from "./components/ErrorPage";
-import SignUp from "./components/Register";
-import Profile from "./components/Profile";
-import FeedbackAll from "./components/FeedbackAll";
+  const handleOrderPopup = () => {
+    setOrderPopup(!orderPopup);
+  };
+  React.useEffect(() => {
+    AOS.init({
+      offset: 100,
+      duration: 800,
+      easing: "ease-in-sine",
+      delay: 100,
+    });
+    AOS.refresh();
+  }, []);
 
-import Javaprog from "./components/Course/Javaprog";
-import Dsa from "./components/Course/Dsa";
-import Mern from "./components/Course/Mern";
-import Fullstack from "./components/Course/Fullstack";
-import Programming from "./components/Course/Programming";
-
-
-function App() {
   return (
-    <>
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/about" element={<About1 />} />
-        <Route path="/courses" element={<Courses1 />} />
-        <Route path="/team" element={<Team1 />} />
-        <Route path="/testimonial" element={<Testimonial1 />} />
-        <Route path="/contact" element={<Contact1 />} />
-        <Route path="/error" element={<ErrorPage />} />
-
-        <Route path="/register" element={<SignUp />} />
-        <Route path="/profile" element={<Profile />} />
-
-        <Route path="/courses/java" element={<Javaprog />} />
-        <Route path="/courses/dsa" element={<Dsa />} />
-
-        <Route path="/courses/mern" element={<Mern />} />
-
-        <Route path="/courses/fullstack" element={<Fullstack />} />
-
-        <Route path="/cources/programming" element={<Programming />} />
-
-        <Route path="/feedback" element={<FeedbackAll />} />
-
-        <Route path="*" element={<ErrorPage />} />
-      </Routes>
-    </>
+    <div className="bg-white dark:bg-gray-900 dark:text-white duration-200">
+      <Navbar handleOrderPopup={handleOrderPopup} />
+      <Hero handleOrderPopup={handleOrderPopup} />
+      <ProductsNew />
+      <TopProducts handleOrderPopup={handleOrderPopup} />
+      <Banner />
+      <Subscribe />
+      <Products />
+      <Testimonials />
+      <Footer />
+      <Popup orderPopup={orderPopup} setOrderPopup={setOrderPopup} />
+    </div>
   );
-}
+};
 
 export default App;
