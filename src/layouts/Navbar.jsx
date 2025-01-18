@@ -49,7 +49,7 @@ export default function Navbar() {
                 >
                   Sản phẩm
                 </NavLink>
-                <div className="dropdown-menu fade-down m-0">
+                <div className="dropdown-menu right-[1.75rem] fade-down m-0">
                   <div className="container">
                     <div className="flex">
 
