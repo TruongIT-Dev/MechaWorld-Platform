@@ -1,14 +1,14 @@
 import "./App.css";
 import { Routes, Route } from "react-router-dom";
 import { Suspense } from "react";
+import Home from "./components/Home";
 
 // import router
-import { About1, Contact1, Courses1, Dsa, ErrorPage, FeedbackAll, Fullstack, Home, Javaprog, Mern, Product1, Profile, Programming, SignUp, Team1, Testimonial1 } from "./routes/router";
+import { About1, Contact1, Courses1, Dsa, ErrorPage, FeedbackAll, Fullstack, Javaprog, Mern, Product1, Profile, Programming, SignUp, Team1, Testimonial1 } from "./routes/router";
 
 import Spinner from "./components/Spinner";
 
 
-function App() {
   return (
     <>
       <Suspense fallback={<Spinner />}>
@@ -27,14 +27,6 @@ function App() {
           {/* Product page */}
           <Route path="/product" element={<Product1 />} />
 
-          <Route path="/courses/java" element={<Javaprog />} />
-          <Route path="/courses/dsa" element={<Dsa />} />
-
-          <Route path="/courses/mern" element={<Mern />} />
-
-          <Route path="/courses/fullstack" element={<Fullstack />} />
-
-          <Route path="/cources/programming" element={<Programming />} />
 
           <Route path="/feedback" element={<FeedbackAll />} />
 
@@ -43,6 +35,6 @@ function App() {
       </Suspense>
     </>
   );
-}
+};
 
 export default App;
