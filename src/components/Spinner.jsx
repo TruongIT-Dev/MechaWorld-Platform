@@ -7,14 +7,20 @@ export default function Spinner() {
             if (spinner) {
                 spinner.classList.remove("show");
             }
-        }, 200); // Ẩn spinner sau 100ms
+        }, 500); // Ẩn spinner sau 200ms
         return () => clearTimeout(timer); // Dọn dẹp timer
     }, []);
 
     return (
         <>
-            <div id="spinner" className="show bg-white position-fixed translate-middle w-100 vh-100 top-50 start-50 d-flex align-items-center justify-content-center">
-                <div className="spinner-border text-primary" style={{ width: '3rem', height: '3rem' }} role="status">
+            <div
+                id="spinner"
+                className="show bg-white fixed inset-0 flex items-center justify-center z-50"
+            >
+                <div
+                    className="animate-spin rounded-full border-4 border-primary border-t-transparent w-12 h-12"
+                    role="status"
+                >
                     <span className="sr-only">Loading...</span>
                 </div>
             </div>

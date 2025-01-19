@@ -1,35 +1,24 @@
-import "./App.css";
 import { Routes, Route } from "react-router-dom";
 import { Suspense } from "react";
-import Home from "./components/Home";
 
 // import router
-import { About1, Contact1, Courses1, Dsa, ErrorPage, FeedbackAll, Fullstack, Javaprog, Mern, Product1, Profile, Programming, SignUp, Team1, Testimonial1 } from "./routes/router";
+import { HomePage, ErrorPage, ProductPage, AboutPage } from "./routes/router";
 
 import Spinner from "./components/Spinner";
 
+const App = () => {
 
   return (
     <>
       <Suspense fallback={<Spinner />}>
         <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/about" element={<About1 />} />
-          <Route path="/courses" element={<Courses1 />} />
-          <Route path="/team" element={<Team1 />} />
-          <Route path="/testimonial" element={<Testimonial1 />} />
-          <Route path="/contact" element={<Contact1 />} />
+
+          {/* Guest View */}
+          <Route path="/" element={<HomePage />} />
+          <Route path="/about" element={<AboutPage />} />
+          <Route path="/product" element={<ProductPage />} />
+
           <Route path="/error" element={<ErrorPage />} />
-
-          <Route path="/register" element={<SignUp />} />
-          <Route path="/profile" element={<Profile />} />
-
-          {/* Product page */}
-          <Route path="/product" element={<Product1 />} />
-
-
-          <Route path="/feedback" element={<FeedbackAll />} />
-
           <Route path="*" element={<ErrorPage />} />
         </Routes>
       </Suspense>

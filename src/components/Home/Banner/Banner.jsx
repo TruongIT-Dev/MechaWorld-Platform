@@ -1,8 +1,9 @@
 import React from "react";
-import BannerImg from "../../assets/img/gun6.jpg";
 import { GrSecure } from "react-icons/gr";
 import { IoFastFood } from "react-icons/io5";
 import { GiFoodTruck } from "react-icons/gi";
+
+import BannerImg from "../../../assets/image/gun6.jpg";
 
 const Banner = () => {
   return (

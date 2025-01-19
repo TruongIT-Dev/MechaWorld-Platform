@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { Select, Slider, Checkbox, Button } from "antd";
-import "tailwindcss/tailwind.css";
 
 const { Option } = Select;
 

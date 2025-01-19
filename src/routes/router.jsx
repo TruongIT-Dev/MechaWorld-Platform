@@ -1,21 +1,18 @@
 import React from "react";
 
-// Lazy load các component
-export const Home = React.lazy(() => import('../pages/Home'));
-export const About1 = React.lazy(() => import("../pages/About1"));
-export const Courses1 = React.lazy(() => import("../pages/Courses1"));
-export const Team1 = React.lazy(() => import("../pages/Team1"));
-export const Testimonial1 = React.lazy(() => import("../pages/Testimonial1"));
-export const Contact1 = React.lazy(() => import("../pages/Contact1"));
+// Lazy load các pages
 
-export const ErrorPage = React.lazy(() => import("../components/ErrorPage"));
-export const SignUp = React.lazy(() => import("../components/Register"));
-export const Profile = React.lazy(() => import("../components/Profile"));
-export const FeedbackAll = React.lazy(() => import("../components/FeedbackAll"));
+// Navigation Bar
+export const HomePage = React.lazy(() => import('../pages/HomePage'));
+export const AboutPage = React.lazy(() => import("../pages/AboutPage"));
+export const ProductPage = React.lazy(() => import('../pages/ProductPage'));
 
-export const Javaprog = React.lazy(() => import("../components/Course/Javaprog"));
-export const Dsa = React.lazy(() => import("../components/Course/Dsa"));
-export const Mern = React.lazy(() => import("../components/Course/Mern"));
-export const Fullstack = React.lazy(() => import("../components/Course/Fullstack"));
-export const Programming = React.lazy(() => import("../components/Course/Programming"));
-export const Product1 = React.lazy(() => import("../pages/Product1"));
+// 404 page
+export const ErrorPage = React.lazy(() => import("../pages/ErrorPage"));
+
+// Authentication page
+
+// User page
+export const Profile = React.lazy(() => import("../pages/ProfilePage"));
+
+

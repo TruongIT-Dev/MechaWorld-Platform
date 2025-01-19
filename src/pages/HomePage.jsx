@@ -1,18 +1,21 @@
 import React from "react";
-import Navbar from "./Navbar/Navbar";
-import Hero from "./Hero/Hero";
-import ProductsNew from "./Products/ProductsNew";
 import AOS from "aos";
 import "aos/dist/aos.css";
-import TopProducts from "./TopProducts/TopProducts";
-import Banner from "./Banner/Banner";
-import Subscribe from "./Subscribe/Subscribe";
-import Testimonials from "./Testimonials/Testimonials";
-import Footer from "./Footer/Footer";
-import Popup from "./Popup/Popup";
-import Products from "./Products/Products";
 
-const Home = () => {
+import Navbar from "../layouts/Navbar";
+import Footer from "../layouts/Footer";
+
+import Hero from "../components/Home/Hero/Hero";
+import Popup from "../components/Home/Popup/Popup";
+import Banner from "../components/Home/Banner/Banner";
+import Spinner from "../components/Spinner";
+import Products from "../components/Home/Products/Products";
+import Subscribe from "../components/Home/Subscribe/Subscribe";
+import ProductsNew from "../components/Home/Products/ProductsNew";
+import TopProducts from "../components/Home/TopProducts/TopProducts";
+import Testimonials from "../components/Home/Testimonials/Testimonials";
+
+const HomePage = () => {
     const [orderPopup, setOrderPopup] = React.useState(false);
 
     const handleOrderPopup = () => {
@@ -44,4 +47,4 @@ const Home = () => {
     );
 };
 
-export default Home;
+export default HomePage;

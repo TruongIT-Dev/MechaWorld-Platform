@@ -1,200 +1,142 @@
-import { Image } from "antd";
-import { Link, NavLink } from "react-router-dom";
+import React from "react";
+import { IoMdSearch } from "react-icons/io";
+import { FaCartShopping } from "react-icons/fa6";
+import { FaCaretDown } from "react-icons/fa";
+
+import Logo from "../assets/image/logo.png";
+import DarkMode from "./DarkMode";
 import UserNavbar from "./UserNavbar";
 
-export default function Navbar() {
+const Menu = [
+  {
+    id: 1,
+    name: "Trang chủ",
+    link: "/#",
+  },
+  {
+    id: 2,
+    name: "Về chúng tôi",
+    link: "/#",
+  },
+  {
+    id: 3,
+    name: "Đấu giá",
+    link: "/#",
+  },
+  {
+    id: 4,
+    name: "Kho đồ",
+    link: "/#",
+  },
+  {
+    id: 5,
+    name: "Phụ kiện",
+    link: "/#",
+  },
+];
+
+const DropdownLinks = [
+  {
+    id: 1,
+    name: "Master Grade",
+    link: "/#",
+  },
+  {
+    id: 2,
+    name: "High Grade",
+    link: "/#",
+  },
+  {
+    id: 3,
+    name: "Real Grade",
+    link: "/#",
+  },
+  {
+    id: 4,
+    name: "Perfect Grade",
+    link: "/#",
+  },
+  {
+    id: 5,
+    name: "None Grade",
+    link: "/#",
+  },
+];
+
+const Navbar = ({ handleOrderPopup }) => {
   return (
-    <>
-      <nav className="navbar navbar-expand-lg bg-white navbar-light shadow sticky-top p-0">
-        <div className="container">
-          <Link
-            to="/"
-            className="navbar-brand d-flex align-items-center"
-          >
-            <h2 className="m-0 text-primary uppercase flex items-center">
-              <Image
-                preview={false}
-                width={180}
-                src="/src/assets/image/navbar-logo-4-clear-bg.png" alt="logo"
-              />
-            </h2>
-          </Link>
-          <button
-            type="button"
-            className="navbar-toggler me-4"
-            data-bs-toggle="collapse"
-            data-bs-target="#navbarCollapse"
-          >
-            <span className="navbar-toggler-icon"></span>
-          </button>
-          <div className="navbar-collapse visible" id="navbarCollapse">
-            <div className="navbar-nav ms-auto p-4 p-lg-0">
-
-              {/* Trang chủ */}
-              <NavLink
-                exact
-                to="/"
-                className="nav-item nav-link"
-                activeClassName="active"
-              >
-                Trang chủ
-              </NavLink>
-
-              {/* Sản phẩm */}
-              <div className="nav-item dropdown">
-                <NavLink
-                  to="/product"
-                  className="nav-link dropdown-toggle"
-                // data-bs-toggle="dropdown"
-                >
-                  Sản phẩm
-                </NavLink>
-                <div className="dropdown-menu right-[1.75rem] fade-down m-0">
-                  <div className="container">
-                    <div className="flex">
-
-                      {/* Sản phẩm */}
-                      <div className="products mr-10">
-                        <h1 className="font-bold text-xl">Mô hình Gundam</h1>
-                        <NavLink
-                          to="/error"
-                          className="dropdown-item"
-                          activeClassName="active"
-                        >
-                          Gundam Super Deformed (SD)
-                        </NavLink>
-                        <NavLink
-                          to="/error"
-                          className="dropdown-item"
-                          activeClassName="active"
-                        >
-                          Gundam Entry Grade (EG)
-                        </NavLink>
-                        <NavLink
-                          to="/error"
-                          className="dropdown-item"
-                          activeClassName="active"
-                        >
-                          Gundam High Grade (HG)
-                        </NavLink>
-                        <NavLink
-                          to="/error"
-                          className="dropdown-item"
-                          activeClassName="active"
-                        >
-                          Gundam Real Grade (RG)
-                        </NavLink>
-                        <NavLink
-                          to="/error"
-                          className="dropdown-item"
-                          activeClassName="active"
-                        >
-                          Gundam Master Grade (MG)
-                        </NavLink>
-                        <NavLink
-                          to="/error"
-                          className="dropdown-item"
-                          activeClassName="active"
-                        >
-                          Gundam Perfect Grade (PG)
-                        </NavLink>
-                        <NavLink
-                          to="/error"
-                          className="dropdown-item"
-                          activeClassName="active"
-                        >
-                          Gundam Non grade
-                        </NavLink>
-                      </div>
-
-                      {/* Phụ kiện */}
-                      <div className="accessories">
-                        <h1 className="font-bold text-xl">Phụ kiện</h1>
-                        <NavLink
-                          to="/error"
-                          className="dropdown-item"
-                          activeClassName="active"
-                        >
-                          Giá trưng bày
-                        </NavLink>
-                        <NavLink
-                          to="/error"
-                          className="dropdown-item"
-                          activeClassName="active"
-                        >
-                          Base
-                        </NavLink>
-                        <NavLink
-                          to="/error"
-                          className="dropdown-item"
-                          activeClassName="active"
-                        >
-                          Kiềm cắt
-                        </NavLink>
-                        <NavLink
-                          to="/error"
-                          className="dropdown-item"
-                          activeClassName="active"
-                        >
-                          Phụ kiện đi kèm
-                        </NavLink>
-                        <NavLink
-                          to="/error"
-                          className="dropdown-item"
-                          activeClassName="active"
-                        >
-                          Đèn LED
-                        </NavLink>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Đấu giá */}
-              <NavLink
-                to="/error"
-                className="nav-item nav-link"
-                activeClassName="active"
-              >
-                Đấu giá
-              </NavLink>
-
-              {/* Giới thiệu */}
-              <NavLink
-                to="/about"
-                className="nav-item nav-link"
-                activeClassName="active"
-              >
-                Giới thiệu
-              </NavLink>
-
-              {/* Tủ trưng bày */}
-              <NavLink
-                to="/contact"
-                className="nav-item nav-link"
-                activeClassName="active"
-              >
-                Tủ trưng bày
-              </NavLink>
-            </div>
-
-
-            {/* User đã Authenticated */}
-            {/* Thay thế nút Đăng nhập bằng 2 icon: Account và Cart */}
-            <UserNavbar />
+    <div className="shadow-md bg-white dark:bg-gray-900 dark:text-white duration-200 relative z-40">
+      {/* upper Navbar */}
+      <div className="bg-primary/40 py-2">
+        <div className="container flex justify-between items-center">
+          <div>
+            <a href="#" className="font-bold text-2xl sm:text-3xl flex gap-2">
+              <img src={Logo} alt="Logo" className="w-10" />
+              MechaWorld
+            </a>
           </div>
 
-          {/* User chưa Authenticate */}
-          {/* <div className="guest">
-            <button className="flex w-max btn bg-blue-500 text-white py-4 px-4">
-              Đăng nhập
-              <i className="fa fa-arrow-right ms-3"></i>
-            </button>
-          </div> */}
-        </div>
+          {/* search bar */}
+          <div className="flex justify-between items-center gap-4">
+            <div className="relative group hidden sm:block">
+              <input
+                type="text"
+                placeholder="search"
+                className="w-[200px] sm:w-[200px] group-hover:w-[300px] transition-all duration-300 rounded-full border border-gray-300 px-2 py-1 focus:outline-none focus:border-1 focus:border-primary dark:border-gray-500 dark:bg-gray-800  "
+              />
+              <IoMdSearch className="text-gray-500 group-hover:text-primary absolute top-1/2 -translate-y-1/2 right-3" />
+            </div>
 
-      </nav>
-    </>
+            {/* Order and Dropdown */}
+            <UserNavbar />
+
+            {/* Darkmode Switch */}
+            <div>
+              <DarkMode />
+            </div>
+          </div>
+        </div>
+      </div>
+      {/* lower Navbar */}
+      <div data-aos="zoom-in" className="flex justify-center">
+        <ul className="sm:flex hidden items-center gap-4">
+          {Menu.map((data) => (
+            <li key={data.id}>
+              <a
+                href={data.link}
+                className="inline-block px-4 hover:text-primary duration-200"
+              >
+                {data.name}
+              </a>
+            </li>
+          ))}
+          {/* Simple Dropdown and Links */}
+          <li className="group relative cursor-pointer">
+            <a href="/product" className="flex items-center gap-[2px] py-2">
+              Sản phẩm
+              <span>
+                <FaCaretDown className="transition-all duration-200 group-hover:rotate-180" />
+              </span>
+            </a>
+            <div className="absolute z-[9999] hidden group-hover:block w-[200px] rounded-md bg-white p-2 text-black shadow-md">
+              <ul>
+                {DropdownLinks.map((data) => (
+                  <li key={data.id}>
+                    <a
+                      href={data.link}
+                      className="inline-block w-full rounded-md p-2 hover:bg-primary/20 "
+                    >
+                      {data.name}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </div>
   );
-}
+};
+
+export default Navbar;

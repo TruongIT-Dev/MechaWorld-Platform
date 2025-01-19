@@ -1,15 +1,16 @@
 import React from "react";
-import Img1 from "../../assets/img/gun1.jpg";
-import Img2 from "../../assets/img/gun2.jpg";
-import Img3 from "../../assets/img/gun3.jpg";
-import Img4 from "../../assets/img/gun4.jpg";
-import Img5 from "../../assets/img/gun5.jpg";
-import Img6 from "../../assets/img/gun6.jpg";
-import Img7 from "../../assets/img/gun7.jpg";
-import Img8 from "../../assets/img/gun8.jpg";
-import Img9 from "../../assets/img/gun9.jpg";
-import Img10 from "../../assets/img/gun10.jpg";
 import { FaStar } from "react-icons/fa6";
+
+import Img1 from "../../../assets/image/gun1.jpg";
+import Img2 from "../../../assets/image/gun2.jpg";
+import Img3 from "../../../assets/image/gun3.jpg";
+import Img4 from "../../../assets/image/gun4.jpg";
+import Img5 from "../../../assets/image/gun5.jpg";
+import Img6 from "../../../assets/image/gun6.jpg";
+import Img7 from "../../../assets/image/gun7.jpg";
+import Img8 from "../../../assets/image/gun8.jpg";
+import Img9 from "../../../assets/image/gun9.jpg";
+import Img10 from "../../../assets/image/gun10.jpg";
 
 const ProductsData = [
   {
@@ -126,15 +127,15 @@ const Products = () => {
                   </div>
                 </div>
                 <div className="flex justify-center">
-                    <button className="text-center mt-10 cursor-pointer bg-primary text-white py-1 px-5 rounded-md">
+                  <button className="text-center mt-10 cursor-pointer bg-primary text-white py-1 px-5 rounded-md">
                     Add To Card
-                    </button>
+                  </button>
                 </div>
               </div>
 
             ))}
           </div>
-          
+
         </div>
       </div>
     </div>

@@ -1,9 +1,9 @@
 /********** Template CSS **********/
 :root {
     /* --primary: #06BBCC; */
-    --primary: #74b1fc;
+    /* --primary: #74b1fc;
     --light: #F0FBFC;
-    --dark: #181d38;
+    --dark: #181d38; */
 }
 
 .fw-medium {
@@ -21,8 +21,6 @@
     bottom: 5px;
     z-index: 99;
     border-radius: 4px;
-    /* height: 35px;
-    width: 35px; */
 }
 
 
@@ -42,7 +40,7 @@
 
 
 /*** Button ***/
-.btn {
+/* .btn {
     font-family: 'Nunito', sans-serif;
     font-weight: 600;
     transition: .5s;
@@ -77,11 +75,11 @@
     justify-content: center;
     font-weight: normal;
     border-radius: 0px;
-}
+} */
 
 
 /*** Navbar ***/
-.navbar .dropdown-toggle::after {
+.dropdown-toggle::after {
     border: none;
     content: "\f107";
     font-family: "Font Awesome 5 Free";
@@ -90,12 +88,11 @@
     margin-left: 8px;
 }
 
-.navbar-light .navbar-nav .nav-link {
+/* .navbar-light .navbar-nav .nav-link {
     margin-right: 30px;
     padding: 25px 0;
     color: #FFFFFF;
     font-size: 15px;
-    /* text-transform: uppercase; */
     outline: none;
 }
 
@@ -128,25 +125,24 @@
 .navbar-light.sticky-top {
     top: -100px;
     transition: .5s;
-}
+} */
 
 @media (min-width: 992px) {
-    .navbar .nav-item .dropdown-menu {
+    .nav-item .dropdown-menu {
         display: block;
         margin-top: 0;
         opacity: 0;
         visibility: hidden;
         transition: .5s;
-        /* right: 1.75rem; */
     }
 
-    .navbar .dropdown-menu.fade-down {
+    .dropdown-menu.fade-down {
         top: 100%;
         transform: rotateX(-75deg);
         transform-origin: 0% 0%;
     }
 
-    .navbar .nav-item:hover .dropdown-menu {
+    .nav-item:hover .dropdown-menu {
         top: 100%;
         transform: rotateX(0deg);
         visibility: visible;
@@ -157,7 +153,7 @@
 
 
 /*** Header carousel ***/
-@media (max-width: 768px) {
+/* @media (max-width: 768px) {
     .header-carousel .owl-carousel-item {
         position: relative;
         min-height: 500px;
@@ -214,11 +210,11 @@
 
 .breadcrumb-item+.breadcrumb-item::before {
     color: var(--light);
-}
+} */
 
 
 /*** Section Title ***/
-.section-title {
+/* .section-title {
     position: relative;
     display: inline-block;
     text-transform: uppercase;
@@ -254,11 +250,11 @@
 .section-title.text-start::after {
     width: calc(100% + 60px);
     left: 0;
-}
+} */
 
 
 /*** Service ***/
-.service-item {
+/* .service-item {
     background: var(--light);
     transition: .5s;
 }
@@ -274,11 +270,11 @@
 
 .service-item:hover * {
     color: var(--light) !important;
-}
+} */
 
 
 /*** Categories & Courses ***/
-.category img,
+/* .category img,
 .course-item img {
     transition: .5s;
 }
@@ -290,17 +286,17 @@
 
 
 /*** Team ***/
-.team-item img {
+/* .team-item img {
     transition: .5s;
 }
 
 .team-item:hover img {
     transform: scale(1.1);
-}
+}  */
 
 
 /*** Testimonial ***/
-.testimonial-carousel::before {
+/* .testimonial-carousel::before {
     position: absolute;
     content: "";
     top: 0;
@@ -371,11 +367,11 @@
 .testimonial-carousel .owl-dot.active {
     background: var(--primary);
     border-color: var(--primary);
-}
+} */
 
 
 /*** Footer ***/
-.footer .btn.btn-social {
+/* .footer .btn.btn-social {
     margin-right: 5px;
     width: 35px;
     height: 35px;
@@ -438,4 +434,4 @@
     margin-right: 0;
     padding-right: 0;
     border-right: none;
-}
+} */

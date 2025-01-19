@@ -1,13 +1,14 @@
 import { Card, Col, Pagination, Row, Button, Breadcrumb } from 'antd';
-import ProductFilter from './ProductFilter';
 import { HomeOutlined, UserOutlined } from '@ant-design/icons';
 
-export default function ProductPage() {
+import ProductFilter from './ProductFilter';
+
+export default function Product() {
     const { Meta } = Card;
 
     return (
         <>
-            <div className="container my-20">
+            <div className="container my-10">
 
                 {/* Breadcrumb */}
                 <div className="breadcurm-section px-4 wow fadeInLeft" data-wow-delay="0.1s">

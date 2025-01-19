@@ -1,6 +1,4 @@
 import React from "react";
-import footerLogo from "../../assets/logo.png";
-import Banner from "../../assets/website/footer-pattern.jpg";
 import {
   FaFacebook,
   FaInstagram,
@@ -8,6 +6,9 @@ import {
   FaLocationArrow,
   FaMobileAlt,
 } from "react-icons/fa";
+
+import footerLogo from "../assets/image/logo.png";
+import Banner from "../assets/image/website/footer-pattern.jpg";
 
 const BannerImg = {
   backgroundImage: `url(${Banner})`,
