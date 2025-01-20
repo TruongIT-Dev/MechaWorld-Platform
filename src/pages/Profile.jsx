@@ -1,18 +1,14 @@
 import Navbar from "../layouts/Navbar";
 import Footer from "../layouts/Footer";
-
+import Spinner from "../components/Spinner";
+import ProfilePage from "../components/Profiles"
 export default function Profile() {
-
   return (
     <>
+      <Spinner />
       <Navbar />
-
-      <div>
-        <h2>Hello Profile</h2>
-      </div>
-
-
+      <ProfilePage />
       <Footer />
     </>
-  )
+  );
 }

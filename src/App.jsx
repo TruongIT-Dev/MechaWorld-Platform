@@ -3,7 +3,7 @@ import { Routes, Route } from "react-router-dom";
 import { Suspense } from "react";
 
 // import router
-import { About1, Contact1, Courses1, Dsa, ErrorPage, FeedbackAll, Fullstack, Home, Javaprog, Mern, Product1, Profile, Programming, SignUp, Team1, Testimonial1 } from "./routes/router";
+import { About1, Contact1, Courses1, Dsa, ErrorPage, FeedbackAll, Fullstack, Home, Javaprog, Mern, OrderHistory, Product1, Profile, Programming, SignUp, Team1, Testimonial1, TradeHistory, UserProfile,Setting, Collection, SignIn, } from "./routes/router";
 
 import Spinner from "./components/Spinner";
 
@@ -21,8 +21,16 @@ function App() {
           <Route path="/contact" element={<Contact1 />} />
           <Route path="/error" element={<ErrorPage />} />
 
+
+          <Route path="/signIn" element={<SignIn />} />
           <Route path="/register" element={<SignUp />} />
-          <Route path="/profile" element={<Profile />} />
+          <Route path="/profile" element={<Profile />} >
+            <Route path="user" element={<UserProfile/>} />
+            <Route path="collection" element={ <Collection/>} />
+            <Route path="tradehistory" element={<TradeHistory/>} />
+            <Route path="orderhistory" element={<OrderHistory/>} />
+            <Route path="setting" element={<Setting/>} />
+          </Route>
 
           {/* Product page */}
           <Route path="/product" element={<Product1 />} />

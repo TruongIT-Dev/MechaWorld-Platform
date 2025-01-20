@@ -1,8 +1,23 @@
 import { Image } from "antd";
 import { Link, NavLink } from "react-router-dom";
 import UserNavbar from "./UserNavbar";
+import { useState } from "react";
+import { useEffect } from "react";
 
 export default function Navbar() {
+  const [user, setUser] = useState(null);
+
+    useEffect(() => {
+        const storedUser = localStorage.getItem('user');
+        if (storedUser) {
+            try {
+                setUser(JSON.parse(storedUser));
+            } catch (error) {
+                console.error("Lỗi từ localStorage:", error);
+                localStorage.removeItem('user'); 
+            }
+        }
+    }, []);
   return (
     <>
       <nav className="navbar navbar-expand-lg bg-white navbar-light shadow sticky-top p-0">
@@ -178,11 +193,19 @@ export default function Navbar() {
                 Tủ trưng bày
               </NavLink>
             </div>
-
+            {user ? (
+                        <UserNavbar picture={user.picture}/>
+                    ) : (
+                        <div className="guest">
+                            <Link to="/signIn" className="btn bg-blue-500 text-white pt-4 px-4 ">
+                                Đăng nhập
+                            </Link>
+                        </div>
+                    )}
 
             {/* User đã Authenticated */}
             {/* Thay thế nút Đăng nhập bằng 2 icon: Account và Cart */}
-            <UserNavbar />
+            {/* <UserNavbar /> */}
           </div>
 
           {/* User chưa Authenticate */}
