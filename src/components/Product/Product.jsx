@@ -9,9 +9,8 @@ export default function Product() {
     return (
         <>
             <div className="container my-10">
-
                 {/* Breadcrumb */}
-                <div className="breadcurm-section px-4 wow fadeInLeft" data-wow-delay="0.1s">
+                <div className="breadcurm-section px-4 py-2">
                     <Breadcrumb
                         items={[
                             {
@@ -44,7 +43,7 @@ export default function Product() {
                         <Col span={18}>
                             <div className="product-car">
                                 {/* Top Filter */}
-                                <div className="mt-4 flex justify-between items-center wow fadeInDown" data-wow-delay="0.1s">
+                                <div className="mt-4 mb-9 flex justify-between items-center">
                                     <h1 className="text-lg font-bold">HG - HIGH GRADE</h1>
                                     <div className="flex items-center space-x-2">
                                         <span className="font-medium">Sắp xếp:</span>
@@ -54,7 +53,7 @@ export default function Product() {
                                         <Button className="border rounded-md">A-Z</Button>
                                         <Button className="border rounded-md">Z-A</Button>
                                         <Button className="border rounded-md">Mới nhất</Button>
-                                        <Button type="primary" className="rounded-md">Bán chạy</Button>
+                                        <Button className="rounded-md">Bán chạy</Button>
                                     </div>
                                 </div>
 

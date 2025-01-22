@@ -33,7 +33,7 @@ const HomePage = () => {
 
     return (
         <div className="bg-white dark:bg-gray-900 dark:text-white duration-200">
-            <Navbar handleOrderPopup={handleOrderPopup} />
+            {/* <Navbar handleOrderPopup={handleOrderPopup} /> */}
             <Hero handleOrderPopup={handleOrderPopup} />
             <ProductsNew />
             <TopProducts handleOrderPopup={handleOrderPopup} />
@@ -41,7 +41,7 @@ const HomePage = () => {
             <Subscribe />
             <Products />
             <Testimonials />
-            <Footer />
+            {/* <Footer /> */}
             <Popup orderPopup={orderPopup} setOrderPopup={setOrderPopup} />
         </div>
     );

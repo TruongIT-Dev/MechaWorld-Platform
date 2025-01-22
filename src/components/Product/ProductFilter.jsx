@@ -41,7 +41,7 @@ const ProductFilter = () => {
     };
 
     return (
-        <div className="p-4 max-w-lg mx-auto bg-white wow fadeInLeft" data-wow-delay="0.3s">
+        <div className="p-4 mr-2 max-w-lg mx-auto ">
             <h1 className="text-xl font-bold mb-4">Filter Gundam Products</h1>
             <div className="mb-4">
                 <label className="block text-sm font-medium mb-1">Grade</label>
@@ -78,7 +78,7 @@ const ProductFilter = () => {
                     In Stock Only
                 </Checkbox>
             </div>
-            <Button type="primary" className="w-full" onClick={handleFilter}>
+            <Button className="w-full" onClick={handleFilter}>
                 Apply Filters
             </Button>
 

@@ -7,7 +7,7 @@ export default function Spinner() {
             if (spinner) {
                 spinner.classList.remove("show");
             }
-        }, 500); // Ẩn spinner sau 200ms
+        }, 1000); // Ẩn spinner sau 1000ms
         return () => clearTimeout(timer); // Dọn dẹp timer
     }, []);
 

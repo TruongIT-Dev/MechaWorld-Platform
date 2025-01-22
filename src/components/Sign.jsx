@@ -1,6 +1,4 @@
-import { Link, useNavigate } from "react-router-dom";
-import Navbar from "../layouts/Navbar";
-import Footer from "../layouts/Footer";
+import { useNavigate } from "react-router-dom";
 import { Checkbox, Form, Input, Button } from "antd";
 import { GoogleLogin } from "@react-oauth/google";
 // import { useState, useMemo } from 'react';
@@ -12,9 +10,9 @@ export default function Sign() {
   const navigate = useNavigate();
   const [form] = Form.useForm();
   const [activeTab, setActiveTab] = useState(1);
-//   const onChange = (e) => {
-//     console.log(`checked = ${e.target.checked}`);
-//   };
+  //   const onChange = (e) => {
+  //     console.log(`checked = ${e.target.checked}`);
+  //   };
   const onFinish = (values) => {
     console.log("Success:", values);
   };
@@ -27,8 +25,6 @@ export default function Sign() {
 
   return (
     <>
-      <Navbar />
-
       <div className="login-container">
         <div className="login-form-wrapper">
           <div className="radio-wrapper-19 w-full">
@@ -114,7 +110,7 @@ export default function Sign() {
                     localStorage.setItem(
                       "user",
                       JSON.stringify(credentialResponseDecoded)
-                      
+
                     );
                     console.log(localStorage.getItem('user'));
                     navigate("/");
@@ -192,8 +188,6 @@ export default function Sign() {
           )}
         </div>
       </div>
-
-      <Footer />
     </>
   );
 }
