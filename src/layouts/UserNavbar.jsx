@@ -1,10 +1,31 @@
-import { NavLink } from "react-router-dom";
-import { UserOutlined, ShoppingCartOutlined } from "@ant-design/icons";
+import { NavLink, useNavigate } from "react-router-dom";
+import { UserOutlined } from "@ant-design/icons";
 import { FaCartShopping } from "react-icons/fa6";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function UserNavbar() {
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+    const [user, setUser] = useState(null);
+
+    const navigate = useNavigate();
+
+
+    useEffect(() => {
+        const storedUser = localStorage.getItem('user');
+        if (storedUser) {
+            try {
+                setUser(JSON.parse(storedUser));
+            } catch (error) {
+                console.error("Lỗi từ localStorage:", error);
+                localStorage.removeItem('user');
+            }
+        }
+    }, []);
+
+    const handleLogout = () => {
+        localStorage.removeItem('user');
+        navigate('/');
+    };
 
     return (
         <div className="space-x-6 flex items-center relative">
@@ -28,27 +49,34 @@ export default function UserNavbar() {
                 </button>
                 {isDropdownOpen && (
                     <div className="absolute right-0 mt-2 w-40 bg-white border rounded-lg shadow-lg z-50">
-                        <NavLink
-                            to="/error"
-                            className="block px-4 py-2 text-gray-700 hover:bg-gray-100 hover:text-gray-900"
-                        >
-                            Đăng nhập
-                        </NavLink>
-                        <NavLink
-                            to="/error"
-                            className="block px-4 py-2 text-gray-700 hover:bg-gray-100 hover:text-gray-900"
-                        >
-                            Tài khoản của tôi
-                        </NavLink>
-                        <NavLink
-                            to="/error"
-                            className="block px-4 py-2 text-gray-700 hover:bg-gray-100 hover:text-gray-900"
-                        >
-                            Đăng xuất
-                        </NavLink>
+                        {user ? (
+                            <>
+                                <NavLink
+                                    to="/profile/user"
+                                    className="block px-4 py-2 text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+                                >
+                                    Tài khoản của tôi
+                                </NavLink>
+                                <NavLink
+                                    onClick={handleLogout}
+                                    className="block px-4 py-2 text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+                                >
+                                    Đăng xuất
+                                </NavLink>
+                            </>
+                        ) : (
+                            <div className="guest">
+                                <NavLink
+                                    to="/signIn"
+                                    className="block px-4 py-2 text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+                                >
+                                    Đăng nhập
+                                </NavLink>
+                            </div>
+                        )}
                     </div>
                 )}
             </div>
         </div>
-    );
+    )
 }

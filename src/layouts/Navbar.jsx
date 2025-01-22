@@ -1,10 +1,9 @@
-import React from "react";
 import { IoMdSearch } from "react-icons/io";
-import { FaCartShopping } from "react-icons/fa6";
 import { FaCaretDown } from "react-icons/fa";
 
 import Logo from "../assets/image/logo.png";
-import DarkMode from "./DarkMode";
+
+// import DarkMode from "./DarkMode";
 import UserNavbar from "./UserNavbar";
 
 const Menu = [
@@ -63,7 +62,8 @@ const DropdownLinks = [
   },
 ];
 
-const Navbar = ({ handleOrderPopup }) => {
+const Navbar = () => {
+
   return (
     <div className="shadow-md bg-white dark:bg-gray-900 dark:text-white duration-200 relative z-40">
       {/* upper Navbar */}
@@ -91,9 +91,9 @@ const Navbar = ({ handleOrderPopup }) => {
             <UserNavbar />
 
             {/* Darkmode Switch */}
-            <div>
+            {/* <div>
               <DarkMode />
-            </div>
+            </div> */}
           </div>
         </div>
       </div>

@@ -1,15 +1,12 @@
-import Profile from "../components/Profile/Profile";
-import Spinner from "../components/Spinner";
-import Footer from "../layouts/Footer";
 import Navbar from "../layouts/Navbar";
-
+import Footer from "../layouts/Footer";
+import Profile from "../components/Profiles"
 export default function ProfilePage() {
-    return (
-        <>
-            <Navbar />
-            <Profile />
-            <Footer />
-
-        </>
-    )
+  return (
+    <>
+      <Navbar />
+      <Profile />
+      <Footer />
+    </>
+  );
 }
