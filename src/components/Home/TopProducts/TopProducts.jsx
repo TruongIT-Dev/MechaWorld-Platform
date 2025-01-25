@@ -34,13 +34,13 @@ const TopProducts = ({ handleOrderPopup }) => {
       <div className="container">
         {/* Header section */}
         <div className="text-left mb-24">
-          <p data-aos="fade-up" className="text-sm text-primary">
+          <p data-aos="fade-up" data-aos-once="true" className="text-sm text-primary">
             Top Rated Products for you
           </p>
-          <h1 data-aos="fade-up" className="text-3xl font-bold">
+          <h1 data-aos="fade-up" data-aos-once="true" className="text-3xl font-bold">
             Best Products
           </h1>
-          <p data-aos="fade-up" className="text-xs text-gray-400">
+          <p data-aos="fade-up" data-aos-once="true" className="text-xs text-gray-400">
             Lorem ipsum dolor sit amet consectetur, adipisicing elit. Sit
             asperiores modi Sit asperiores modi
           </p>
@@ -50,6 +50,7 @@ const TopProducts = ({ handleOrderPopup }) => {
           {ProductsData.map((data) => (
             <div
               data-aos="zoom-in"
+              data-aos-once="true"
               className="rounded-2xl bg-white dark:bg-gray-800 hover:bg-black/80 dark:hover:bg-primary hover:text-white relative shadow-xl duration-300 group max-w-[300px]"
             >
               {/* image section */}

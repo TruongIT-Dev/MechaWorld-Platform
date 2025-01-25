@@ -1,42 +1,32 @@
 import React from "react";
-import LightButton from "../assets/image/website/light-mode-button.png";
-import DarkButton from "../assets/image/website/dark-mode-button.png";
+import { ToastContainer, toast } from 'react-toastify';
+import { Bell } from "lucide-react";
+import 'react-toastify/dist/ReactToastify.css';  // Đừng quên thêm CSS của react-toastify
 
-const DarkMode = () => {
-  const [theme, setTheme] = React.useState(
-    localStorage.getItem("theme") ? localStorage.getItem("theme") : "light"
-  );
-
-  const element = document.documentElement; // html element
-
-  React.useEffect(() => {
-    if (theme === "dark") {
-      element.classList.add("dark");
-      localStorage.setItem("theme", "dark");
-    } else {
-      element.classList.remove("dark");
-      localStorage.setItem("theme", "light");
-    }
-  }, [theme]);
+const NotificationIcon = ({ count = 0 }) => {
+  // Hàm để hiển thị thông báo
+  const notify = () => toast("Notification!");
 
   return (
-    <div className="relative">
-      <img
-        src={LightButton}
-        alt=""
-        onClick={() => setTheme(theme === "light" ? "dark" : "light")}
-        className={`w-12 cursor-pointer drop-shadow-[1px_1px_1px_rgba(0,0,0,0.1)] transition-all duration-300 absolute right-0 z-10 ${
-          theme === "dark" ? "opacity-0" : "opacity-100"
-        } `}
-      />
-      <img
-        src={DarkButton}
-        alt=""
-        onClick={() => setTheme(theme === "light" ? "dark" : "light")}
-        className="w-12 cursor-pointer drop-shadow-[1px_1px_1px_rgba(0,0,0,0.1)] transition-all duration-300"
-      />
+    <div>
+      <button onClick={notify}>
+          <div className="relative inline-block">
+          {/* Bell Icon */}
+          <div className="p-2 bg-gray-100 rounded-full shadow-md hover:bg-gray-200 cursor-pointer">
+            <Bell className="w-6 h-6 text-gray-800" />
+          </div>
+          {/* Notification Badge */}
+          {count > 0 && (
+            <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center shadow-md">
+              {count > 99 ? "99+" : count}
+            </span>
+          )}
+        </div>
+      </button>  {/* Nút bấm để hiển thị thông báo */}
+      <ToastContainer />  {/* Phần chứa thông báo */}
     </div>
   );
-};
+}
 
-export default DarkMode;
+export default NotificationIcon;
+

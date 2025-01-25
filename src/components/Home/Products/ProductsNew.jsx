@@ -55,13 +55,13 @@ const ProductsNew = () => {
       <div className="container">
         {/* Header section */}
         <div className="text-center mb-10 max-w-[600px] mx-auto">
-          <p data-aos="fade-up" className="text-sm text-primary">
+          <p data-aos="fade-up" data-aos-once="true" className="text-sm text-primary">
             Top Selling Products for you
           </p>
-          <h1 data-aos="fade-up" className="text-3xl font-bold">
+          <h1 data-aos="fade-up" data-aos-once="true" className="text-3xl font-bold">
             Products New
           </h1>
-          <p data-aos="fade-up" className="text-xs text-gray-400">
+          <p data-aos="fade-up" data-aos-once="true" className="text-xs text-gray-400">
             New GunDam in 2025
           </p>
         </div>
@@ -72,6 +72,7 @@ const ProductsNew = () => {
             {ProductsData.map((data) => (
               <div
                 data-aos="fade-up"
+                data-aos-once="true"
                 data-aos-delay={data.aosDelay}
                 key={data.id}
                 className="space-y-3"
