@@ -38,7 +38,7 @@ const product = {
 
 const reviews = { href: '#', average: 4.8, totalCount: 245 };
 
-export default function GundamProductPage() {
+const GundamProductPage = () => {
     const [selectedImage, setSelectedImage] = useState(product.images[0]);
 
     return (
@@ -158,3 +158,4 @@ export default function GundamProductPage() {
         </div>
     );
 }
+export default GundamProductPage

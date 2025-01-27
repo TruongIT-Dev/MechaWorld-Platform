@@ -3,7 +3,7 @@ import { HomeOutlined, UserOutlined } from '@ant-design/icons';
 
 import ProductFilter from './ProductFilter';
 
-export default function Product() {
+const Product = () => {
     const { Meta } = Card;
 
     return (
@@ -195,3 +195,5 @@ export default function Product() {
         </>
     )
 }
+
+export default Product

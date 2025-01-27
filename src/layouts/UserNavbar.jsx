@@ -3,12 +3,13 @@ import { UserOutlined } from "@ant-design/icons";
 import { FaCartShopping } from "react-icons/fa6";
 import { useEffect, useState } from "react";
 
-export default function UserNavbar() {
-    const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+import Notification from "./Notification";
+
+const UserNavbar = () => {
     const [user, setUser] = useState(null);
+    const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
     const navigate = useNavigate();
-
 
     useEffect(() => {
         const storedUser = localStorage.getItem('user');
@@ -29,18 +30,28 @@ export default function UserNavbar() {
 
     return (
         <div className="space-x-6 flex items-center relative">
-            <button
-                className="bg-gradient-to-r from-primary to-secondary transition-all duration-200 text-white py-1 px-4 rounded-full flex items-center gap-3 group"
-            >
-                <span className="group-hover:block hidden transition-all duration-200">
-                    Giỏ hàng
-                </span>
-                <FaCartShopping className="text-xl text-white drop-shadow-sm cursor-pointer" />
-            </button>
 
-            <div className="h-5 border-l-2 border-l-black"></div>
+            {/* Cart */}
+            <div className="cart-section">
+                <button
+                    className="bg-gradient-to-r from-primary to-secondary transition-all duration-200 text-white py-1 px-4 rounded-full flex items-center gap-3 group"
+                >
+                    <NavLink className="group-hover:block hidden transition-all duration-200" to="/cart">
+                        Giỏ hàng
+                    </NavLink>
+                    <FaCartShopping className="text-xl text-white drop-shadow-sm cursor-pointer" />
+                </button>
+            </div>
 
-            <div className="relative">
+            <div className="h-4 border-l-2 border-l-black"></div>
+
+            {/* Notification */}
+            <Notification />
+
+            <div className="h-4 border-l-2 border-l-black"></div>
+
+            {/* User Profile */}
+            <div className="profile-section relative">
                 <button
                     onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                     className="btn text-xl hover:text-orange-500 flex justify-center items-center m-0"
@@ -80,3 +91,4 @@ export default function UserNavbar() {
         </div>
     )
 }
+export default UserNavbar

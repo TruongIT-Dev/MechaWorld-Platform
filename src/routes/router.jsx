@@ -13,10 +13,11 @@ export const ProductPage = React.lazy(() => import('../components/Product/Produc
 // Detail Product route
 export const ProductDetailPage = React.lazy(() => import('../components/ProductDetail/ProductDetail'));
 
-// 404 page route
-export const ErrorPage = React.lazy(() => import("../components/Error"));
 
-// Account route
+// Cart route
+export const CartPage = React.lazy(() => import('../components/Cart/Cart'));
+
+// Profile route
 export const ProfilePage = React.lazy(() => import("../components/Profile/Profiles"));
 export const UserProfile = React.lazy(() => import("../components/Profile/UserProfile"));
 export const OrderHistory = React.lazy(() => import("../components/Profile/OrderHistory"));
@@ -27,5 +28,7 @@ export const Setting = React.lazy(() => import("../components/Profile/Setting"))
 // Authentication route
 export const SignIn = React.lazy(() => import("../components/Sign"));
 
+// 404 page route
+export const ErrorPage = React.lazy(() => import("../components/Error"));
 
 
