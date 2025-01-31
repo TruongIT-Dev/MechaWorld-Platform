@@ -17,7 +17,7 @@ const Notification = () => {
                     <div className="bell-icon relative">
                         <button
                             onClick={toggleNotify}
-                            className="btn text-xl hover:text-orange-500 flex justify-center items-center m-0 relative"
+                            className="btn text-xl hover:text-blue-700 flex justify-center items-center m-0 relative"
                         >
                             <BellOutlined />
                             {/* Notification Badge */}

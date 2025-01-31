@@ -1,5 +1,4 @@
 import { Routes, Route } from "react-router-dom";
-import { Suspense } from "react";
 
 // import router
 import { HomePage, ErrorPage, ProductPage, AboutPage, SignIn, ProfilePage, UserProfile, Collection, TradeHistory, OrderHistory, Setting, UserLayout, ProductDetailPage, CartPage } from "./routes/router";
@@ -10,7 +9,6 @@ const App = () => {
 
   return (
     <>
-      {/* <Suspense fallback={<Spinner />}> */}
       <Routes>
         <Route path="/" element={<UserLayout />} >
           <Route index element={<HomePage />} />
@@ -40,8 +38,6 @@ const App = () => {
           <Route path="*" element={<ErrorPage />} />
         </Route>
       </Routes>
-
-      {/* </Suspense> */}
     </>
   );
 };

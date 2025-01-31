@@ -1,16 +1,16 @@
 import { Card, Col, Pagination, Row, Button, Breadcrumb } from 'antd';
 import { HomeOutlined, UserOutlined } from '@ant-design/icons';
 
-import ProductFilter from './ProductFilter';
+import FilterSidebar from './ProductFilter';
 
 const Product = () => {
     const { Meta } = Card;
 
     return (
         <>
-            <div className="container my-10">
+            <div className="container">
                 {/* Breadcrumb */}
-                <div className="breadcurm-section px-4 py-2">
+                <div className="breadcurm-section px-4 py-2 hidden">
                     <Breadcrumb
                         items={[
                             {
@@ -34,36 +34,33 @@ const Product = () => {
                 </div>
 
                 {/* Content */}
-                <div className="container-content">
-                    <Row>
+                <div className="content py-10">
+                    <Row gutter={24}>
                         {/* Filter */}
-                        <Col span={6}><ProductFilter /></Col>
+                        <Col span={5}><FilterSidebar /></Col>
 
                         {/* Start List of Products */}
-                        <Col span={18}>
-                            <div className="product-car">
+                        <Col span={19}>
+                            <div className="product-car bg-white shadow-lg rounded-lg p-4">
                                 {/* Top Filter */}
-                                <div className="mt-4 mb-9 flex justify-between items-center">
-                                    <h1 className="text-lg font-bold">HG - HIGH GRADE</h1>
+                                <div className="flex justify-between items-center">
+                                    <h1 className="text-lg font-semibold">THỂ LOẠI: <span className='font-normal'>HG</span></h1>
                                     <div className="flex items-center space-x-2">
                                         <span className="font-medium">Sắp xếp:</span>
-                                        <Button className="border rounded-md">Nổi bật</Button>
-                                        <Button className="border rounded-md">Giá: Tăng dần</Button>
-                                        <Button className="border rounded-md">Giá: Giảm dần</Button>
-                                        <Button className="border rounded-md">A-Z</Button>
-                                        <Button className="border rounded-md">Z-A</Button>
                                         <Button className="border rounded-md">Mới nhất</Button>
-                                        <Button className="rounded-md">Bán chạy</Button>
+                                        <Button className="border rounded-md">Giá tăng dần</Button>
+                                        <Button className="border rounded-md">Giá giảm dần</Button>
+
                                     </div>
                                 </div>
 
                                 {/* Products */}
-                                <div className="product-list wow fadeInUp" data-wow-delay="0.3s">
+                                <div className="product-list">
                                     <Row gutter={24}>
                                         <Col span={6}>
                                             <Card
                                                 bordered={false}
-                                                className="max-w-fit overflow-hidden"
+                                                className="max-w-fit overflow-hidden mb-2"
                                                 cover={
                                                     <img
                                                         className="cursor-pointer transform transition-transform duration-500 hover:scale-110"
@@ -182,10 +179,10 @@ const Product = () => {
                                         </Col>
                                     </Row>
                                 </div>
-                            </div>
-                            {/* Pagination */}
-                            <div className="pagination mt-5 flex justify-center">
-                                <Pagination defaultCurrent={1} total={50} />
+                                {/* Pagination */}
+                                <div className="pagination mt-5 flex justify-center">
+                                    <Pagination defaultCurrent={1} total={50} />
+                                </div>
                             </div>
                         </Col>
                         {/* End List of Products */}

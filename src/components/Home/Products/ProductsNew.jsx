@@ -55,13 +55,13 @@ const ProductsNew = () => {
       <div className="container">
         {/* Header section */}
         <div className="text-center mb-10 max-w-[600px] mx-auto">
-          <p data-aos="fade-up" className="text-sm text-primary">
-            Top Selling Products for you
+          <p data-aos="fade-up" data-aos-once="true" className="text-sm text-primary">
+            Bán chạy nhất
           </p>
-          <h1 data-aos="fade-up" className="text-3xl font-bold">
+          <h1 data-aos="fade-up" data-aos-once="true" className="text-3xl font-bold">
             Products New
           </h1>
-          <p data-aos="fade-up" className="text-xs text-gray-400">
+          <p data-aos="fade-up" data-aos-once="true" className="text-xs text-gray-400">
             New GunDam in 2025
           </p>
         </div>
@@ -73,6 +73,7 @@ const ProductsNew = () => {
               <div
                 data-aos="fade-up"
                 data-aos-delay={data.aosDelay}
+                data-aos-once="true"
                 key={data.id}
                 className="space-y-3"
               >
@@ -93,11 +94,11 @@ const ProductsNew = () => {
             ))}
           </div>
           {/* view all button */}
-          <div className="flex justify-center">
+          {/* <div className="flex justify-center">
             <button className="text-center mt-10 cursor-pointer bg-primary text-white py-1 px-5 rounded-md">
               View All Button
             </button>
-          </div>
+          </div> */}
         </div>
       </div>
     </div>
