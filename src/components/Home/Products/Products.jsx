@@ -111,7 +111,6 @@ const Products = () => {
                 data-aos="fade-up"
                 data-aos-once="true"
                 data-aos-delay={data.aosDelay}
-                data-aos-once="true"
                 key={data.id}
                 className="space-y-3"
               >

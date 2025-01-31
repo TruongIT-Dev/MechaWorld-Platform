@@ -92,9 +92,7 @@ const Navbar = () => {
             <GuestNavbar />
 
             {/* Darkmode Switch */}
-            <div>
-            <NotificationIcon count={1} />
-            </div>
+
           </div>
         </div>
       </div>
