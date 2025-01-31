@@ -111,6 +111,7 @@ const Products = () => {
                 data-aos="fade-up"
                 data-aos-once="true"
                 data-aos-delay={data.aosDelay}
+                data-aos-once="true"
                 key={data.id}
                 className="space-y-3"
               >
@@ -128,8 +129,8 @@ const Products = () => {
                   </div>
                 </div>
                 <div className="flex justify-center">
-                  <button className="text-center mt-10 cursor-pointer bg-primary text-white py-1 px-5 rounded-md">
-                    Add To Card
+                  <button className="text-center mt-10 cursor-pointer bg-blue-400 text-white py-1 px-5 rounded-md">
+                    Xem chi tiết
                   </button>
                 </div>
               </div>

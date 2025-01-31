@@ -2,7 +2,6 @@ import React from "react";
 import AOS from "aos";
 import "aos/dist/aos.css";
 
-
 import Hero from "../components/Home/Hero/Hero";
 import Popup from "../components/Home/Popup/Popup";
 import Banner from "../components/Home/Banner/Banner";
@@ -30,15 +29,13 @@ const HomePage = () => {
 
     return (
         <div className="bg-white dark:bg-gray-900 dark:text-white duration-200">
-            {/* <Navbar handleOrderPopup={handleOrderPopup} /> */}
             <Hero handleOrderPopup={handleOrderPopup} />
             <ProductsNew />
-            <TopProducts handleOrderPopup={handleOrderPopup} />
+            {/* <TopProducts handleOrderPopup={handleOrderPopup} /> bỏ */}
             <Banner />
-            <Subscribe />
+            {/* <Subscribe /> */}
             <Products />
-            <Testimonials />
-            {/* <Footer /> */}
+            {/* <Testimonials /> */}
             <Popup orderPopup={orderPopup} setOrderPopup={setOrderPopup} />
         </div>
     );
