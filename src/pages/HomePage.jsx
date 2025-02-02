@@ -6,10 +6,8 @@ import Hero from "../components/Home/Hero/Hero";
 import Popup from "../components/Home/Popup/Popup";
 import Banner from "../components/Home/Banner/Banner";
 import Products from "../components/Home/Products/Products";
-import Subscribe from "../components/Home/Subscribe/Subscribe";
 import ProductsNew from "../components/Home/Products/ProductsNew";
-import TopProducts from "../components/Home/TopProducts/TopProducts";
-import Testimonials from "../components/Home/Testimonials/Testimonials";
+import CategoryList from "../components/Home/Category/Category";
 
 const HomePage = () => {
     const [orderPopup, setOrderPopup] = React.useState(false);
@@ -30,11 +28,12 @@ const HomePage = () => {
     return (
         <div className="bg-white dark:bg-gray-900 dark:text-white duration-200">
             <Hero handleOrderPopup={handleOrderPopup} />
+            <CategoryList />
             <ProductsNew />
-            {/* <TopProducts handleOrderPopup={handleOrderPopup} /> bỏ */}
-            <Banner />
-            {/* <Subscribe /> */}
             <Products />
+            <Banner />
+            {/* <TopProducts handleOrderPopup={handleOrderPopup} /> bỏ */}
+            {/* <Subscribe /> */}
             {/* <Testimonials /> */}
             <Popup orderPopup={orderPopup} setOrderPopup={setOrderPopup} />
         </div>

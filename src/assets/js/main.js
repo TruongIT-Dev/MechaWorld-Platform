@@ -14,7 +14,7 @@
 
 
     // Initiate the wowjs
-    new WOW().init();
+    // new WOW().init();
 
 
     // Sticky Navbar
@@ -27,5 +27,5 @@
     // });
 
 
-})(jQuery);
+})();
 

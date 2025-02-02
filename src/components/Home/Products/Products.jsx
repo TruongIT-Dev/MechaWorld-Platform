@@ -1,4 +1,3 @@
-import React from "react";
 import { FaStar } from "react-icons/fa6";
 
 import Img1 from "../../../assets/image/gun1.jpg";
@@ -18,6 +17,7 @@ const ProductsData = [
     img: Img1,
     title: "Unicorn",
     rating: 5.0,
+    price: "200.000vnd",
     aosDelay: "0",
   },
   {
@@ -25,6 +25,7 @@ const ProductsData = [
     img: Img2,
     title: "Gundam Exia",
     rating: 4.5,
+    price: "200.000vnd",
     aosDelay: "200",
   },
   {
@@ -32,6 +33,7 @@ const ProductsData = [
     img: Img3,
     title: "Gundam RX-78-2",
     rating: 4.7,
+    price: "200.000vnd",
     aosDelay: "400",
   },
   {
@@ -39,6 +41,7 @@ const ProductsData = [
     img: Img4,
     title: "Gundam Aerial",
     rating: 4.4,
+    price: "200.000vnd",
     aosDelay: "600",
   },
   {
@@ -46,6 +49,7 @@ const ProductsData = [
     img: Img5,
     title: "Gundam Pharact HG",
     rating: 4.5,
+    price: "200.000vnd",
     aosDelay: "800",
   },
   {
@@ -53,6 +57,7 @@ const ProductsData = [
     img: Img6,
     title: "Gundam Michaelis HG",
     rating: 5.0,
+    price: "200.000vnd",
     aosDelay: "0",
   },
   {
@@ -60,6 +65,7 @@ const ProductsData = [
     img: Img7,
     title: "Gundam Schwarzette",
     rating: 4.5,
+    price: "200.000vnd",
     aosDelay: "200",
   },
   {
@@ -67,6 +73,7 @@ const ProductsData = [
     img: Img8,
     title: "Gundam Calibarn HG",
     rating: 4.7,
+    price: "200.000vnd",
     aosDelay: "400",
   },
   {
@@ -74,6 +81,7 @@ const ProductsData = [
     img: Img9,
     title: "Gundam Lfrith HG",
     rating: 4.4,
+    price: "200.000vnd",
     aosDelay: "600",
   },
   {
@@ -81,25 +89,22 @@ const ProductsData = [
     img: Img10,
     title: "Bandai HGUC RGM-79",
     rating: 4.5,
+    price: "200.000vnd",
     aosDelay: "800",
   },
 ];
 
 const Products = () => {
   return (
-    <div className="mt-14 mb-12">
+    <div className="my-14">
       <div className="container">
         {/* Header section */}
         <div className="text-center mb-10 max-w-[600px] mx-auto">
-          <p data-aos="fade-up" data-aos-once="true" className="text-sm text-primary">
-            Top Selling Products for you
-          </p>
-          <h1 data-aos="fade-up" data-aos-once="true" className="text-3xl font-bold">
-            Products
+          <h1 className="text-2xl font-bold mb-6 uppercase text-center">
+            Sản phẩm bán chạy
           </h1>
-          <p data-aos="fade-up" data-aos-once="true" className="text-xs text-gray-400">
-            Lorem ipsum dolor sit amet consectetur, adipisicing elit. Sit
-            asperiores modi Sit asperiores modi
+          <p className="text-xs text-gray-400">
+           Top Gundam được ưa thích nhất
           </p>
         </div>
         {/* Body section */}
@@ -112,31 +117,24 @@ const Products = () => {
                 data-aos-delay={data.aosDelay}
                 data-aos-once="true"
                 key={data.id}
-                className="space-y-3"
+                className="space-y-3 overflow-hidden rounded-sm"
               >
                 <img
                   src={data.img}
                   alt=""
-                  className="h-[220px] w-[150px] object-cover rounded-md"
+                  className="h-[220px] w-[200px] object-cover rounded-md cursor-pointer transform transition-transform duration-500 hover:scale-110"
                 />
                 <div>
                   <h3 className="font-semibold">{data.title}</h3>
-                  <p className="text-sm text-gray-600">{data.color}</p>
+                  <p className="text-sm font-semibold text-red-600">{data.price}</p>
                   <div className="flex items-center gap-1">
                     <FaStar className="text-yellow-400" />
                     <span>{data.rating}</span>
                   </div>
                 </div>
-                <div className="flex justify-center">
-                  <button className="text-center mt-10 cursor-pointer bg-blue-400 text-white py-1 px-5 rounded-md">
-                    Xem chi tiết
-                  </button>
-                </div>
               </div>
-
             ))}
           </div>
-
         </div>
       </div>
     </div>
