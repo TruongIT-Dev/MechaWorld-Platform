@@ -1,29 +1,30 @@
 import { NavLink, useNavigate } from "react-router-dom";
 import { UserOutlined } from "@ant-design/icons";
 import { FaCartShopping } from "react-icons/fa6";
-import { useEffect, useState } from "react";
-
+import {  useState } from "react";
+import { useSelector,useDispatch } from "react-redux";
+import { logout } from "../features/auth/authSlice";
 export default function UserNavbar() {
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-    const [user, setUser] = useState(null);
-
+    // const [userData, setUserData] = useState(null);
+    const user = useSelector((state) => state.auth.user);
     const navigate = useNavigate();
+    const dispatch = useDispatch();
 
-
-    useEffect(() => {
-        const storedUser = localStorage.getItem('user');
-        if (storedUser) {
-            try {
-                setUser(JSON.parse(storedUser));
-            } catch (error) {
-                console.error("Lỗi từ localStorage:", error);
-                localStorage.removeItem('user');
-            }
-        }
-    }, []);
+    // useEffect(() => {
+    //     const storedUser = localStorage.getItem('user');
+    //     if (storedUser) {
+    //         try {
+    //             setUserData(JSON.parse(storedUser));
+    //         } catch (error) {
+    //             console.error("Lỗi từ localStorage:", error);
+    //             localStorage.removeItem('user');
+    //         }
+    //     }
+    // }, []);
 
     const handleLogout = () => {
-        localStorage.removeItem('user');
+        dispatch(logout());
         navigate('/');
     };
 
@@ -46,6 +47,7 @@ export default function UserNavbar() {
                     className="btn text-xl hover:text-orange-500 flex justify-center items-center m-0"
                 >
                     <UserOutlined />
+                    
                 </button>
                 {isDropdownOpen && (
                     <div className="absolute right-0 mt-2 w-40 bg-white border rounded-lg shadow-lg z-50">

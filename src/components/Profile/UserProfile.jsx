@@ -1,30 +1,33 @@
 import { useState, useEffect } from 'react';
 import { Form, Input, Upload, Button, message } from 'antd';
 import { UploadOutlined } from '@ant-design/icons';
-
+import { useSelector,useDispatch } from 'react-redux';
+import { updateUserProfile } from '../../features/auth/authSlice';
 const { Item } = Form;
 
 const ProfilePage = () => {
     const [form] = Form.useForm();
     const [imageUrl, setImageUrl] = useState(null); // State cho URL ảnh
-    const [initialValues, setInitialValues] = useState(null);
+    const dispatch = useDispatch();
+    // const [initialValues, setInitialValues] = useState(null);
+    const user = useSelector((state) => state.auth.user)
 
     useEffect(() => {
-        const storedUser = localStorage.getItem('user');
-        if (storedUser) {
+        if (user) {
             try {
-                const user = JSON.parse(storedUser);
-                setInitialValues({
-                    name: user.name,
-                    email: user.email,
-                    phone: user.phone || '', 
-                    picture: user.picture,
-                    address: user.address,
-                    role: user.role || 'Người dùng', 
-                    accountPackage: user.accountPackage || 'Cơ bản',
-                });
+                // console.log(user.picture);
+                // setInitialValues({
+                //     name: user.name,
+                //     email: user.email,
+                //     phone: user.phone || '', 
+                //     picture: user.picture,
+                //     address: user.address,
+                //     role: user.role || 'Người dùng', 
+                //     accountPackage: user.accountPackage || 'Cơ bản',
+                // });
                 setImageUrl(user.picture)
                 form.setFieldsValue({
+                    avatar: user.picture,
                     name: user.name,
                     email: user.email,
                     phone: user.phone || '', 
@@ -37,7 +40,7 @@ const ProfilePage = () => {
                 localStorage.removeItem('user');
             }
         }
-    }, [form]);
+    }, [user, form]);
 
 
     const handleUploadChange = info => {
@@ -54,8 +57,9 @@ const ProfilePage = () => {
     }
     const onFinish = (values) => {
         console.log('Success:', values);
-        const updatedUser = { ...initialValues, ...values,picture:imageUrl };
-        localStorage.setItem('user', JSON.stringify(updatedUser));
+        const updatedUser = { ...user, ...values,picture:imageUrl };
+        // localStorage.setItem('user', JSON.stringify(updatedUser));
+        dispatch(updateUserProfile(updatedUser));
         message.success('Cập nhật thông tin thành công!');
     };
 
@@ -74,7 +78,6 @@ const ProfilePage = () => {
         <Form
             form={form}
             layout="vertical"
-            initialValues={initialValues}
             onFinish={onFinish}
             onFinishFailed={onFinishFailed}
             autoComplete="off"
@@ -129,7 +132,7 @@ const ProfilePage = () => {
             </Item>
 
             <Item>
-                <Button type="primary" htmlType="submit">
+                <Button type="primary" htmlType="submit" name='btn submit'style={{backgroundColor:'palevioletred'}}>
                     Lưu thay đổi
                 </Button>
             </Item>
