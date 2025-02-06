@@ -68,8 +68,8 @@ const ProductsNew = () => {
             {ProductsData.map((data) => (
               <div
                 data-aos="fade-up"
-                data-aos-delay={data.aosDelay}
                 data-aos-once="true"
+                data-aos-delay={data.aosDelay}
                 key={data.id}
                 className="space-y-3 overflow-hidden rounded-sm"
               >

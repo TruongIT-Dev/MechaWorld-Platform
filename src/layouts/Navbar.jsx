@@ -92,9 +92,7 @@ const Navbar = () => {
             <GuestNavbar />
 
             {/* Darkmode Switch */}
-            {/* <div>
-              <DarkMode />
-            </div> */}
+
           </div>
         </div>
       </div>
