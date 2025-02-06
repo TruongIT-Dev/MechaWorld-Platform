@@ -2,17 +2,30 @@ import { NavLink, useNavigate } from "react-router-dom";
 import { UserOutlined } from "@ant-design/icons";
 import { useState } from "react";
 import { FaCartShopping } from "react-icons/fa6";
-import Notification from "./Notification";
-
-const UserNavbar = () => {
-
+import {  useState } from "react";
+import { useSelector,useDispatch } from "react-redux";
+import { logout } from "../features/auth/authSlice";
+export default function UserNavbar() {
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-
+    // const [userData, setUserData] = useState(null);
+    const user = useSelector((state) => state.auth.user);
     const navigate = useNavigate();
+    const dispatch = useDispatch();
 
+    // useEffect(() => {
+    //     const storedUser = localStorage.getItem('user');
+    //     if (storedUser) {
+    //         try {
+    //             setUserData(JSON.parse(storedUser));
+    //         } catch (error) {
+    //             console.error("Lỗi từ localStorage:", error);
+    //             localStorage.removeItem('user');
+    //         }
+    //     }
+    // }, []);
 
     const handleLogout = () => {
-        localStorage.removeItem('user');
+        dispatch(logout());
         navigate('/');
     };
 

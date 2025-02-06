@@ -1,27 +1,40 @@
 import { useNavigate } from "react-router-dom";
 import { Checkbox, Form, Input, Button } from "antd";
 import { GoogleLogin } from "@react-oauth/google";
-// import { useState, useMemo } from 'react';
 import { jwtDecode } from "jwt-decode";
-import { useState } from "react";
+import {  useState } from "react";
+import { useDispatch, } from "react-redux";
+import { login } from "../features/auth/authSlice";
 import "../assets/css/sign.css";
 
 export default function Sign() {
   const navigate = useNavigate();
   const [form] = Form.useForm();
-  const [activeTab, setActiveTab] = useState(1);
-  //   const onChange = (e) => {
-  //     console.log(`checked = ${e.target.checked}`);
-  //   };
+  const [activeTab, setActiveTab] = useState(1); 
+  const dispatch = useDispatch();
+  // const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
   const onFinish = (values) => {
     console.log("Success:", values);
+    dispatch(login(values));
+    console.log("data redux: ");
   };
 
   const onFinishFailed = (errorInfo) => {
     console.log("Failed:", errorInfo);
   };
-
-
+  const handleSuccess = (credentialResponse) => {
+    try {
+      const credentialResponseDecoded = jwtDecode(credentialResponse.credential);
+      dispatch(login(credentialResponseDecoded)); 
+        navigate("/");
+       
+    } catch (error) {
+      console.error("Lỗi JWT:", error);
+    }
+  };
+  const handleError = (error) => {
+    console.error("Lỗi đăng nhập Google:", error);
+  };
 
   return (
     <>
@@ -103,19 +116,8 @@ export default function Sign() {
                   type="icon"
                   theme="filled_blue"
                   shape="square"
-                  onSuccess={(credentialResponse) => {
-                    const credentialResponseDecoded = jwtDecode(
-                      credentialResponse.credential
-                    );
-                    localStorage.setItem(
-                      "user",
-                      JSON.stringify(credentialResponseDecoded)
-
-                    );
-                    console.log(localStorage.getItem('user'));
-                    navigate("/");
-                  }}
-                  onError={console.error("Đăng nhập thất bại")}
+                  onSuccess={handleSuccess}
+                  onError={handleError}
                 />
               </div>
 
