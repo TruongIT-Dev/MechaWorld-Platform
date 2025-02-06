@@ -1,11 +1,15 @@
-import { NavLink, useNavigate } from "react-router-dom";
-import { UserOutlined } from "@ant-design/icons";
 import { useState } from "react";
 import { FaCartShopping } from "react-icons/fa6";
-import {  useState } from "react";
 import { useSelector,useDispatch } from "react-redux";
+import { NavLink, useNavigate } from "react-router-dom";
+
+import { UserOutlined } from "@ant-design/icons";
+
 import { logout } from "../features/auth/authSlice";
-export default function UserNavbar() {
+
+import Notification from "./Notification";
+
+const UserNavbar = () => {
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     // const [userData, setUserData] = useState(null);
     const user = useSelector((state) => state.auth.user);

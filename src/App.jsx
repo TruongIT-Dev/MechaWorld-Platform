@@ -32,16 +32,19 @@ const App = () => {
             <Route path="orderhistory" element={<OrderHistory />} />
             <Route path="setting" element={<Setting />} />
           </Route>
-            {/* Shop Route*/ }
-            <Route path="/shop" element={<ShopPage/>}>
-              <Route path="dashboard" element={<ShopDashboard />} />
-              <Route path="management" element={<ShopProductManagement />} />
-              <Route path="transition" element={<ShopTransaction />} />
-              {/* <Route path="setting" element={<UserProfile />} /> */}
-            </Route>
+
+          {/* Shop Route*/}
+          <Route path="/shop" element={<ShopPage />}>
+            <Route path="dashboard" element={<ShopDashboard />} />
+            <Route path="management" element={<ShopProductManagement />} />
+            <Route path="transition" element={<ShopTransaction />} />
+            {/* <Route path="setting" element={<UserProfile />} /> */}
+          </Route>
+          
           {/* Error route */}
           <Route path="/error" element={<ErrorPage />} />
           <Route path="*" element={<ErrorPage />} />
+        
         </Route>
       </Routes>
     </>
