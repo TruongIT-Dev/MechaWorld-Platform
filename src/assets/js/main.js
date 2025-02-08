@@ -1,31 +1,32 @@
-(function ($) {
-    "use strict";
+window.addEventListener("load", function () {
+    const observer = new MutationObserver(() => {
+        const navbar = document.querySelector(".main-navbar");
 
-    // Spinner
-    var spinner = function () {
-        setTimeout(function () {
-            if ($('#spinner').length > 0) {
-                $('#spinner').removeClass('show');
-            }
-        }, 1);
-    };
-    
-    spinner();
+        if (navbar) {
+            observer.disconnect(); // Dừng theo dõi khi đã tìm thấy navbar
+            console.log("✅ Navbar đã render:", navbar);
 
+            let lastScrollY = window.scrollY;
+            let isScrollingDown = false;
 
-    // Initiate the wowjs
-    // new WOW().init();
+            window.addEventListener("scroll", function () {
+                const currentScrollY = window.scrollY;
 
+                if (currentScrollY > lastScrollY) {
+                    if (currentScrollY > 50 && !isScrollingDown) {
+                        navbar.style.top = "-100px"; // Ẩn Navbar
+                        isScrollingDown = true;
+                    }
+                } else {
+                    navbar.style.top = "0"; // Hiện Navbar
+                    isScrollingDown = false;
+                }
 
-    // Sticky Navbar
-    // $(window).scroll(function () {
-    //     if ($(this).scrollTop() > 300) {
-    //         $('.sticky-top').css('top', '0px');
-    //     } else {
-    //         $('.sticky-top').css('top', '-100px');
-    //     }
-    // });
+                lastScrollY = currentScrollY;
+            });
+        }
+    });
 
-
-})();
-
+    // Quan sát toàn bộ DOM khi có thay đổi
+    observer.observe(document.body, { childList: true, subtree: true });
+});

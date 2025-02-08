@@ -1,8 +1,5 @@
-import { IoMdSearch } from "react-icons/io";
 import { FaCaretDown } from "react-icons/fa";
 import { NavLink } from "react-router-dom";
-
-import Logo from "../assets/image/logo.png";
 
 // import DarkMode from "./DarkMode";
 import GuestNavbar from "./GuestNavbar";
@@ -38,7 +35,7 @@ const Menu = [
 const DropdownLinks = [
   {
     id: 1,
-    name: "Master Grade",
+    name: "Entry Grade",
     link: "/#",
   },
   {
@@ -48,7 +45,7 @@ const DropdownLinks = [
   },
   {
     id: 3,
-    name: "Real Grade",
+    name: "Master Grade",
     link: "/#",
   },
   {
@@ -58,6 +55,16 @@ const DropdownLinks = [
   },
   {
     id: 5,
+    name: "Real Grade",
+    link: "/#",
+  },
+  {
+    id: 6,
+    name: "Super Deformed",
+    link: "/#",
+  },
+  {
+    id: 7,
     name: "None Grade",
     link: "/#",
   },
@@ -66,13 +73,12 @@ const DropdownLinks = [
 const Navbar = () => {
 
   return (
-    <div className="shadow-md bg-white dark:text-white duration-200 relative z-40">
+    <div className="main-navbar fixed w-full bg-white dark:text-white shadow-md z-40 top-0 transition-all duration-300">
       {/* upper Navbar */}
       <div className="p-2 bg-blue-300">
         <div className="container flex justify-between items-center">
           <div>
             <a href="#" className="font-bold hover:text-blue-700 text-2xl sm:text-3xl flex gap-2">
-              {/* <img src={Logo} alt="Logo" className="w-10" /> */}
               MechaWorld
             </a>
           </div>
@@ -83,19 +89,16 @@ const Navbar = () => {
               <input
                 type="text"
                 placeholder="Tìm kiếm..."
-                className="w-[200px] sm:w-[200px] group-hover:w-[300px] transition-all duration-300 rounded-full border border-gray-300 px-2 py-1 focus:outline-none focus:border-1 focus:border-primary dark:border-gray-500 dark:bg-gray-800  "
+                className="w-[200px] sm:w-[200px] group-hover:w-[300px] transition-all duration-300 rounded-full border border-gray-300 px-2 py-1 focus:outline-none focus:border-1 focus:border-primary dark:border-gray-500 dark:bg-gray-800"
               />
-              <IoMdSearch className="text-gray-500 group-hover:text-blue-700 absolute top-1/2 -translate-y-1/2 right-3" />
             </div>
 
             {/* Order and Dropdown */}
             <GuestNavbar />
-
-            {/* Darkmode Switch */}
-
           </div>
         </div>
       </div>
+
       {/* lower Navbar */}
       <div className="flex justify-center p-1 bg-gray-50">
         <ul className="sm:flex hidden items-center gap-4">
@@ -109,21 +112,23 @@ const Navbar = () => {
               </NavLink>
             </li>
           ))}
-          {/* Simple Dropdown and Links */}
           <li className="group relative cursor-pointer">
-            <NavLink to="/product" className="flex items-center text-base hover:text-blue-700 hover:font-semibold gap-[2px] py-2 capitalize">
+            <NavLink
+              to="/product"
+              className="flex items-center text-base hover:text-blue-700 hover:font-semibold gap-[2px] py-2 capitalize"
+            >
               Sản phẩm
               <span>
                 <FaCaretDown className="transition-all duration-200 group-hover:rotate-180" />
               </span>
             </NavLink>
-            <div className="absolute z-[9999] hidden group-hover:block w-[200px] rounded-md bg-white p-2 text-black shadow-md">
-              <ul>
+            <div className="absolute z-[9999] hidden group-hover:block w-[350px] rounded-md bg-white p-2 text-black shadow-md">
+              <ul className="grid grid-cols-2">
                 {DropdownLinks.map((data) => (
                   <li key={data.id}>
                     <NavLink
                       to={data.link}
-                      className="inline-block w-full rounded-md p-2 hover:bg-gray-200 "
+                      className="inline-block w-full rounded-md p-2 hover:bg-gray-200"
                     >
                       {data.name}
                     </NavLink>
@@ -131,6 +136,7 @@ const Navbar = () => {
                 ))}
               </ul>
             </div>
+
           </li>
         </ul>
       </div>
