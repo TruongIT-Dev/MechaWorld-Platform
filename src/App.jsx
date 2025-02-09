@@ -1,7 +1,7 @@
 import { Routes, Route } from "react-router-dom";
 
 // import router
-import { HomePage, ErrorPage, ProductPage, AboutPage, SignIn, ProfilePage, UserProfile, Collection, TradeHistory, OrderHistory, Setting, UserLayout, ProductDetailPage, ShopDashboard, ShopPage, ShopProductManagement, ShopTransaction, CartPage } from "./routes/router";
+import { HomePage, ErrorPage, ProductPage, AboutPage, SignIn, ProfilePage, UserProfile, Collection, TradeHistory, OrderHistory, Setting, UserLayout, ProductDetailPage, ShopDashboard, ShopPage, ShopProductManagement, ShopTransaction, CartPage, ShopRegister } from "./routes/router";
 
 // import Spinner from "./components/Spinner";
 
@@ -30,6 +30,7 @@ const App = () => {
             <Route path="collection" element={<Collection />} />
             <Route path="tradehistory" element={<TradeHistory />} />
             <Route path="orderhistory" element={<OrderHistory />} />
+            <Route path="shop-register" element={<ShopRegister />} />
             <Route path="setting" element={<Setting />} />
           </Route>
 

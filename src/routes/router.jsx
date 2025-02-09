@@ -24,6 +24,8 @@ export const OrderHistory = React.lazy(() => import("../components/Profile/Order
 export const TradeHistory = React.lazy(() => import("../components/Profile/TradeHistory"));
 export const Collection = React.lazy(() => import("../components/Profile/Collection"));
 export const Setting = React.lazy(() => import("../components/Profile/Setting"));
+export const ShopRegister = React.lazy(() => import("../components/Profile/ShopRegister"));
+
 // Shop route
 export const ShopDashboard = React.lazy(() => import("../components/Shop/ShopDashboard"));
 export const ShopProductManagement = React.lazy(() => import("../components/Shop/ShopProductManagement"));
