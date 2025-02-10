@@ -4,7 +4,7 @@ window.addEventListener("load", function () {
 
         if (navbar) {
             observer.disconnect(); // Dừng theo dõi khi đã tìm thấy navbar
-            console.log("✅ Navbar đã render:", navbar);
+            // console.log("✅ Navbar đã render:", navbar);
 
             let lastScrollY = window.scrollY;
             let isScrollingDown = false;
