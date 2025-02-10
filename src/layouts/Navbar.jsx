@@ -1,11 +1,13 @@
 import { IoMdSearch } from "react-icons/io";
 import { FaCaretDown } from "react-icons/fa";
 import { NavLink } from "react-router-dom";
-
+import UserNavbar from "./UserNavbar";
 import Logo from "../assets/image/logo.png";
-
+import { useSelector } from "react-redux"
 // import DarkMode from "./DarkMode";
 import GuestNavbar from "./GuestNavbar";
+;
+
 
 const Menu = [
   {
@@ -63,7 +65,9 @@ const DropdownLinks = [
   },
 ];
 
+
 const Navbar = () => {
+  const { isLoggedIn, user } = useSelector(state => state.auth);
 
   return (
     <div className="shadow-md bg-white dark:text-white duration-200 relative z-40">
@@ -89,7 +93,7 @@ const Navbar = () => {
             </div>
 
             {/* Order and Dropdown */}
-            <GuestNavbar />
+            {isLoggedIn ? <UserNavbar user={user} /> : <GuestNavbar />}
 
             {/* Darkmode Switch */}
 

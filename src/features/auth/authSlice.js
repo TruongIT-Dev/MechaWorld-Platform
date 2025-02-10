@@ -6,7 +6,7 @@ import {}from "@reduxjs/toolkit"
 
 
 const initialState ={
-    isAuthenticated: false,
+    isLoggedIn: false,
     user: null
 };
 export const authSlice = createAppSlice({

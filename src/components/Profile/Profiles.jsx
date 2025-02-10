@@ -36,11 +36,11 @@ const items = [
     children: [
       {
         key: '7',
-        label: <Link to="/profile/setting">Mật khẩu và bảo mật</Link>,
+        label: <Link to="/profile/address-setting">Địa chỉ giao dịch</Link>,
       },
       {
         key: '8',
-        label:<Link to="/profile/setting">Thiết lập giao dịch</Link>,
+        label:<Link to="/profile/advanced-setting">Thiết lập nâng cao</Link>,
       }
     ],
   },

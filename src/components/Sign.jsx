@@ -2,40 +2,145 @@ import { useNavigate } from "react-router-dom";
 import { Checkbox, Form, Input, Button } from "antd";
 import { GoogleLogin } from "@react-oauth/google";
 import { jwtDecode } from "jwt-decode";
-import {  useState } from "react";
+import {  useEffect, useState } from "react";
 import { useDispatch, } from "react-redux";
 import { login } from "../features/auth/authSlice";
 import "../assets/css/sign.css";
-
+// import axios from "axios";
+import axios from '../axios'
+import { useCookies } from "react-cookie";
 export default function Sign() {
+  const [cookies, setCookie] = useCookies(['cookie-name']);
   const navigate = useNavigate();
   const [form] = Form.useForm();
   const [activeTab, setActiveTab] = useState(1); 
   const dispatch = useDispatch();
   // const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
-  const onFinish = (values) => {
-    console.log("Success:", values);
-    dispatch(login(values));
-    console.log("data redux: ");
-  };
-
-  const onFinishFailed = (errorInfo) => {
-    console.log("Failed:", errorInfo);
-  };
-  const handleSuccess = (credentialResponse) => {
-    try {
-      const credentialResponseDecoded = jwtDecode(credentialResponse.credential);
-      dispatch(login(credentialResponseDecoded)); 
-        navigate("/");
-       
-    } catch (error) {
-      console.error("Lỗi JWT:", error);
+  const auth_api = `http://localhost:8080/v1/`;
+  const api = axios.create({
+    baseUR: auth_api,
+    headers: {
+      'Content-Type': 'application/json',
     }
-  };
+  })
+  async function handleCredentialResponse(response) {
+    // console.log("Encoded JWT ID token: " + response.credential);
+    // const responseData = await api.post(`${auth_api}`+`auth-login`, {
+    //   id_token: response.credential
+    // }, {
+    //   headers: {
+    //     'Content-Type': 'application/json'
+    //   }
+    // }).then(response => {
+    //   console.log(response);
+    // }).catch(error => {
+    //   console.error(error);
+    // });
+    axios({
+      method: 'post',
+      url: `${auth_api}`+`auth-login`,
+      data: {
+        id_token: response.credential
+      },
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    }).then(response => {
+      console.log(response);
+      navigate("/");
+    })
+
+  }
+  useEffect(() => {
+    /* global google */
+    google.accounts.id.initialize({
+      client_id: import.meta.env.VITE_CLIENT_ID_SECRET, 
+      callback: handleCredentialResponse
+    });
+    google.accounts.id.renderButton(
+      document.getElementById("buttonDiv"),
+      { theme: "outline", size: "large" }  
+    );
+    google.accounts.id.prompt(); 
+  },[]);
+  // const handleSuccess = async (credentialResponse) => {
+  //   try {
+  //     const response = await api.post(`${auth_api}`+`auth-login`, {
+  //       id_token: credentialResponse.credential
+  //     }, {
+  //       headers: {
+  //         'Content-Type': 'application/json'
+  //       }
+  //     }).then(response => {
+  //       console.log(response);
+  //     }).catch(error => {
+  //       console.error(error);
+  //     });
+
+  //     console.log("Credential Response:", credentialResponse);
+  //     const credentialResponseDecoded = jwtDecode(credentialResponse.credential);
+  //     console.log("Credential Response đã giải mã:", credentialResponseDecoded);
+  //     dispatch(login(credentialResponseDecoded));
+  
+  //     navigate("/");
+  
+  //   } catch (error) {
+  //     console.error("Lỗi trong quá trình đăng nhập:", error);
+
+  //   }
+  // };
+
+  // const onFinish = async (values) => {
+  //   console.log("Success:", values);
+  //   try {
+  //     const response = await api.post(`${auth_api}`+`login`, {
+  //       email: values.username,
+  //       password: values.password
+  //     }).then(response => {
+  //       console.log(response);
+  //       dispatch(login(response));
+  //     }).catch(error => {
+  //       console.error(error);
+  //     });
+  //   } catch (error) {
+  //     console.error("Lỗi trong quá trình đăng nhập:", error);
+  //   }
+  // };
+  const onFinish = async (values) => {
+    console.log("Success:", values);
+    try {
+        const response = await fetch(`${auth_api}`+`auth/login`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ 
+                email: values.username,
+                password: values.password
+            })
+        });
+
+        if (!response.ok) { 
+            const errorData = await response.json(); 
+            throw new Error(`${response.status} ${response.statusText}: ${errorData?.message || 'Lỗi đăng nhập'}`);
+        }
+        const data = await response.json(); 
+        console.log(data);
+        // Cookie setup
+        const expiryDate = new Date();
+        expiryDate.setDate(expiryDate.getDate() + 1);
+        setCookie('user',data,{ expires: expiryDate})
+        dispatch(login(data)); 
+    } catch (error) {
+        console.error("Lỗi đăng nhập:", error);
+    }
+};
   const handleError = (error) => {
     console.error("Lỗi đăng nhập Google:", error);
   };
-
+  const onFinishFailed = (errorInfo) => {
+    console.log("Failed:", errorInfo);
+  };
   return (
     <>
       <div className="login-container">
@@ -110,7 +215,7 @@ export default function Sign() {
                 </Button>
               </Form.Item>
               <br />
-              <div>
+              {/* <div>
                 <label> Đăng nhập bằng: </label>
                 <GoogleLogin
                   type="icon"
@@ -119,7 +224,8 @@ export default function Sign() {
                   onSuccess={handleSuccess}
                   onError={handleError}
                 />
-              </div>
+              </div> */}
+              <div id="buttonDiv"></div>
 
               <div className="hr"></div>
               {/* <div className="foot-lnk mt-2">

@@ -1,18 +1,17 @@
 import { useState } from "react";
 import { FaCartShopping } from "react-icons/fa6";
-import { useSelector,useDispatch } from "react-redux";
+import { useDispatch } from "react-redux";
 import { NavLink, useNavigate } from "react-router-dom";
-
-import { UserOutlined } from "@ant-design/icons";
+import PropTypes from 'prop-types';
+// import { UserOutlined } from "@ant-design/icons";
 
 import { logout } from "../features/auth/authSlice";
 
 import Notification from "./Notification";
 
-const UserNavbar = () => {
+const UserNavbar = ({user}) => {
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     // const [userData, setUserData] = useState(null);
-    const user = useSelector((state) => state.auth.user);
     const navigate = useNavigate();
     const dispatch = useDispatch();
 
@@ -61,7 +60,9 @@ const UserNavbar = () => {
                         onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                         className="btn text-xl hover:text-blue-700 flex justify-center items-center m-0"
                     >
-                        <UserOutlined />
+                        {/* <UserOutlined /> */}
+                        <img src={user?.picture} alt="avatar" style={{ width: '40px', height: '40px', borderRadius: '50%'  }} />
+
                     </button>
 
                     {isDropdownOpen && (
@@ -90,4 +91,9 @@ const UserNavbar = () => {
         </>
     )
 }
+UserNavbar.propTypes = {
+    user: PropTypes.shape({  
+        picture: PropTypes.string 
+    }).isRequired 
+};
 export default UserNavbar
