@@ -6,7 +6,7 @@ import BannerImg from "../../../assets/image/gun6.jpg";
 
 const Banner = () => {
   return (
-    <div className="container my-14">
+    <div className="container mt-14">
       <div className="min-h-[550px] flex justify-center items-center py-12 sm:py-0">
         <div className="container">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 items-center">

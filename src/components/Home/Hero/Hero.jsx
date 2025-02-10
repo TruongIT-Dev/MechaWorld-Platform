@@ -1,4 +1,3 @@
-import React from "react";
 import Slider from "react-slick";
 
 import Image1 from "../../../assets/image/hero/1.jpg";
@@ -44,7 +43,7 @@ const Hero = ({ handleOrderPopup }) => {
   };
 
   return (
-    <div className="relative overflow-hidden min-h-[550px] sm:min-h-[650px] bg-gray-100 flex justify-center items-center dark:bg-gray-950 dark:text-white duration-200 ">
+    <div className="mt-20 relative overflow-hidden min-h-[550px] sm:min-h-[650px] bg-gray-100 flex justify-center items-center dark:bg-gray-950 dark:text-white duration-200 ">
       {/* background pattern */}
       <div className="h-[700px] w-[700px] bg-blue-300 absolute -top-1/2 right-0 rounded-3xl rotate-45 -z[8]"></div>
       {/* hero section */}

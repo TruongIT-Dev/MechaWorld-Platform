@@ -1,7 +1,7 @@
 import { Routes, Route } from "react-router-dom";
 
 // import router
-import { HomePage, ErrorPage, ProductPage, AboutPage, SignIn, ProfilePage, UserProfile, Collection, TradeHistory, OrderHistory,AdvancedSetting,SettingAddress, UserLayout, ProductDetailPage, ShopDashboard, ShopPage, ShopProductManagement, ShopTransaction, CartPage } from "./routes/router";
+import { HomePage, ErrorPage, ProductPage, AboutPage, SignIn, ProfilePage, UserProfile, Collection, TradeHistory, OrderHistory, Setting, UserLayout, ProductDetailPage, ShopDashboard, ShopPage, ShopProductManagement, ShopTransaction, CartPage } from "./routes/router";
 
 // import Spinner from "./components/Spinner";
 
@@ -14,12 +14,11 @@ const App = () => {
           <Route index element={<HomePage />} />
           <Route path="/about" element={<AboutPage />} />
           <Route path="/product" element={<ProductPage />} />
+          <Route path="/product/:slug" element={<ProductDetailPage />} />
 
           {/* Login route */}
           <Route path="/signIn" element={<SignIn />} />
 
-          {/* Detail Product route */}
-          <Route path="/product-detail" element={<ProductDetailPage />} />
 
           {/* Cart route */}
           <Route path="/cart" element={<CartPage />} />
@@ -30,8 +29,7 @@ const App = () => {
             <Route path="collection" element={<Collection />} />
             <Route path="tradehistory" element={<TradeHistory />} />
             <Route path="orderhistory" element={<OrderHistory />} />
-            <Route path="advanced-setting" element={<AdvancedSetting />} />
-            <Route path="address-setting" element={<SettingAddress />} />
+            <Route path="setting" element={<Setting />} />
           </Route>
 
           {/* Shop Route*/}

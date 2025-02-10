@@ -1,12 +1,32 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Collapse, Input, Radio, Slider } from "antd";
+import { GetGrades } from "../../apis/Product/APIProduct";
 
 const { Panel } = Collapse;
 
 const FilterSidebar = () => {
-    const [grade, setGrade] = useState("all");
+    const [grades, setGrades] = useState([]);
+    const [selectedGrade, setSelectedGrade] = useState();
+    const [error, setError] = useState("");
+
     const [condition, setCondition] = useState("all");
     const [priceRange, setPriceRange] = useState([100, 1000]);
+
+
+    // Fetch ALL Grades
+    useEffect(() => {
+        const fetchGrades = async () => {
+            try {
+                const response = await GetGrades();
+                setGrades(response?.data || []);
+            } catch (err) {
+                setError("Grades Error: Lỗi fetch API grades");
+            }
+        };
+
+        fetchGrades();
+    }, []);
+
 
     return (
         <div className="bg-white shadow-lg rounded-lg p-4">
@@ -23,18 +43,15 @@ const FilterSidebar = () => {
                 {/* Loại Gundam */}
                 <Panel className="font-bold" header="Loại Gundam" key="1">
                     <Radio.Group
-                        onChange={(e) => setGrade(e.target.value)}
-                        value={grade}
+                        onChange={(e) => setSelectedGrade(e.target.value)}
+                        value={selectedGrade}
                         className="flex flex-col space-y-2 font-normal"
                     >
-                        <Radio value="all">Tất cả loại</Radio>
-                        <Radio value="EG">Entry Grade</Radio>
-                        <Radio value="HG">High Grade</Radio>
-                        <Radio value="MG">Master Grade</Radio>
-                        <Radio value="PG">Perfect Grade</Radio>
-                        <Radio value="RG">Real Grade</Radio>
-                        <Radio value="SD">Super Deformed</Radio>
-                        <Radio value="NG">None Grade</Radio>
+                        {grades.map((grade, index) => (
+                            <Radio key={index} value={grade?.name}>
+                                {grade?.display_name}
+                            </Radio>
+                        ))}
                     </Radio.Group>
                 </Panel>
 
@@ -49,7 +66,6 @@ const FilterSidebar = () => {
                         <Radio value="new">Nguyên seal</Radio>
                         <Radio value="builded">Mô hình đã lắp ráp</Radio>
                         <Radio value="used">Đã qua sử dụng</Radio>
-
                     </Radio.Group>
                 </Panel>
 
@@ -68,6 +84,7 @@ const FilterSidebar = () => {
                     </div>
                 </Panel>
             </Collapse>
+
         </div>
     );
 };

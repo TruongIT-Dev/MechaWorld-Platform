@@ -1,14 +1,46 @@
-import { Card, Col, Pagination, Row, Button, Breadcrumb } from 'antd';
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { HomeOutlined, UserOutlined } from '@ant-design/icons';
+import { Card, Col, Row, Button, Breadcrumb } from 'antd';
 
+import { GetGundams } from '../../apis/Product/APIProduct';
 import FilterSidebar from './ProductFilter';
 
 const Product = () => {
+
     const { Meta } = Card;
+    const navigate = useNavigate();
+
+    // useState
+    const [gundams, setGundams] = useState([]);
+
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState("");
+
+    // Fetch ALL Gundams
+    useEffect(() => {
+        const fetchGundams = async () => {
+            try {
+                const response = await GetGundams();
+                setGundams(response?.data.data || []);
+            } catch (err) {
+                setError("List Gundam Error: Không nhận data Gundam");
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchGundams();
+    }, []);
+
+    // handleClicked to Link detail gundam
+    const handleClickedDetailGundam = (slug) => {
+        navigate(`/product/${slug}`);
+    }
 
     return (
         <>
-            <div className="container">
+            <div className="container mt-24">
                 {/* Breadcrumb */}
                 <div className="breadcurm-section px-4 py-2 hidden">
                     <Breadcrumb
@@ -42,6 +74,7 @@ const Product = () => {
                         {/* Start List of Products */}
                         <Col span={19}>
                             <div className="product-car bg-white shadow-lg rounded-lg p-4">
+
                                 {/* Top Filter */}
                                 <div className="flex justify-between items-center">
                                     <h1 className="text-lg font-semibold">THỂ LOẠI: <span className='font-normal'>HG</span></h1>
@@ -55,134 +88,40 @@ const Product = () => {
                                 </div>
 
                                 {/* Products */}
-                                <div className="product-list">
+                                <div className="product-list mt-6">
                                     <Row gutter={24}>
-                                        <Col span={6}>
-                                            <Card
-                                                bordered={false}
-                                                className="max-w-fit overflow-hidden mb-2"
-                                                cover={
-                                                    <img
-                                                        className="cursor-pointer transform transition-transform duration-500 hover:scale-110"
-                                                        alt="example"
-                                                        src="/src/assets/image/product-1.webp"
+                                        {gundams.map((gundam, index) => (
+                                            <Col key={index} span={6}>
+                                                <Card
+                                                    onClick={() => {
+                                                        handleClickedDetailGundam(gundam.slug);
+                                                    }}
+                                                    bordered={false}
+                                                    className="max-w-fit max-h-fit mb-2"
+                                                    cover={
+                                                        <div className="h-[200px] w-full overflow-hidden">
+                                                            <img
+                                                                className="w-full h-full object-cover cursor-pointer transform transition-transform duration-500 hover:scale-110"
+                                                                alt="example"
+                                                                src={gundam?.images?.[0]?.url || "https://via.placeholder.com/150"}
+                                                            />
+                                                        </div>
+                                                    }
+                                                >
+                                                    <Meta
+                                                        title={gundam.name}
+                                                        description={<span className="text-red-600 font-semibold">{gundam.price} VND</span>}
                                                     />
-                                                }
-                                            >
-                                                <Meta
-                                                    title="Mô hình lắp ráp RG 1/144 Hi-ν GUNDAM Hi Nu Bandai 4573102619150"
-                                                    description={<span className="text-red-600 font-semibold">1.199.900₫</span>}
-                                                />
-                                            </Card>
-                                        </Col>
-                                        <Col span={6}>
-                                            <Card
-                                                bordered={false}
-                                                className="max-w-fit overflow-hidden"
-                                                cover={
-                                                    <img
-                                                        className="cursor-pointer transform transition-transform duration-500 hover:scale-110"
-                                                        alt="example"
-                                                        src="/src/assets/image/product-1.webp"
-                                                    />
-                                                }
-                                            >
-                                                <Meta
-                                                    title="Mô hình lắp ráp RG 1/144 Hi-ν GUNDAM Hi Nu Bandai 4573102619150"
-                                                    description={<span className="text-red-600 font-semibold">1.199.900₫</span>} />
-                                            </Card>
-                                        </Col>
-                                        <Col span={6}>
-                                            <Card
-                                                bordered={false}
-                                                className="max-w-fit overflow-hidden"
-                                                cover={
-                                                    <img
-                                                        className="cursor-pointer transform transition-transform duration-500 hover:scale-110"
-                                                        alt="example"
-                                                        src="/src/assets/image/product-1.webp"
-                                                    />
-                                                }
-                                            >
-                                                <Meta
-                                                    title="Mô hình lắp ráp RG 1/144 Hi-ν GUNDAM Hi Nu Bandai 4573102619150"
-                                                    description={<span className="text-red-600 font-semibold">1.199.900₫</span>} />
-                                            </Card>
-                                        </Col>
-                                        <Col span={6}>
-                                            <Card
-                                                bordered={false}
-                                                className="max-w-fit overflow-hidden"
-                                                cover={
-                                                    <img
-                                                        className="cursor-pointer transform transition-transform duration-500 hover:scale-110"
-                                                        alt="example"
-                                                        src="/src/assets/image/product-1.webp"
-                                                    />
-                                                }
-                                            >
-                                                <Meta
-                                                    title="Mô hình lắp ráp RG 1/144 Hi-ν GUNDAM Hi Nu Bandai 4573102619150"
-                                                    description={<span className="text-red-600 font-semibold">1.199.900₫</span>} />
-                                            </Card>
-                                        </Col>
-                                        <Col span={6}>
-                                            <Card
-                                                bordered={false}
-                                                className="max-w-fit overflow-hidden"
-                                                cover={
-                                                    <img
-                                                        className="cursor-pointer transform transition-transform duration-500 hover:scale-110"
-                                                        alt="example"
-                                                        src="/src/assets/image/product-1.webp"
-                                                    />
-                                                }
-                                            >
-                                                <Meta
-                                                    title="Mô hình lắp ráp RG 1/144 Hi-ν GUNDAM Hi Nu Bandai 4573102619150"
-                                                    description={<span className="text-red-600 font-semibold">1.199.900₫</span>} />
-                                            </Card>
-                                        </Col>
-                                        <Col span={6}>
-                                            <Card
-                                                bordered={false}
-                                                className="max-w-fit overflow-hidden"
-                                                cover={
-                                                    <img
-                                                        className="cursor-pointer transform transition-transform duration-500 hover:scale-110"
-                                                        alt="example"
-                                                        src="/src/assets/image/product-1.webp"
-                                                    />
-                                                }
-                                            >
-                                                <Meta
-                                                    title="Mô hình lắp ráp RG 1/144 Hi-ν GUNDAM Hi Nu Bandai 4573102619150"
-                                                    description={<span className="text-red-600 font-semibold">1.199.900₫</span>} />
-                                            </Card>
-                                        </Col>
-                                        <Col span={6}>
-                                            <Card
-                                                bordered={false}
-                                                className="max-w-fit overflow-hidden"
-                                                cover={
-                                                    <img
-                                                        className="cursor-pointer transform transition-transform duration-500 hover:scale-110"
-                                                        alt="example"
-                                                        src="/src/assets/image/product-1.webp"
-                                                    />
-                                                }
-                                            >
-                                                <Meta
-                                                    title="Mô hình lắp ráp RG 1/144 Hi-ν GUNDAM Hi Nu Bandai 4573102619150"
-                                                    description={<span className="text-red-600 font-semibold">1.199.900₫</span>} />
-                                            </Card>
-                                        </Col>
+                                                </Card>
+                                            </Col>
+                                        ))}
                                     </Row>
                                 </div>
+
                                 {/* Pagination */}
-                                <div className="pagination mt-5 flex justify-center">
+                                {/* <div className="pagination mt-5 flex justify-center">
                                     <Pagination defaultCurrent={1} total={50} />
-                                </div>
+                                </div> */}
                             </div>
                         </Col>
                         {/* End List of Products */}
