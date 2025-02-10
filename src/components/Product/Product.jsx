@@ -1,13 +1,15 @@
-import { Card, Col, Pagination, Row, Button, Breadcrumb } from 'antd';
-import { HomeOutlined, UserOutlined } from '@ant-design/icons';
-
-import FilterSidebar from './ProductFilter';
 import { useEffect, useState } from 'react';
-import { ListGundams } from '../../apis/Product/APIProduct';
+import { useNavigate } from 'react-router-dom';
+import { HomeOutlined, UserOutlined } from '@ant-design/icons';
+import { Card, Col, Row, Button, Breadcrumb } from 'antd';
+
+import { GetGundams } from '../../apis/Product/APIProduct';
+import FilterSidebar from './ProductFilter';
 
 const Product = () => {
 
     const { Meta } = Card;
+    const navigate = useNavigate();
 
     // useState
     const [gundams, setGundams] = useState([]);
@@ -19,7 +21,7 @@ const Product = () => {
     useEffect(() => {
         const fetchGundams = async () => {
             try {
-                const response = await ListGundams();
+                const response = await GetGundams();
                 setGundams(response?.data.data || []);
             } catch (err) {
                 setError("List Gundam Error: Không nhận data Gundam");
@@ -30,6 +32,11 @@ const Product = () => {
 
         fetchGundams();
     }, []);
+
+    // handleClicked to Link detail gundam
+    const handleClickedDetailGundam = (slug) => {
+        navigate(`/product/${slug}`);
+    }
 
     return (
         <>
@@ -86,6 +93,9 @@ const Product = () => {
                                         {gundams.map((gundam, index) => (
                                             <Col key={index} span={6}>
                                                 <Card
+                                                    onClick={() => {
+                                                        handleClickedDetailGundam(gundam.slug);
+                                                    }}
                                                     bordered={false}
                                                     className="max-w-fit max-h-fit mb-2"
                                                     cover={

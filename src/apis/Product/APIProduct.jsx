@@ -1,14 +1,14 @@
 import axios from '../../utils/axios-custome';
 
 // list tất cả Gundams các grades
-export const ListGundams = () => {
+export const GetGundams = () => {
     return axios.get('/gundams')
 }
 
-export const ListGundamByGrade = (grade) => {
+export const GetGundamByGrade = (grade) => {
     return axios.get(`/gundams?grade=${grade}`)
 }
 
-export const ListGrades = () => {
+export const GetGrades = () => {
     return axios.get('/grades')
 }

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Collapse, Input, Radio, Slider } from "antd";
-import { ListGrades } from "../../apis/Product/APIProduct";
+import { GetGrades } from "../../apis/Product/APIProduct";
 
 const { Panel } = Collapse;
 
@@ -17,7 +17,7 @@ const FilterSidebar = () => {
     useEffect(() => {
         const fetchGrades = async () => {
             try {
-                const response = await ListGrades();
+                const response = await GetGrades();
                 setGrades(response?.data || []);
             } catch (err) {
                 setError("Grades Error: Lỗi fetch API grades");

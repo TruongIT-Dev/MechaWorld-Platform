@@ -14,12 +14,11 @@ const App = () => {
           <Route index element={<HomePage />} />
           <Route path="/about" element={<AboutPage />} />
           <Route path="/product" element={<ProductPage />} />
+          <Route path="/product/:slug" element={<ProductDetailPage />} />
 
           {/* Login route */}
           <Route path="/signIn" element={<SignIn />} />
 
-          {/* Detail Product route */}
-          <Route path="/product-detail" element={<ProductDetailPage />} />
 
           {/* Cart route */}
           <Route path="/cart" element={<CartPage />} />

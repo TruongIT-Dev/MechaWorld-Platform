@@ -1,7 +1,13 @@
-import { Col, Row, Tag } from 'antd';
-import { useState } from 'react';
+import { Col, Row } from 'antd';
+import { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
+
+import { GetGundamDetailBySlug } from '../../apis/ProductDetail/APIProductDetail';
+
 import ReviewProduct from './Review';
 import SuggestProduct from './SuggestProduct';
+import ShopInfo from './ShopInfo';
+
 
 const product = {
     name: 'Gundam RX-78-2',
@@ -34,7 +40,43 @@ const product = {
 };
 
 const GundamProductPage = () => {
-    const [selectedImage, setSelectedImage] = useState(product.images[0]);
+    const { slug } = useParams();
+
+    const [detailGundam, setDetailGundam] = useState([]);
+    const [gundamGrade, setGundamGrade] = useState([]);
+    const [imageGundam, setImageGundam] = useState([]);
+    const [shop, setShop] = useState([]);
+    const [selectedImage, setSelectedImage] = useState(imageGundam[0]);
+
+    // Fetch Data Deatail Gundam by Slug
+    useEffect(() => {
+        const fetchDetailGundamBySlug = async (slug) => {
+            try {
+                const detailGundam = await GetGundamDetailBySlug(slug);
+
+                setDetailGundam(detailGundam?.data || []);
+                setGundamGrade(detailGundam?.data?.gundam_grade || []);
+                setImageGundam(detailGundam?.data?.images || []);
+                setShop(detailGundam?.data?.owner || []);
+
+                if (detailGundam?.data?.images?.length > 0) {
+                    setSelectedImage(detailGundam.data.images[0]); // Cập nhật ảnh đầu tiên
+                }
+            } catch (error) {
+                console.log("Fail to fetch detail gundam: No data detected!");
+            }
+        }
+
+        fetchDetailGundamBySlug(slug);
+    }, [slug])
+
+    // Lưu Mảng Ảnh gundam
+    useEffect(() => {
+        if (imageGundam.length > 0) {
+            setSelectedImage(imageGundam[0]); // Gán ảnh đầu tiên khi có dữ liệu
+        }
+    }, [imageGundam]);
+
 
     return (
         <div className="container mt-24 p-6 bg-white">
@@ -42,40 +84,38 @@ const GundamProductPage = () => {
                 {/* Main Section */}
                 <div className="top-section">
                     <Row gutter={24}>
-
                         {/* Image */}
                         <Col span={8}>
                             <div className="image-section">
-
                                 {/* Main Display Image */}
-                                <div className="flex-1 flex justify-center items-center">
+                                <div className="flex justify-center items-center">
                                     <img
-                                        src={selectedImage.src}
-                                        alt={selectedImage.alt}
+                                        src={selectedImage?.url}
                                         className="w-full h-[750px] max-w-full max-h-96 object-contain"
                                     />
                                 </div>
 
                                 {/* Thumbnail List */}
-                                <div className="flex gap-4">
-                                    {product.images.map((image, index) => (
-                                        <img
-                                            key={index}
-                                            src={image.src}
-                                            alt={image.alt}
-                                            className={`w-20 h-20 object-cover cursor-pointer rounded-lg border ${selectedImage.src === image.src
-                                                ? 'border-red-500'
-                                                : 'border-gray-200'
-                                                }`}
-                                            onClick={() => setSelectedImage(image)}
-                                        />
-                                    ))}
+                                <div className="mt-4 overflow-auto">
+                                    <div className="flex gap-4 max-w-[320px]">
+                                        {imageGundam.slice(0, 5).map((image, index) => (
+                                            image?.url && (
+                                                <img
+                                                    key={index}
+                                                    src={image.url}
+                                                    className={`w-20 h-20 object-cover cursor-pointer rounded-lg border 
+                                    ${selectedImage?.url === image.url ? 'border-red-500' : 'border-gray-200'}`}
+                                                    onClick={() => setSelectedImage(image)}
+                                                />
+                                            )
+                                        ))}
+                                    </div>
                                 </div>
                             </div>
                         </Col>
 
                         {/* Describe */}
-                        <Col span={10}>
+                        <Col span={9}>
                             <div className="description-section">
                                 <div className="p-4 border rounded-lg shadow-sm">
                                     <h2 className="text-xl font-semibold text-gray-900">Mô tả sản phẩm</h2>
@@ -95,33 +135,29 @@ const GundamProductPage = () => {
                         </Col>
 
                         {/* Add to card */}
-                        <Col span={6}>
+                        <Col span={7}>
                             <div className="p-4 border rounded-lg shadow-sm space-y-4">
                                 {/* Product Name */}
-                                <h1 className="text-xl font-bold text-gray-900">{product.name}</h1>
+                                <h1 className="text-xl font-bold text-gray-900">{detailGundam.name}</h1>
 
-                                {/* Price and Discount */}
+                                {/* Price */}
                                 <div className="flex items-center space-x-4">
-                                    <p className="text-2xl font-semibold text-red-600">{product.price}</p>
-                                    <p className="line-through text-gray-500">{product.originalPrice}</p>
-                                    <Tag color="green">-{product.discount}%</Tag>
-                                </div>
-
-                                {/* Shipping Info */}
-                                <div className="space-y-2 text-sm">
-                                    <p>
-                                        <span className="font-semibold">Giao hàng:</span> {product.shippingInfo.deliveryFee}
+                                    <p className="text-2xl font-semibold text-red-500">
+                                        Giá: {detailGundam.price} VND
                                     </p>
                                 </div>
 
-                                {/* Seller Info */}
+                                {/* Gundam Info */}
                                 <div className="space-y-2 text-sm">
-                                    <p>
-                                        <span className="font-semibold">Nhà bán hàng:</span> {product.seller.name}
-                                    </p>
-                                    <p>
-                                        <span className="font-semibold">Đã bán:</span> {product.seller.totalSales}
-                                    </p>
+                                    <p><span className="font-semibold">Scale:</span> {detailGundam.scale}</p>
+                                    <p><span className="font-semibold">Tình trạng:</span> {detailGundam.condition}</p>
+                                    <p><span className="font-semibold">Nhà sản xuất:</span> {detailGundam.manufacturer} </p>
+                                    <p><span className="font-semibold">Status:</span> {detailGundam.status}</p>
+                                </div>
+
+                                {/* Seller Info with Hover Dropdown */}
+                                <div className="space-y-2">
+                                    <ShopInfo shop={shop} />
                                 </div>
 
                                 {/* Buy Button */}
