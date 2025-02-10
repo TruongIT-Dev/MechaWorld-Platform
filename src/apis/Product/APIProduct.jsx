@@ -8,3 +8,7 @@ export const ListGundams = () => {
 export const ListGundamByGrade = (grade) => {
     return axios.get(`/gundams?grade=${grade}`)
 }
+
+export const ListGrades = () => {
+    return axios.get('/grades')
+}

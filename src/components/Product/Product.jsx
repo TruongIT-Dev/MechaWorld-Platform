@@ -15,19 +15,20 @@ const Product = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
 
+    // Fetch ALL Gundams
     useEffect(() => {
-        const fetchProducts = async () => {
+        const fetchGundams = async () => {
             try {
                 const response = await ListGundams();
                 setGundams(response?.data.data || []);
             } catch (err) {
-                setError("Lỗi khi tải sản phẩm");
+                setError("List Gundam Error: Không nhận data Gundam");
             } finally {
                 setLoading(false);
             }
         };
 
-        fetchProducts();
+        fetchGundams();
     }, []);
 
     return (
@@ -108,9 +109,9 @@ const Product = () => {
                                 </div>
 
                                 {/* Pagination */}
-                                <div className="pagination mt-5 flex justify-center">
+                                {/* <div className="pagination mt-5 flex justify-center">
                                     <Pagination defaultCurrent={1} total={50} />
-                                </div>
+                                </div> */}
                             </div>
                         </Col>
                         {/* End List of Products */}
