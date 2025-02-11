@@ -1,6 +1,6 @@
 import React, { useContext,useState } from "react";
 import { FaCartShopping } from "react-icons/fa6";
-import Img1 from "../assets/image/gun1.jpg"
+import Img1 from "../assets/image/gun1.jpg";
 import { Link } from 'react-router-dom';
 import { FiTrash2 } from 'react-icons/fi'
 
@@ -11,9 +11,11 @@ const CartContext = () => {
 
     // Fake dữ liệu giỏ hàng (thay thế bằng dữ liệu thực từ context)
     const cartItems = [
-        { id: 1, name: "Mens Casual Slim Fit", price: 15.99, quantity: 1, image: Img1 },
-        { id: 2, name: "BIYLACLESEN Women's Jacket", price: 56.99, quantity: 1, image: Img1 },
-    ];
+              { id: 1, name: "Mens Casual Slim Fit", price: 15.99, quantity: 1,image: Img1 },
+              { id: 2, name: "BIYLACLESEN Women's Jacket", price: 56.99, quantity: 1,image: Img1  },
+              { id: 3, name: "BIYLACLESEN Women's Jacket", price: 56.99, quantity: 1,image: Img1  },
+              { id: 4, name: "BIYLACLESEN Women's Jacket", price: 56.99, quantity: 1,image: Img1  },
+          ];
 
     const total = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
 

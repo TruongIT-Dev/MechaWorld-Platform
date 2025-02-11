@@ -80,13 +80,13 @@ export default function SellerRegister() {
           <RobotOutlined /> GÓI ĐĂNG KÝ CHO NGƯỜI BÁN GUNDAM 
           </h3>
           <div className="grid grid-cols-3 gap-4">
-            <Card className=" p-6 shadow-lg rounded-lg bg-white border-gray-300 border">
+            <Card className=" h-300 p-6 shadow-lg rounded-lg bg-white border-gray-300 border">
               <div className="text-center">
                 <ClockCircleOutlined className="text-4xl" />
                 <h3 className="font-bold text-lg">GÓI DÙNG THỬ</h3>
                 <p className="text-gray-600 mb-4">Bắt đầu trải nghiệm</p>
               </div>
-              <div className=" justify-start h-full">                
+              <div className=" justify-start h-300">                
                 <p className="flex items-center gap-2"><InboxOutlined /> Số lượt bán: <strong>5</strong></p>
                 <p className="flex items-center gap-2"> Số lượt mở đấu giá: <strong>1</strong></p>
                 <p><ClockCircleOutlined  /> Thời hạn: <strong>30 ngày</strong></p>
@@ -96,7 +96,8 @@ export default function SellerRegister() {
                 Bắt đầu dùng thử
               </Button>
             </Card>
-            <Card className=" p-6 shadow-lg rounded-lg bg-gray-300 border-gray-500 border">
+
+            <Card className=" h-300 p-6 shadow-lg rounded-lg bg-gray-300 border-gray-500 border">
                 <div className="text-center">
                     <StarOutlined className="text-4xl"/>
                     <h3 className="font-bold text-lg">GÓI NÂNG CẤP</h3>
@@ -115,16 +116,23 @@ export default function SellerRegister() {
                 359.000 đ
               </Button>
             </Card>
-            <Card className="text-center p-6 shadow-lg rounded-lg bg-black text-white border-gray-800 border">
-                <CrownOutlined className="text-4xl"/>
-              <h3 className="font-bold text-lg"> KHÔNG GIỚI HẠN</h3>
-              <p className="text-gray-400 mb-4">Bứt phá giới hạn</p>
-              <p>♾️ Bán & Đấu giá không giới hạn</p>
-              <p><ClockCircleOutlined  /> Thời hạn: <strong>180 ngày</strong></p>
-              <Button type="primary" className="mt-10 w-full bg-white text-black rounded-lg py-2 flex flex-col h-full">
+
+            <Card className=" h-300  p-6 shadow-lg rounded-lg bg-black text-white border-gray-500 border">
+              <div className="text-center">
+                  <CrownOutlined className="text-4xl"/>
+                  <h3 className="font-bold text-lg"> KHÔNG GIỚI HẠN</h3>
+                  <p className="text-gray-400 mb-4">Bứt phá giới hạn</p>
+              </div>
+              <div className=" justify-start ">
+                <p>♾️ Bán & Đấu giá không giới hạn</p>
+                <p><ClockCircleOutlined  /> Thời hạn: <strong>180 ngày</strong></p>
+              </div> 
+              
+              <Button type="primary" className="mt-14 w-full bg-white text-black rounded-lg py-2 flex flex-col h-full">
                 1.049.000 đ
               </Button>
             </Card>
+
           </div>
         </div>
       )}
