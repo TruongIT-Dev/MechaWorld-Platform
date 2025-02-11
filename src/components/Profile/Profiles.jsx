@@ -3,7 +3,8 @@ import {  HeartOutlined,
   UserSwitchOutlined,
   ShoppingOutlined,
   UserOutlined,
-  SettingOutlined,} from '@ant-design/icons';
+  SettingOutlined,
+  ShoppingCartOutlined,} from '@ant-design/icons';
 import {  Menu,Layout } from 'antd';
 import { Outlet, Link } from 'react-router-dom';
 
@@ -43,6 +44,10 @@ const items = [
         label:<Link to="/profile/setting">Thiết lập giao dịch</Link>,
       }
     ],
+  },{
+    key: '9',
+    label: <Link to="/profile/seller">Đăng ký bán hàng</Link>,
+    icon: <ShoppingCartOutlined  />,
   },
 ];
 

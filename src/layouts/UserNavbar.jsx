@@ -8,6 +8,7 @@ import { UserOutlined } from "@ant-design/icons";
 import { logout } from "../features/auth/authSlice";
 
 import Notification from "./Notification";
+import CartContext from "./CartContext";
 
 const UserNavbar = () => {
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -38,16 +39,7 @@ const UserNavbar = () => {
             <div className="space-x-6 flex items-center">
 
                 {/* Cart */}
-                <div className="cart-section">
-                    <button
-                        className="bg-gradient-to-r from-cyan-500 to-blue-600 transition-all duration-200 text-white py-1 px-4 rounded-full flex items-center gap-3 group"
-                    >
-                        <NavLink className="group-hover:block hidden hover:text-black capitalize transition-all duration-200" to="/cart">
-                            Giỏ hàng
-                        </NavLink>
-                        <FaCartShopping className="text-xl text-white drop-shadow-sm cursor-pointer" />
-                    </button>
-                </div>
+                <CartContext />
 
                 <div className="h-4 border-l-2 border-l-black"></div>
 
