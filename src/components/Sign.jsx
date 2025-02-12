@@ -1,55 +1,38 @@
 import { useNavigate } from "react-router-dom";
 import { Checkbox, Form, Input, Button } from "antd";
-import { GoogleLogin } from "@react-oauth/google";
-import { jwtDecode } from "jwt-decode";
 import {  useEffect, useState } from "react";
 import { useDispatch, } from "react-redux";
 import { login } from "../features/auth/authSlice";
 import "../assets/css/sign.css";
-// import axios from "axios";
-import axios from '../axios'
 import { useCookies } from "react-cookie";
+import { loginEmail,loginGoogle } from "../apis/Auth/APIAuth";
+import { Alert } from 'antd';
+
 export default function Sign() {
+  // eslint-disable-next-line no-unused-vars
   const [cookies, setCookie] = useCookies(['cookie-name']);
   const navigate = useNavigate();
   const [form] = Form.useForm();
   const [activeTab, setActiveTab] = useState(1); 
   const dispatch = useDispatch();
-  // const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
-  const auth_api = `http://localhost:8080/v1/`;
-  const api = axios.create({
-    baseUR: auth_api,
-    headers: {
-      'Content-Type': 'application/json',
-    }
-  })
-  async function handleCredentialResponse(response) {
-    // console.log("Encoded JWT ID token: " + response.credential);
-    // const responseData = await api.post(`${auth_api}`+`auth-login`, {
-    //   id_token: response.credential
-    // }, {
-    //   headers: {
-    //     'Content-Type': 'application/json'
-    //   }
-    // }).then(response => {
-    //   console.log(response);
-    // }).catch(error => {
-    //   console.error(error);
-    // });
-    axios({
-      method: 'post',
-      url: `${auth_api}`+`auth-login`,
-      data: {
-        id_token: response.credential
-      },
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    }).then(response => {
-      console.log(response);
-      navigate("/");
-    })
+  const [showAlert, setShowAlert] = useState(false);
 
+  // const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
+
+  async function handleCredentialResponse(response) {
+    // console.log(response.credential);
+    console.log(response);
+    loginGoogle(response.credential).then(response => {
+      console.log(response.data);
+      dispatch(login(response.data));
+      setShowAlert(true);
+      setTimeout(() => {
+        setShowAlert(false); 
+        navigate("/");
+    }, 3000);
+    }).catch(error => {
+      console.error(error);
+  });
   }
   useEffect(() => {
     /* global google */
@@ -65,7 +48,7 @@ export default function Sign() {
   },[]);
   // const handleSuccess = async (credentialResponse) => {
   //   try {
-  //     const response = await api.post(`${auth_api}`+`auth-login`, {
+  //     const response = await api.post(`/auth/google-login`, {
   //       id_token: credentialResponse.credential
   //     }, {
   //       headers: {
@@ -75,13 +58,7 @@ export default function Sign() {
   //       console.log(response);
   //     }).catch(error => {
   //       console.error(error);
-  //     });
-
-  //     console.log("Credential Response:", credentialResponse);
-  //     const credentialResponseDecoded = jwtDecode(credentialResponse.credential);
-  //     console.log("Credential Response đã giải mã:", credentialResponseDecoded);
-  //     dispatch(login(credentialResponseDecoded));
-  
+  //     });  
   //     navigate("/");
   
   //   } catch (error) {
@@ -90,54 +67,32 @@ export default function Sign() {
   //   }
   // };
 
-  // const onFinish = async (values) => {
-  //   console.log("Success:", values);
-  //   try {
-  //     const response = await api.post(`${auth_api}`+`login`, {
-  //       email: values.username,
-  //       password: values.password
-  //     }).then(response => {
-  //       console.log(response);
-  //       dispatch(login(response));
-  //     }).catch(error => {
-  //       console.error(error);
-  //     });
-  //   } catch (error) {
-  //     console.error("Lỗi trong quá trình đăng nhập:", error);
-  //   }
-  // };
   const onFinish = async (values) => {
     console.log("Success:", values);
     try {
-        const response = await fetch(`${auth_api}`+`auth/login`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ 
-                email: values.username,
-                password: values.password
-            })
-        });
-
-        if (!response.ok) { 
-            const errorData = await response.json(); 
-            throw new Error(`${response.status} ${response.statusText}: ${errorData?.message || 'Lỗi đăng nhập'}`);
-        }
-        const data = await response.json(); 
-        console.log(data);
+      loginEmail(values.email, values.password).then(response => {
+        console.log(response.data);
+        // const expiryDate = new Date();
+        // expiryDate.setDate(expiryDate.getDate() + 1); 
         // Cookie setup
-        const expiryDate = new Date();
-        expiryDate.setDate(expiryDate.getDate() + 1);
-        setCookie('user',data,{ expires: expiryDate})
-        dispatch(login(data)); 
+        setCookie('user',response.data.user,{ expires: response.data.access_token_expires_at});
+        dispatch(login(response.data));
+        setShowAlert(true);
+      setTimeout(() => {
+        setShowAlert(false); 
+        navigate("/");
+    }, 3000);
+    })
+    .catch(error => {
+        console.error(error);
+    });
     } catch (error) {
         console.error("Lỗi đăng nhập:", error);
     }
 };
-  const handleError = (error) => {
-    console.error("Lỗi đăng nhập Google:", error);
-  };
+  // const handleError = (error) => {
+  //   console.error("Lỗi đăng nhập Google:", error);
+  // };
   const onFinishFailed = (errorInfo) => {
     console.log("Failed:", errorInfo);
   };
@@ -183,7 +138,7 @@ export default function Sign() {
             >
               <Form.Item
                 label="Username"
-                name="username"
+                name="email"
                 rules={[{ required: true, message: "Vui lòng nhập username!" }]}
                 className="group"
               >
@@ -294,7 +249,17 @@ export default function Sign() {
               {/* đang cố fix */}
             </Form>
           )}
+          
         </div>
+        {showAlert && ( 
+            <Alert
+                className="fixed bottom-4 right-4 z-50 bg-green-100 border-green-400 text-green-700 px-4 py-3 rounded"
+                message="Đăng nhập thành công!"
+                type="success"
+                closable 
+                afterClose={() => setShowAlert(false)}
+            />
+        )}
       </div>
     </>
   );

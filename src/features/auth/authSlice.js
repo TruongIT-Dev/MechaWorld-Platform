@@ -7,7 +7,9 @@ import {}from "@reduxjs/toolkit"
 
 const initialState ={
     isLoggedIn: false,
-    user: null
+    user: null,
+    access_token: null,
+    access_token_expires_at: null,
 };
 export const authSlice = createAppSlice({
     name: 'auth',
@@ -15,11 +17,15 @@ export const authSlice = createAppSlice({
     reducers: {
         login: (state, action) => {
             state.isLoggedIn = true;
-            state.user = action.payload;
+            state.user = action.payload.user;
+            state.access_token = action.payload.access_token;
+            state.access_token_expires_at = action.payload.access_token_expires_at;
         },
         logout: (state) => {
             state.isLoggedIn = false;
             state.user = null;
+            state.access_token = null;
+            state.access_token_expires_at = null;
         },
         updateUserProfile: (state, action) => {
             state.user = action.payload; 

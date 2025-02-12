@@ -13,12 +13,12 @@ import Notification from "./Notification";
 const UserNavbar = ({user}) => {
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     // const [userData, setUserData] = useState(null);
-
+    const { isLoggedIn } = useSelector(state => state.auth);
     let timeoutId = null;
 
     const navigate = useNavigate();
     const dispatch = useDispatch();
-    const user = useSelector((state) => state.auth.user);
+    // const user = useSelector((state) => state.auth.user);
 
     // useEffect(() => {
     //     const storedUser = localStorage.getItem('user');
@@ -46,6 +46,7 @@ const UserNavbar = ({user}) => {
 
     const handleLogout = () => {
         dispatch(logout());
+        console.log(isLoggedIn);
         navigate('/');
     };
 
@@ -77,7 +78,7 @@ const UserNavbar = ({user}) => {
                 >
                     <button className="btn text-xl hover:text-blue-700 flex justify-center items-center m-0">
                         {/* <UserOutlined /> */}
-                        <img src={user?.picture} alt="avatar" style={{ width: '40px', height: '40px', borderRadius: '50%'  }} />
+                        <img src={user?.avatar_url} alt="avatar" style={{ width: '40px', height: '40px', borderRadius: '50%'  }} />
                     </button>
 
                     {isDropdownOpen && (
@@ -118,7 +119,7 @@ const UserNavbar = ({user}) => {
 }
 UserNavbar.propTypes = {
     user: PropTypes.shape({  
-        picture: PropTypes.string 
+        avatar_url: PropTypes.string 
     }).isRequired 
 };
 export default UserNavbar
