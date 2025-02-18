@@ -16,6 +16,7 @@ export const ProductDetailPage = React.lazy(() => import('../components/ProductD
 
 // Cart route
 export const CartPage = React.lazy(() => import('../components/Cart/Cart'));
+export const CartPage1 = React.lazy(() => import('../components/Cart/Carts'));
 // Checkout route
 export const Checkout = React.lazy(() => import('../components/Checkout/checkout'));
 

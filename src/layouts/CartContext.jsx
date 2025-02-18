@@ -12,9 +12,6 @@ const CartContext = () => {
     // Fake dữ liệu giỏ hàng (thay thế bằng dữ liệu thực từ context)
     const cartItems = [
               { id: 1, name: "Mens Casual Slim Fit", price: 15.99, quantity: 1,image: Img1 },
-              { id: 2, name: "BIYLACLESEN Women's Jacket", price: 56.99, quantity: 1,image: Img1  },
-              { id: 3, name: "BIYLACLESEN Women's Jacket", price: 56.99, quantity: 1,image: Img1  },
-              { id: 4, name: "BIYLACLESEN Women's Jacket", price: 56.99, quantity: 1,image: Img1  },
           ];
 
     const total = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
@@ -93,7 +90,7 @@ const CartContext = () => {
                         </div>
 
                         <Link 
-                            to={'/checkout'} 
+                            to={'/cart1'} 
                             className='bg-gray-200 flex p-4 justify-center items-center text-black w-full font-medium'>
                                 View Cart
                         </Link>  
