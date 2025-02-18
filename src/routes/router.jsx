@@ -19,7 +19,8 @@ export const CartPage = React.lazy(() => import('../components/Cart/Cart'));
 export const CartPage1 = React.lazy(() => import('../components/Cart/Carts'));
 // Checkout route
 export const Checkout = React.lazy(() => import('../components/Checkout/checkout'));
-
+// wallet route
+export const WalletPage = React.lazy(() => import('../components/Wallet/WalletUser'));
 // Profile route
 export const ProfilePage = React.lazy(() => import("../components/Profile/Profiles"));
 export const UserProfile = React.lazy(() => import("../components/Profile/UserProfile"));

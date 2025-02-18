@@ -1,5 +1,6 @@
 import React, { useContext,useState } from "react";
 import { FaCartShopping } from "react-icons/fa6";
+import { NavLink, useNavigate } from "react-router-dom";
 import Img1 from "../assets/image/gun1.jpg";
 import { Link } from 'react-router-dom';
 import { FiTrash2 } from 'react-icons/fi'
@@ -24,10 +25,10 @@ const CartContext = () => {
                     className="bg-gradient-to-r from-cyan-500 to-blue-600 text-white py-1 px-4 rounded-full flex items-center gap-3"
                     onClick={() => setIsOpen(true)}
                 >   
-                    {/* <NavLink className="group-hover:block hidden hover:text-black capitalize transition-all duration-200" to="/cart">
+                    <NavLink className="group-hover:block  hover:text-black capitalize transition-all duration-200" to="/cart1">
                             Giỏ hàng
-                        </NavLink> */}
-                    <span >Giỏ hàng</span>
+                    </NavLink>
+                    
                     <div className="flex relative">
                         <FaCartShopping className="text-xl text-white drop-shadow-sm cursor-pointer" />
                         <div className="bg-red-500 absolute -right-2 -bottom-2 text-[12px] w-[18px] h-[18px] text-white rounded-full flex justify-center items-center">

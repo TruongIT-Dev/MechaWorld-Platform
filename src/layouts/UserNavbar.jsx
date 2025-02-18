@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { FaCartShopping } from "react-icons/fa6";
+import { FaWallet } from "react-icons/fa6";
 import { useSelector,useDispatch } from "react-redux";
 import { NavLink, useNavigate } from "react-router-dom";
 
@@ -40,7 +40,16 @@ const UserNavbar = () => {
 
                 {/* Cart */}
                 <CartContext />
-
+                <div className="h-4 border-l-2 border-l-black"></div>
+                {/* Notification */}
+                <div className="cart-section">
+                    <button className="bg-gradient-to-r from-cyan-500 to-blue-600 transition-all duration-200 text-white py-1 px-4 rounded-full flex items-center gap-3 group">
+                        <NavLink className="group-hover:block hover:text-black capitalize transition-all duration-200" to="/wallet">
+                            Ví Cá Nhân
+                        </NavLink>
+                        <FaWallet  className="text-xl text-white drop-shadow-sm cursor-pointer" />
+                    </button>
+                </div>
                 <div className="h-4 border-l-2 border-l-black"></div>
 
                 {/* Notification */}
@@ -77,6 +86,7 @@ const UserNavbar = () => {
                         </div>
                     )}
                 </div>
+                
             </div>
 
         </>
