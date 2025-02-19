@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { HomeOutlined, UserOutlined } from '@ant-design/icons';
 import { Card, Col, Row, Button, Breadcrumb } from 'antd';
 
-import { GetGundams } from '../../apis/Product/APIProduct';
+import { GetGundamByGrade, GetGundams } from '../../apis/Product/APIProduct';
 import FilterSidebar from './ProductFilter';
 
 const Product = () => {
@@ -13,28 +13,52 @@ const Product = () => {
 
     // useState
     const [gundams, setGundams] = useState([]);
+    const [filters, setFilters] = useState({
+        selectedGrade: null,
+        condition: "all",
+        priceRange: [100, 1000]
+    });
 
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState("");
 
-    // Fetch ALL Gundams
+
+    // Gọi API khi bộ lọc thay đổi
     useEffect(() => {
         const fetchGundams = async () => {
             try {
-                const response = await GetGundams();
-                setGundams(response?.data || []);
+                let response;
+                if (filters.selectedGrade) {
+                    response = await GetGundamByGrade(filters.selectedGrade);
+                } else {
+                    response = await GetGundams();
+                }
 
-            } catch (err) {
-                setError("List Gundam Error: Không nhận data Gundam", err);
-                console.log(error);
+                let filteredData = response.data;
 
-            } finally {
-                setLoading(false);
+                // Lọc theo tình trạng
+                if (filters.condition !== "all") {
+                    filteredData = filteredData.filter(gundam => gundam.condition === filters.condition);
+                }
+
+                // Lọc theo giá
+                filteredData = filteredData.filter(gundam =>
+                    gundam.price >= filters.priceRange[0] * 1000 &&
+                    gundam.price <= filters.priceRange[1] * 1000
+                );
+
+                setGundams(filteredData);
+            } catch (error) {
+                console.error("Lỗi khi lấy danh sách Gundam:", error);
             }
         };
 
         fetchGundams();
-    }, []);
+    }, [filters]);
+
+    // Hàm nhận dữ liệu lọc từ FilterSidebar
+    const handleFilterChange = (newFilters) => {
+        setFilters(newFilters);
+    };
 
     // handleClicked to Link detail gundam
     const handleClickedDetailGundam = (slug) => {
@@ -72,7 +96,7 @@ const Product = () => {
                 <div className="content py-10">
                     <Row gutter={24}>
                         {/* Filter */}
-                        <Col span={5}><FilterSidebar /></Col>
+                        <Col span={5}><FilterSidebar onFilterChange={handleFilterChange} /></Col>
 
                         {/* Start List of Products */}
                         <Col span={19}>
@@ -93,31 +117,33 @@ const Product = () => {
                                 {/* Products */}
                                 <div className="product-list mt-6">
                                     <Row gutter={24}>
-                                        {gundams.map((gundam, index) => (
-                                            <Col key={index} span={6}>
-                                                <Card
-                                                    onClick={() => {
-                                                        handleClickedDetailGundam(gundam.slug);
-                                                    }}
-                                                    bordered={false}
-                                                    className="max-w-fit max-h-fit mb-2 border-2 p-1"
-                                                    cover={
-                                                        <div className="h-[200px] w-full overflow-hidden">
-                                                            <img
-                                                                className="w-full h-full object-cover cursor-pointer transform transition-transform duration-500 hover:scale-110"
-                                                                alt="example"
-                                                                src={gundam?.image_urls?.[0] || "https://via.placeholder.com/150"}
-                                                            />
-                                                        </div>
-                                                    }
-                                                >
-                                                    <Meta
-                                                        title={gundam.name}
-                                                        description={<span className="text-red-600 font-semibold">Giá: {gundam.price}VND</span>}
-                                                    />
-                                                </Card>
-                                            </Col>
-                                        ))}
+                                        {gundams.length > 0 ? (
+                                            gundams.map((gundam, index) => (
+                                                <Col key={index} span={6}>
+                                                    <Card
+                                                        onClick={() => handleClickedDetailGundam(gundam.slug)}
+                                                        bordered={false}
+                                                        className="max-w-fit max-h-fit mb-2 border-2 p-1"
+                                                        cover={
+                                                            <div className="h-[200px] w-full overflow-hidden">
+                                                                <img
+                                                                    className="w-full h-full object-cover cursor-pointer transform transition-transform duration-500 hover:scale-110"
+                                                                    alt="example"
+                                                                    src={gundam?.image_urls?.[0] || "https://via.placeholder.com/150"}
+                                                                />
+                                                            </div>
+                                                        }
+                                                    >
+                                                        <Meta
+                                                            title={gundam.name}
+                                                            description={<span className="text-red-600 font-semibold">Giá: {gundam.price} VND</span>}
+                                                        />
+                                                    </Card>
+                                                </Col>
+                                            ))
+                                        ) : (
+                                            <p className="text-center text-gray-500">Không có sản phẩm nào.</p>
+                                        )}
                                     </Row>
                                 </div>
 
