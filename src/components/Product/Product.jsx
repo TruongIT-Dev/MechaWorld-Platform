@@ -22,9 +22,12 @@ const Product = () => {
         const fetchGundams = async () => {
             try {
                 const response = await GetGundams();
-                setGundams(response?.data.data || []);
+                setGundams(response?.data || []);
+
             } catch (err) {
-                setError("List Gundam Error: Không nhận data Gundam");
+                setError("List Gundam Error: Không nhận data Gundam", err);
+                console.log(error);
+
             } finally {
                 setLoading(false);
             }
@@ -97,20 +100,20 @@ const Product = () => {
                                                         handleClickedDetailGundam(gundam.slug);
                                                     }}
                                                     bordered={false}
-                                                    className="max-w-fit max-h-fit mb-2"
+                                                    className="max-w-fit max-h-fit mb-2 border-2 p-1"
                                                     cover={
                                                         <div className="h-[200px] w-full overflow-hidden">
                                                             <img
                                                                 className="w-full h-full object-cover cursor-pointer transform transition-transform duration-500 hover:scale-110"
                                                                 alt="example"
-                                                                src={gundam?.images?.[0]?.url || "https://via.placeholder.com/150"}
+                                                                src={gundam?.image_urls?.[0] || "https://via.placeholder.com/150"}
                                                             />
                                                         </div>
                                                     }
                                                 >
                                                     <Meta
                                                         title={gundam.name}
-                                                        description={<span className="text-red-600 font-semibold">{gundam.price} VND</span>}
+                                                        description={<span className="text-red-600 font-semibold">Giá: {gundam.price}VND</span>}
                                                     />
                                                 </Card>
                                             </Col>

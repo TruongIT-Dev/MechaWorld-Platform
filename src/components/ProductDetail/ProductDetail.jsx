@@ -43,9 +43,8 @@ const GundamProductPage = () => {
     const { slug } = useParams();
 
     const [detailGundam, setDetailGundam] = useState([]);
-    const [gundamGrade, setGundamGrade] = useState([]);
     const [imageGundam, setImageGundam] = useState([]);
-    const [shop, setShop] = useState([]);
+    const [shopId, setShopId] = useState([]);
     const [selectedImage, setSelectedImage] = useState(imageGundam[0]);
 
     // Fetch Data Deatail Gundam by Slug
@@ -55,13 +54,11 @@ const GundamProductPage = () => {
                 const detailGundam = await GetGundamDetailBySlug(slug);
 
                 setDetailGundam(detailGundam?.data || []);
-                setGundamGrade(detailGundam?.data?.gundam_grade || []);
-                setImageGundam(detailGundam?.data?.images || []);
-                setShop(detailGundam?.data?.owner || []);
+                setShopId(detailGundam?.data?.owner_id || []);
 
-                if (detailGundam?.data?.images?.length > 0) {
-                    setSelectedImage(detailGundam.data.images[0]); // Cập nhật ảnh đầu tiên
-                }
+                setImageGundam(detailGundam?.data?.image_urls || []);
+
+
             } catch (error) {
                 console.log("Fail to fetch detail gundam: No data detected!");
             }
@@ -70,10 +67,13 @@ const GundamProductPage = () => {
         fetchDetailGundamBySlug(slug);
     }, [slug])
 
+    console.log("selectedImage", selectedImage);
+
+
     // Lưu Mảng Ảnh gundam
     useEffect(() => {
         if (imageGundam.length > 0) {
-            setSelectedImage(imageGundam[0]); // Gán ảnh đầu tiên khi có dữ liệu
+            setSelectedImage(imageGundam[0]); // Chọn ảnh đầu tiên làm ảnh chính
         }
     }, [imageGundam]);
 
@@ -90,7 +90,7 @@ const GundamProductPage = () => {
                                 {/* Main Display Image */}
                                 <div className="flex justify-center items-center">
                                     <img
-                                        src={selectedImage?.url}
+                                        src={selectedImage}
                                         className="w-full h-[750px] max-w-full max-h-96 object-contain"
                                     />
                                 </div>
@@ -99,15 +99,13 @@ const GundamProductPage = () => {
                                 <div className="mt-4 overflow-auto">
                                     <div className="flex gap-4 max-w-[320px]">
                                         {imageGundam.slice(0, 5).map((image, index) => (
-                                            image?.url && (
-                                                <img
-                                                    key={index}
-                                                    src={image.url}
-                                                    className={`w-20 h-20 object-cover cursor-pointer rounded-lg border 
-                                    ${selectedImage?.url === image.url ? 'border-red-500' : 'border-gray-200'}`}
-                                                    onClick={() => setSelectedImage(image)}
-                                                />
-                                            )
+                                            <img
+                                                key={index}
+                                                src={image}
+                                                className={`w-20 h-20 object-cover cursor-pointer rounded-lg border 
+                ${selectedImage === image ? 'border-red-500' : 'border-gray-200'}`}
+                                                onClick={() => setSelectedImage(image)}
+                                            />
                                         ))}
                                     </div>
                                 </div>
@@ -149,15 +147,15 @@ const GundamProductPage = () => {
 
                                 {/* Gundam Info */}
                                 <div className="space-y-2 text-sm">
-                                    <p><span className="font-semibold">Scale:</span> {detailGundam.scale}</p>
-                                    <p><span className="font-semibold">Tình trạng:</span> {detailGundam.condition}</p>
-                                    <p><span className="font-semibold">Nhà sản xuất:</span> {detailGundam.manufacturer} </p>
-                                    <p><span className="font-semibold">Status:</span> {detailGundam.status}</p>
+                                    <p><span className="font-semibold text-black">Scale:</span> {detailGundam.scale}</p>
+                                    <p><span className="font-semibold text-black">Tình trạng:</span> {detailGundam.condition}</p>
+                                    <p><span className="font-semibold text-black">Nhà sản xuất:</span> {detailGundam.manufacturer} </p>
+                                    <p className={`font-semibold ${detailGundam.status === "available" ? 'text-green-400' : 'text-red-400'}`}><span className="font-semibold text-black">Status:</span> {detailGundam.status}</p>
                                 </div>
 
                                 {/* Seller Info with Hover Dropdown */}
                                 <div className="space-y-2">
-                                    <ShopInfo shop={shop} />
+                                    <ShopInfo shop={shopId} />
                                 </div>
 
                                 {/* Buy Button */}
@@ -166,6 +164,13 @@ const GundamProductPage = () => {
                                     className="w-full py-3 bg-red-500 text-white rounded-lg font-semibold hover:bg-red-600 transition"
                                 >
                                     Thêm vào giỏ hàng
+                                </button>
+
+                                <button
+                                    type="button"
+                                    className="w-full py-3 bg-gray-300 text-black rounded-lg font-semibold hover:bg-gray-500 transition"
+                                >
+                                    Mua ngay
                                 </button>
                             </div>
                         </Col>

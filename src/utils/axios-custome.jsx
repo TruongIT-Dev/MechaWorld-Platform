@@ -1,7 +1,7 @@
 import axios from 'axios';
 
-// const baseURL = 'http://localhost:8080/v1/';
-const baseURL = '/v1';
+const baseURL = 'http://localhost:8080/v1/';
+// const baseURL = '/v1';
 // axios.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded';
 
 // Tạo instance axios với baseURL và header chứa token
