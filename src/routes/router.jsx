@@ -9,9 +9,11 @@ export const UserLayout = React.lazy(() => import('../pages/UserLayout'));
 export const HomePage = React.lazy(() => import('../pages/HomePage'));
 export const AboutPage = React.lazy(() => import("../components/About/About"));
 export const ProductPage = React.lazy(() => import('../components/Product/Product'));
+export const ExchangePage = React.lazy(() => import('../components/Exchange/Exchange'));
 
-// Detail Product route
+// Detail route
 export const ProductDetailPage = React.lazy(() => import('../components/ProductDetail/ProductDetail'));
+export const ExchangeDetail = React.lazy(() => import('../components/ExchangeDetail/ExchangeDetail'));
 
 
 // Cart route

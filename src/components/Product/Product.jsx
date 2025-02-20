@@ -123,11 +123,11 @@ const Product = () => {
                                                     <Card
                                                         onClick={() => handleClickedDetailGundam(gundam.slug)}
                                                         bordered={false}
-                                                        className="max-w-fit max-h-fit mb-2 border-2 p-1"
+                                                        className="max-w-fit max-h-fit cursor-pointer mb-2 shadow-2xl p-2 rounded-lg transform transition-transform duration-300 hover:scale-105 hover:shadow-[0_10px_20px_rgba(0,0,0,0.3)]"
                                                         cover={
-                                                            <div className="h-[200px] w-full overflow-hidden">
+                                                            <div className="h-auto w-full overflow-hidden">
                                                                 <img
-                                                                    className="w-full h-full object-cover cursor-pointer transform transition-transform duration-500 hover:scale-110"
+                                                                    className="w-[400px] h-[150px] object-cover cursor-pointer transform transition-transform duration-500 hover:scale-110"
                                                                     alt="example"
                                                                     src={gundam?.image_urls?.[0] || "https://via.placeholder.com/150"}
                                                                 />
