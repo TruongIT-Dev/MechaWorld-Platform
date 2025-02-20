@@ -24,6 +24,13 @@ const App = () => {
 
           {/* Cart route */}
           <Route path="/cart" element={<CartPage />} />
+          <Route path="/cart1" element={<CartPage1 />} />
+
+          {/* checkout route */}
+          <Route path="/checkout" element={<Checkout />} />
+
+          {/* wallet user route */}
+          <Route path="/wallet" element={<WalletPage />} />
 
           {/* Profile route */}
           <Route path="/profile" element={<ProfilePage />} >
@@ -33,6 +40,8 @@ const App = () => {
             <Route path="orderhistory" element={<OrderHistory />} />
             <Route path="shop-register" element={<ShopRegister />} />
             <Route path="setting" element={<Setting />} />
+            <Route path="seller" element={<SellerRegister />} />
+           
           </Route>
 
           {/* Shop Route*/}
