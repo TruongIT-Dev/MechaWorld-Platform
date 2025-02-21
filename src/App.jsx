@@ -1,7 +1,7 @@
 import { Routes, Route } from "react-router-dom";
 
 // import router
-import { HomePage, ErrorPage, ProductPage, AboutPage, SignIn, ProfilePage, UserProfile, Collection, TradeHistory, OrderHistory, SettingAddress, UserLayout, ProductDetailPage, ShopDashboard, ShopPage, ShopProductManagement, ShopTransaction, CartPage, AdvancedSetting } from "./routes/router";
+import { HomePage, ErrorPage, ProductPage, AboutPage, SignIn, ProfilePage, UserProfile, Collection, TradeHistory, OrderHistory, UserLayout, ProductDetailPage, ShopDashboard, ShopPage, ShopProductManagement, ShopTransaction, CartPage, ShopRegister, ExchangePage, ExchangeDetail, CartPage1, Checkout, WalletPage, SellerRegister,AdvancedSetting,SettingAddress } from "./routes/router";
 
 // import Spinner from "./components/Spinner";
 
@@ -15,6 +15,8 @@ const App = () => {
           <Route path="/about" element={<AboutPage />} />
           <Route path="/product" element={<ProductPage />} />
           <Route path="/product/:slug" element={<ProductDetailPage />} />
+          <Route path="/exchange" element={<ExchangePage />} />
+          <Route path="/exchange-detail" element={<ExchangeDetail />} />
 
           {/* Login route */}
           <Route path="/signIn" element={<SignIn />} />
@@ -22,6 +24,13 @@ const App = () => {
 
           {/* Cart route */}
           <Route path="/cart" element={<CartPage />} />
+          <Route path="/cart1" element={<CartPage1 />} />
+
+          {/* checkout route */}
+          <Route path="/checkout" element={<Checkout />} />
+
+          {/* wallet user route */}
+          <Route path="/wallet" element={<WalletPage />} />
 
           {/* Profile route */}
           <Route path="/profile" element={<ProfilePage />} >
@@ -31,6 +40,9 @@ const App = () => {
             <Route path="orderhistory" element={<OrderHistory />} />
             <Route path="advanced-setting" element={<AdvancedSetting />} />
             <Route path="address-setting" element={<SettingAddress />} />
+            <Route path="shop-register" element={<ShopRegister />} />
+            <Route path="seller" element={<SellerRegister />} />
+           
           </Route>
 
           {/* Shop Route*/}
@@ -40,11 +52,11 @@ const App = () => {
             <Route path="transition" element={<ShopTransaction />} />
             {/* <Route path="setting" element={<UserProfile />} /> */}
           </Route>
-          
+
           {/* Error route */}
           <Route path="/error" element={<ErrorPage />} />
           <Route path="*" element={<ErrorPage />} />
-        
+
         </Route>
       </Routes>
     </>

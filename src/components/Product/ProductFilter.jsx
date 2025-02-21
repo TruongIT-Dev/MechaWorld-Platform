@@ -4,14 +4,13 @@ import { GetGrades } from "../../apis/Product/APIProduct";
 
 const { Panel } = Collapse;
 
-const FilterSidebar = () => {
+const FilterSidebar = ({ onFilterChange }) => {
     const [grades, setGrades] = useState([]);
     const [selectedGrade, setSelectedGrade] = useState();
     const [error, setError] = useState("");
 
     const [condition, setCondition] = useState("all");
     const [priceRange, setPriceRange] = useState([100, 1000]);
-
 
     // Fetch ALL Grades
     useEffect(() => {
@@ -21,12 +20,17 @@ const FilterSidebar = () => {
                 setGrades(response?.data || []);
             } catch (err) {
                 setError("Grades Error: Lỗi fetch API grades");
+                console.log(error);
             }
         };
 
         fetchGrades();
     }, []);
 
+    // Khi giá trị thay đổi, gọi hàm `onFilterChange`
+    useEffect(() => {
+        onFilterChange({ selectedGrade, condition, priceRange });
+    }, [selectedGrade, condition, priceRange]);
 
     return (
         <div className="bg-white shadow-lg rounded-lg p-4">
@@ -48,7 +52,7 @@ const FilterSidebar = () => {
                         className="flex flex-col space-y-2 font-normal"
                     >
                         {grades.map((grade, index) => (
-                            <Radio key={index} value={grade?.name}>
+                            <Radio key={index} value={grade?.slug}>
                                 {grade?.display_name}
                             </Radio>
                         ))}
@@ -84,7 +88,6 @@ const FilterSidebar = () => {
                     </div>
                 </Panel>
             </Collapse>
-
         </div>
     );
 };

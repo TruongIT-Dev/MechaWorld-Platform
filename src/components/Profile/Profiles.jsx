@@ -43,6 +43,10 @@ const items = [
         label:<Link to="/profile/advanced-setting">Thiết lập nâng cao</Link>,
       }
     ],
+  }, {
+    key: '9',
+    label: <Link to="/profile/seller">Đăng ký bán hàng</Link>,
+    icon: <ShoppingCartOutlined />,
   },
 ];
 

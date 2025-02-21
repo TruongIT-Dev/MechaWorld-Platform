@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { FaCartShopping } from "react-icons/fa6";
+import { FaWallet } from "react-icons/fa6";
 import { FaUser, FaSignOutAlt, FaRobot, FaClipboardList } from "react-icons/fa";
 import { useSelector, useDispatch } from "react-redux";
 import { NavLink, useNavigate } from "react-router-dom";
@@ -9,6 +9,7 @@ import PropTypes from 'prop-types';
 import { logout } from "../features/auth/authSlice";
 
 import Notification from "./Notification";
+import CartContext from "./CartContext";
 
 const UserNavbar = ({user}) => {
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -54,15 +55,17 @@ const UserNavbar = ({user}) => {
         <>
             <div className="space-x-6 flex items-center">
                 {/* Cart */}
+                <CartContext />
+                <div className="h-4 border-l-2 border-l-black"></div>
+                {/* Notification */}
                 <div className="cart-section">
                     <button className="bg-gradient-to-r from-cyan-500 to-blue-600 transition-all duration-200 text-white py-1 px-4 rounded-full flex items-center gap-3 group">
-                        <NavLink className="group-hover:block hidden hover:text-black capitalize transition-all duration-200" to="/cart">
-                            Giỏ hàng
+                        <NavLink className="group-hover:block hover:text-black capitalize transition-all duration-200" to="/wallet">
+                            Ví Cá Nhân
                         </NavLink>
-                        <FaCartShopping className="text-xl text-white drop-shadow-sm cursor-pointer" />
+                        <FaWallet  className="text-xl text-white drop-shadow-sm cursor-pointer" />
                     </button>
                 </div>
-
                 <div className="h-4 border-l-2 border-l-black"></div>
 
                 {/* Notification */}
@@ -112,6 +115,7 @@ const UserNavbar = ({user}) => {
                         </div>
                     )}
                 </div>
+                
             </div>
         </>
     );

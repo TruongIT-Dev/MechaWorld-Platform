@@ -16,21 +16,16 @@ const Menu = [
   },
   {
     id: 2,
-    name: "Về chúng tôi",
-    link: "/#",
-  },
-  {
-    id: 3,
     name: "Đấu giá",
     link: "/#",
   },
   {
-    id: 4,
-    name: "Kho đồ",
-    link: "/#",
+    id: 3,
+    name: "Trao đổi",
+    link: "/exchange",
   },
   {
-    id: 5,
+    id: 4,
     name: "Phụ kiện",
     link: "/#",
   },
@@ -115,7 +110,7 @@ const Navbar = () => {
             <li key={data.id}>
               <NavLink
                 to={data.link}
-                className="inline-block text-base px-4 hover:text-blue-700 hover:font-semibold duration-200 capitalize"
+                className="inline-block text-base px-4 hover:text-blue-700 hover:font-semibold duration-200 uppercase"
               >
                 {data.name}
               </NavLink>
@@ -124,7 +119,7 @@ const Navbar = () => {
           <li className="group relative cursor-pointer">
             <NavLink
               to="/product"
-              className="flex items-center text-base hover:text-blue-700 hover:font-semibold gap-[2px] py-2 capitalize"
+              className="flex items-center text-base hover:text-blue-700 hover:font-semibold gap-[2px] py-2 uppercase"
             >
               Sản phẩm
               <span>
