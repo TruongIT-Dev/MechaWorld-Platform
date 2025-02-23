@@ -94,7 +94,7 @@ const UserNavbar = ({user}) => {
                             </NavLink>
                             {/* Link cho tài khoản Shop */}
                             <NavLink
-                                to="#"
+                                to="/shop/dashboard"
                                 className="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100 hover:text-gray-900"
                             >
                                 <FaRobot className="mr-2 text-green-500" /> Quản lý kho

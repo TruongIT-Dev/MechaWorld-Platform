@@ -27,6 +27,9 @@ export const authSlice = createAppSlice({
             state.access_token = null;
             state.access_token_expires_at = null;
         },
+        // signup: (state, action) => {
+            
+        // },
         updateUserProfile: (state, action) => {
             state.user = action.payload; 
         }

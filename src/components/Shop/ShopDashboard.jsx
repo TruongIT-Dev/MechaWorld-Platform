@@ -1,6 +1,7 @@
 import { Column, Pie } from '@antv/g2plot';
 import { each, groupBy } from '@antv/util';
 import { useEffect, useRef } from 'react';
+import { Button, Card, Col, Row, Statistic } from 'antd';
 
 const data = 
 [
@@ -33,6 +34,9 @@ export default function ShopDashboard() {
     const columnRef = useRef(null);
     
     useEffect(() => {
+      if (!data) {
+        return null; // Hoặc loading indicator, hoặc placeholder
+    }
         let pie, column;
         const pieData = ((originData) => {
           const groupData = groupBy(originData, "type");
@@ -134,10 +138,62 @@ export default function ShopDashboard() {
 
 
   return (
-    <div>
-            <div ref={container1Ref} className='max-h-80'></div>
-            <div ref={container2Ref} className='max-h-80'></div>
+    <div className="flex container mx-auto p-4 gap-4">
+      {/* Cột bên trái (3 bảng) */}
+      <div className="w-1/2 flex flex-col gap-4">
+        {/* Bảng hiển thị số dư */}
+        <Card className="p-4 shadow-md">
+        <p className="text-2xl font-semibold">THỐNG KÊ</p>
+          <Row gutter={16}>
+            <Col span={12}>
+              <Statistic title="Số dư tài khoản (VND)" value={112893000} precision={2} />
+            </Col>
+            <Col span={12}>
+             <br/>
+             <br/>
+              <Button type="primary">Nạp tiền</Button>
+            </Col>
+          </Row>
+        </Card>
+
+        {/* Bảng hiển thị Tổng doanh thu tháng + sản phẩm đã bán */}
+        <Card className="p-4 shadow-md">
+          <Row gutter={16}>
+            <Col span={12}>
+              <Statistic title="Tổng doanh thu tháng (VND)" value={5000000} precision={2} />
+            </Col>
+            <Col span={12}>
+              <Statistic title="Sản phẩm đã bán" value={150} />
+            </Col>
+          </Row>
+        </Card>
+
+        {/* Bảng tổng số sản phẩm / sản phẩm đã bán / sản phẩm đã đấu giá */}
+        <Card className="p-4 shadow-md">
+          <Row gutter={16}>
+            <Col span={8}>
+              <Statistic title="Tổng sản phẩm" value={500} />
+            </Col>
+            <Col span={8}>
+              <Statistic title="Đã bán" value={150} />
+            </Col>
+            <Col span={8}>
+              <Statistic title="Đấu giá thành công" value={50} />
+            </Col>
+          </Row>
+        </Card>
+      </div>
+
+      {/* Cột bên phải (2 biểu đồ) */}
+      <div className="w-1/2 flex flex-col gap-4">
+        <Card className="p-4 shadow-md">
+          <div ref={container1Ref } className="h-60 w-full"></div>
+        </Card>
+        <Card className="p-4 shadow-md">
+          <div ref={container2Ref } className="h-60 w-full"></div>
+        </Card>
+      </div>
     </div>
-  )
+  );
 }
 

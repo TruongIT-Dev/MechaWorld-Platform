@@ -3,7 +3,8 @@ import {  HeartOutlined,
   UserSwitchOutlined,
   ShoppingOutlined,
   UserOutlined,
-  SettingOutlined,} from '@ant-design/icons';
+  SettingOutlined,
+  ShoppingCartOutlined,} from '@ant-design/icons';
 import {  Menu,Layout } from 'antd';
 import { Outlet, Link } from 'react-router-dom';
 
@@ -60,7 +61,7 @@ export default function Profile() {
       <br />
       <Layout className=" flex">
         <Sider
-        className="bg-gray-100 items-center w-64 ml-5" 
+        className="bg-gray-100 items-center w-64 ml-5 mt-20"
         >
         <Menu
         className='h-full w-64'
@@ -71,7 +72,7 @@ export default function Profile() {
         </Sider>
        
 
-        <Layout className="flex-1 px-10 py-4">
+        <Layout className="flex-1 px-10 py-4 ml-6 mt-16">
           <Content className="bg-white rounded-lg shadow-md p-16 h-full">
             <Outlet/>
           </Content>

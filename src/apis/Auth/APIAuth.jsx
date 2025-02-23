@@ -21,3 +21,14 @@ export const loginEmail = (email, password) => {
         withCredentials: true,
       });
 }
+export const signupEmail = (email, password) => {
+  return axios.post('/users', { 
+      email: email, 
+      password: password 
+  }, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+      withCredentials: true,
+    });
+}

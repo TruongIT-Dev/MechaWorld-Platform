@@ -1,7 +1,13 @@
 import { Table, Row, Space, Input, Button, Modal, Form, Select } from "antd";
 import  { useState } from 'react';
 
-
+const seriesGundam =[];
+const grade = [
+  {
+    name: "SD",
+    display_name: "Super deformed"
+  },
+]
 const { Option } = Select;
 const columns = [
   {

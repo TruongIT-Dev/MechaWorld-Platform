@@ -1,4 +1,5 @@
 import axios from 'axios';
+import Cookies from 'js-cookie';
 
 const baseURL = 'http://localhost:8080/v1/';
 // const baseURL = '/v1';
@@ -8,7 +9,9 @@ const baseURL = 'http://localhost:8080/v1/';
 const instance = axios.create({
 
     baseURL: baseURL,
-
+    headers: {
+        'Content-Type': 'application/json',
+    },
     // `timeout` để chỉ định số mili - giây trước khi request hết giờ.
     // Nếu thời gian request lâu hơn `timeout` thì request sẽ được ngưng giữa chừng.
     timeout: 1000,
@@ -19,12 +22,18 @@ const instance = axios.create({
 });
 
 // Lưu Token tại LocalStorage. Dự kiến sẽ đổi qua Cookie sau
-instance.defaults.headers.common = { 'Authorization': `Bearer ${localStorage.getItem('access_token')}` }
+// Đã đổi qua cookie
+instance.defaults.headers.common = { 'Authorization': `Bearer ${Cookies.get('access_token')}` }
 
 // Thêm một bộ đón chặn request
 axios.interceptors.request.use(function (config) {
     // Làm gì đó trước khi request dược gửi đi
-    return config;
+    if (config.url?.startsWith('/cart')) {
+        const access_token = Cookies.get('access_token');
+        config.headers.Authorization = `Bearer ${access_token}`
+      }
+      return config
+    
 }, function (error) {
     // Làm gì đó với lỗi request
     return Promise.reject(error);

@@ -1,0 +1,9 @@
+.card-profile {
+    width: 800px;
+  }
+    
+  .ant-form-item-label > label {
+    position: relative; 
+    top: 10px; /* Hạ label xuống 2px */
+  }
+  
