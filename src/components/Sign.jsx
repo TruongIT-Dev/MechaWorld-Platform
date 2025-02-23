@@ -26,7 +26,7 @@ export default function Sign() {
     
   // });
   async function handleCredentialResponse(response) {
-    // console.log(response);
+    console.log(response);
     loginGoogle(response.credential).then(response => {
       // console.log(response.data);
       dispatch(login(response.data));
@@ -36,7 +36,7 @@ export default function Sign() {
         setShowAlert(false); 
         console.log("Login thành công");
         navigate("/");
-    }, 1500);
+    }, 100);
     }).catch(error => {
       console.error(error);
   });

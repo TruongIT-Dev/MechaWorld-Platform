@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Form, Input, Upload, Button, message, Card, Modal, Checkbox } from 'antd';
 import { UploadOutlined } from '@ant-design/icons';
 import { useSelector,useDispatch } from 'react-redux';
-import { uploadAvatar, verifyOtp,verifyPhone } from '../../apis/User/APIUserProfile';
+import { updateUserData, uploadAvatar, verifyOtp,verifyPhone } from '../../apis/User/APIUserProfile';
 import { Cropper } from 'react-cropper';
 import "cropperjs/dist/cropper.css";
 import "../../assets/css/userProfile.css"
@@ -17,7 +17,7 @@ const ProfilePage = () => {
     const [otpVisible, setOtpVisible] = useState(false);
     const [otp, setOtp] = useState("");
     const cropperRef = useRef(null);
-
+    const [phoneNumber, setPhoneNumber] = useState(user?.phone_number);
     useEffect(() => {
         if (user) {
             try {
@@ -36,10 +36,21 @@ const ProfilePage = () => {
             }
         }
     }, [user, form]);
-    const onChange = (e) => {
-      console.log(`checked = ${e.target.checked}`);
+    // const onChange = (e) => {
+    //   console.log(`checked = ${e.target.checked}`);
+    // };
+    const handlePhoneChange = (e) => {
+      const newPhone = e.target.value;
+      setPhoneNumber(newPhone);
+    
+      dispatch(updateUserProfile({ ...user, phone_number: newPhone }));
     };
-
+    // const handleData = (e) => {
+    //   const newPhone = e.target.value;
+    //   setPhoneNumber(newPhone);
+      
+    //   dispatch(updateUserProfile({ ...user, phone_number: newPhone }));
+    // };
     const handleUpload = ({ file }) => {
         const reader = new FileReader();
         reader.onload = (e) => {
@@ -51,7 +62,7 @@ const ProfilePage = () => {
               setAvatar(e.target.result);
             } else {
               setAvatar(e.target.result);
-              await uploadAvatar(user.id, file); // Gửi ngay nếu không cần crop
+              await uploadAvatar(user.id, file); 
             }
           };
         };
@@ -88,7 +99,10 @@ const ProfilePage = () => {
           message.error("Không thể gửi OTP! Vui lòng thử lại.");
         }
       };
-    
+      const handleOtp = (e) => {
+        setOtp(e.target.value);
+        console.log(e.target.value);
+      }
       // Xác thực OTP
       const handleVerifyOtp = async () => {
         try {
@@ -107,6 +121,7 @@ const ProfilePage = () => {
         console.log('Success:', values);
         const updatedUser = { ...user, ...values, avatar };
         // localStorage.setItem('user', JSON.stringify(updatedUser));
+        updateUserData(user.id, values.full_name);
         dispatch(updateUserProfile(updatedUser));
         message.success('Cập nhật thông tin thành công!');
     };
@@ -144,15 +159,16 @@ const ProfilePage = () => {
                   labelCol={{ span: 24 }} // Giữ label trên input
                   wrapperCol={{ span: 24 }}
                   onFinish={onFinish}
-                  >
+                >
                   <Form.Item label="Tên người dùng" className="mb-3 ">
-                    <Input value={user?.full_name} readOnly className="h-10" />
+                    <Input value={user?.full_name} className="h-10" />
                   </Form.Item>
                   <Form.Item label="Email" className="mb-3 ">
-                    <Input value={user?.email} readOnly className="h-10" />
+                    <Input value={user?.email} readOnly className="h-10" disabled/>
                   </Form.Item>
-                  <Form.Item label="Vai trò" className="mb-3">
-                    <Input value={user?.role} readOnly className="h-10 w-fit" />
+                  <Form.Item  className="mb-3">
+                    {/* <Input value={user?.role} readOnly className="h-10 w-fit" /> */}
+                    Vai trò : {user?.role} 
                     {/* {user?.role} */}
                   </Form.Item>
                   <Form.Item>
@@ -172,11 +188,12 @@ const ProfilePage = () => {
             <Card className="mt-6">
               <div className="flex items-center space-x-4">
                 <Input
-                  value={user?.phone_number || "0961841902"}
-                  placeholder="Số điện thoại chưa đăng ký"
+                  value={phoneNumber}
+                  onChange={handlePhoneChange} 
+                  placeholder="Nhập số điện thoại"
                 />
                 {/* <Input placeholder="Nhập số điện thoại" />               */}
-                  <Button
+                <Button
                   type="primary"
                   onClick={handleSendOtp}
                   className="bg-[#0056b3] hover:bg-[#4a90e2] text-white px-4 py-2 rounded"
@@ -190,7 +207,7 @@ const ProfilePage = () => {
                     placeholder="Nhập OTP"
                     length={6}
                     value={otp}
-                    onChange={(e) => setOtp(e.target.value)}
+                    onChange={handleOtp}
                   />
                   <Button
                     type="primary"
@@ -199,7 +216,6 @@ const ProfilePage = () => {
                   >
                     Xác thực
                   </Button>
-                  
                 </div>
               )}
             </Card>

@@ -28,6 +28,9 @@ export const getUserAddresses = (id) => {
 export const postUserAddresses = (id, addressData) => {
     return axios.post(`/users/${id}/addresses`, addressData)
 }
+export const updateUserData = (id, userData) => {
+    return axios.put (`/users/${id}`, userData)
+}
 export const uploadAvatar = (id, file) => {
     const formData = new FormData();
     formData.append("avatar", file); // Đính kèm file vào FormData
