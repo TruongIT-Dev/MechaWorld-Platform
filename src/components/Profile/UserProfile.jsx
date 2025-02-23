@@ -172,10 +172,11 @@ const ProfilePage = () => {
             <Card className="mt-6">
               <div className="flex items-center space-x-4">
                 <Input
-                  value={user?.phone_number || ""}
+                  value={user?.phone_number || "0961841902"}
                   placeholder="Số điện thoại chưa đăng ký"
                 />
-                <Input placeholder="Nhập số điện thoại" />                <Button
+                {/* <Input placeholder="Nhập số điện thoại" />               */}
+                  <Button
                   type="primary"
                   onClick={handleSendOtp}
                   className="bg-[#0056b3] hover:bg-[#4a90e2] text-white px-4 py-2 rounded"

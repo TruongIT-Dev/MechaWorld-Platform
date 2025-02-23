@@ -13,12 +13,12 @@ const conditionOptions = [
 ];
 
 const ProductCondition = ({
-  // selectedCondition,
-  // setSelectedCondition,
-  // checkedConditions,
-  // setCheckedConditions,
-  // conditionDescription,
-  // setConditionDescription,
+  selectedCondition,
+  setSelectedCondition,
+  checkedConditions,
+  setCheckedConditions,
+  conditionDescription,
+  setConditionDescription,
 }) => {
   
   const handleCheckboxChange = (checkedValues) => {

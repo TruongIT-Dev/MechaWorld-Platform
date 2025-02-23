@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import {  Form, Input, Button } from "antd";
+import {  Form, Input, Button, message } from "antd";
 import {  useEffect, useState } from "react";
 import { useDispatch, } from "react-redux";
 import { login } from "../features/auth/authSlice";
@@ -30,6 +30,7 @@ export default function Sign() {
     loginGoogle(response.credential).then(response => {
       // console.log(response.data);
       dispatch(login(response.data));
+      message.success('Đăng nhập thành công! Trở về trang chủ.', 2);
       setShowAlert(true);
       setTimeout(() => {
         setShowAlert(false); 
