@@ -193,7 +193,7 @@ export default function Sign() {
 
                   <Form.Item
                     name="password"
-                    label="password"
+                    label="Password"
                     rules={[
                       { required: true, message: "Vui lòng nhập password!" },
                     ]}
@@ -205,7 +205,7 @@ export default function Sign() {
                 >
                   Password
                 </label> */}
-                    <Input.Password className="input" id="pass" />
+                    <Input className="input w-full" id="pass" type="password"/>
                   </Form.Item>
                   <Form.Item className="group">
                     <Button

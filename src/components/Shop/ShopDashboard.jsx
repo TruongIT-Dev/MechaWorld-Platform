@@ -91,9 +91,9 @@ export default function ShopDashboard() {
     });
 
     pie.render();
-    console.log('render pie');
+    // console.log('render pie');
     column.render();
-    console.log('render column');
+    // console.log('render column');
     pieRef.current = pie; 
     columnRef.current = column; 
     // change state when mouse on pie
@@ -123,7 +123,7 @@ export default function ShopDashboard() {
       pie.chart.changeData(pieData);
       column.chart.changeData(data);
     });
-    console.log('checking if this show');
+    // console.log('checking if this show');
     
 
   return () => {

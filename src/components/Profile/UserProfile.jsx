@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Form, Input, Upload, Button, message, Card, Modal } from 'antd';
+import { Form, Input, Upload, Button, message, Card, Modal, Checkbox } from 'antd';
 import { UploadOutlined } from '@ant-design/icons';
 import { useSelector,useDispatch } from 'react-redux';
 import { uploadAvatar, verifyOtp,verifyPhone } from '../../apis/User/APIUserProfile';
@@ -36,7 +36,9 @@ const ProfilePage = () => {
             }
         }
     }, [user, form]);
-
+    const onChange = (e) => {
+      console.log(`checked = ${e.target.checked}`);
+    };
 
     const handleUpload = ({ file }) => {
         const reader = new FileReader();
@@ -112,7 +114,7 @@ const ProfilePage = () => {
 
     return (
       <div>
-        <button onClick={console.log(user)}>Show Data</button>
+        {/* <button onClick={console.log(user)}>Show Data</button> */}
         <div className="flex justify-center mt-10">
           <Card className="p-6 shadow-lg card-profile ">
             <div className="flex items-center space-x-6">
@@ -171,10 +173,9 @@ const ProfilePage = () => {
               <div className="flex items-center space-x-4">
                 <Input
                   value={user?.phone_number || ""}
-                  readOnly
                   placeholder="Số điện thoại chưa đăng ký"
                 />
-                <Button
+                <Input placeholder="Nhập số điện thoại" />                <Button
                   type="primary"
                   onClick={handleSendOtp}
                   className="bg-[#0056b3] hover:bg-[#4a90e2] text-white px-4 py-2 rounded"
@@ -197,6 +198,7 @@ const ProfilePage = () => {
                   >
                     Xác thực
                   </Button>
+                  
                 </div>
               )}
             </Card>

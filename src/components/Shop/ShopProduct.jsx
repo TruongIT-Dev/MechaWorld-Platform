@@ -1,138 +1,152 @@
-import { Table, Row, Space, Input, Button, Modal, Form, Select } from "antd";
-import  { useState } from 'react';
+import {
+  Table,
+  Row,
+  Space,
+  Input,
+  Button,
+  Modal,
+  Form,
+  Steps,
+} from "antd";
+import { useState } from "react";
+import ProductGeneral from "./ProductGeneral";
+import ProductInfoDetail from "./ProductInfoDetail";
+import ProductCondition from "./ProductCondition";
 
-const seriesGundam =[];
-const grade = [
-  {
-    name: "SD",
-    display_name: "Super deformed"
-  },
-]
-const { Option } = Select;
-const columns = [
-  {
-    title: "Mã sản phẩm",
-    dataIndex: "code",
-    width: 40,
-  },
-  {
-    title: "Tên sản phẩm",
-    dataIndex: "name",
-    width: 100,
-  },
-  {
-    title: "Hãng sản xuất",
-    dataIndex: "manufacturer",
-    width: 50,
-  },
-  {
-    title: "Giá bán",
-    dataIndex: "price",
-    width: 50,
-  },
-  {
-    title: "Action",
-    dataIndex: "action",
-    width: 50,
-    render: () => <Button>Chỉnh sửa</Button>,
-  }
-];
-const dataSource = Array.from({
-  length: 100,
-}).map((_, i) => ({
-  key: i,
-  code: `CGS-${i+1}`,
-  name: `BANDAI MG 1/100 Gundam 00V 00 Qant[T] Full Saver Painted Plastic Model Kit ${i}`,
-  price: 320000,
-  manufacturer: `Bandai`,
-}));
+const { Step } = Steps;
 
 function ShopProduct() {
-    const [modal2Open, setModal2Open] = useState(false);
-    const [form] = Form.useForm();
-    const handleOk = () => {
-        form.validateFields() 
-      .then((values) => {
-        console.log("Data from form:", values); 
+  const [modalOpen, setModalOpen] = useState(false);
+  const [currentStep, setCurrentStep] = useState(0);
+  const [form] = Form.useForm();
+  const [editorContent, setEditorContent] = useState("");
+  const [selectedCondition, setSelectedCondition] = useState("new");
+  const [checkedConditions, setCheckedConditions] = useState([]);
+  const [conditionDescription, setConditionDescription] = useState("");
 
-        form.resetFields(); 
-        setModal2Open(false); 
-      })
-      .catch((errorInfo) => {
-        console.log('Validate Failed:', errorInfo); 
-      });
+  const steps = [
+    { title: "Thông tin Sản phẩm", content: <ProductGeneral form={form} /> },
+    {
+      title: "Thông tin chi tiết sản phẩm",
+      content: (
+        <ProductInfoDetail
+          form={form}
+          editorContent={editorContent}
+          setEditorContent={setEditorContent}
+        />
+      ),
+    },
+    {
+      title: "Tình trạng sản phẩm",
+      content: (
+        <ProductCondition
+          selectedCondition={selectedCondition}
+          setSelectedCondition={setSelectedCondition}
+          checkedConditions={checkedConditions}
+          setCheckedConditions={setCheckedConditions} 
+          conditionDescription={conditionDescription}
+          setConditionDescription={setConditionDescription}
+        />
+      ),
+    },
+  ];
+
+  const handleOk = () => {
+    form.validateFields().then((values) => {
+      const productData = {
+        ...values,
+        description: editorContent,
+        condition: selectedCondition,
+        condition_description:
+          selectedCondition === "new"
+            ? "Hộp mới nguyên Seal, chưa bị trầy xước"
+            : [...checkedConditions, conditionDescription]
+                .filter(Boolean)
+                .join(" / "),
       };
-      const handleCancel = () => {
-        setModal2Open(false);
-        form.resetFields(); 
-      };
+      console.log("Data gửi API:", productData);
+
+      form.resetFields();
+      setEditorContent("");
+      setCheckedConditions([]); 
+      setConditionDescription("");
+      setSelectedCondition("new");
+      setCurrentStep(0);
+      setModalOpen(false);
+    });
+  };
+
+  const next = () => setCurrentStep(currentStep + 1);
+  const prev = () => setCurrentStep(currentStep - 1);
+
   return (
     <div>
-      {/*Content */}
       <div className="container-content">
         <Row>
           <Space style={{ marginBottom: 16 }}>
             <Input.Search placeholder="Tìm kiếm sản phẩm" />
-            <Button className="text-gray-950" type="primary">
-              Chọn tất cả
-            </Button>
-            <Button
-              className="text-gray-950"
-              type="primary"
-              onClick={() => setModal2Open(true)}
-            >
+            <Button type="primary">Chọn tất cả</Button>
+            <Button type="primary" onClick={() => setModalOpen(true)}>
               Thêm mới
             </Button>
+
             <Modal
-              title="Thêm Sản Phẩm mới"
+              title="Thêm Sản Phẩm Mới"
               centered
-              open={modal2Open}
-              onOk={handleOk} // Gọi handleOk khi nhấn OK
-              onCancel={handleCancel} // Gọi handleCancel khi nhấn Cancel
+              open={modalOpen}
+              onCancel={() => {
+                form.resetFields();
+                setModalOpen(false);
+              }}
+              footer={null}
+              width={800}
             >
-              <Form form={form} layout="vertical">
-                <Form.Item name="name" label="Tên sản phẩm" rules={[{ required: true, message: 'Vui lòng nhập tên sản phẩm!' }]}>
-                  <Input />
-                </Form.Item>
-                <Form.Item name="manufacturer" label="Hãng sản xuất" rules={[{ required: true, message: 'Vui lòng nhập hãng sản xuất!' }]}>
-                  <Input />
-                </Form.Item>
-                <Form.Item name="type" label="Dòng sản xuất" rules={[{ required: true, message: 'Vui lòng chọn dòng sản xuất!' }]}>
-                  <Select className="w-full" placeholder="Chọn dòng sản xuất" allowClear>
-                    <Option value="High Grade">High Grade</Option>
-                    <Option value="Master Grade">Master Grade</Option>
-                    <Option value="Real Grade">Real Grade</Option>
-                    <Option value="Perfect Grade">Perfect Grade</Option>
-                  </Select>
-                </Form.Item>
-                <Form.Item name="decription" label="Chi tiết">
-                  <Input.TextArea />
-                </Form.Item>
-                <Form.Item name="price" label="Giá bán" rules={[{ required: true, message: 'Vui lòng nhập giá bán!' }]}>
-                  <Input type="number" min={0} />
-                </Form.Item>
-                {/* ... các trường khác */}
-              </Form>
+              <div className="max-w-full mx-auto bg-white p-6">
+                <Steps progressDot current={currentStep} className="mb-6">
+                  {steps.map((step, index) => (
+                    <Step key={index} title={step.title} />
+                  ))}
+                </Steps>
+
+                <Form form={form} layout="vertical">
+                  {steps[currentStep].content}
+                </Form>
+
+                <div className="flex justify-between mt-6">
+                  {currentStep > 0 && <Button onClick={prev}>Quay lại</Button>}
+                  {currentStep < steps.length - 1 ? (
+                    <Button onClick={next}>Tiếp tục</Button>
+                  ) : (
+                    <Button type="primary" onClick={handleOk}>
+                      Hoàn tất
+                    </Button>
+                  )}
+                </div>
+              </div>
             </Modal>
-            {/* <Button type="danger">Xóa đã chọn</Button> */}
           </Space>
         </Row>
+
         <Row>
           <Table
-            className={{}}
-            columns={columns}
-            dataSource={dataSource}
-            pagination={{
-              defaultPageSize: 20,
-            }}
-            scroll={{
-              y: 55 * 5,
-            }}
+            columns={[
+              { title: "Mã sản phẩm", dataIndex: "code", width: 40 },
+              { title: "Tên sản phẩm", dataIndex: "name", width: 100 },
+              { title: "Hãng sản xuất", dataIndex: "manufacturer", width: 50 },
+              { title: "Giá bán", dataIndex: "price", width: 50 },
+              {
+                title: "Action",
+                dataIndex: "action",
+                render: () => <Button>Chỉnh sửa</Button>,
+              },
+            ]}
+            dataSource={[]}
+            pagination={{ defaultPageSize: 20 }}
           />
         </Row>
       </div>
-
-      <br />
+      <div>
+      </div>
     </div>
   );
 }
