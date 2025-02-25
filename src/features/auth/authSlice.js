@@ -1,6 +1,5 @@
 import { createAppSlice } from "../../app/createAppSlice";
 import {}from "@reduxjs/toolkit"
-import Cookies from "js-cookie";
 
 
 
@@ -26,8 +25,6 @@ export const authSlice = createAppSlice({
             state.user = null;
             state.access_token = null;
             state.access_token_expires_at = null;
-            Cookies.remove('user');
-            Cookies.remove('access_token');
         },
         // signup: (state, action) => {
             

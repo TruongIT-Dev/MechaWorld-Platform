@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
 import { FaWallet } from "react-icons/fa6";
 import { FaUser, FaSignOutAlt, FaRobot, FaClipboardList } from "react-icons/fa";
-import { useSelector, useDispatch } from "react-redux";
+import { useDispatch } from "react-redux";
 import { NavLink, useNavigate } from "react-router-dom";
 import PropTypes from 'prop-types';
 // import { UserOutlined } from "@ant-design/icons";
-
+import Cookies from "js-cookie";
 import { logout } from "../features/auth/authSlice";
 
 import Notification from "./Notification";
@@ -15,7 +15,6 @@ const UserNavbar = ({user}) => {
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     // const isRole = useSelector(state => state.auth.user.role)
     // const [userData, setUserData] = useState(null);
-    const { isLoggedIn } = useSelector(state => state.auth);
     let timeoutId = null;
 
     const navigate = useNavigate();
@@ -34,10 +33,8 @@ const UserNavbar = ({user}) => {
     //     }
     // }, []);
     useEffect(() => {
-        if (!isLoggedIn) {
-            navigate('/');
-        }
-    }, [isLoggedIn, navigate]);
+
+    }, []);
 
     const handleMouseEnter = () => {
         clearTimeout(timeoutId); // Hủy delay nếu có
@@ -52,10 +49,13 @@ const UserNavbar = ({user}) => {
 
     const handleLogout = () => {
         dispatch(logout());
+        Cookies.remove("access_token"); 
+        Cookies.remove("user"); 
     
         setTimeout(() => {
-            navigate('/');
-        }, 100);  
+            // navigate('/');
+            window.location.href = "/";
+        }, 50);
     };
 
     return (

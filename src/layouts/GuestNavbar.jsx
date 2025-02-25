@@ -3,33 +3,30 @@ import { useEffect, useState } from "react";
 import Cookies from "js-cookie";
 import UserProfile from "./UserNavbar";
 import { verifyToken } from "../apis/Auth/APIAuth";
+import { useSelector } from "react-redux";
 
 const GuestNavbar = () => {
     const [user, setUser] = useState(null);
+    const isLoggedIn = useSelector(state => state.auth.isLoggedIn); 
 
     useEffect(() => {
-        // const storedUser = localStorage.getItem('user');
-        // const userData = Cookies.get('user');
-        const Access_token = Cookies.get('access_token');
+        const Access_token = Cookies.get("access_token");
+
         if (Access_token) {
-            try {
-                verifyToken(Access_token).then(response => {
-                    console.log(response);
+            verifyToken(Access_token)
+                .then(response => {
                     setUser(response.data);
                 })
-            } catch (error) {
-                console.error("Lỗi từ API:", error);
-            }
+                .catch(error => {
+                    console.error("Lỗi từ API:", error);
+                    setUser(null); // Nếu token hết hạn, reset user
+                    Cookies.remove("access_token");
+                    Cookies.remove("user");
+                });
+        } else {
+            setUser(null);
         }
-        // if (userData) {
-        //     try {
-        //         setUser(JSON.parse(userData));
-        //     } catch (error) {
-        //         console.error("Lỗi từ localStorage:", error);
-        //         // localStorage.removeItem('user');
-        //     }
-        // }
-    }, []);
+    }, [isLoggedIn]);
 
     return (
         <div className="space-x-3 flex items-center relative">

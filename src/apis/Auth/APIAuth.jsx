@@ -33,7 +33,7 @@ export const signupEmail = (email, password) => {
     });
 }
 export const verifyToken = (access_token) => {
-  return axios.post('tokens/veriify', {
+  return axios.post('tokens/verify', {
     access_token: access_token
   })
 }

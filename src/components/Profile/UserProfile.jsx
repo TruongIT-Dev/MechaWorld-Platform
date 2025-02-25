@@ -8,6 +8,7 @@ import { Cropper } from 'react-cropper';
 import "cropperjs/dist/cropper.css";
 import "../../assets/css/userProfile.css"
 import { updateUserProfile } from '../../features/auth/authSlice';
+import { verifyToken } from '../../apis/Auth/APIAuth';
 const ProfilePage = () => {
     const [form] = Form.useForm();
     const dispatch = useDispatch();
@@ -22,22 +23,23 @@ const ProfilePage = () => {
     const cropperRef = useRef(null);
     const [phoneNumber, setPhoneNumber] = useState(user?.phone_number);
     useEffect(() => {
-      const userData = Cookies.get("user");
-      const savedAvatar = localStorage.getItem("user_avatar");
-    
-      if (userData && !user) {
+      // const userData = Cookies.get("user");
+      const Access_token = Cookies.get('access_token');
+      if (Access_token) {
         try {
-          const parsedUser = JSON.parse(userData);
-          setUser(parsedUser);
+            verifyToken(Access_token).then(response => {
+                console.log(response.data);
+                setUser(response.data);
+            })
         } catch (error) {
-          console.error("Lỗi từ cookie:", error);
+            console.error("Lỗi từ API:", error);
         }
-      }
-    
+    }             
+      const savedAvatar = localStorage.getItem("user_avatar");
       if (savedAvatar) {
         setAvatar(savedAvatar);
       }
-    }, [user]);
+    }, []);
     
     // const onChange = (e) => {
     //   console.log(`checked = ${e.target.checked}`);
@@ -164,6 +166,7 @@ const ProfilePage = () => {
               <div className="flex-1">
                 <Form
                   layout="vertical"
+                  form={form}
                   className=""
                   labelCol={{ span: 24 }} // Giữ label trên input
                   wrapperCol={{ span: 24 }}
