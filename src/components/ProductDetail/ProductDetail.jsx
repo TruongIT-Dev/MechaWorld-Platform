@@ -47,18 +47,14 @@ const GundamProductPage = () => {
     const [shopId, setShopId] = useState([]);
     const [selectedImage, setSelectedImage] = useState(imageGundam[0]);
 
-    // Fetch Data Deatail Gundam by Slug
+    // ************ Fetch Data Deatail Gundam by Slug ******************
     useEffect(() => {
         const fetchDetailGundamBySlug = async (slug) => {
             try {
                 const detailGundam = await GetGundamDetailBySlug(slug);
-
                 setDetailGundam(detailGundam?.data || []);
                 setShopId(detailGundam?.data?.owner_id || []);
-
                 setImageGundam(detailGundam?.data?.image_urls || []);
-
-
             } catch (error) {
                 console.log("Fail to fetch detail gundam: No data detected!");
             }
@@ -66,16 +62,24 @@ const GundamProductPage = () => {
 
         fetchDetailGundamBySlug(slug);
     }, [slug])
+    // *****************************************************************
 
-    console.log("selectedImage", selectedImage);
 
+    // ************** Hàm Format Tiền Việt *****************
+    const formatCurrencyVND = (price) => {
+    if (!price) return "0 vnd";
+    return price.toLocaleString("vi-VN") + " vnd";
+};
+    // *****************************************************
 
-    // Lưu Mảng Ảnh gundam
+    // *************** Lưu Mảng Ảnh gundam *****************
     useEffect(() => {
         if (imageGundam.length > 0) {
-            setSelectedImage(imageGundam[0]); // Chọn ảnh đầu tiên làm ảnh chính
+            setSelectedImage(imageGundam[0]);
         }
     }, [imageGundam]);
+    // *****************************************************
+
 
 
     return (
@@ -133,29 +137,23 @@ const GundamProductPage = () => {
                         </Col>
 
                         {/* Add to card */}
-                        <Col span={7}>
-                            <div className="p-4 border rounded-lg shadow-sm space-y-4">
+                        <Col span={7} className='space-y-2'>
+                            <div className="p-4 border rounded-lg shadow-md space-y-3">
                                 {/* Product Name */}
                                 <h1 className="text-xl font-bold text-gray-900">{detailGundam.name}</h1>
 
                                 {/* Price */}
                                 <div className="flex items-center space-x-4">
                                     <p className="text-2xl font-semibold text-red-500">
-                                        Giá: {detailGundam.price} VND
+                                        Giá: {formatCurrencyVND(detailGundam?.price)}
                                     </p>
                                 </div>
 
                                 {/* Gundam Info */}
                                 <div className="space-y-2 text-sm">
-                                    <p><span className="font-semibold text-black">Scale:</span> {detailGundam.scale}</p>
+                                    <p><span className="font-semibold text-black">Tỉ lệ:</span> {detailGundam.scale}</p>
                                     <p><span className="font-semibold text-black">Tình trạng:</span> {detailGundam.condition}</p>
                                     <p><span className="font-semibold text-black">Nhà sản xuất:</span> {detailGundam.manufacturer} </p>
-                                    <p className={`font-semibold ${detailGundam.status === "available" ? 'text-green-400' : 'text-red-400'}`}><span className="font-semibold text-black">Status:</span> {detailGundam.status}</p>
-                                </div>
-
-                                {/* Seller Info with Hover Dropdown */}
-                                <div className="space-y-2">
-                                    <ShopInfo shop={shopId} />
                                 </div>
 
                                 {/* Buy Button */}
@@ -163,15 +161,19 @@ const GundamProductPage = () => {
                                     type="button"
                                     className="w-full py-3 bg-red-500 text-white rounded-lg font-semibold hover:bg-red-600 transition"
                                 >
-                                    Thêm vào giỏ hàng
-                                </button>
-
-                                <button
-                                    type="button"
-                                    className="w-full py-3 bg-gray-300 text-black rounded-lg font-semibold hover:bg-gray-500 transition"
-                                >
                                     Mua ngay
                                 </button>
+                                <button
+                                    type="button"
+                                    className="w-full py-3 bg-gray-300 text-black rounded-lg font-semibold hover:bg-gray-400 transition"
+                                >
+                                    Thêm vào giỏ hàng
+                                </button>
+                            </div>
+
+                            {/* Seller Info */}
+                            <div className="shop-info">
+                                <ShopInfo shop={shopId} />
                             </div>
                         </Col>
                     </Row>

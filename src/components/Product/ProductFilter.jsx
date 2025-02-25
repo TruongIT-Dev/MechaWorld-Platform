@@ -12,7 +12,7 @@ const FilterSidebar = ({ onFilterChange }) => {
     const [condition, setCondition] = useState("all");
     const [priceRange, setPriceRange] = useState([100, 1000]);
 
-    // Fetch ALL Grades
+    // ************ Fetch ALL Grades *******************
     useEffect(() => {
         const fetchGrades = async () => {
             try {
@@ -26,11 +26,14 @@ const FilterSidebar = ({ onFilterChange }) => {
 
         fetchGrades();
     }, []);
+    // **************************************************
 
-    // Khi giá trị thay đổi, gọi hàm `onFilterChange`
+
+    // **************** Khi giá trị thay đổi, gọi hàm `onFilterChange` ***********************
     useEffect(() => {
         onFilterChange({ selectedGrade, condition, priceRange });
     }, [selectedGrade, condition, priceRange]);
+    // ***************************************************************************************
 
     return (
         <div className="bg-white shadow-lg rounded-lg p-4">
@@ -51,6 +54,7 @@ const FilterSidebar = ({ onFilterChange }) => {
                         value={selectedGrade}
                         className="flex flex-col space-y-2 font-normal"
                     >
+                        <Radio className="radio-all">Tất cả</Radio>
                         {grades.map((grade, index) => (
                             <Radio key={index} value={grade?.slug}>
                                 {grade?.display_name}
