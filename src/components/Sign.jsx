@@ -14,7 +14,7 @@ export default function Sign() {
   // eslint-disable-next-line no-unused-vars
   const navigate = useNavigate();
   const [form] = Form.useForm();
-  const Client_ID = import.meta.env.VITE_CLIENT_ID_SECRET;
+  // const CLIENT_ID = import.meta.env.VITE_CLIENT_ID_SECRET;
   const [activeTab, setActiveTab] = useState(1); 
   const [loading, setLoading] = useState(false);
   const dispatch = useDispatch();
@@ -34,19 +34,11 @@ export default function Sign() {
     // );
     // google.accounts.id.prompt(); 
 
-    /* Load Google API */
-    window.google.accounts.id.initialize({
-      client_id: import.meta.env.VITE_CLIENT_ID_SECRET,
-      callback: handleCredentialResponse
-    });
-    const hash = window.location.hash;
-        const params = new URLSearchParams(hash.substring(1));
-        const accessToken = params.get("access_token");
-
-        if (accessToken) {
-            console.log("✅ Access Token:", accessToken);
-            alert("Login thành công! Token: " + accessToken);
-        }
+    // /* Load Google API */
+    // window.google.accounts.id.initialize({
+    //   client_id: import.meta.env.VITE_CLIENT_ID_SECRET,
+    //   callback: handleCredentialResponse
+    // });
   },[]);
   async function handleCredentialResponse(response) {
     console.log(response);
@@ -74,42 +66,6 @@ export default function Sign() {
     return emailRegex.test(email);
   };
   
-//   const handleLogin = () => {
-//     const googleAuthUrl = `https://accounts.google.com/o/oauth2/v2/auth?` +
-//     `client_id=${Client_ID}` +
-//     `&redirect_uri=${encodeURIComponent("http://localhost:5173")}` + 
-//     `&response_type=token` +  
-//     `&scope=openid email profile`;
-//     // Mở popup đăng nhập Google
-//     console.log("Google Auth URL:", googleAuthUrl);
-//     const newWindow = window.open(
-//         googleAuthUrl,
-//         "_blank",
-//         "width=500,height=600"
-//     );
-    
-
-//     // Lắng nghe khi popup đóng lại
-//     const interval = setInterval(() => {
-//         if (newWindow?.closed) {
-//             clearInterval(interval);
-//             console.log("Google login popup closed");
-//         }
-//     }, 1000);
-// };
-
-  // const onFinishSignUp = async (values) => {
-  //   console.log("Success: ", values);
-  //   try {
-  //     signupEmail(values.email, values.password).then(response => {
-  //       console.log(response.data);
-  //     }).catch(error => {
-  //       console.error('Lỗi API: ',error);
-  //     });
-  //   } catch (error) {
-  //     console.error("Lỗi đăng kí tài khoản:", error);
-  //   }
-  // };
   const onFinishSignUp = async (values) => {
     const { email, password, confirmPassword } = values;
 
@@ -170,6 +126,7 @@ export default function Sign() {
       loginEmail(values.email, values.password).then(response => {
         console.log(response.data);
         // Cookie setup
+        Cookies.set('access_token',response.data.access_token);
         Cookies.set('user', JSON.stringify(response.data.user), {
           expires: new Date(response.data.access_token_expires_at), 
           path: "/",
@@ -326,21 +283,7 @@ export default function Sign() {
                     Đăng nhập bằng Google
                   </button>
                 </div> */}
-                {/* <button
-            onClick={handleLogin}
-            style={{
-                width: "200px",
-                height: "100px",
-                backgroundColor: "#4285F4",
-                color: "white",
-                fontSize: "16px",
-                borderRadius: "5px",
-                border: "none",
-                cursor: "pointer",
-            }}
-        >
-            Đăng nhập bằng Google
-        </button> */}
+
                 <div className="flex items-center justify-between mt-4">
                   <span className="w-1/5 border-b dark:border-gray-600 md:w-1/4"></span>
                   <button

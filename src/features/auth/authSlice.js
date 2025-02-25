@@ -27,6 +27,7 @@ export const authSlice = createAppSlice({
             state.access_token = null;
             state.access_token_expires_at = null;
             Cookies.remove('user');
+            Cookies.remove('access_token');
         },
         // signup: (state, action) => {
             

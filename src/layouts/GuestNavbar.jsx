@@ -2,21 +2,33 @@ import { NavLink } from "react-router-dom";
 import { useEffect, useState } from "react";
 import Cookies from "js-cookie";
 import UserProfile from "./UserNavbar";
+import { verifyToken } from "../apis/Auth/APIAuth";
 
 const GuestNavbar = () => {
     const [user, setUser] = useState(null);
 
     useEffect(() => {
         // const storedUser = localStorage.getItem('user');
-        const userData = Cookies.get('user');
-        if (userData) {
+        // const userData = Cookies.get('user');
+        const Access_token = Cookies.get('access_token');
+        if (Access_token) {
             try {
-                setUser(JSON.parse(userData));
+                verifyToken(Access_token).then(response => {
+                    console.log(response);
+                    setUser(response.data);
+                })
             } catch (error) {
-                console.error("Lỗi từ localStorage:", error);
-                // localStorage.removeItem('user');
+                console.error("Lỗi từ API:", error);
             }
         }
+        // if (userData) {
+        //     try {
+        //         setUser(JSON.parse(userData));
+        //     } catch (error) {
+        //         console.error("Lỗi từ localStorage:", error);
+        //         // localStorage.removeItem('user');
+        //     }
+        // }
     }, []);
 
     return (
