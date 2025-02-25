@@ -28,12 +28,12 @@ instance.defaults.headers.common = { 'Authorization': `Bearer ${Cookies.get('acc
 // Thêm một bộ đón chặn request
 axios.interceptors.request.use(function (config) {
     // Làm gì đó trước khi request dược gửi đi
-    if (config.url?.startsWith('/cart')) {
-        const access_token = Cookies.get('access_token');
-        config.headers.Authorization = `Bearer ${access_token}`
-      }
-      return config
-    
+    const accessToken = Cookies.get('access_token');
+    if (accessToken) {
+        config.headers.Authorization = `Bearer ${accessToken}`;
+    }
+    return config;
+
 }, function (error) {
     // Làm gì đó với lỗi request
     return Promise.reject(error);
