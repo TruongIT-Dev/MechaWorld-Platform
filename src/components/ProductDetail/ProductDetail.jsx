@@ -2,7 +2,7 @@ import { Col, Row } from 'antd';
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 
-import { GetGundamDetailBySlug } from '../../apis/ProductDetail/APIProductDetail';
+import { AddToCart, GetGundamDetailBySlug } from '../../apis/ProductDetail/APIProductDetail';
 
 import ReviewProduct from './Review';
 import SuggestProduct from './SuggestProduct';
@@ -43,34 +43,74 @@ const GundamProductPage = () => {
     const { slug } = useParams();
 
     const [detailGundam, setDetailGundam] = useState([]);
+    const [idGundam, setIdGundam] = useState(null);
+    const [loadingAdded, setLoadingAdded] = useState(false);
+    const [added, setAdded] = useState(false);
     const [imageGundam, setImageGundam] = useState([]);
     const [shopId, setShopId] = useState([]);
     const [selectedImage, setSelectedImage] = useState(imageGundam[0]);
 
+
+
     // ************ Fetch Data Deatail Gundam by Slug ******************
     useEffect(() => {
-        const fetchDetailGundamBySlug = async (slug) => {
-            try {
-                const detailGundam = await GetGundamDetailBySlug(slug);
-                setDetailGundam(detailGundam?.data || []);
-                setShopId(detailGundam?.data?.owner_id || []);
-                setImageGundam(detailGundam?.data?.image_urls || []);
-            } catch (error) {
-                console.log("Fail to fetch detail gundam: No data detected!");
+    const fetchDetailGundamBySlug = async (slug) => {
+        try {
+            const detailGundam = await GetGundamDetailBySlug(slug);
+
+            // Mapping condition từ tiếng Anh sang tiếng Việt
+            const conditionMapping = {
+                "new": "Hàng mới 100%",
+                "open box": "Đã mở hộp",
+                "second hand": "Đã qua sử dụng"
+            };
+
+            // Chuyển đổi condition nếu có
+            let gundamData = detailGundam?.data || {};
+            if (gundamData.condition) {
+                gundamData.condition = conditionMapping[gundamData.condition] || gundamData.condition;
             }
+
+            // Cập nhật state
+            setIdGundam(gundamData.id || null);
+            setDetailGundam(gundamData);
+            setShopId(gundamData.owner_id || []);
+            setImageGundam(gundamData.image_urls || []);
+        } catch (error) {
+            console.log("Fail to fetch detail gundam: No data detected!");
+        }
+    };
+
+    fetchDetailGundamBySlug(slug);
+}, [slug]);
+
+
+
+
+    // Handle Add To Cart
+    const handleAddToCart = async (id) => {
+        try {
+            const response = await AddToCart(id);
+            setAdded(true);
+            console.log("Added to cart:", response.data);
+            alert("Sản phẩm đã được thêm vào giỏ hàng!");
+        } catch (error) {
+            console.error("Error:", error);
+            alert("Lỗi khi thêm vào giỏ hàng!");
+        } finally {
+            setLoadingAdded(false);
         }
 
-        fetchDetailGundamBySlug(slug);
-    }, [slug])
-    // *****************************************************************
+    }
 
 
     // ************** Hàm Format Tiền Việt *****************
     const formatCurrencyVND = (price) => {
-    if (!price) return "0 vnd";
-    return price.toLocaleString("vi-VN") + " vnd";
-};
-    // *****************************************************
+        if (!price) return "0 vnd";
+        return price.toLocaleString("vi-VN") + " vnd";
+    };
+
+
 
     // *************** Lưu Mảng Ảnh gundam *****************
     useEffect(() => {
@@ -78,7 +118,6 @@ const GundamProductPage = () => {
             setSelectedImage(imageGundam[0]);
         }
     }, [imageGundam]);
-    // *****************************************************
 
 
 
@@ -152,7 +191,7 @@ const GundamProductPage = () => {
                                 {/* Gundam Info */}
                                 <div className="space-y-2 text-sm">
                                     <p><span className="font-semibold text-black">Tỉ lệ:</span> {detailGundam.scale}</p>
-                                    <p><span className="font-semibold text-black">Tình trạng:</span> {detailGundam.condition}</p>
+                                    <p className='text-green-600 font-semibold'><span className="font-semibold text-black">Tình trạng:</span> {detailGundam.condition}</p>
                                     <p><span className="font-semibold text-black">Nhà sản xuất:</span> {detailGundam.manufacturer} </p>
                                 </div>
 
@@ -165,15 +204,20 @@ const GundamProductPage = () => {
                                 </button>
                                 <button
                                     type="button"
-                                    className="w-full py-3 bg-gray-300 text-black rounded-lg font-semibold hover:bg-gray-400 transition"
+                                    onClick={() => handleAddToCart(idGundam)}
+                                    disabled={loadingAdded || added}
+                                    className={`w-full py-3 rounded-lg font-semibold transition ${added
+                                        ? "bg-green-500 text-white cursor-not-allowed"
+                                        : "bg-gray-300 text-black hover:bg-gray-400"
+                                        }`}
                                 >
-                                    Thêm vào giỏ hàng
+                                    {added ? "✅ Đã thêm vào giỏ hàng" : loadingAdded ? "Đang thêm..." : "Thêm vào giỏ hàng"}
                                 </button>
                             </div>
 
                             {/* Seller Info */}
                             <div className="shop-info">
-                                <ShopInfo shop={shopId} />
+                                <ShopInfo shopID={shopId} />
                             </div>
                         </Col>
                     </Row>

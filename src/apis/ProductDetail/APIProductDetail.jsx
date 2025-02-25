@@ -7,3 +7,9 @@ export const GetGundamDetailBySlug = (slug) => {
 export const GetShopInfoById = (id) => {
     return axios.get(`/sellers/${id}`)
 }
+
+export const AddToCart = (id) => {
+    return axios.post(`/cart/items`, {
+        gundam_id: id,
+    })
+}

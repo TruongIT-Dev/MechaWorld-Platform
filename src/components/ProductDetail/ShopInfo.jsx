@@ -4,25 +4,26 @@ import { FaStore } from "react-icons/fa";
 import { useEffect, useState } from "react";
 import { GetShopInfoById } from "../../apis/ProductDetail/APIProductDetail";
 
-const ShopInfo = ({ shop }) => {
+const ShopInfo = ({ shopID }) => {
     const [shopInfo, setShopInfo] = useState(null);
 
 
-    // ************* Fetch Thông Tin Shop ******************
+    // Fetch Shop Info
     useEffect(() => {
-        const fetchShopInfo = async (id) => {
+        if (!shopID) return;
+
+        const fetchShopInfo = async () => {
             try {
-                const ShopInfo = await GetShopInfoById(id);
-                setShopInfo(ShopInfo?.data || null);
+                // console.log("Fetching shop info for ID:", shopID);
+                const response = await GetShopInfoById(shopID);
+                setShopInfo(response?.data || null);
             } catch (error) {
-                console.log(error);
-
+                console.error("Lỗi khi fetch shop info:", error);
             }
-        }
-        fetchShopInfo(shop);
-    }, [shop])
-    // ******************************************************
+        };
 
+        fetchShopInfo();
+    }, [shopID]);
 
     return (
         <div className="border rounded-lg p-4 bg-white shadow-md transition-shadow flex items-center">
