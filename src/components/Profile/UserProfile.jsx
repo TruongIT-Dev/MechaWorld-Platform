@@ -3,6 +3,7 @@ import { Form, Input, Upload, Button, message, Card, Modal, Checkbox } from 'ant
 import { UploadOutlined } from '@ant-design/icons';
 import { useSelector,useDispatch } from 'react-redux';
 import { updateUserData, uploadAvatar, verifyOtp,verifyPhone } from '../../apis/User/APIUserProfile';
+import Cookies from 'js-cookie';
 import { Cropper } from 'react-cropper';
 import "cropperjs/dist/cropper.css";
 import "../../assets/css/userProfile.css"
@@ -10,7 +11,9 @@ import { updateUserProfile } from '../../features/auth/authSlice';
 const ProfilePage = () => {
     const [form] = Form.useForm();
     const dispatch = useDispatch();
-    const user = useSelector((state) => state.auth.user); // Lấy user từ Redux
+    // const user = useSelector((state) => state.auth.user); // Lấy user từ Redux
+    // const [user, setUser] = useState(null);
+    const [user, setUser] = useState(useSelector((state) => state.auth.user));
     const [avatar, setAvatar] = useState(user?.avatar_url);
     const [cropVisible, setCropVisible] = useState(false);
     const [cropper, setCropper] = useState(null);
@@ -19,23 +22,23 @@ const ProfilePage = () => {
     const cropperRef = useRef(null);
     const [phoneNumber, setPhoneNumber] = useState(user?.phone_number);
     useEffect(() => {
-        if (user) {
-            try {
-                // setImageUrl(user.picture)
-                // form.setFieldsValue({
-                //     avatar: user.picture,
-                //     name: user.name,
-                //     email: user.email,
-                //     phone: user.phone || '', 
-                //     address: user.address || '',
-                //     role: user.role || 'Member',
-                // });
-            } catch (error) {
-                console.error("Lỗi parse user từ localStorage:", error);
-                localStorage.removeItem('user');
-            }
+      const userData = Cookies.get("user");
+      const savedAvatar = localStorage.getItem("user_avatar");
+    
+      if (userData && !user) {
+        try {
+          const parsedUser = JSON.parse(userData);
+          setUser(parsedUser);
+        } catch (error) {
+          console.error("Lỗi từ cookie:", error);
         }
-    }, [user, form]);
+      }
+    
+      if (savedAvatar) {
+        setAvatar(savedAvatar);
+      }
+    }, [user]);
+    
     // const onChange = (e) => {
     //   console.log(`checked = ${e.target.checked}`);
     // };
@@ -76,7 +79,13 @@ const ProfilePage = () => {
           croppedCanvas.toBlob(async (blob) => {
             const file = new File([blob], "avatar.jpg", { type: "image/jpeg" });
             await uploadAvatar(user.id, file);
-            setAvatar(URL.createObjectURL(blob)); 
+      
+            const newAvatarURL = URL.createObjectURL(blob);
+            setAvatar(newAvatarURL);
+      
+            // 👉 Lưu avatar vào localStorage
+            localStorage.setItem("user_avatar", newAvatarURL);
+            
             setCropVisible(false);
           }, "image/jpeg");
         }

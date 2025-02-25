@@ -14,7 +14,7 @@ const instance = axios.create({
     },
     // `timeout` để chỉ định số mili - giây trước khi request hết giờ.
     // Nếu thời gian request lâu hơn `timeout` thì request sẽ được ngưng giữa chừng.
-    timeout: 1000,
+    timeout: 10000,
 
     // `withCredentials` biểu thị liệu việc tạo ra request cross-site `Access-Control`
     // thì có cần sử dụng credential hay không.

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FaWallet } from "react-icons/fa6";
 import { FaUser, FaSignOutAlt, FaRobot, FaClipboardList } from "react-icons/fa";
 import { useSelector, useDispatch } from "react-redux";
@@ -33,7 +33,11 @@ const UserNavbar = ({user}) => {
     //         }
     //     }
     // }, []);
-
+    useEffect(() => {
+        if (!isLoggedIn) {
+            navigate('/');
+        }
+    }, [isLoggedIn, navigate]);
 
     const handleMouseEnter = () => {
         clearTimeout(timeoutId); // Hủy delay nếu có
@@ -48,8 +52,10 @@ const UserNavbar = ({user}) => {
 
     const handleLogout = () => {
         dispatch(logout());
-        console.log(isLoggedIn);
-        navigate('/');
+    
+        setTimeout(() => {
+            navigate('/');
+        }, 100);  
     };
 
     return (

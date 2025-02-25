@@ -32,3 +32,8 @@ export const signupEmail = (email, password) => {
       withCredentials: true,
     });
 }
+export const verifyToken = (access_token) => {
+  return axios.post('tokens/veriify', {
+    access_token: access_token
+  })
+}

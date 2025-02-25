@@ -14,7 +14,7 @@ const GuestNavbar = () => {
                 setUser(JSON.parse(userData));
             } catch (error) {
                 console.error("Lỗi từ localStorage:", error);
-                localStorage.removeItem('user');
+                // localStorage.removeItem('user');
             }
         }
     }, []);
