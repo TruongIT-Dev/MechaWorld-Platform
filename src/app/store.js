@@ -1,10 +1,11 @@
 import { combineSlices, configureStore } from "@reduxjs/toolkit"
 import { setupListeners } from "@reduxjs/toolkit/query"
 import { authSlice } from "../features/auth/authSlice"
+import { userSlice } from "../features/user/userSlice"
 
 // `combineSlices` automatically combines the reducers using
 // their `reducerPath`s, therefore we no longer need to call `combineReducers`.
-const rootReducer = combineSlices(authSlice)
+const rootReducer = combineSlices(authSlice, userSlice)
 
 // The store setup is wrapped in `makeStore` to allow reuse
 // when setting up tests that need the same store config

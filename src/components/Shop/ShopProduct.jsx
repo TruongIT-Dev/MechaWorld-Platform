@@ -85,8 +85,8 @@ function ShopProduct() {
         <Row>
           <Space style={{ marginBottom: 16 }}>
             <Input.Search placeholder="Tìm kiếm sản phẩm" />
-            <Button type="primary">Chọn tất cả</Button>
-            <Button type="primary" onClick={() => setModalOpen(true)}>
+            <Button type="primary" className="bg-[#0056b3] hover:bg-[#4a90e2] text-white">Chọn tất cả</Button>
+            <Button type="primary" onClick={() => setModalOpen(true)} className="bg-[#0056b3] hover:bg-[#4a90e2] text-white">
               Thêm mới
             </Button>
 
@@ -117,7 +117,7 @@ function ShopProduct() {
                   {currentStep < steps.length - 1 ? (
                     <Button onClick={next}>Tiếp tục</Button>
                   ) : (
-                    <Button type="primary" onClick={handleOk}>
+                    <Button type="primary" onClick={handleOk} className="bg-[#0056b3] hover:bg-[#4a90e2] text-white">
                       Hoàn tất
                     </Button>
                   )}

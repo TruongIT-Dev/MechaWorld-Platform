@@ -7,44 +7,21 @@ import "../assets/css/sign.css";
 import Cookies from "js-cookie";
 import { loginEmail,loginGoogle,signupEmail } from "../apis/Auth/APIAuth";
 import { Alert } from 'antd';
-import { GoogleLogin  } from "@react-oauth/google";
+import { GoogleLogin } from "@react-oauth/google";
 import bgImage from "../assets/image/gundam_bg.jpg";
 
 export default function Sign() {
   // eslint-disable-next-line no-unused-vars
   const navigate = useNavigate();
   const [form] = Form.useForm();
+  // const CLIENT_ID = import.meta.env.VITE_CLIENT_ID_SECRET;
   const [activeTab, setActiveTab] = useState(1); 
   const [loading, setLoading] = useState(false);
   const dispatch = useDispatch();
   const [showAlert, setShowAlert] = useState(false);
   const [alertMess, setAlertMess] = useState('');
   const [alertType, setAlertType] = useState("error");
-  // const loginGooglebtn = useGoogleOAuth({
-  //   onSuccess: TokenResponse => console.log(TokenResponse),
-  //   flow: 'implicit',
-    
-  // });
-  async function handleCredentialResponse(response) {
-    // console.log(response);
-    loginGoogle(response.credential).then(response => {
-      // console.log(response.data);
-      dispatch(login(response.data));
-      message.success('Đăng nhập thành công! Trở về trang chủ.', 2);
-      setShowAlert(true);
-      setTimeout(() => {
-        setShowAlert(false); 
-        console.log("Login thành công");
-        navigate("/");
-    }, 1500);
-    }).catch(error => {
-      console.error(error);
-  });
-  }
-  const validateEmail = (email) => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
-  };
+
   useEffect(() => {
     // /* global google */
     // google.accounts.id.initialize({
@@ -56,20 +33,39 @@ export default function Sign() {
     //   { theme: "outline", size: "large" }  
     // );
     // google.accounts.id.prompt(); 
-  },[]);
 
-  // const onFinishSignUp = async (values) => {
-  //   console.log("Success: ", values);
-  //   try {
-  //     signupEmail(values.email, values.password).then(response => {
-  //       console.log(response.data);
-  //     }).catch(error => {
-  //       console.error('Lỗi API: ',error);
-  //     });
-  //   } catch (error) {
-  //     console.error("Lỗi đăng kí tài khoản:", error);
-  //   }
-  // };
+    // /* Load Google API */
+    // window.google.accounts.id.initialize({
+    //   client_id: import.meta.env.VITE_CLIENT_ID_SECRET,
+    //   callback: handleCredentialResponse
+    // });
+  },[]);
+  async function handleCredentialResponse(response) {
+    console.log(response);
+    loginGoogle(response.credential).then(response => {
+      console.log(response.data);
+      dispatch(login(response.data));
+      Cookies.set('access_token',response.data.access_token);
+      Cookies.set('user', JSON.stringify(response.data.user), {
+        expires: new Date(response.data.access_token_expires_at), 
+        path: "/",
+      });
+      message.success('Đăng nhập thành công! Trở về trang chủ.', 2);
+      setShowAlert(true);
+      setTimeout(() => {
+        setShowAlert(false); 
+        console.log("Login thành công");
+        navigate("/");
+    }, 100);
+    }).catch(error => {
+      console.error(error);
+  });
+  }
+  const validateEmail = (email) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+  
   const onFinishSignUp = async (values) => {
     const { email, password, confirmPassword } = values;
 
@@ -129,13 +125,13 @@ export default function Sign() {
     try {
       loginEmail(values.email, values.password).then(response => {
         console.log(response.data);
-        // const expiryDate = new Date();
-        // expiryDate.setDate(expiryDate.getDate() + 1); 
         // Cookie setup
+        Cookies.set('access_token',response.data.access_token);
         Cookies.set('user', JSON.stringify(response.data.user), {
           expires: new Date(response.data.access_token_expires_at), 
           path: "/",
         });
+
         dispatch(login(response.data));
         setShowAlert(true);
       setTimeout(() => {
@@ -164,7 +160,6 @@ export default function Sign() {
       >
         <div className="relative py-3 sm:max-w-xl ml-40 mt-4">
           <div className="relative px-4 py-10 bg-white mx-8 md:mx-0 shadow rounded-3xl sm:p-10 ">
-            
             {activeTab === 1 && (
               <div className="max-w-md section">
                 <h2 className="flex items-center space-x-5 justify-center font-bold">
@@ -206,7 +201,7 @@ export default function Sign() {
                 >
                   Password
                 </label> */}
-                    <Input className="input w-full" id="pass" type="password"/>
+                    <Input className="input w-full" id="pass" type="password" />
                   </Form.Item>
                   <Form.Item className="group">
                     <Button
@@ -242,6 +237,53 @@ export default function Sign() {
                     }}
                   />
                 </div>
+                {/* <div className="mt-2 text-center">
+                  <button
+                    className="w-full bg-white border border-gray-300 text-black py-2 rounded-md flex items-center justify-center hover:bg-gray-100 transition duration-300"
+                    onClick={handleLogin}
+                  >
+                    <svg
+                      width="20px"
+                      height="20px"
+                      viewBox="0 0 32 32"
+                      data-name="Layer 1"
+                      className="mr-2"
+                      id="Layer_1"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M23.75,16A7.7446,7.7446,0,0,1,8.7177,18.6259L4.2849,22.1721A13.244,13.244,0,0,0,29.25,16"
+                        fill="#00ac47"
+                      />
+                      <path
+                        d="M23.75,16a7.7387,7.7387,0,0,1-3.2516,6.2987l4.3824,3.5059A13.2042,13.2042,0,0,0,29.25,16"
+                        fill="#4285f4"
+                      />
+                      <path
+                        d="M8.25,16a7.698,7.698,0,0,1,.4677-2.6259L4.2849,9.8279a13.177,13.177,0,0,0,0,12.3442l4.4328-3.5462A7.698,7.698,0,0,1,8.25,16Z"
+                        fill="#ffba00"
+                      />
+                      <polygon
+                        fill="#2ab2db"
+                        points="8.718 13.374 8.718 13.374 8.718 13.374 8.718 13.374"
+                      />
+                      <path
+                        d="M16,8.25a7.699,7.699,0,0,1,4.558,1.4958l4.06-3.7893A13.2152,13.2152,0,0,0,4.2849,9.8279l4.4328,3.5462A7.756,7.756,0,0,1,16,8.25Z"
+                        fill="#ea4435"
+                      />
+                      <polygon
+                        fill="#2ab2db"
+                        points="8.718 18.626 8.718 18.626 8.718 18.626 8.718 18.626"
+                      />
+                      <path
+                        d="M29.25,15v1L27,19.5H16.5V14H28.25A1,1,0,0,1,29.25,15Z"
+                        fill="#4285f4"
+                      />
+                    </svg>
+                    Đăng nhập bằng Google
+                  </button>
+                </div> */}
+
                 <div className="flex items-center justify-between mt-4">
                   <span className="w-1/5 border-b dark:border-gray-600 md:w-1/4"></span>
                   <button
@@ -254,7 +296,7 @@ export default function Sign() {
                 </div>
               </div>
             )}
-          {activeTab === 2 && (
+            {activeTab === 2 && (
               <div className="w-96 ">
                 <h2 className="flex items-center space-x-5 justify-center font-bold">
                   Đăng kí
@@ -329,17 +371,17 @@ export default function Sign() {
           </div>
         </div>
       </div>
-      {showAlert && ( 
-            <Alert
-                className="fixed bottom-4 right-4 z-50 px-4 py-3 rounded"
-                message={alertMess}
-                type={alertType}
-                // type="error"
-                showIcon
-                closable 
-                afterClose={() => setShowAlert(false)}
-            />
-        )}
+      {showAlert && (
+        <Alert
+          className="fixed bottom-4 right-4 z-50 px-4 py-3 rounded"
+          message={alertMess}
+          type={alertType}
+          // type="error"
+          showIcon
+          closable
+          afterClose={() => setShowAlert(false)}
+        />
+      )}
     </>
   );
 }

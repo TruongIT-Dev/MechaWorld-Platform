@@ -1,11 +1,11 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FaWallet } from "react-icons/fa6";
 import { FaUser, FaSignOutAlt, FaRobot, FaClipboardList } from "react-icons/fa";
-import { useSelector, useDispatch } from "react-redux";
+import { useDispatch } from "react-redux";
 import { NavLink, useNavigate } from "react-router-dom";
 import PropTypes from 'prop-types';
 // import { UserOutlined } from "@ant-design/icons";
-
+import Cookies from "js-cookie";
 import { logout } from "../features/auth/authSlice";
 
 import Notification from "./Notification";
@@ -13,8 +13,8 @@ import CartContext from "./CartContext";
 
 const UserNavbar = ({user}) => {
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+    // const isRole = useSelector(state => state.auth.user.role)
     // const [userData, setUserData] = useState(null);
-    const { isLoggedIn } = useSelector(state => state.auth);
     let timeoutId = null;
 
     const navigate = useNavigate();
@@ -32,7 +32,9 @@ const UserNavbar = ({user}) => {
     //         }
     //     }
     // }, []);
+    useEffect(() => {
 
+    }, []);
 
     const handleMouseEnter = () => {
         clearTimeout(timeoutId); // Hủy delay nếu có
@@ -47,8 +49,13 @@ const UserNavbar = ({user}) => {
 
     const handleLogout = () => {
         dispatch(logout());
-        console.log(isLoggedIn);
-        navigate('/');
+        Cookies.remove("access_token"); 
+        Cookies.remove("user"); 
+    
+        setTimeout(() => {
+            // navigate('/');
+            window.location.href = "/";
+        }, 50);
     };
 
     return (
@@ -92,7 +99,8 @@ const UserNavbar = ({user}) => {
                             >
                                 <FaUser className="mr-2 text-blue-500" /> Tài khoản của tôi
                             </NavLink>
-                            {/* Link cho tài khoản Shop */}
+                        {/* {isRole == "seller" && ( */}
+                            {/* Link cho tài khoản Shop */} {}
                             <NavLink
                                 to="/shop/dashboard"
                                 className="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100 hover:text-gray-900"
@@ -100,6 +108,7 @@ const UserNavbar = ({user}) => {
                                 <FaRobot className="mr-2 text-green-500" /> Quản lý kho
                             </NavLink>
                             {/* Link cho tài khoản Shop */}
+                        {/* )} */}
                             <NavLink
                                 to="#"
                                 className="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100 hover:text-gray-900"
