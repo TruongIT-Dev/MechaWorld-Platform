@@ -13,6 +13,7 @@ import CartContext from "./CartContext";
 
 const UserNavbar = ({user}) => {
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+    // const isRole = useSelector(state => state.auth.user.role)
     // const [userData, setUserData] = useState(null);
     const { isLoggedIn } = useSelector(state => state.auth);
     let timeoutId = null;
@@ -92,7 +93,8 @@ const UserNavbar = ({user}) => {
                             >
                                 <FaUser className="mr-2 text-blue-500" /> Tài khoản của tôi
                             </NavLink>
-                            {/* Link cho tài khoản Shop */}
+                        {/* {isRole == "seller" && ( */}
+                            {/* Link cho tài khoản Shop */} {}
                             <NavLink
                                 to="/shop/dashboard"
                                 className="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100 hover:text-gray-900"
@@ -100,6 +102,7 @@ const UserNavbar = ({user}) => {
                                 <FaRobot className="mr-2 text-green-500" /> Quản lý kho
                             </NavLink>
                             {/* Link cho tài khoản Shop */}
+                        {/* )} */}
                             <NavLink
                                 to="#"
                                 className="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100 hover:text-gray-900"

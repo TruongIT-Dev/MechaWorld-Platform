@@ -23,13 +23,16 @@ export default function Sign() {
   // const loginGooglebtn = useGoogleOAuth({
   //   onSuccess: TokenResponse => console.log(TokenResponse),
   //   flow: 'implicit',
-    
   // });
   async function handleCredentialResponse(response) {
     console.log(response);
     loginGoogle(response.credential).then(response => {
-      // console.log(response.data);
+      console.log(response.data);
       dispatch(login(response.data));
+      Cookies.set('user', JSON.stringify(response.data.user), {
+        expires: new Date(response.data.access_token_expires_at), 
+        path: "/",
+      });
       message.success('Đăng nhập thành công! Trở về trang chủ.', 2);
       setShowAlert(true);
       setTimeout(() => {
@@ -136,6 +139,7 @@ export default function Sign() {
           expires: new Date(response.data.access_token_expires_at), 
           path: "/",
         });
+
         dispatch(login(response.data));
         setShowAlert(true);
       setTimeout(() => {

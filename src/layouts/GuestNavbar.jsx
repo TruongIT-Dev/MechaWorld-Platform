@@ -1,17 +1,17 @@
 import { NavLink } from "react-router-dom";
 import { useEffect, useState } from "react";
-
+import Cookies from "js-cookie";
 import UserProfile from "./UserNavbar";
 
 const GuestNavbar = () => {
     const [user, setUser] = useState(null);
 
-
     useEffect(() => {
-        const storedUser = localStorage.getItem('user');
-        if (storedUser) {
+        // const storedUser = localStorage.getItem('user');
+        const userData = Cookies.get('user');
+        if (userData) {
             try {
-                setUser(JSON.parse(storedUser));
+                setUser(JSON.parse(userData));
             } catch (error) {
                 console.error("Lỗi từ localStorage:", error);
                 localStorage.removeItem('user');
@@ -25,7 +25,7 @@ const GuestNavbar = () => {
             {user ? (
                 <>
                     {/* User Profile */}
-                    < UserProfile />
+                    < UserProfile  user={user}/>
                 </>
             ) : (
                 <>
