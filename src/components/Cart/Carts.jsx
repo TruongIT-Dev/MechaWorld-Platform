@@ -66,7 +66,7 @@ const Carts = () => {
       .reduce((sum, item) => sum + item.total, 0);
   };
   return (
-    <div className="p-4">
+    <div className="container mx-auto mt-36 mb-14">
       <Table dataSource={data} pagination={true} rowSelection={rowSelection}>
       <Column
           title="Sản Phẩm"

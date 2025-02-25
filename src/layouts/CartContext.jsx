@@ -1,23 +1,50 @@
-import React, { useContext,useState } from "react";
+import React, { useEffect, useState } from 'react';
+import { GetCart, DeleteCart } from '../apis/Cart/APICart';
+import { NavLink } from "react-router-dom";
 import { FaCartShopping } from "react-icons/fa6";
-import { NavLink, useNavigate } from "react-router-dom";
-import Img1 from "../assets/image/gun1.jpg";
-import { Link } from 'react-router-dom';
 import { FiTrash2 } from 'react-icons/fi'
-
+import { Link } from 'react-router-dom';
 
 const CartContext = () => {
+    const [cartItems, setCartItems] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
     const [isOpen, setIsOpen] = useState(false);
 
+    useEffect(() => {
+        fetchCartItems();
+    }, []);
 
-    // Fake dữ liệu giỏ hàng (thay thế bằng dữ liệu thực từ context)
-    const cartItems = [
-              { id: 1, name: "Mens Casual Slim Fit", price: 15.99, quantity: 1,image: Img1 },
-          ];
+    const fetchCartItems = async () => {
+        try {
+            const response = await GetCart();
+            if (response.data && Array.isArray(response.data)) {
+                setCartItems(response.data);
+            } else {
+                setCartItems([]);
+            }
+            setLoading(false);
+        } catch (err) {
+            setError(err.message);
+            setLoading(false);
+            setCartItems([]); // Đặt cartItems thành mảng rỗng nếu có lỗi
+        }
+    };
 
-    const total = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    const handleRemoveItem = async (itemId) => {
+        try {
+            await DeleteCart(itemId);
+            fetchCartItems(); // Refresh the cart items after deletion
+        } catch (err) {
+            setError(err.message);
+        }
+    };
+
+    if (loading) return <div>Loading...</div>;
+    if (error) return <div>Error: {error}</div>;
 
     return (
+        
         <div>
             {/* Nút mở giỏ hàng */}
             <div className="cart-section">
@@ -25,7 +52,7 @@ const CartContext = () => {
                     className="bg-gradient-to-r from-cyan-500 to-blue-600 text-white py-1 px-4 rounded-full flex items-center gap-3"
                     onClick={() => setIsOpen(true)}
                 >   
-                    <NavLink className="group-hover:block  hover:text-black capitalize transition-all duration-200" to="/cart1">
+                    <NavLink className="group-hover:block  hover:text-black capitalize transition-all duration-200" >
                             Giỏ hàng
                     </NavLink>
                     
@@ -59,23 +86,17 @@ const CartContext = () => {
                     <ul className="flex flex-col gap-y-2 h-[520px] lg:h-[640px] overflow-y-auto
                      overflow-x-hidden border-b">
                         {cartItems.map((item) => (
-                            <li key={item.id} className="flex items-center py-4">
-                                <img
-                                    src={item.image}
-                                    alt={item.name}
-                                    className="w-12 h-12 object-cover rounded"
-                                />
-                                <div className="ml-4 flex-1">
-                                    <h3 className="text-sm font-medium">{item.name}</h3>
-                                    <div className="text-gray-500 text-sm">
-                                        {item.quantity} x ${item.price.toFixed(2)}
-                                    </div>
-                                </div>
-                                <div className="text-gray-800 font-medium">
-                                    ${(item.price * item.quantity).toFixed(2)}
-                                </div>
-                            </li>
-                        ))}
+                        <li key={item.cart_item_id}>
+                            <img src={item.gundam_image_url} alt={item.gundam_name} className="w-12 h-12 object-cover rounded"/>
+                            <div className="ml-4 flex-1">
+                                    <h3 className="text-sm font-medium">{item.gundam_name}</h3>
+                            </div>
+                            <div className="text-gray-800 font-medium">
+                                Price: ${item.gundam_price}
+                            </div>
+                            <button onClick={() => handleRemoveItem(item.cart_item_id)}>Remove</button>
+                        </li>
+                    ))}
                     </ul>
 
                     
@@ -83,7 +104,7 @@ const CartContext = () => {
                         <div className=' flex w-full justify-between items-center'>
                         {/* total */}
                             <div className='uppercase font-semibold'>
-                                <span className='mr-2'> Total: </span>${total.toFixed(2)}
+                                <span className='mr-2'> Total: </span>
                             </div>
                             <div  className='bg-red-500 cursor-pointer py4 bg-re-500 text-white w-12 h-12 flex 
                                             justify-center items-center text-xl'><FiTrash2 />

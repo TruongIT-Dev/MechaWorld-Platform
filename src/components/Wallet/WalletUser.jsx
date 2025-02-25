@@ -21,7 +21,7 @@ const WalletPage = () => {
   };
 
   return (
-    <div className="p-4">
+    <div className="container mx-auto mt-36 mb-14">
       {/* Số dư ví */}
       <Card className="mb-6">
         <Statistic
