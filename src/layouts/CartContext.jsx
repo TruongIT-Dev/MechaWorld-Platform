@@ -11,25 +11,61 @@ const CartContext = () => {
     const [error, setError] = useState(null);
     const [isOpen, setIsOpen] = useState(false);
 
-    useEffect(() => {
-        fetchCartItems();
-    }, []);
+    
 
     const fetchCartItems = async () => {
         try {
             const response = await GetCart();
-            if (response.data && Array.isArray(response.data)) {
+            console.log("API response:", response); 
+            console.log("Response Data:", response.data); // Kiểm tra xem dữ liệu đúng chưa
+    
+            if (Array.isArray(response.data)) {
                 setCartItems(response.data);
             } else {
-                setCartItems([]);
+                console.error("Unexpected data format:", response.data);
+                setCartItems([]); 
             }
+    
             setLoading(false);
         } catch (err) {
+            console.error("Error fetching cart:", err);
             setError(err.message);
             setLoading(false);
-            setCartItems([]); // Đặt cartItems thành mảng rỗng nếu có lỗi
+            setCartItems([]); 
         }
     };
+    
+
+    useEffect(() => {
+        fetchCartItems();
+    }, []);
+    
+    
+    // useEffect(() => {
+    //         const fetchCartItems = async () => {
+    //             try {
+    //         const response = await GetCart();
+    //         console.log("API response:", response.data); // Debug dữ liệu nhận được từ API
+    
+    //         if (Array.isArray(response.data)) {
+    //             setCartItems(response.data); // Gán trực tiếp nếu là mảng
+    //         } else {
+    //             console.error("Unexpected data format:", response.data);
+    //             setCartItems([]); // Nếu dữ liệu không đúng định dạng mong muốn, đặt mảng rỗng
+    //         }
+            
+    //         setLoading(false);
+    //     } catch (err) {
+    //         console.error("Error fetching cart:", err);
+    //         setError(err.message);
+    //         setLoading(false);
+    //         setCartItems([]); 
+    //     }
+    //         };
+    
+    //         fetchCartItems();
+    //     }, [filters]);
+    
 
     const handleRemoveItem = async (itemId) => {
         try {
@@ -83,21 +119,34 @@ const CartContext = () => {
                         </button>
                     </div>
 
-                    <ul className="flex flex-col gap-y-2 h-[520px] lg:h-[640px] overflow-y-auto
-                     overflow-x-hidden border-b">
+                    <ul className="flex flex-col gap-y-4 h-[520px] lg:h-[640px] overflow-y-auto overflow-x-hidden border-b px-2">
                         {cartItems.map((item) => (
-                        <li key={item.cart_item_id}>
-                            <img src={item.gundam_image_url} alt={item.gundam_name} className="w-12 h-12 object-cover rounded"/>
-                            <div className="ml-4 flex-1">
-                                    <h3 className="text-sm font-medium">{item.gundam_name}</h3>
-                            </div>
-                            <div className="text-gray-800 font-medium">
-                                Price: ${item.gundam_price}
-                            </div>
-                            <button onClick={() => handleRemoveItem(item.cart_item_id)}>Remove</button>
-                        </li>
-                    ))}
+                            <li key={item.cart_item_id} 
+                                className="flex items-center gap-4 bg-white shadow-md p-4 rounded-lg border border-gray-200 hover:shadow-lg transition">
+                                
+                                {/* Hình ảnh sản phẩm */}
+                                <img 
+                                    src={item.gundam_image_url} 
+                                    alt={item.gundam_name} 
+                                    className="w-16 h-16 object-cover rounded-lg border border-gray-300"
+                                />
+                                
+                                {/* Thông tin sản phẩm */}
+                                <div className="flex-1">
+                                    <h3 className="text-md font-semibold text-gray-800">{item.gundam_name}</h3>
+                                    <p className="text-sm text-gray-600">Price: <span className="text-red-500 font-semibold">${item.gundam_price}</span></p>
+                                </div>
+                                
+                                {/* Nút Xóa */}
+                                <button 
+                                    onClick={() => handleRemoveItem(item.cart_item_id)}
+                                    className="bg-red-500 text-white px-3 py-1 rounded-lg text-sm hover:bg-red-600 transition">
+                                    Remove
+                                </button>
+                            </li>
+                        ))}
                     </ul>
+
 
                     
                     <div className=' flex flex-col gap-y-3 py-4'>

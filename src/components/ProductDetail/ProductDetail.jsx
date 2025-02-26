@@ -1,4 +1,4 @@
-import { Col, Row , message } from 'antd';
+import { Col, Row  } from 'antd';
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 
@@ -7,7 +7,6 @@ import { AddToCart, GetGundamDetailBySlug } from '../../apis/ProductDetail/APIPr
 import ReviewProduct from './Review';
 import SuggestProduct from './SuggestProduct';
 import ShopInfo from './ShopInfo';
-import { AddToCart } from '../../apis/Cart/APICart';
 
 
 const product = {
@@ -120,24 +119,6 @@ const GundamProductPage = () => {
         }
     }, [imageGundam]);
 
-    // Xử lý thêm vào giỏ hàng
-    const handleAddToCart = async () => {
-        try {
-            const gundamId = detailGundam.id; // Lấy ID của sản phẩm
-            if (!gundamId) {
-                message.error("Không tìm thấy ID sản phẩm!"); // Sử dụng message từ antd
-                return;
-            }
-    
-            // Gọi API thêm vào giỏ hàng
-            const response = await AddToCart(gundamId);
-            message.success("Đã thêm sản phẩm vào giỏ hàng!"); // Sử dụng message từ antd
-            console.log("Response from AddToCart:", response);
-        } catch (error) {
-            console.error("Lỗi khi thêm vào giỏ hàng:", error);
-            message.error("Thêm vào giỏ hàng thất bại!"); // Sử dụng message từ antd
-        }
-    };
 
 
     return (
