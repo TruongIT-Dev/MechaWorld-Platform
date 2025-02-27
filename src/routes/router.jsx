@@ -5,13 +5,14 @@ import React from "react";
 // Layout
 export const UserLayout = React.lazy(() => import('../pages/UserLayout'));
 
+
 // Navigation Bar route
 export const HomePage = React.lazy(() => import('../pages/HomePage'));
-export const AboutPage = React.lazy(() => import("../components/About/About"));
 export const ProductPage = React.lazy(() => import('../components/Product/Product'));
 export const ExchangePage = React.lazy(() => import('../components/Exchange/Exchange'));
 
-// Detail route
+
+// Detail Page route
 export const ProductDetailPage = React.lazy(() => import('../components/ProductDetail/ProductDetail'));
 export const ExchangeDetail = React.lazy(() => import('../components/ExchangeDetail/ExchangeDetail'));
 
@@ -19,10 +20,16 @@ export const ExchangeDetail = React.lazy(() => import('../components/ExchangeDet
 // Cart route
 export const CartPage = React.lazy(() => import('../components/Cart/Cart'));
 export const CartPage1 = React.lazy(() => import('../components/Cart/Carts'));
+
+
 // Checkout route
 export const Checkout = React.lazy(() => import('../components/Checkout/checkout'));
+
+
 // wallet route
 export const WalletPage = React.lazy(() => import('../components/Wallet/WalletUser'));
+
+
 // Profile route
 export const ProfilePage = React.lazy(() => import("../components/Profile/Profiles"));
 export const UserProfile = React.lazy(() => import("../components/Profile/UserProfile"));
@@ -31,9 +38,12 @@ export const TradeHistory = React.lazy(() => import("../components/Profile/Trade
 export const Collection = React.lazy(() => import("../components/Profile/Collection"));
 export const SettingAddress = React.lazy(() => import("../components/Profile/SettingAddress"));
 export const AdvancedSetting = React.lazy(() => import("../components/Profile/AdvancedSetting"));
-export const ShopRegister = React.lazy(() => import("../components/Profile/ShopRegister"));
 
-export const SellerRegister = React.lazy(() => import("../components/Profile/Seller"));
+
+// Register Shop route
+export const ShopRegister = React.lazy(() => import("../components/RegisterShop/RegisterShop"));
+export const RegisterShopLayout = React.lazy(() => import("../components/RegisterShop/RegisterShopLayout"));
+
 // Shop route
 export const ShopDashboard = React.lazy(() => import("../components/Shop/ShopDashboard"));
 export const ShopProductManagement = React.lazy(() => import("../components/Shop/ShopProductManagement"));

@@ -1,6 +1,6 @@
-import React, { useContext,useState } from "react";
+import { useState } from "react";
 import { FaCartShopping } from "react-icons/fa6";
-import { NavLink, useNavigate } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 import Img1 from "../assets/image/gun1.jpg";
 import { Link } from 'react-router-dom';
 import { FiTrash2 } from 'react-icons/fi'
@@ -12,8 +12,8 @@ const CartContext = () => {
 
     // Fake dữ liệu giỏ hàng (thay thế bằng dữ liệu thực từ context)
     const cartItems = [
-              { id: 1, name: "Mens Casual Slim Fit", price: 15.99, quantity: 1,image: Img1 },
-          ];
+        { id: 1, name: "Mens Casual Slim Fit", price: 15.99, quantity: 1, image: Img1 },
+    ];
 
     const total = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
@@ -24,11 +24,11 @@ const CartContext = () => {
                 <button
                     className="bg-gradient-to-r from-cyan-500 to-blue-600 text-white py-1 px-4 rounded-full flex items-center gap-3"
                     onClick={() => setIsOpen(true)}
-                >   
+                >
                     <NavLink className="group-hover:block  hover:text-black capitalize transition-all duration-200" to="/cart1">
-                            Giỏ hàng
+                        Giỏ hàng
                     </NavLink>
-                    
+
                     <div className="flex relative">
                         <FaCartShopping className="text-xl text-white drop-shadow-sm cursor-pointer" />
                         <div className="bg-red-500 absolute -right-2 -bottom-2 text-[12px] w-[18px] h-[18px] text-white rounded-full flex justify-center items-center">
@@ -41,10 +41,10 @@ const CartContext = () => {
             {/* Modal giỏ hàng */}
             <div
                 className={`w-full bg-white fixed top-0 h-full shadow-2xl md:w-[35vw] xl:max-w-[30vw] transform
-                     ${ isOpen ? 'right-0':'-right-full '} 
+                     ${isOpen ? 'right-0' : '-right-full '} 
                      transition-all duration-300 z-50 px-4 lg:px-[15px]`}
             >
-                    
+
                 <div className="p-4">
                     <div className="flex justify-between items-center mb-4">
                         <h2 className="uppercase text-sm font-semibold">Shopping Bag ({cartItems.length})</h2>
@@ -78,29 +78,29 @@ const CartContext = () => {
                         ))}
                     </ul>
 
-                    
+
                     <div className=' flex flex-col gap-y-3 py-4'>
                         <div className=' flex w-full justify-between items-center'>
-                        {/* total */}
+                            {/* total */}
                             <div className='uppercase font-semibold'>
                                 <span className='mr-2'> Total: </span>${total.toFixed(2)}
                             </div>
-                            <div  className='bg-red-500 cursor-pointer py4 bg-re-500 text-white w-12 h-12 flex 
+                            <div className='bg-red-500 cursor-pointer py4 bg-re-500 text-white w-12 h-12 flex 
                                             justify-center items-center text-xl'><FiTrash2 />
                             </div>
                         </div>
 
-                        <Link 
-                            to={'/cart1'} 
+                        <Link
+                            to={'/cart1'}
                             className='bg-gray-200 flex p-4 justify-center items-center text-black w-full font-medium'>
-                                View Cart
-                        </Link>  
+                            View Cart
+                        </Link>
 
-                        <Link 
-                            to={'/checkout'} 
+                        <Link
+                            to={'/checkout'}
                             className='bg-black flex p-4 justify-center items-center text-white w-full font-medium'>
-                                check out
-                        </Link>  
+                            check out
+                        </Link>
                     </div>
 
                 </div>
