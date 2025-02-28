@@ -137,13 +137,13 @@ const CartContext = () => {
                         <Link 
                             to={'/cart'} 
                             className='bg-gray-200 flex p-4 justify-center items-center text-black w-full font-medium'>
-                                View Cart
+                                Xem Chi Tiết Giỏ Hàng
                         </Link>  
 
                         <Link 
                             to={'/checkout'} 
                             className='bg-black flex p-4 justify-center items-center text-white w-full font-medium'>
-                                check out
+                                Thanh Toán
                         </Link>  
                     </div>
 

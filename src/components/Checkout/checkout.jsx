@@ -64,7 +64,7 @@ const Checkout = () => {
   if (loading) return <div className="text-xl">Loading...</div>;
 
   return (
-    <div className="container mx-auto mt-36 mb-14 text-lg">
+    <div className="container mx-auto mt-36 mb-14 text-lg ">
       <Card className="mb-4">
         <div className="flex items-center">
           <EnvironmentOutlined className="text-2xl text-red-500 mr-2" />
