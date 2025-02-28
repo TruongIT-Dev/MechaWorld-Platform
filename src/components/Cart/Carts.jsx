@@ -89,9 +89,11 @@ const Carts = () => {
             </div>
           )}
         />
+        <Column title="Thông tin người bán" dataIndex="gundam_price" key="gundam_price" render={(price) => `${price.toLocaleString()} VNĐ`} />
+        
         <Column title="Đơn Giá" dataIndex="gundam_price" key="gundam_price" render={(price) => `${price.toLocaleString()} VNĐ`} />
-        <Column title="Số Lượng" key="quantity" render={() => <span>1</span>} />
-        <Column title="Tổng Tiền" dataIndex="gundam_price" key="gundam_price" render={(price) => `${price.toLocaleString()} VNĐ`} />
+
+        
         <Column
           title="Hành động"
           key="actions"

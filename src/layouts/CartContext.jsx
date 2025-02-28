@@ -39,33 +39,7 @@ const CartContext = () => {
     useEffect(() => {
         fetchCartItems();
     }, []);
-    
-    
-    // useEffect(() => {
-    //         const fetchCartItems = async () => {
-    //             try {
-    //         const response = await GetCart();
-    //         console.log("API response:", response.data); // Debug dữ liệu nhận được từ API
-    
-    //         if (Array.isArray(response.data)) {
-    //             setCartItems(response.data); // Gán trực tiếp nếu là mảng
-    //         } else {
-    //             console.error("Unexpected data format:", response.data);
-    //             setCartItems([]); // Nếu dữ liệu không đúng định dạng mong muốn, đặt mảng rỗng
-    //         }
-            
-    //         setLoading(false);
-    //     } catch (err) {
-    //         console.error("Error fetching cart:", err);
-    //         setError(err.message);
-    //         setLoading(false);
-    //         setCartItems([]); 
-    //     }
-    //         };
-    
-    //         fetchCartItems();
-    //     }, [filters]);
-    
+
 
     const handleRemoveItem = async (itemId) => {
         try {
@@ -161,7 +135,7 @@ const CartContext = () => {
                         </div>
 
                         <Link 
-                            to={'/cart1'} 
+                            to={'/cart'} 
                             className='bg-gray-200 flex p-4 justify-center items-center text-black w-full font-medium'>
                                 View Cart
                         </Link>  
