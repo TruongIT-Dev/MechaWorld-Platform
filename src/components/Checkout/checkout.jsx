@@ -1,10 +1,21 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Button, Radio, Divider, message,Table } from 'antd';
-import { ShoppingCartOutlined, EnvironmentOutlined,ShopOutlined } from '@ant-design/icons';
+import { Card, Button, Radio, Divider, message, Table } from 'antd';
+import { ShoppingCartOutlined, EnvironmentOutlined, ShopOutlined } from '@ant-design/icons';
 import { GetCart } from '../../apis/Cart/APICart';
 import { getUserAddresses } from '../../apis/User/APIUserProfile';
 import Cookies from 'js-cookie';
+
 const { Column } = Table;
+const groupByShop = (items) => {
+  return items.reduce((acc, item) => {
+    const shopName = item.seller_name; // hoặc item.shop_id
+    if (!acc[shopName]) {
+      acc[shopName] = [];
+    }
+    acc[shopName].push(item);
+    return acc;
+  }, {});
+};
 
 const Checkout = () => {
   const [cartItems, setCartItems] = useState([]);
@@ -16,15 +27,11 @@ const Checkout = () => {
   const userCookie = Cookies.get('user');
   const userData = JSON.parse(decodeURIComponent(userCookie));
 
-
   useEffect(() => {
     const fetchCheckoutData = async () => {
       try {
         const cartResponse = await GetCart();
-        
         const userId = userData.id; // Lấy id từ user
-        console.log(userId);// Thay thế bằng ID người dùng thực tế
-
         const addressResponse = await getUserAddresses(userId);
 
         setCartItems(cartResponse.data || []);
@@ -61,10 +68,13 @@ const Checkout = () => {
     }
   };
 
+  // Nhóm sản phẩm theo shop
+  const groupedCartItems = groupByShop(cartItems);
+
   if (loading) return <div className="text-xl">Loading...</div>;
 
   return (
-    <div className="container mx-auto mt-36 mb-14 text-lg ">
+    <div className="container mx-auto mt-36 mb-14 text-lg">
       <Card className="mb-4">
         <div className="flex items-center">
           <EnvironmentOutlined className="text-2xl text-red-500 mr-2" />
@@ -85,30 +95,33 @@ const Checkout = () => {
           <ShoppingCartOutlined className="text-2xl text-gray-500 mr-2" />
           <p className="font-semibold text-xl">Giỏ hàng</p>
         </div>
-        <div className="flex items-center mt-5">
-          <ShopOutlined  className="text-2xl text-gray-500 mr-2" />
-          <p className="font-semibold text-xl"> Tên Shop </p>
-        </div>
-        <Table dataSource={cartItems} pagination={false}  rowKey="cart_item_id">
-        <Column
-          title="Sản Phẩm"
-          key="product"
-          render={(text, record) => (
-            <div className="flex items-center">
-              <img src={record.gundam_image_url} alt={record.gundam_name} className="w-16 h-16 object-cover rounded border border-gray-300 mr-4"/>
-              <div>
-                <div className="font-semibold">{record.gundam_name}</div>
-                <div className="text-sm text-gray-500">{record.seller_name}</div>
-              </div>
-            </div>
-          )}
-        />
-        <Column title="Thông tin người bán" dataIndex="gundam_price" key="gundam_price" render={(price) => `${price.toLocaleString()} VNĐ`} />
-        
-        <Column title="Đơn Giá" dataIndex="gundam_price" key="gundam_price" render={(price) => `${price.toLocaleString()} VNĐ`} />
 
-        
-      </Table>
+        {Object.entries(groupedCartItems).map(([shopName, items]) => (
+          <div key={shopName}>
+            <div className="flex items-center mt-5 mb-5">
+              <ShopOutlined className="text-2xl text-gray-500 mr-2" />
+              <p className="font-semibold text-xl">{shopName}</p>
+            </div>
+            
+            <Table dataSource={items} pagination={false} rowKey="cart_item_id">
+              <Column
+                title="Sản Phẩm"
+                key="product"
+                render={(text, record) => (
+                  <div className="flex items-center">
+                    <img src={record.gundam_image_url} alt={record.gundam_name} className="w-16 h-16 object-cover rounded border border-gray-300 mr-4"/>
+                    <div>
+                      <div className="font-semibold">{record.gundam_name}</div>
+                      <div className="text-sm text-gray-500">{record.seller_name}</div>
+                    </div>
+                  </div>
+                )}
+              />
+              <Column title="Thông tin người bán" dataIndex="seller_name" key="seller_name" />
+              <Column title="Đơn Giá" dataIndex="gundam_price" key="gundam_price" render={(price) => `${price.toLocaleString()} VNĐ`} />
+            </Table>
+          </div>
+        ))}
       </Card>
 
       <Card className="mb-4">
@@ -131,12 +144,12 @@ const Checkout = () => {
       </Card>
       
       <Card>
-        <div className="flex justify-between text-lg">
-          <p>Tổng tiền hàng</p>
+        <div className="flex justify-end text-lg mt-5">
+          <p className='mr-10'>Tổng tiền hàng</p>
           <p>{totalPrice.toLocaleString()} VNĐ</p>
         </div>
-        <div className="flex justify-between text-lg">
-          <p>Phí vận chuyển</p>
+        <div className="flex justify-end text-lg mt-5">
+          <p className='mr-10'>Phí vận chuyển</p>
           <p>{shippingFee.toLocaleString()} VNĐ</p>
         </div>
         <Divider />
