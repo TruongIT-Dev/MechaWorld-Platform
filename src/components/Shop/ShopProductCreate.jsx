@@ -254,9 +254,9 @@ const handleFinish = (values) => {
                 style={{ width: "100%" }}
                 parser={(value) => value.replace(/[^0-9]/g, "")}
             />
-            <small>Dùng để tính chi phí vận chuyển. (3.500 vnd / 500g)</small>
-        </Form.Item>
 
+        </Form.Item>
+        <small>Dùng để tính chi phí vận chuyển. (3.500 vnd / 500g)</small>
         <Form.Item name="description" label="Mô tả sản phẩm" rules={[{ required: true }]}>
           <Input.TextArea />
         </Form.Item>
