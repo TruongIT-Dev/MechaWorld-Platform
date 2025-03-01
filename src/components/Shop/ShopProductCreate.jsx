@@ -18,6 +18,7 @@ const ShopProductCreate = ({ setIsCreating }) => {
   const [secondaryImages, setSecondaryImages] = useState([]); // Khởi tạo với mảng rỗng
   const [price, setPrice] = useState(null);
   const [accessories, setAccessories] = useState([{ name: "", quantity: 1 }]);
+  const [isUploading, setIsUploading] = useState(false);
 
 
 
@@ -126,6 +127,7 @@ const handleAddAccessory = () => {
 
 
 const handleFinish = (values) => {
+    setIsUploading(true); 
     const hideLoading = message.loading("Đang xử lý...", 0);
     const formData = new FormData();
     console.log(values);
@@ -148,7 +150,10 @@ const handleFinish = (values) => {
         console.log(file);
         formData.append("secondary_images", file.originFileObj);
     })
-    accessories.forEach((item) => {
+    const validAccessories = accessories.filter(
+        (item) => item.name.trim() !== "" && item.quantity > 0
+      );
+      validAccessories.forEach((item) => {
         const accessoryData = JSON.stringify({ name: item.name, quantity: item.quantity });
         formData.append("accessory", accessoryData);
       });
@@ -166,12 +171,16 @@ const handleFinish = (values) => {
         message.success("Sản phẩm đã được đăng ký thành công!");
         form.resetFields();
         setPrimaryImage(null);
-        setIsCreating(false);
+        setTimeout(setIsCreating(false),200);
+        // setIsCreating(false);
       }
     })
     .catch(() => {
       hideLoading();
       message.error("Lỗi khi đăng ký sản phẩm! Vui lòng thử lại.");
+    })
+    .finally(() => {
+        setIsUploading(false); // Tắt trạng thái loading
     });
   };
 //   const handlePrimaryImageUpload = ({ file }) => {
@@ -289,44 +298,6 @@ const handleFinish = (values) => {
             />
         </Form.Item>
 
-        {/* Upload hình ảnh */}
-        {/* <Form.Item label="Ảnh bìa (1 ảnh)">
-            <Upload
-                showUploadList={false}
-                customRequest={handlePrimaryImageUpload}
-                accept="image/*"
-                maxCount={1} // Chỉ cho phép chọn 1 ảnh
-            >
-                <Button icon={<UploadOutlined />}>Tải ảnh bìa lên</Button>
-            </Upload>
-
-        {primaryImage && (
-            <div className="mt-2">
-            <img src={primaryImage.url} alt="Ảnh bìa" className="w-20 h-20 border" />
-            </div>
-        )}
-        </Form.Item>
-
-        <Form.Item label="Hình ảnh phụ (Tối đa 5 ảnh)">
-          <Upload showUploadList={false} multiple customRequest={handleImageUpload} accept="image/*">
-            <Button icon={<UploadOutlined />}>Tải ảnh lên</Button>
-          </Upload>
-          <div className="flex mt-2">
-            {images.map((img, index) => (
-              <div key={index} className="relative">
-                <img src={img.url} alt="Uploaded" className="w-20 h-20 object-cover border mr-2" />
-                <Button
-                  type="text"
-                  danger
-                  onClick={() => handleRemoveImage(index)}
-                  className="absolute top-0 right-0"
-                >
-                  X
-                </Button>
-              </div>
-            ))}
-          </div>
-        </Form.Item> */}
         <Form.Item label="Tải lên hình ảnh">
             <ImageUpload 
                 // onImagesChange={(data) => form.setFieldsValue(data)}  
@@ -337,16 +308,32 @@ const handleFinish = (values) => {
         </Form.Item>
 
 
-
-
         <Form.Item>
+            <Button
+                type="primary"
+                htmlType="submit"
+                className="bg-[#0056b3] hover:bg-[#4a90e2]"
+                disabled={isUploading}
+            >
+                {isUploading ? "Đang tải dữ liệu ..." : "Đăng ký sản phẩm"}
+            </Button>
+            <Button
+                onClick={() => setIsCreating(false)}
+                className="ml-2"
+                disabled={isUploading} 
+            >
+                Hủy
+            </Button>
+        </Form.Item>
+
+        {/* <Form.Item>
           <Button type="primary" htmlType="submit" className="bg-[#0056b3] hover:bg-[#4a90e2]">
             Đăng kí sản phẩm
           </Button>
           <Button onClick={() => setIsCreating(false)} className="ml-2">
             Hủy
           </Button>
-        </Form.Item>
+        </Form.Item> */}
       </Form>
     </div>
   );
