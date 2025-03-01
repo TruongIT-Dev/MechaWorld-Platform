@@ -24,11 +24,11 @@ const ShopProductCreate = ({ setIsCreating }) => {
 
   // Danh sách phân khúc Gundam
   const scaleOptions = ["1/144", "1/100", "1/60", "1/48"];
-  const conditionOptions = {
-    new: "Hộp mới nguyên dạng, chưa bóc seal, linh kiện không bị hư hại, đủ phụ kiện đi kèm",
-    "open box": "Đã mở hộp, có thể đã thiếu phụ kiện hoặc có vết trầy xước nhẹ",
-    "second hand": "Sản phẩm đã qua sử dụng, có dấu hiệu hao mòn hoặc đã được lắp ráp",
-  };
+//   const conditionOptions = {
+//     new: "Hộp mới nguyên dạng, chưa bóc seal, linh kiện không bị hư hại, đủ phụ kiện đi kèm",
+//     "open box": "Đã mở hộp, có thể đã thiếu phụ kiện hoặc có vết trầy xước nhẹ",
+//     "second hand": "Sản phẩm đã qua sử dụng, có dấu hiệu hao mòn hoặc đã được lắp ráp",
+//   };
   useEffect(() => {
     GetGrades()
       .then((response) => {
@@ -108,17 +108,17 @@ const ShopProductCreate = ({ setIsCreating }) => {
 //         console.log(err);
 //       });
 //   };
-// 🛠 Xử lý thêm dòng nhập phụ kiện
+//  Xử lý thêm dòng nhập phụ kiện
 const handleAddAccessory = () => {
     setAccessories([...accessories, { name: "", quantity: 1 }]);
   };
   
-  // 🛠 Xóa dòng phụ kiện
+  // Xóa dòng phụ kiện
   const handleRemoveAccessory = (index) => {
     setAccessories(accessories.filter((_, i) => i !== index));
   };
   
-  // 🛠 Cập nhật giá trị nhập vào
+  //  Cập nhật giá trị nhập vào
   const handleAccessoryChange = (index, field, value) => {
     const newAccessories = [...accessories];
     newAccessories[index][field] = value;
@@ -143,7 +143,7 @@ const handleFinish = (values) => {
     
     console.log("1st img",primaryImage);
     console.log("2nd img",secondaryImages);
-    // 🖼️ Thêm ảnh chính (primary_image)
+    //  Thêm ảnh chính (primary_image)
     formData.append("primary_image", primaryImage.file);
       console.log("qua bước này")
     secondaryImages.forEach((file) => {
@@ -157,7 +157,7 @@ const handleFinish = (values) => {
         const accessoryData = JSON.stringify({ name: item.name, quantity: item.quantity });
         formData.append("accessory", accessoryData);
       });
-    // 🖼️ Thêm ảnh phụ (secondary_images[])
+    // Thêm ảnh phụ (secondary_images[])
     // images
     //   .filter((img) => img.url !== primaryImage)
     //   .forEach((img) => {
@@ -171,7 +171,7 @@ const handleFinish = (values) => {
         message.success("Sản phẩm đã được đăng ký thành công!");
         form.resetFields();
         setPrimaryImage(null);
-        setTimeout(setIsCreating(false),200);
+        setTimeout(setIsCreating(false),800);
         // setIsCreating(false);
       }
     })
@@ -198,7 +198,7 @@ const handleFinish = (values) => {
 
       <Form form={form} layout="vertical" onFinish={handleFinish}>
         <Form.Item name="name" label="Tên Gundam" rules={[{ required: true, message: "Vui lòng nhập tên sản phẩm!" }]}>
-          <Input />
+          <Input placeholder="VD: MGEX 1/100 Strike Freedom Gundam" />
         </Form.Item>
 
         <Form.Item name="grade_id" label="Phân khúc" rules={[{ required: true, message: "Vui lòng chọn phân khúc!" }]}>
@@ -211,7 +211,7 @@ const handleFinish = (values) => {
             </Select>
         </Form.Item>
 
-        <Form.Item name="condition" label="Điều kiện sản phẩm" rules={[{ required: true }]}>
+        <Form.Item name="condition" label="Tình trạng sản phẩm" rules={[{ required: true }]}>
           <Select value={condition} onChange={setCondition}>
             <Option value="new">Hàng mới</Option>
             <Option value="open box">Đã mở hộp</Option>
@@ -226,7 +226,7 @@ const handleFinish = (values) => {
         )}
 
         <Form.Item name="manufacturer" label="Thương hiệu" rules={[{ required: true }]}>
-          <Input />
+          <Input placeholder="vd: Bandai, ect" />
         </Form.Item>
 
         <Form.Item name="scale" label="Kích thước" rules={[{ required: true }]}>
@@ -245,7 +245,7 @@ const handleFinish = (values) => {
         </Form.Item> */}
         <Form.Item 
             name="weight" 
-            label="Cân nặng (để tính phí vận chuyển)" 
+            label="Cân nặng " 
             rules={[{ required: true, message: "Vui lòng nhập cân nặng!" }]}
         >
             <InputNumber
@@ -254,6 +254,7 @@ const handleFinish = (values) => {
                 style={{ width: "100%" }}
                 parser={(value) => value.replace(/[^0-9]/g, "")}
             />
+            <small>Dùng để tính chi phí vận chuyển. (3.500 vnd / 500g)</small>
         </Form.Item>
 
         <Form.Item name="description" label="Mô tả sản phẩm" rules={[{ required: true }]}>
