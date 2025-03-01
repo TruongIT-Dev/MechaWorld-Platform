@@ -2,42 +2,13 @@ import { Col, Row } from 'antd';
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 
-import { AddToCart, GetGundamDetailBySlug } from '../../apis/ProductDetail/APIProductDetail';
+import { AddToCart, GetAllCartItem, GetGundamDetailBySlug } from '../../apis/ProductDetail/APIProductDetail';
 
 import ReviewProduct from './Review';
 import SuggestProduct from './SuggestProduct';
 import ShopInfo from './ShopInfo';
+import ProductInfo from './ProductInfo';
 
-
-const product = {
-    name: 'Gundam RX-78-2',
-    price: '$299',
-    originalPrice: '$349',
-    discount: 15,
-    images: [
-        { src: 'https://i.ebayimg.com/images/g/GG4AAOSw3SpmO9qK/s-l1200.jpg', alt: 'Ảnh 1' },
-        { src: 'https://images-na.ssl-images-amazon.com/images/I/51qL8XPsDbS.jpg', alt: 'Ảnh 2' },
-        { src: 'https://i.ebayimg.com/images/g/GG4AAOSw3SpmO9qK/s-l1200.jpg', alt: 'Ảnh 3' },
-        { src: 'https://images.amain.com/cdn-cgi/image/f=auto,width=950/images/large/bas/bas2509667_2.jpg', alt: 'Ảnh 4' },
-    ],
-    description:
-        'Sở hữu mô hình Gundam RX-78-2 mang tính biểu tượng, được chế tác tỉ mỉ với từng chi tiết hoàn hảo. Một lựa chọn không thể thiếu cho bất kỳ fan Gundam nào!',
-    highlights: [
-        'Chi tiết cực kỳ chính xác',
-        'Chất liệu cao cấp',
-        'Bao gồm các phụ kiện và vũ khí',
-        'Kích thước tỷ lệ 1/100',
-    ],
-    details:
-        'Mô hình được sản xuất bởi Bandai, thuộc dòng sản phẩm Master Grade nổi tiếng. Gói sản phẩm bao gồm bộ phận ráp, sách hướng dẫn, và các decal dán chi tiết.',
-    shippingInfo: {
-        deliveryFee: 'Miễn phí',
-    },
-    seller: {
-        name: 'Gundam Store',
-        totalSales: '3.5k+',
-    },
-};
 
 const GundamProductPage = () => {
     const { slug } = useParams();
@@ -54,43 +25,70 @@ const GundamProductPage = () => {
 
     // ************ Fetch Data Deatail Gundam by Slug ******************
     useEffect(() => {
-    const fetchDetailGundamBySlug = async (slug) => {
-        try {
-            const detailGundam = await GetGundamDetailBySlug(slug);
+        const fetchDetailGundamBySlug = async (slug) => {
+            try {
+                const detailGundam = await GetGundamDetailBySlug(slug);
 
-            // Mapping condition từ tiếng Anh sang tiếng Việt
-            const conditionMapping = {
-                "new": "Hàng mới 100%",
-                "open box": "Đã mở hộp",
-                "second hand": "Đã qua sử dụng"
-            };
+                // Mapping condition từ tiếng Anh sang tiếng Việt
+                const conditionMapping = {
+                    "new": "Hộp mới nguyên dạng, chưa bóc seal, linh kiện không bị hư hại, đủ phụ kiện đi kèm",
+                    "open box": "Đã mở hộp",
+                    "second hand": "Đã qua sử dụng"
+                };
 
-            // Chuyển đổi condition nếu có
-            let gundamData = detailGundam?.data || {};
-            if (gundamData.condition) {
-                gundamData.condition = conditionMapping[gundamData.condition] || gundamData.condition;
+                // Chuyển đổi condition nếu có
+                let gundamData = detailGundam?.data || {};
+                if (gundamData.condition) {
+                    gundamData.condition = conditionMapping[gundamData.condition] || gundamData.condition;
+                }
+
+                // Cập nhật state
+                setIdGundam(gundamData.id || null);
+                setDetailGundam(gundamData);
+                setShopId(gundamData.owner_id || []);
+                setImageGundam(gundamData.image_urls || []);
+            } catch (error) {
+                console.log("Fail to fetch detail gundam: No data detected!");
             }
+        };
 
-            // Cập nhật state
-            setIdGundam(gundamData.id || null);
-            setDetailGundam(gundamData);
-            setShopId(gundamData.owner_id || []);
-            setImageGundam(gundamData.image_urls || []);
-        } catch (error) {
-            console.log("Fail to fetch detail gundam: No data detected!");
-        }
-    };
-
-    fetchDetailGundamBySlug(slug);
-}, [slug]);
+        fetchDetailGundamBySlug(slug);
+    }, [slug]);
 
 
+
+    // Khi component mount, lấy danh sách sản phẩm từ API
+    useEffect(() => {
+        const fetchCartItems = async () => {
+            try {
+                const response = await GetAllCartItem(); // Gọi API lấy giỏ hàng từ DB
+                const cartItems = response?.data || [];  // Đảm bảo có dữ liệu
+                console.log("cartItems", cartItems);
+
+                if (cartItems.some(item => item?.gundam_id === idGundam)) {
+                    setAdded(true); // Nếu sản phẩm đã có trong giỏ hàng thì đổi UI
+                }
+            } catch (error) {
+                console.error("Lỗi khi lấy giỏ hàng:", error);
+            }
+        };
+        fetchCartItems();
+    }, [idGundam]);
 
 
     // Handle Add To Cart
     const handleAddToCart = async (id) => {
+        setLoadingAdded(true);
         try {
             const response = await AddToCart(id);
+
+            // Cập nhật localStorage
+            const cartItems = JSON.parse(localStorage.getItem("cartItems")) || [];
+            if (!cartItems.includes(id)) {
+                cartItems.push(id);
+                localStorage.setItem("cartItems", JSON.stringify(cartItems));
+            }
+
             setAdded(true);
             console.log("Added to cart:", response.data);
             alert("Sản phẩm đã được thêm vào giỏ hàng!");
@@ -100,8 +98,7 @@ const GundamProductPage = () => {
         } finally {
             setLoadingAdded(false);
         }
-
-    }
+    };
 
 
     // ************** Hàm Format Tiền Việt *****************
@@ -158,20 +155,7 @@ const GundamProductPage = () => {
                         {/* Describe */}
                         <Col span={9}>
                             <div className="description-section">
-                                <div className="p-4 border rounded-lg shadow-sm">
-                                    <h2 className="text-xl font-semibold text-gray-900">Mô tả sản phẩm</h2>
-                                    <p className="mt-4 text-gray-700">{product.description}</p>
-
-                                    <h2 className="mt-8 text-lg font-semibold text-gray-900">Điểm nổi bật</h2>
-                                    <ul className="mt-4 list-disc pl-6 space-y-2 text-gray-700">
-                                        {product.highlights.map((highlight) => (
-                                            <li key={highlight}>{highlight}</li>
-                                        ))}
-                                    </ul>
-
-                                    <h2 className="mt-8 text-lg font-semibold text-gray-900">Thông tin chi tiết</h2>
-                                    <p className="mt-4 text-gray-700">{product.details}</p>
-                                </div>
+                                <ProductInfo />
                             </div>
                         </Col>
 
@@ -190,9 +174,9 @@ const GundamProductPage = () => {
 
                                 {/* Gundam Info */}
                                 <div className="space-y-2 text-sm">
-                                    <p><span className="font-semibold text-black">Tỉ lệ:</span> {detailGundam.scale}</p>
+                                    {/* <p><span className="font-semibold text-black">Tỉ lệ:</span> {detailGundam.scale}</p> */}
                                     <p className='text-green-600 font-semibold'><span className="font-semibold text-black">Tình trạng:</span> {detailGundam.condition}</p>
-                                    <p><span className="font-semibold text-black">Nhà sản xuất:</span> {detailGundam.manufacturer} </p>
+                                    {/* <p><span className="font-semibold text-black">Nhà sản xuất:</span> {detailGundam.manufacturer} </p> */}
                                 </div>
 
                                 {/* Buy Button */}

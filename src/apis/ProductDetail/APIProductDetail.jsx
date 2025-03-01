@@ -13,3 +13,7 @@ export const AddToCart = (id) => {
         gundam_id: id,
     },)
 }
+
+export const GetAllCartItem = () => {
+    return axios.get(`/cart/items`);
+}
