@@ -19,6 +19,8 @@ const UserNavbar = ({ user }) => {
 
 
     let timeoutId = null;
+
+    // const navigate = useNavigate();
     const dispatch = useDispatch();
 
 
@@ -36,7 +38,9 @@ const UserNavbar = ({ user }) => {
     //         }
     //     }
     // }, []);
-
+    useEffect(() => {
+        console.log(user);
+    }, []);
 
     // Hover Enter hiện dropdown
     const handleMouseEnter = () => {
