@@ -1,4 +1,4 @@
-import { Col, Row } from 'antd';
+import { Col, Row  } from 'antd';
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 
@@ -183,6 +183,7 @@ const GundamProductPage = () => {
                                 <button
                                     type="button"
                                     className="w-full py-3 bg-red-500 text-white rounded-lg font-semibold hover:bg-red-600 transition"
+                                    onClick={handleAddToCart} // Thêm sự kiện onClick
                                 >
                                     Mua ngay
                                 </button>

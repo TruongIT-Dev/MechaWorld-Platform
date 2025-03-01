@@ -1,32 +1,69 @@
-import { useState } from "react";
-import { FaCartShopping } from "react-icons/fa6";
+import React, { useEffect, useState } from 'react';
+import { GetCart, DeleteCart } from '../apis/Cart/APICart';
 import { NavLink } from "react-router-dom";
-import Img1 from "../assets/image/gun1.jpg";
-import { Link } from 'react-router-dom';
+import { FaCartShopping } from "react-icons/fa6";
 import { FiTrash2 } from 'react-icons/fi'
-
+import { Link } from 'react-router-dom';
 
 const CartContext = () => {
+    const [cartItems, setCartItems] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
     const [isOpen, setIsOpen] = useState(false);
 
+    
 
-    // Fake dữ liệu giỏ hàng (thay thế bằng dữ liệu thực từ context)
-    const cartItems = [
-        { id: 1, name: "Mens Casual Slim Fit", price: 15.99, quantity: 1, image: Img1 },
-    ];
+    const fetchCartItems = async () => {
+        try {
+            const response = await GetCart();
+            console.log("API response:", response); 
+            console.log("Response Data:", response.data); // Kiểm tra xem dữ liệu đúng chưa
+    
+            if (Array.isArray(response.data)) {
+                setCartItems(response.data);
+            } else {
+                console.error("Unexpected data format:", response.data);
+                setCartItems([]); 
+            }
+    
+            setLoading(false);
+        } catch (err) {
+            console.error("Error fetching cart:", err);
+            setError(err.message);
+            setLoading(false);
+            setCartItems([]); 
+        }
+    };
+    
 
-    const total = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    useEffect(() => {
+        fetchCartItems();
+    }, []);
+
+
+    const handleRemoveItem = async (itemId) => {
+        try {
+            await DeleteCart(itemId);
+            fetchCartItems(); // Refresh the cart items after deletion
+        } catch (err) {
+            setError(err.message);
+        }
+    };
+
+    if (loading) return <div>Loading...</div>;
+    if (error) return <div>Error: {error}</div>;
 
     return (
+        
         <div>
             {/* Nút mở giỏ hàng */}
             <div className="cart-section">
                 <button
                     className="bg-gradient-to-r from-cyan-500 to-blue-600 text-white py-1 px-4 rounded-full flex items-center gap-3"
                     onClick={() => setIsOpen(true)}
-                >
-                    <NavLink className="group-hover:block  hover:text-black capitalize transition-all duration-200" to="/cart1">
-                        Giỏ hàng
+                >   
+                    <NavLink className="group-hover:block  hover:text-black capitalize transition-all duration-200" >
+                            Giỏ hàng
                     </NavLink>
 
                     <div className="flex relative">
@@ -56,51 +93,58 @@ const CartContext = () => {
                         </button>
                     </div>
 
-                    <ul className="flex flex-col gap-y-2 h-[520px] lg:h-[640px] overflow-y-auto
-                     overflow-x-hidden border-b">
+                    <ul className="flex flex-col gap-y-4 h-[520px] lg:h-[640px] overflow-y-auto overflow-x-hidden border-b px-2">
                         {cartItems.map((item) => (
-                            <li key={item.id} className="flex items-center py-4">
-                                <img
-                                    src={item.image}
-                                    alt={item.name}
-                                    className="w-12 h-12 object-cover rounded"
+                            <li key={item.cart_item_id} 
+                                className="flex items-center gap-4 bg-white shadow-md p-4 rounded-lg border border-gray-200 hover:shadow-lg transition">
+                                
+                                {/* Hình ảnh sản phẩm */}
+                                <img 
+                                    src={item.gundam_image_url} 
+                                    alt={item.gundam_name} 
+                                    className="w-16 h-16 object-cover rounded-lg border border-gray-300"
                                 />
-                                <div className="ml-4 flex-1">
-                                    <h3 className="text-sm font-medium">{item.name}</h3>
-                                    <div className="text-gray-500 text-sm">
-                                        {item.quantity} x ${item.price.toFixed(2)}
-                                    </div>
+                                
+                                {/* Thông tin sản phẩm */}
+                                <div className="flex-1">
+                                    <h3 className="text-md font-semibold text-gray-800">{item.gundam_name}</h3>
+                                    <p className="text-sm text-gray-600">Price: <span className="text-red-500 font-semibold">${item.gundam_price}</span></p>
                                 </div>
-                                <div className="text-gray-800 font-medium">
-                                    ${(item.price * item.quantity).toFixed(2)}
-                                </div>
+                                
+                                {/* Nút Xóa */}
+                                <button 
+                                    onClick={() => handleRemoveItem(item.cart_item_id)}
+                                    className="bg-red-500 text-white px-3 py-1 rounded-lg text-sm hover:bg-red-600 transition">
+                                    Remove
+                                </button>
                             </li>
                         ))}
                     </ul>
 
 
+                    
                     <div className=' flex flex-col gap-y-3 py-4'>
                         <div className=' flex w-full justify-between items-center'>
                             {/* total */}
                             <div className='uppercase font-semibold'>
-                                <span className='mr-2'> Total: </span>${total.toFixed(2)}
+                                <span className='mr-2'> Total: </span>
                             </div>
                             <div className='bg-red-500 cursor-pointer py4 bg-re-500 text-white w-12 h-12 flex 
                                             justify-center items-center text-xl'><FiTrash2 />
                             </div>
                         </div>
 
-                        <Link
-                            to={'/cart1'}
+                        <Link 
+                            to={'/cart'} 
                             className='bg-gray-200 flex p-4 justify-center items-center text-black w-full font-medium'>
-                            View Cart
-                        </Link>
+                                Xem Chi Tiết Giỏ Hàng
+                        </Link>  
 
                         <Link
                             to={'/checkout'}
                             className='bg-black flex p-4 justify-center items-center text-white w-full font-medium'>
-                            check out
-                        </Link>
+                                Thanh Toán
+                        </Link>  
                     </div>
 
                 </div>

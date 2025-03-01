@@ -9,19 +9,22 @@ const { Content } = Layout;
 const UserLayout = () => {
 
     return (
-        <Layout>
-            <Navbar />
+        <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+           <Layout>
+                <Navbar />
 
-            {/* CONTENT */}
-            <Content>
-                <div className='user-layout'>
-                    <Outlet></Outlet>
-                </div>
-            </Content>
+                {/* CONTENT */}
+                <Content>
+                    <div className='user-layout'>
+                        <Outlet></Outlet>
+                    </div>
+                </Content>
 
-            {/* FOOTER */}
-            <Footer />
-        </Layout>
+                {/* FOOTER */}
+                <Footer />
+             </Layout> 
+        </div>
+        
     )
 }
 export default UserLayout

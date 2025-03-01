@@ -39,7 +39,7 @@ const FooterLinks = [
 
 const Footer = () => {
   return (
-    <footer  style={BannerImg} className="text-white text-white py-5 mt-aut">
+    <footer style={{ ...BannerImg, marginTop: 'auto' }} className="text-white py-5">
       <div className="container mx-auto">
         <div className="grid md:grid-cols-3 pb-44 pt-5">
           {/* company details */}
@@ -119,7 +119,7 @@ const Footer = () => {
           </div>
         </div>
       </div>
-    </footer >
+    </footer>
   );
 };
 
