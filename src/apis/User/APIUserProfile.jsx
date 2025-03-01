@@ -28,8 +28,8 @@ export const getUserAddresses = (id) => {
 export const postUserAddresses = (id, addressData) => {
     return axios.post(`/users/${id}/addresses`, addressData)
 }
-export const updateUserData = (id, userData) => {
-    return axios.put (`/users/${id}`, userData)
+export const updateUserData = (id, fullname) => {
+    return axios.put (`/users/${id}`, {full_name: fullname})
 }
 export const uploadAvatar = (id, file) => {
     const formData = new FormData();

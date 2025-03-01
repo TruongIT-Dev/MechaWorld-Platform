@@ -34,9 +34,12 @@ axios.interceptors.request.use(function (config) {
     //     config.headers.Authorization = `Bearer ${access_token}`
     //   }
       const accessToken = Cookies.get('access_token');
+      console.log("đã qua request checking",accessToken);
       if (accessToken) {
           config.headers.Authorization = `Bearer ${accessToken}`; 
-      }
+      } else {
+        console.warn("⚠️ Access Token không tồn tại trong Cookies!");
+    }
       return config;
     
 }, function (error) {

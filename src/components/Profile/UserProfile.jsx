@@ -1,19 +1,19 @@
 import { useState, useEffect, useRef } from 'react';
-import { Form, Input, Upload, Button, message, Card, Modal, Checkbox } from 'antd';
+import { Form, Input, Upload, Button, message, Card, Modal } from 'antd';
 import { UploadOutlined } from '@ant-design/icons';
-import { useSelector,useDispatch } from 'react-redux';
+import { useSelector,
+  // useDispatch 
+} from 'react-redux';
 import { updateUserData, uploadAvatar, verifyOtp,verifyPhone } from '../../apis/User/APIUserProfile';
 import Cookies from 'js-cookie';
 import { Cropper } from 'react-cropper';
 import "cropperjs/dist/cropper.css";
 import "../../assets/css/userProfile.css"
-import { updateUserProfile } from '../../features/auth/authSlice';
+// import { updateUserProfile } from '../../features/auth/authSlice';
 import { verifyToken } from '../../apis/Auth/APIAuth';
 const ProfilePage = () => {
     const [form] = Form.useForm();
-    const dispatch = useDispatch();
-    // const user = useSelector((state) => state.auth.user); // Lấy user từ Redux
-    // const [user, setUser] = useState(null);
+    // const dispatch = useDispatch();
     const [user, setUser] = useState(useSelector((state) => state.auth.user));
     const [avatar, setAvatar] = useState(user?.avatar_url);
     const [cropVisible, setCropVisible] = useState(false);
@@ -21,15 +21,22 @@ const ProfilePage = () => {
     const [otpVisible, setOtpVisible] = useState(false);
     const [otp, setOtp] = useState("");
     const cropperRef = useRef(null);
-    const [phoneNumber, setPhoneNumber] = useState(user?.phone_number);
+    const [fullName, setFullName] = useState(user?.full_name || "");
+    const [phoneModalVisible, setPhoneModalVisible] = useState(false);
+    const [countdown, setCountdown] = useState(60);
+    const [isCounting, setIsCounting] = useState(false);
+    const [newPhoneNumber, setNewPhoneNumber] = useState("");
     useEffect(() => {
       // const userData = Cookies.get("user");
+
       const Access_token = Cookies.get('access_token');
       if (Access_token) {
         try {
             verifyToken(Access_token).then(response => {
                 console.log(response.data);
                 setUser(response.data);
+                setAvatar(response.data.avatar_url);
+                setFullName(response.data.full_name);
             })
         } catch (error) {
             console.error("Lỗi từ API:", error);
@@ -41,15 +48,9 @@ const ProfilePage = () => {
       }
     }, []);
     
-    // const onChange = (e) => {
-    //   console.log(`checked = ${e.target.checked}`);
-    // };
-    const handlePhoneChange = (e) => {
-      const newPhone = e.target.value;
-      setPhoneNumber(newPhone);
-    
-      dispatch(updateUserProfile({ ...user, phone_number: newPhone }));
-    };
+    const handleNameChange = (e) => {
+      setFullName(e.target.value);
+  };
     // const handleData = (e) => {
     //   const newPhone = e.target.value;
     //   setPhoneNumber(newPhone);
@@ -61,6 +62,7 @@ const ProfilePage = () => {
         reader.onload = (e) => {
           const img = new Image();
           img.src = e.target.result;
+          console.log("img file data: ",file);
           img.onload = async () => {
             if (img.width > 400 || img.height > 400) {
               setCropVisible(true);
@@ -92,29 +94,38 @@ const ProfilePage = () => {
           }, "image/jpeg");
         }
       };
-      
+    //   const handleUpdateUser = async () => {
+    //     if (!fullName.trim()) {
+    //         message.error("Tên không được để trống!");
+    //         return;
+    //     }
 
-    // const getBase64 = (img, callback) => {
-    //     const reader = new FileReader();
-    //     reader.addEventListener('load', () => callback(reader.result));
-    //     reader.readAsDataURL(img);
-    // }
-    const handleSendOtp = async () => {
-        try {
-          const response = await verifyPhone(user.phone_number);
-          if (response.status === 200) {
-            message.success("OTP đã được gửi!");
-            setOtpVisible(true);
-          }
-        } catch (error) {
-          message.error("Không thể gửi OTP! Vui lòng thử lại.");
-        }
-      };
-      const handleOtp = (e) => {
-        setOtp(e.target.value);
-        console.log(e.target.value);
-      }
-      // Xác thực OTP
+    //     try {
+    //         await updateUserData(user.id, fullName);
+    //         const updatedUser = { ...user, full_name: fullName };
+    //         setUser(updatedUser); // Cập nhật vào state
+    //         dispatch(updateUserProfile(updatedUser)); // Cập nhật vào Redux
+    //         message.success("Cập nhật thông tin thành công!");
+    //     } catch (error) {
+    //         message.error("Lỗi khi cập nhật tên người dùng.");
+    //     }
+    // };
+    // const handleSendOtp = async () => {
+    //     try {
+    //       const response = await verifyPhone(user.phone_number);
+    //       if (response.status === 200) {
+    //         message.success("OTP đã được gửi!");
+    //         setOtpVisible(true);
+    //       }
+    //     } catch (error) {
+    //       message.error("Không thể gửi OTP! Vui lòng thử lại.");
+    //     }
+    //   };
+    //   const handleOtp = (e) => {
+    //     setOtp(e.target.value);
+    //     console.log(e.target.value);
+    //   }
+    //   // Xác thực OTP
       const handleVerifyOtp = async () => {
         try {
           const response = await verifyOtp(user.id,user.phone_number,otp);
@@ -128,13 +139,52 @@ const ProfilePage = () => {
           message.error("Lỗi khi xác thực OTP.");
         }
       };
+
+      const handlePhoneSubmit = async () => {
+        if (!newPhoneNumber) {
+            message.error("Vui lòng nhập số điện thoại!");
+            return;
+        }
+        try {
+            const response = await verifyPhone(newPhoneNumber);
+            if (response.status === 200) {
+                message.success("OTP đã được gửi!");
+                setOtpVisible(true);
+                setIsCounting(true);
+                setCountdown(60);
+                startCountdown();
+            }
+        } catch (error) {
+            message.error("Không thể gửi OTP! Vui lòng thử lại.");
+        }
+    };
+
+    const startCountdown = () => {
+        let timeLeft = 60;
+        const interval = setInterval(() => {
+            timeLeft -= 1;
+            setCountdown(timeLeft);
+            if (timeLeft === 0) {
+                clearInterval(interval);
+                setIsCounting(false);
+            }
+        }, 1000);
+    };
+
+
       const onFinish = (values) => {
         console.log('Success:', values);
-        const updatedUser = { ...user, ...values, avatar };
         // localStorage.setItem('user', JSON.stringify(updatedUser));
-        updateUserData(user.id, values.full_name);
-        dispatch(updateUserProfile(updatedUser));
-        message.success('Cập nhật thông tin thành công!');
+        updateUserData(user.id, fullName).then(response => {
+          console.log(response);
+          if(response.status == 200){
+            message.success('Cập nhật thông tin thành công!');
+          }
+        }).catch( error => {
+          return message.error(error);
+        })
+        // dispatch(updateUserProfile(updatedUser));
+        
     };
 
 
@@ -173,14 +223,17 @@ const ProfilePage = () => {
                   onFinish={onFinish}
                 >
                   <Form.Item label="Tên người dùng" className="mb-3 ">
-                    <Input value={user?.full_name} className="h-10" />
+                    <Input value={fullName} onChange={handleNameChange} />
                   </Form.Item>
                   <Form.Item label="Email" className="mb-3 ">
                     <Input value={user?.email} readOnly className="h-10" disabled/>
                   </Form.Item>
                   <Form.Item  className="mb-3">
                     {/* <Input value={user?.role} readOnly className="h-10 w-fit" /> */}
-                    Vai trò : {user?.role} 
+                    Số điện thoại : {user?.phone_number || "Chưa đăng kí số điện thoại"} 
+                    <Button type="link" onClick={() => setPhoneModalVisible(true)}>
+                                    {user?.phone_number ? "Thay đổi" : "Đăng ký"}
+                    </Button>
                     {/* {user?.role} */}
                   </Form.Item>
                   <Form.Item>
@@ -197,40 +250,37 @@ const ProfilePage = () => {
             </div>
 
             {/* Số điện thoại + OTP */}
-            <Card className="mt-6">
-              <div className="flex items-center space-x-4">
-                <Input
-                  value={phoneNumber}
-                  onChange={handlePhoneChange} 
-                  placeholder="Nhập số điện thoại"
-                />
-                {/* <Input placeholder="Nhập số điện thoại" />               */}
-                <Button
-                  type="primary"
-                  onClick={handleSendOtp}
-                  className="bg-[#0056b3] hover:bg-[#4a90e2] text-white px-4 py-2 rounded"
-                >
-                  Kiểm tra
-                </Button>
-              </div>
-              {otpVisible && (
-                <div className="flex items-center space-x-4 mt-4">
-                  <Input.OTP
-                    placeholder="Nhập OTP"
-                    length={6}
-                    value={otp}
-                    onChange={handleOtp}
-                  />
-                  <Button
-                    type="primary"
-                    onClick={handleVerifyOtp}
-                    className="bg-[#0056b3] hover:bg-[#4a90e2] text-white px-4 py-2 rounded"
-                  >
-                    Xác thực
-                  </Button>
-                </div>
-              )}
-            </Card>
+            <Modal
+                open={phoneModalVisible}
+                onCancel={() => setPhoneModalVisible(false)}
+                footer={null}
+                title={otpVisible ? "Xác thực OTP" : "Nhập số điện thoại"}
+            >
+                {!otpVisible ? (
+                    <>
+                        <Form layout="vertical">
+                            <Form.Item label="Số điện thoại">
+                                <Input type="number" value={newPhoneNumber} onChange={(e) => setNewPhoneNumber(e.target.value)} />
+                            </Form.Item>
+                        </Form>
+                        <Button type="primary" onClick={handlePhoneSubmit}>Xác thực</Button>
+                    </>
+                ) : (
+                    <>
+                        <Form layout="vertical">
+                            <Form.Item label="Nhập mã OTP">
+                                <Input type="number" maxLength={6} value={otp} onChange={(e) => setOtp(e.target.value)} />
+                            </Form.Item>
+                        </Form>
+                        <div className="flex justify-between">
+                            <Button type="primary" onClick={handleVerifyOtp}>Xác thực</Button>
+                            <Button type="link" disabled={isCounting} onClick={handlePhoneSubmit}>
+                                {isCounting ? `Gửi lại sau ${countdown}s` : "Gửi lại OTP"}
+                            </Button>
+                        </div>
+                    </>
+                )}
+            </Modal>
           </Card>
 
           {/* Modal Cropper */}
@@ -273,6 +323,7 @@ const ProfilePage = () => {
               checkOrientation={false}
               onInitialized={(instance) => setCropper(instance)}
             />
+            {/* {console.log("avattar: ",avatar)}; */}
           </Modal>
         </div>
       </div>

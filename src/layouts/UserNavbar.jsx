@@ -17,7 +17,7 @@ const UserNavbar = ({user}) => {
     // const [userData, setUserData] = useState(null);
     let timeoutId = null;
 
-    const navigate = useNavigate();
+    // const navigate = useNavigate();
     const dispatch = useDispatch();
     // const user = useSelector((state) => state.auth.user);
 
@@ -33,7 +33,7 @@ const UserNavbar = ({user}) => {
     //     }
     // }, []);
     useEffect(() => {
-
+        console.log(user);
     }, []);
 
     const handleMouseEnter = () => {
