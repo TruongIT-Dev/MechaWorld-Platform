@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Card, Button, Radio, Divider, message, Table } from 'antd';
 import { ShoppingCartOutlined, EnvironmentOutlined, ShopOutlined } from '@ant-design/icons';
-import { GetCart } from '../../apis/Cart/APICart';
 import { getUserAddresses } from '../../apis/User/APIUserProfile';
+import { useCart } from '../../context/CartContext';
+import { useLocation } from 'react-router-dom';
 import Cookies from 'js-cookie';
 
 const { Column } = Table;
+
 const groupByShop = (items) => {
   return items.reduce((acc, item) => {
     const shopName = item.seller_name; // hoặc item.shop_id
@@ -18,7 +20,8 @@ const groupByShop = (items) => {
 };
 
 const Checkout = () => {
-  const [cartItems, setCartItems] = useState([]);
+  const location = useLocation();
+  const { cartItems, removeFromCart } = useCart(); // Sử dụng hàm addToCart từ Context
   const [userAddress, setUserAddress] = useState(null);
   const [paymentMethod, setPaymentMethod] = useState('GunPay');
   const [showPaymentOptions, setShowPaymentOptions] = useState(false);
@@ -27,14 +30,16 @@ const Checkout = () => {
   const userCookie = Cookies.get('user');
   const userData = JSON.parse(decodeURIComponent(userCookie));
 
+  // Lấy danh sách sản phẩm đã chọn từ state của location
+  const selectedItems = location.state?.selectedItems || cartItems;
+  console.log("Selected Items (Checkout):", selectedItems);
+
   useEffect(() => {
     const fetchCheckoutData = async () => {
       try {
-        const cartResponse = await GetCart();
         const userId = userData.id; // Lấy id từ user
         const addressResponse = await getUserAddresses(userId);
 
-        setCartItems(cartResponse.data || []);
         setUserAddress(addressResponse.data[0] || null);
       } catch (error) {
         message.error("Lỗi khi tải dữ liệu!");
@@ -47,29 +52,13 @@ const Checkout = () => {
     fetchCheckoutData();
   }, []);
 
-  const totalPrice = cartItems.reduce((acc, item) => acc + item.gundam_price, 0);
+  // Tính tổng tiền dựa trên selectedItems
+  const totalPrice = selectedItems.reduce((acc, item) => acc + item.gundam_price, 0);
   const shippingFee = 0;
   const finalPrice = totalPrice + shippingFee;
 
-  const handlePlaceOrder = async () => {
-    try {
-      const orderData = {
-        cartItems: cartItems.map(item => ({ id: item.cart_item_id, price: item.gundam_price })),
-        paymentMethod: paymentMethod,
-        address: userAddress,
-        total: finalPrice
-      };
-
-      // await PlaceOrder(orderData);
-      message.success("Đặt hàng thành công!");
-    } catch (error) {
-      message.error("Lỗi khi đặt hàng!");
-      console.error(error);
-    }
-  };
-
   // Nhóm sản phẩm theo shop
-  const groupedCartItems = groupByShop(cartItems);
+  const groupedCartItems = groupByShop(selectedItems);
 
   if (loading) return <div className="text-xl">Loading...</div>;
 
@@ -103,7 +92,7 @@ const Checkout = () => {
               <p className="font-semibold text-xl">{shopName}</p>
             </div>
             
-            <Table dataSource={items} pagination={false} rowKey="cart_item_id">
+            <Table dataSource={items} pagination={false} rowKey="cart_item_id" style={{ width: '100%' }}>
               <Column
                 title="Sản Phẩm"
                 key="product"
@@ -116,6 +105,7 @@ const Checkout = () => {
                     </div>
                   </div>
                 )}
+                width="33.33%"
               />
               <Column
                 title="Thông tin người bán"
@@ -128,8 +118,23 @@ const Checkout = () => {
                     </div>
                   </div>
                 )}
+                width="33.33%"
               />
-              <Column title="Đơn Giá" dataIndex="gundam_price" key="gundam_price" render={(price) => `${price.toLocaleString()} VNĐ`} />
+              <Column
+                title="Đơn Giá"
+                dataIndex="gundam_price"
+                key="gundam_price"
+                render={(price) => `${price.toLocaleString()} VNĐ`}
+                width="33.33%"
+              />
+              <Column
+                title="Hành động"
+                key="actions"
+                render={(text, record) => (
+                  <Button danger onClick={() => removeFromCart(record.cart_item_id)}>Xóa</Button>
+                )}
+                width="10%"
+              />
             </Table>
           </div>
         ))}
@@ -168,7 +173,9 @@ const Checkout = () => {
           <p>Tổng thanh toán</p>
           <p className="text-red-500">{finalPrice.toLocaleString()} VNĐ</p>
         </div>
-        <Button type="primary" className="w-full mt-4 bg-red-500 border-none text-lg" onClick={handlePlaceOrder}>
+        <Button type="primary" className="w-full mt-4 bg-red-500 border-none text-lg" 
+        // onClick={handlePlaceOrder}
+        >
           Đặt hàng
         </Button>
       </Card>
