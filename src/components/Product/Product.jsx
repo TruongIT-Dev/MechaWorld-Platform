@@ -55,6 +55,9 @@ const Product = () => {
         fetchGundams();
     }, [filters]);
 
+    console.log("gundams", gundams);
+
+
     // Hàm nhận dữ liệu lọc từ FilterSidebar
     const handleFilterChange = (newFilters) => {
         setFilters(newFilters);

@@ -1,11 +1,7 @@
-import { FaCaretDown } from "react-icons/fa";
 import { NavLink } from "react-router-dom";
-import UserNavbar from "./UserNavbar";
-// import Logo from "../assets/image/logo.png";
 import { useSelector } from "react-redux"
-// import DarkMode from "./DarkMode";
+import UserNavbar from "./UserNavbar";
 import GuestNavbar from "./GuestNavbar";
-
 
 
 const Menu = [
@@ -21,53 +17,58 @@ const Menu = [
   },
   {
     id: 3,
+    name: "Sản phẩm Gundam",
+    link: "/product",
+  },
+  {
+    id: 4,
     name: "Trao đổi",
     link: "/exchange",
   },
   {
-    id: 4,
+    id: 5,
     name: "Phụ kiện",
     link: "/#",
   },
 ];
 
-const DropdownLinks = [
-  {
-    id: 1,
-    name: "Entry Grade",
-    link: "/#",
-  },
-  {
-    id: 2,
-    name: "High Grade",
-    link: "/#",
-  },
-  {
-    id: 3,
-    name: "Master Grade",
-    link: "/#",
-  },
-  {
-    id: 4,
-    name: "Perfect Grade",
-    link: "/#",
-  },
-  {
-    id: 5,
-    name: "Real Grade",
-    link: "/#",
-  },
-  {
-    id: 6,
-    name: "Super Deformed",
-    link: "/#",
-  },
-  {
-    id: 7,
-    name: "None Grade",
-    link: "/#",
-  },
-];
+// const DropdownLinks = [
+//   {
+//     id: 1,
+//     name: "Entry Grade",
+//     link: "/#",
+//   },
+//   {
+//     id: 2,
+//     name: "High Grade",
+//     link: "/#",
+//   },
+//   {
+//     id: 3,
+//     name: "Master Grade",
+//     link: "/#",
+//   },
+//   {
+//     id: 4,
+//     name: "Perfect Grade",
+//     link: "/#",
+//   },
+//   {
+//     id: 5,
+//     name: "Real Grade",
+//     link: "/#",
+//   },
+//   {
+//     id: 6,
+//     name: "Super Deformed",
+//     link: "/#",
+//   },
+//   {
+//     id: 7,
+//     name: "None Grade",
+//     link: "/#",
+//   },
+// ];
 
 
 const Navbar = () => {
@@ -110,13 +111,13 @@ const Navbar = () => {
             <li key={data.id}>
               <NavLink
                 to={data.link}
-                className="inline-block text-base px-4 hover:text-blue-700 hover:font-semibold duration-200 uppercase"
+                className="inline-block text-base px-4 py-2 hover:text-blue-700 hover:font-semibold duration-200 uppercase"
               >
                 {data.name}
               </NavLink>
             </li>
           ))}
-          <li className="group relative cursor-pointer">
+          {/* <li className="group relative cursor-pointer">
             <NavLink
               to="/product"
               className="flex items-center text-base hover:text-blue-700 hover:font-semibold gap-[2px] py-2 uppercase"
@@ -140,8 +141,7 @@ const Navbar = () => {
                 ))}
               </ul>
             </div>
-
-          </li>
+          </li> */}
         </ul>
       </div>
     </div>

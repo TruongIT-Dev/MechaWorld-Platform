@@ -34,7 +34,7 @@ const GuestNavbar = () => {
             {user ? (
                 <>
                     {/* User Profile */}
-                    < UserProfile  user={user}/>
+                    <UserProfile user={user}/>
                 </>
             ) : (
                 <>
