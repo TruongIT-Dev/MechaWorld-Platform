@@ -161,7 +161,7 @@ const handleFinish = (values) => {
     // images
     //   .filter((img) => img.url !== primaryImage)
     //   .forEach((img) => {
-    //     formData.append(`secondary_images`, img.file); // Axios tự động nhận diện mảng
+    //     formData.append(`secondary_images`, img.file);
     //   });
     //   console.log(formData);
     PostGundam(user.id, formData)
@@ -266,6 +266,7 @@ const handleFinish = (values) => {
                 <Input
                     placeholder="Tên phụ kiện"
                     value={accessory.name}
+                    className="w-60"
                     onChange={(e) => handleAccessoryChange(index, "name", e.target.value)}
                 />
                 <InputNumber
