@@ -33,6 +33,7 @@ const Checkout = () => {
   // Lấy danh sách sản phẩm đã chọn từ state của location
   const selectedItems = location.state?.selectedItems || cartItems;
   console.log("Selected Items (Checkout):", selectedItems);
+  console.log("Location State:", location.state);
 
   useEffect(() => {
     const fetchCheckoutData = async () => {
