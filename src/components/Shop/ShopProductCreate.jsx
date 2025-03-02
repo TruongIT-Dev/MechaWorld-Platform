@@ -17,7 +17,8 @@ const ShopProductCreate = ({ setIsCreating }) => {
   const [primaryImage, setPrimaryImage] = useState(null); // Ảnh chính
   const [secondaryImages, setSecondaryImages] = useState([]); // Khởi tạo với mảng rỗng
   const [price, setPrice] = useState(null);
-  const [accessories, setAccessories] = useState([{ name: "", quantity: 1 }]);
+  // const [accessories, setAccessories] = useState([{ name: "", quantity: 1 }]);
+  const [accessories, setAccessories] = useState([]);
   const [isUploading, setIsUploading] = useState(false);
 
 

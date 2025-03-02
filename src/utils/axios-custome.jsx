@@ -4,7 +4,7 @@ import Cookies from 'js-cookie';
 const baseURL = 'http://localhost:8080/v1/';
 // const baseURL = '/v1';
 // axios.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded';
-// const accessToken = Cookies.get('access_token');
+const accessToken = Cookies.get('access_token');
 // Tạo instance axios với baseURL và header chứa token
 const instance = axios.create({
     
@@ -23,7 +23,7 @@ const instance = axios.create({
 
 // Lưu Token tại LocalStorage. Dự kiến sẽ đổi qua Cookie sau
 // Đã đổi qua cookie
-// instance.defaults.headers.common = { 'Authorization': `Bearer ${Cookies.get('access_token')}` }
+instance.defaults.headers.common = { 'Authorization': `Bearer ${accessToken}`}
 
 // Thêm một bộ đón chặn request
 axios.interceptors.request.use(function (config) {
@@ -38,6 +38,7 @@ axios.interceptors.request.use(function (config) {
 
      const accessToken = Cookies.get('access_token'); 
         if (accessToken) {
+            console.log(accessToken);
             config.headers.Authorization = `Bearer ${accessToken}`;
         } else {
             console.warn("Không thấy access_token trong Cookies....");

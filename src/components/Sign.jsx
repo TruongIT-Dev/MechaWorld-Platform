@@ -6,7 +6,6 @@ import { login } from "../features/auth/authSlice";
 import "../assets/css/sign.css";
 import Cookies from "js-cookie";
 import { loginEmail,loginGoogle,signupEmail } from "../apis/Auth/APIAuth";
-import { Alert } from 'antd';
 import { GoogleLogin } from "@react-oauth/google";
 import bgImage from "../assets/image/gundam_bg.jpg";
 
@@ -18,9 +17,9 @@ export default function Sign() {
   const [activeTab, setActiveTab] = useState(1); 
   const [loading, setLoading] = useState(false);
   const dispatch = useDispatch();
-  const [showAlert, setShowAlert] = useState(false);
-  const [alertMess, setAlertMess] = useState('');
-  const [alertType, setAlertType] = useState("error");
+  // const [showAlert, setShowAlert] = useState(false);
+  // const [alertMess, setAlertMess] = useState('');
+  // const [alertType, setAlertType] = useState("error");
 
   useEffect(() => {
     // /* global google */
@@ -51,9 +50,7 @@ export default function Sign() {
         path: "/",
       });
       message.success('Đăng nhập thành công! Trở về trang chủ.', 2);
-      setShowAlert(true);
       setTimeout(() => {
-        setShowAlert(false); 
         console.log("Login thành công");
         navigate("/");
     }, 100);
@@ -113,9 +110,7 @@ export default function Sign() {
         });
 
         dispatch(login(response.data));
-        setShowAlert(true);
       setTimeout(() => {
-        setShowAlert(false); 
         navigate("/");
     }, 1500);
     })
@@ -351,17 +346,7 @@ export default function Sign() {
           </div>
         </div>
       </div>
-      {showAlert && (
-        <Alert
-          className="fixed bottom-4 right-4 z-50 px-4 py-3 rounded"
-          message={alertMess}
-          type={alertType}
-          // type="error"
-          showIcon
-          closable
-          afterClose={() => setShowAlert(false)}
-        />
-      )}
+
     </>
   );
 }
