@@ -117,7 +117,18 @@ const Checkout = () => {
                   </div>
                 )}
               />
-              <Column title="Thông tin người bán" dataIndex="seller_name" key="seller_name" />
+              <Column
+                title="Thông tin người bán"
+                key="seller_name"
+                render={(text, record) => (
+                  <div className="flex items-center">
+                    <img src={record.seller_avatar_url} alt={record.gundam_name} className="w-16 h-16 object-cover rounded border border-gray-300 mr-4"/>
+                    <div>
+                      <div className="font-semibold">{record.seller_name}</div>
+                    </div>
+                  </div>
+                )}
+              />
               <Column title="Đơn Giá" dataIndex="gundam_price" key="gundam_price" render={(price) => `${price.toLocaleString()} VNĐ`} />
             </Table>
           </div>
