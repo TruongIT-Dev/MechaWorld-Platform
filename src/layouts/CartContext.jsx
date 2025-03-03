@@ -16,14 +16,14 @@ const CartContext = () => {
 
     return (
         <div>
-            <div className="cart-section flex justify-end p-4">
+            <div className="cart-section  ">
                 <button
-                    className="bg-blue-600 text-white py-2 px-5 rounded-full flex items-center gap-3"
+                    className="bg-gradient-to-r from-cyan-500 to-blue-600 transition-all duration-200 text-white py-1 px-4 rounded-full flex items-center gap-3 group"
                     onClick={() => setIsOpen(true)}
                 >
                     <span className="hidden sm:inline">Giỏ hàng</span>
                     <div className="relative">
-                        <FaCartShopping className="text-2xl" />
+                        <FaCartShopping className="text-xl text-white drop-shadow-sm cursor-pointer" />
                         <div className="bg-red-500 absolute -right-2 -bottom-2 text-xs w-5 h-5 flex items-center justify-center text-white rounded-full">
                             {cartItems.length}
                         </div>

@@ -1,5 +1,6 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
-import { GetCart, DeleteCart,AddToCart } from '../apis/Cart/APICart'; // Import API của bạn
+import { GetCart, DeleteCart, AddToCart } from '../apis/Cart/APICart'; // Import API của bạn
+import Cookies from 'js-cookie';
 
 // Tạo Context
 const CartContext = createContext();
@@ -48,9 +49,14 @@ export const CartProvider = ({ children }) => {
         }
     };
 
-    // Fetch giỏ hàng khi component mount
+    // Fetch giỏ hàng khi component mount hoặc access_token thay đổi
     useEffect(() => {
-        fetchCartItems();
+        const accessToken = Cookies.get('access_token');
+        if (accessToken) {
+            fetchCartItems(); // Fetch giỏ hàng nếu có access_token
+        } else {
+            setLoading(false); // Nếu không có access_token, không fetch giỏ hàng
+        }
     }, []);
 
     return (
