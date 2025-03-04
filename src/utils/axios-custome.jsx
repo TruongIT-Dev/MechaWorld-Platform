@@ -1,13 +1,16 @@
 import axios from 'axios';
 import Cookies from 'js-cookie';
 
+
+
 const baseURL = 'http://localhost:8080/v1/';
 // const baseURL = '/v1';
 // axios.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded';
 const accessToken = Cookies.get('access_token');
+
+
 // Tạo instance axios với baseURL và header chứa token
 const instance = axios.create({
-    
     baseURL: baseURL,
     headers: {
         'Content-Type': 'application/json',
@@ -36,7 +39,7 @@ axios.interceptors.request.use(function (config) {
     //   const accessToken = Cookies.get('access_token');
     //   console.log("đã qua request checking",accessToken);
 
-     const accessToken = Cookies.get('access_token'); 
+    const accessToken = Cookies.get('access_token'); 
         if (accessToken) {
             console.log(accessToken);
             config.headers.Authorization = `Bearer ${accessToken}`;

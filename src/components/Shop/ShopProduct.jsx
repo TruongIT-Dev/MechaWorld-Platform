@@ -1,11 +1,14 @@
-import { Table, Row, Button, InputNumber, Select } from "antd";
+import { Table, Row, Button, InputNumber, Select, Space, Input } from "antd";
 import { useEffect, useState } from "react";
 import { GetGundamByID } from "../../apis/Product/APIProduct";
 import Cookies from "js-cookie";
+import PropTypes from 'prop-types';
 
 const { Option } = Select;
 
-function ShopProduct() {
+function ShopProduct({
+  // isCreating,
+  setIsCreating}) {
   const user = JSON.parse(Cookies.get("user"));
   const [gundamList, setGundamList] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
@@ -15,7 +18,6 @@ function ShopProduct() {
   const [maxPrice, setMaxPrice] = useState(null);
   const [selectedCondition, setSelectedCondition] = useState(null);
   const [selectedGrade, setSelectedGrade] = useState(null);
-
   useEffect(() => {
     GetGundamByID(user.id,"")
       .then((response) => {
@@ -43,7 +45,6 @@ function ShopProduct() {
     if (selectedCondition) {
       filtered = filtered.filter((item) => item.condition === selectedCondition);
     }
-
     // Lọc theo phân khúc (grade)
     if (selectedGrade) {
       filtered = filtered.filter((item) => item.grade === selectedGrade);
@@ -52,6 +53,18 @@ function ShopProduct() {
     setFilteredData(filtered);
   }, [minPrice, maxPrice, selectedCondition, selectedGrade, gundamList]);
 
+  const searchGundam = (values) => {
+    console.log(values);
+    GetGundamByID(user.id,values)
+    .then((response) => {
+      setGundamList(response.data);
+      setFilteredData(response.data);
+      console.log("search complete");
+    })
+    .catch((error) => {
+      console.error("Lỗi khi lấy danh sách sản phẩm:", error);
+    });
+  }
   const columns = [
     {
       title: "Hình ảnh",
@@ -105,6 +118,9 @@ function ShopProduct() {
     <div>
       <div className="container-content">
         <Row className="mb-4 flex gap-8">
+          <Space >
+            <Input.Search placeholder="Tìm kiếm sản phẩm" onSearch={searchGundam} />
+          </Space>
           <InputNumber
             placeholder="Giá thấp nhất"
             min={0}
@@ -130,6 +146,13 @@ function ShopProduct() {
             ))}
           </Select>
           <Button onClick={() => setFilteredData(gundamList)} className="">Xóa bộ lọc</Button>
+          <Button
+              type="primary"
+              className="bg-[#0056b3] hover:bg-[#4a90e2] text-white"
+              onClick={() => setIsCreating(true)}
+            >
+              Thêm sản phẩm
+            </Button>
         </Row>
 
         <Table columns={columns} dataSource={filteredData} pagination={{
@@ -142,5 +165,8 @@ function ShopProduct() {
     </div>
   );
 }
-
+ShopProduct.propTypes = {
+  // isCreating: PropTypes.bool,
+  setIsCreating: PropTypes.func.isRequired,
+};
 export default ShopProduct;

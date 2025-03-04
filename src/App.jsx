@@ -1,14 +1,18 @@
 import { Routes, Route } from "react-router-dom";
-
+import  { Suspense } from "react";
 // import router
-import { HomePage, ErrorPage, ProductPage, AboutPage, SignIn, ProfilePage, UserProfile, Collection, TradeHistory, OrderHistory, UserLayout, ProductDetailPage, ShopDashboard, ShopPage, ShopProductManagement, ShopTransaction, CartPage, ShopRegister, ExchangePage, ExchangeDetail, CartPage1, Checkout, WalletPage, SellerRegister,AdvancedSetting,SettingAddress } from "./routes/router";
+import { HomePage, ErrorPage, ProductPage, AboutPage, SignIn, ProfilePage, UserProfile, Collection, TradeHistory, OrderHistory, UserLayout, ProductDetailPage, ShopDashboard, ShopPage, ShopProductManagement, ShopTransaction, CartPage, ShopRegister, ExchangePage, ExchangeDetail, CartPage1, Checkout, WalletPage, SellerRegister,AdvancedSetting,SettingAddress, ShopOrderManagement, ShopAuctionManagement, ShopReportManagement } from "./routes/router";
+import { useSelector } from "react-redux";
 
 // import Spinner from "./components/Spinner";
 
-const App = () => {
-
+function App  () {
+  const accessToken = useSelector((state) => state.auth.access_token);
+  const userId = useSelector((state) => state.auth.user);
+  console.log(accessToken, userId);
+  
   return (
-    <>
+    <Suspense fallback={<div>Loading...</div>}> 
       <Routes>
         <Route path="/" element={<UserLayout />} >
           <Route index element={<HomePage />} />
@@ -50,6 +54,9 @@ const App = () => {
             <Route path="dashboard" element={<ShopDashboard />} />
             <Route path="management" element={<ShopProductManagement />} />
             <Route path="transition" element={<ShopTransaction />} />
+            <Route path="order-management" element={<ShopOrderManagement />} />
+            <Route path="auction-management" element={<ShopAuctionManagement />} />
+            <Route path="report-management" element={<ShopReportManagement />} />
             {/* <Route path="setting" element={<UserProfile />} /> */}
           </Route>
 
@@ -59,8 +66,8 @@ const App = () => {
 
         </Route>
       </Routes>
-    </>
+    </Suspense>
   );
-};
+}
 
 export default App;

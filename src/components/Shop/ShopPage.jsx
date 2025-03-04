@@ -1,17 +1,17 @@
 import {  
-    UserSwitchOutlined,
     ShoppingOutlined,
-    UserOutlined,
+    LineChartOutlined,
   } from '@ant-design/icons';
   import {  Menu,Layout } from 'antd';
   import { Outlet, Link } from 'react-router-dom';
-
+  import {  FaBoxOpen } from "react-icons/fa";
+  import {  MdOutlineGavel, MdOutlineReviews } from "react-icons/md";
 
   const { Sider, Content } = Layout; 
   const items = [
     {
       key: '1',
-      icon: <UserOutlined />,
+      icon: <LineChartOutlined />,
       label: <Link to="/shop/dashboard">Dashboard</Link>,
     },
     {
@@ -21,8 +21,8 @@ import {
     },
     {
       key: '3',
-      label: <Link to="/shop/transition">Quản lý giao dịch</Link>,
-      icon: <UserSwitchOutlined />,
+      label: <Link to="/shop/order-management">Quản lý đơn hàng</Link>,
+      icon: <FaBoxOpen/>,
     //   children: [
     //     {
     //         key: '4',
@@ -33,6 +33,16 @@ import {
     //         label:<Link to="/shop/"></Link>,
     //       }
     //   ]
+    },
+    {
+      key: '4',
+      icon: <MdOutlineGavel  />,
+      label: <Link to="/shop/auction-management">Quản lý đấu giá</Link>
+    },
+    {
+      key: '6',
+      icon: <MdOutlineReviews />,
+      label: <Link to="/shop/report-management">Quản lý đánh giá</Link>
     },
     // {
     //   key: '6',
