@@ -36,45 +36,45 @@ const AutionDetail = () => {
                   <Caption>(2 customer reviews)</Caption>
                 </div>
                 <br />
-                <Body>Korem ipsum dolor amet, consectetur adipiscing elit. Maece nas in pulvinar neque. Nulla finibus lobortis pulvinar. Donec a consectetur nulla.</Body>
+                <Body></Body>
                 <br />
-                <Caption>Item condition: New</Caption>
+                <Caption>Tình Trạng Sản Phẩm: New</Caption>
                 <br />
-                <Caption>Item Verifed: Yes</Caption>
+                <Caption>Sản phẩm đã được xác nhận: Yes</Caption>
                 <br />
-                <Caption>Time left:</Caption>
+                <Caption>Thời gian đấu giá:</Caption>
                 <br />
                 <div className="flex gap-8 text-center">
                   <div className="p-5 px-10 shadow-s1">
                     <Title level={4}>149</Title>
-                    <Caption>Days</Caption>
+                    <Caption>Ngày</Caption>
                   </div>
                   <div className="p-5 px-10 shadow-s1">
                     <Title level={4}>12</Title>
-                    <Caption>Hours</Caption>
+                    <Caption>Tiếng</Caption>
                   </div>
                   <div className="p-5 px-10 shadow-s1">
                     <Title level={4}>36</Title>
-                    <Caption>Minutes</Caption>
+                    <Caption>phút</Caption>
                   </div>
                   <div className="p-5 px-10 shadow-s1">
                     <Title level={4}>51</Title>
-                    <Caption>Seconds</Caption>
+                    <Caption>giây</Caption>
                   </div>
                 </div>
                 <br />
                 <Title className="flex items-center gap-2">
-                  Auction ends:
-                  <Caption>March 30, 2025 12:00 am</Caption>
+                  Đấu giá kết thúc:
+                  <Caption>30/03/2025 12:00 am</Caption>
                 </Title>
                 <Title className="flex items-center gap-2 my-5">
                   Timezone: <Caption>UTC 0</Caption>
                 </Title>
                 <Title className="flex items-center gap-2 my-5">
-                  Price:<Caption>500000 VNĐ </Caption>
+                  Giá sàn:<Caption>500000 VNĐ </Caption>
                 </Title>
                 <Title className="flex items-center gap-2">
-                  Current bid:<Caption className="text-3xl">1000000 VNĐ </Caption>
+                  Đấu giá gần nhất:<Caption className="text-3xl">1000000 VNĐ </Caption>
                 </Title>
                 <div className="p-5 px-10 shadow-2xl py-8"> 
                     <form className="flex gap-3 justify-between  p-5  rounded-lg">
@@ -125,8 +125,8 @@ const AutionDetail = () => {
                     <div className="flex justify-between gap-5">
                       <div className="mt-4 capitalize w-1/2">
                         <div className="flex justify-between border-b py-3">
-                          <Title>category</Title>
-                          <Caption>Category</Caption>
+                          <Title>Thể Loại</Title>
+                          <Caption>EG</Caption>
                         </div>
                         <div className="flex justify-between border-b py-3">
                           <Title>Cấp độ </Title>
@@ -141,20 +141,20 @@ const AutionDetail = () => {
                           <Caption> 1/144</Caption>
                         </div>
                         <div className="flex justify-between py-3 border-b">
-                          <Title>Price</Title>
+                          <Title>Giá</Title>
                           <Caption> 500000 VNĐ </Caption>
                         </div>
                         <div className="flex justify-between py-3 border-b">
-                          <Title>verify</Title>
-                          YES
+                          <Title>Xác nhận</Title>
+                          Đã Xác Nhận
                         </div>
                         <div className="flex justify-between py-3 border-b">
                           <Title>Create At</Title>
-                          <Caption>March 01, 2025 12:00 am</Caption>
+                          <Caption>01/03/2025 12:00 am</Caption>
                         </div>
                         <div className="flex justify-between py-3">
                           <Title>Update At</Title>
-                          <Caption>March 31, 2025 12:00 am</Caption>
+                          <Caption>30/03/2025 12:00 am</Caption>
                         </div>
                       </div>
                       <div className="w-1/2">
@@ -206,13 +206,13 @@ export const AuctionHistory = () => {
               <thead className="text-xs text-gray-700 uppercase bg-gray-100">
                 <tr>
                   <th scope="col" className="px-6 py-5">
-                    Date
+                    Ngày 
                   </th>
                   <th scope="col" className="px-6 py-3">
-                    Bid Amount(USD)
+                    Số tiền đã đấu giá (VNĐ)
                   </th>
                   <th scope="col" className="px-6 py-3">
-                    User
+                    Người đấu giá
                   </th>
                   <th scope="col" className="px-6 py-3">
                     Auto
