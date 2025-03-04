@@ -13,18 +13,27 @@ export const CartProvider = ({ children }) => {
 
     // Fetch giỏ hàng từ API
     const fetchCartItems = async () => {
+        const accessToken = Cookies.get('access_token');
+        if (!accessToken) {
+            setLoading(false);
+            return;
+        }
+
         try {
-            const response = await GetCart();
+            const response = await GetCart(accessToken); // Truyền access_token vào API
             if (Array.isArray(response.data)) {
                 setCartItems(response.data);
+                console.log("Số lượng sản phẩm trong giỏ hàng sau khi fetch:", response.data.length);
             } else {
                 setCartItems([]);
+                console.log("Giỏ hàng trống sau khi fetch");
             }
             setLoading(false);
         } catch (err) {
             setError(err.message);
             setLoading(false);
             setCartItems([]);
+            console.log("Lỗi khi fetch giỏ hàng:", err.message);
         }
     };
 
@@ -33,7 +42,11 @@ export const CartProvider = ({ children }) => {
         try {
             const response = await AddToCart(item.id); // Gọi API thêm vào giỏ hàng
             const newItem = response.data; // Giả sử API trả về sản phẩm vừa thêm vào
-            setCartItems((prevItems) => [...prevItems, newItem]); // Cập nhật state
+            setCartItems((prevItems) => {
+                const updatedItems = [...prevItems, newItem];
+                console.log("Số lượng sản phẩm trong giỏ hàng sau khi thêm:", updatedItems.length);
+                return updatedItems;
+            });
         } catch (error) {
             console.error("Error adding to cart:", error);
         }
@@ -43,7 +56,11 @@ export const CartProvider = ({ children }) => {
     const removeFromCart = async (itemId) => {
         try {
             await DeleteCart(itemId); // Gọi API xóa sản phẩm
-            setCartItems((prevItems) => prevItems.filter((item) => item.cart_item_id !== itemId)); // Cập nhật state
+            setCartItems((prevItems) => {
+                const updatedItems = prevItems.filter((item) => item.cart_item_id !== itemId);
+                console.log("Số lượng sản phẩm trong giỏ hàng sau khi xóa:", updatedItems.length);
+                return updatedItems;
+            });
         } catch (error) {
             console.error("Error removing from cart:", error);
         }
@@ -51,13 +68,13 @@ export const CartProvider = ({ children }) => {
 
     // Fetch giỏ hàng khi component mount hoặc access_token thay đổi
     useEffect(() => {
-        const accessToken = Cookies.get('access_token');
-        if (accessToken) {
-            fetchCartItems(); // Fetch giỏ hàng nếu có access_token
-        } else {
-            setLoading(false); // Nếu không có access_token, không fetch giỏ hàng
-        }
+        fetchCartItems();
     }, []);
+
+    // Theo dõi sự thay đổi của cartItems
+    useEffect(() => {
+        console.log("Số lượng sản phẩm trong giỏ hàng:", cartItems.length);
+    }, [cartItems]);
 
     return (
         <CartContext.Provider value={{ cartItems, addToCart, removeFromCart, loading, error }}>

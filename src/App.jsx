@@ -1,7 +1,7 @@
 import { Routes, Route } from "react-router-dom";
 
 // import router
-import { HomePage, ErrorPage, ProductPage, SignIn, ProfilePage, UserProfile, Collection, TradeHistory, OrderHistory, UserLayout, ProductDetailPage, ShopDashboard, ShopPage, ShopProductManagement, ShopTransaction, ExchangePage, ExchangeDetail, CartPage1, Checkout, WalletPage, AdvancedSetting, SettingAddress, ShopRegister, RegisterShopLayout } from "./routes/router";
+import { HomePage, ErrorPage, ProductPage, SignIn, ProfilePage, UserProfile, Collection, TradeHistory, OrderHistory, UserLayout, ProductDetailPage, ShopDashboard, ShopPage, ShopProductManagement, ShopTransaction, ExchangePage, ExchangeDetail, CartPage1, Checkout, WalletPage, AdvancedSetting, SettingAddress, ShopRegister, RegisterShopLayout,AutionList,AutionDetail } from "./routes/router";
 
 // import Spinner from "./components/Spinner";
 
@@ -47,6 +47,11 @@ const App = () => {
           {/* <Route path="setting" element={<UserProfile />} /> */}
         </Route>
 
+        {/* Aution Route */}
+        <Route path="aution" element={<AutionList />}/>       
+        <Route path="aution/detail" element={<AutionDetail />} />
+
+        
         {/* Error route */}
         <Route path="error" element={<ErrorPage />} />
         <Route path="*" element={<ErrorPage />} />
