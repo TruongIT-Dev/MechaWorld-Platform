@@ -1,9 +1,9 @@
-import { Col, Row  } from 'antd';
+import { Col, message, Row } from 'antd';
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
-
+import { useNavigate, useParams } from 'react-router-dom';
 import { AddToCart, GetAllCartItem, GetGundamDetailBySlug } from '../../apis/ProductDetail/APIProductDetail';
-
+import { verifyToken } from '../../apis/Auth/APIAuth';
+import Cookies from 'js-cookie';
 import ReviewProduct from './Review';
 import SuggestProduct from './SuggestProduct';
 import ShopInfo from './ShopInfo';
@@ -12,6 +12,7 @@ import ProductInfo from './ProductInfo';
 
 const GundamProductPage = () => {
     const { slug } = useParams();
+    const navigate = useNavigate();
 
     const [detailGundam, setDetailGundam] = useState([]);
     const [idGundam, setIdGundam] = useState(null);
@@ -19,6 +20,8 @@ const GundamProductPage = () => {
     const [added, setAdded] = useState(false);
     const [imageGundam, setImageGundam] = useState([]);
     const [shopId, setShopId] = useState([]);
+    const [userId, setUserId] = useState("");
+    const [disableBuy, setDisableBuy] = useState(false);
     const [selectedImage, setSelectedImage] = useState(imageGundam[0]);
 
 
@@ -28,6 +31,7 @@ const GundamProductPage = () => {
         const fetchDetailGundamBySlug = async (slug) => {
             try {
                 const detailGundam = await GetGundamDetailBySlug(slug);
+                // console.log("detailGundam", detailGundam);
 
                 // Mapping condition từ tiếng Anh sang tiếng Việt
                 const conditionMapping = {
@@ -63,7 +67,7 @@ const GundamProductPage = () => {
             try {
                 const response = await GetAllCartItem(); // Gọi API lấy giỏ hàng từ DB
                 const cartItems = response?.data || [];  // Đảm bảo có dữ liệu
-                console.log("cartItems", cartItems);
+                // console.log("cartItems", cartItems);
 
                 if (cartItems.some(item => item?.gundam_id === idGundam)) {
                     setAdded(true); // Nếu sản phẩm đã có trong giỏ hàng thì đổi UI
@@ -76,35 +80,99 @@ const GundamProductPage = () => {
     }, [idGundam]);
 
 
+    // Lấy thông tin User từ Cookie để nhận dạng items có phải của Shop?
+    useEffect(() => {
+        const Access_token = Cookies.get('access_token');
+        if (Access_token) {
+            try {
+                verifyToken(Access_token).then(response => {
+                    // console.log(response?.data);
+                    setUserId(response?.data?.id);
+
+                })
+            } catch (error) {
+                console.error("Lỗi từ API:", error);
+            }
+        }
+    }, [])
+
+
+    // Kiểm tra nếu shopId === userId thì disable nút
+    useEffect(() => {
+        if (shopId !== null && userId !== null && shopId === userId) {
+            setDisableBuy(true);
+        } else {
+            setDisableBuy(false);
+        }
+    }, [shopId, userId]);
+
     // Handle Add To Cart
     const handleAddToCart = async (id) => {
         setLoadingAdded(true);
-        try {
-            const response = await AddToCart(id);
 
-            // Cập nhật localStorage
-            const cartItems = JSON.parse(localStorage.getItem("cartItems")) || [];
-            if (!cartItems.includes(id)) {
-                cartItems.push(id);
-                localStorage.setItem("cartItems", JSON.stringify(cartItems));
+        try {
+            // Kiểm tra nếu chưa đăng nhập
+            if (!userId) {
+                message.error('Bạn cần phải Đăng nhập trước!');
+                navigate('/signIn');
+                return;
             }
 
-            setAdded(true);
-            console.log("Added to cart:", response.data);
-            alert("Sản phẩm đã được thêm vào giỏ hàng!");
+            // Tạo độ trễ trước khi thêm vào giỏ hàng
+            setTimeout(async () => {
+                try {
+                    // Gọi API để thêm vào giỏ hàng
+                    const response = await AddToCart(id);
+                    if (response?.data) {
+                        setAdded(true);
+                        message.success('Đã thêm vào giỏ hàng.');
+                    }
+                } catch (error) {
+                    message.error("Lỗi khi thêm vào giỏ hàng!");
+                    console.error("Error:", error);
+                } finally {
+                    setLoadingAdded(false);
+                }
+            }, 1500); // Độ trễ 1.5 giây
+
         } catch (error) {
+            message.error("Lỗi Added Cart!");
             console.error("Error:", error);
-            alert("Lỗi khi thêm vào giỏ hàng!");
-        } finally {
             setLoadingAdded(false);
         }
     };
 
 
+    // Handle Buy Instant
+    const handleBuyNow = async (id) => {
+        try {
+            // Kiểm tra nếu chưa đăng nhập
+            if (!userId) {
+                message.error('Bạn cần phải Đăng nhập trước!');
+                navigate('/signIn');
+                return; // Dừng function tại đây
+            }
+
+            // Gọi API để thêm vào giỏ hàng
+            const response = await AddToCart(id);
+            if (response?.data) {
+                setAdded(true);
+                navigate('/checkout');
+            }
+
+        } catch (error) {
+            message.error("Sản phẩm đã có trong Giỏ hàng!");
+            console.error("Error:", error);
+        } finally {
+            setLoadingAdded(false);
+        }
+    }
+
+
     // ************** Hàm Format Tiền Việt *****************
     const formatCurrencyVND = (price) => {
         if (!price) return "0 vnd";
-        return price.toLocaleString("vi-VN") + " vnd";
+        return price.toLocaleString("vi-VN") + " VND";
     };
 
 
@@ -119,16 +187,16 @@ const GundamProductPage = () => {
 
 
     return (
-        <div className="container mt-24 p-6 bg-white">
+        <div className="container mt-24 p-6 bg-gray-100">
             <div className="wrapper mx-40">
                 {/* Main Section */}
                 <div className="top-section">
                     <Row gutter={24}>
                         {/* Image */}
                         <Col span={8}>
-                            <div className="image-section">
+                            <div className="image-section sticky top-24">
                                 {/* Main Display Image */}
-                                <div className="flex justify-center items-center">
+                                <div className="flex justify-center items-center bg-white shadow-md rounded-md">
                                     <img
                                         src={selectedImage}
                                         className="w-full h-[750px] max-w-full max-h-96 object-contain"
@@ -136,7 +204,7 @@ const GundamProductPage = () => {
                                 </div>
 
                                 {/* Thumbnail List */}
-                                <div className="mt-4 overflow-auto">
+                                <div className="mt-4 overflow-auto bg-white shadow-md py-2 rounded-lg">
                                     <div className="flex gap-4 max-w-[320px]">
                                         {imageGundam.slice(0, 5).map((image, index) => (
                                             <img
@@ -155,54 +223,65 @@ const GundamProductPage = () => {
                         {/* Describe */}
                         <Col span={9}>
                             <div className="description-section">
-                                <ProductInfo />
+                                <ProductInfo info={detailGundam} />
                             </div>
                         </Col>
 
                         {/* Add to card */}
-                        <Col span={7} className='space-y-2'>
-                            <div className="p-4 border rounded-lg shadow-md space-y-3">
-                                {/* Product Name */}
-                                <h1 className="text-xl font-bold text-gray-900">{detailGundam.name}</h1>
+                        <Col span={7}>
+                            <div className='space-y-4 sticky top-24'>
+                                <div className="p-4 border rounded-lg bg-white shadow-md space-y-3">
+                                    {/* Product Name */}
+                                    <h1 className="text-xl font-bold text-gray-900">{detailGundam.name}</h1>
 
-                                {/* Price */}
-                                <div className="flex items-center space-x-4">
-                                    <p className="text-2xl font-semibold text-red-500">
-                                        Giá: {formatCurrencyVND(detailGundam?.price)}
-                                    </p>
+                                    {/* Price */}
+                                    <div className="flex items-center space-x-4">
+                                        <p className="text-2xl font-semibold text-red-500">
+                                            Giá: {formatCurrencyVND(detailGundam?.price)}
+                                        </p>
+                                    </div>
+
+
+                                    {/* Gundam Info */}
+                                    <div className="space-y-2 text-sm">
+                                        <p className='text-green-600 font-semibold'><span className="font-semibold text-black">Tình trạng:</span> {detailGundam.condition}</p>
+                                    </div>
+
+                                    {/* Buy Button */}
+                                    <button
+                                        type="button"
+                                        className={`w-full py-3 rounded-lg font-semibold transition ${disableBuy ? "bg-gray-300 text-gray-400 cursor-not-allowed" : "bg-red-500 text-white hover:bg-red-600"
+                                            }`}
+                                        onClick={disableBuy ? null : () => handleBuyNow(idGundam)}
+                                        disabled={disableBuy}
+                                    >
+                                        Mua ngay
+                                    </button>
+
+                                    {/* Add to Cart Button */}
+                                    <button
+                                        type="button"
+                                        onClick={() => handleAddToCart(idGundam)}
+                                        disabled={disableBuy || loadingAdded || added}
+                                        className={`w-full py-3 rounded-lg font-semibold transition 
+    ${disableBuy ? "bg-gray-300 text-gray-400 cursor-not-allowed" :
+                                                added ? "bg-green-500 text-white hover:bg-green-600" :
+                                                    "bg-gray-300 text-black hover:bg-gray-400"}
+  `}
+                                    >
+                                        {disableBuy
+                                            ? "🚫 Không thể mua"
+                                            : added
+                                                ? "✅ Đã thêm vào giỏ hàng"
+                                                : loadingAdded
+                                                    ? "Đang thêm..."
+                                                    : "Thêm vào giỏ hàng"}
+                                    </button>
                                 </div>
-
-                                {/* Gundam Info */}
-                                <div className="space-y-2 text-sm">
-                                    {/* <p><span className="font-semibold text-black">Tỉ lệ:</span> {detailGundam.scale}</p> */}
-                                    <p className='text-green-600 font-semibold'><span className="font-semibold text-black">Tình trạng:</span> {detailGundam.condition}</p>
-                                    {/* <p><span className="font-semibold text-black">Nhà sản xuất:</span> {detailGundam.manufacturer} </p> */}
+                                {/* Seller Info */}
+                                <div className="shop-info sticky ">
+                                    <ShopInfo shopID={shopId} />
                                 </div>
-
-                                {/* Buy Button */}
-                                <button
-                                    type="button"
-                                    className="w-full py-3 bg-red-500 text-white rounded-lg font-semibold hover:bg-red-600 transition"
-                                    onClick={handleAddToCart} // Thêm sự kiện onClick
-                                >
-                                    Mua ngay
-                                </button>
-                                <button
-                                    type="button"
-                                    onClick={() => handleAddToCart(idGundam)}
-                                    disabled={loadingAdded || added}
-                                    className={`w-full py-3 rounded-lg font-semibold transition ${added
-                                        ? "bg-green-500 text-white cursor-not-allowed"
-                                        : "bg-gray-300 text-black hover:bg-gray-400"
-                                        }`}
-                                >
-                                    {added ? "✅ Đã thêm vào giỏ hàng" : loadingAdded ? "Đang thêm..." : "Thêm vào giỏ hàng"}
-                                </button>
-                            </div>
-
-                            {/* Seller Info */}
-                            <div className="shop-info">
-                                <ShopInfo shopID={shopId} />
                             </div>
                         </Col>
                     </Row>

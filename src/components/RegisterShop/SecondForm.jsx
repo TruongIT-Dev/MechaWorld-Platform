@@ -90,10 +90,9 @@ const SecondForm = () => {
 
     return (
         <>
-
             <div className="max-w-2xl mx-auto">
                 <div className="second-form-header">
-                    <h2 className="text-xl font-bold">NHẬP THÔNG TIN GIAO HÀNG</h2>
+                    <h2 className="text-xl font-bold">NHẬP THÔNG TIN LẤY HÀNG</h2>
                     <p className="text-gray-500">
                         Địa chỉ nơi thuận tiện nhất của bạn để dịch vụ giao hàng của chúng tôi có thể đến lấy hàng và tiến hành giao hàng.
                     </p>

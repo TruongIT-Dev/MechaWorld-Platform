@@ -3,6 +3,7 @@ import { useSelector } from "react-redux"
 import UserNavbar from "./UserNavbar";
 import GuestNavbar from "./GuestNavbar";
 
+import Logo from '../assets/image/web-logo.png';
 
 const Menu = [
   {
@@ -79,7 +80,8 @@ const Navbar = () => {
       {/* upper Navbar */}
       <div className="p-2 bg-blue-300">
         <div className="container flex justify-between items-center">
-          <div>
+          <div className="flex items-center">
+            {/* <img src={Logo} alt="Logo MechaWorld" className="w-[90px] h-[50px] object-contain" /> */}
             <a href="#" className="font-bold hover:text-blue-700 text-2xl sm:text-3xl flex gap-2">
               MechaWorld
             </a>

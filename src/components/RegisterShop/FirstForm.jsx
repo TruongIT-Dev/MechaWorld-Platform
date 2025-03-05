@@ -8,6 +8,8 @@ import { verifyOtp, verifyPhone } from "../../apis/User/APIUserProfile";
 const FirstForm = ({ form, setIsPhoneVerified }) => {
 
     const [user, setUser] = useState(useSelector((state) => state.auth.user));
+    const [fullName, setFullName] = useState(user?.full_name || "");
+
 
     const [otpVisible, setOtpVisible] = useState(false);
     const [otp, setOtp] = useState("");
@@ -19,8 +21,9 @@ const FirstForm = ({ form, setIsPhoneVerified }) => {
         if (access_token) {
             try {
                 verifyToken(access_token).then(response => {
-                    console.log(response.data);
+                    // console.log("Data user", response.data);
                     setUser(response.data);
+                    setFullName(response.data.full_name);
                 })
             } catch (error) {
                 console.error("Lỗi lấy Thông tin User:", error);
@@ -31,11 +34,19 @@ const FirstForm = ({ form, setIsPhoneVerified }) => {
 
     // Hàm xử lý Thay đổi tên Shop
     useEffect(() => {
-        if (user?.full_name) {
+        if (user) {
             // console.log("🔄 Cập nhật Form Cha với full_name:", user.full_name);
+            // console.log("🔄 Cập nhật Form Cha với phoneNumber:", user.phone_number);
             form.setFieldsValue({ full_name: user.full_name });
+            form.setFieldsValue({ phone_number: user?.phone_number });
         }
     }, [user, form]);
+
+
+
+    const handleNameChange = (e) => {
+        setFullName(e.target.value);
+    };
 
 
     // Gửi OTP
@@ -51,8 +62,8 @@ const FirstForm = ({ form, setIsPhoneVerified }) => {
             const otpValue = response.data.otp_code; // ✅ Lấy trực tiếp từ response
 
             setOtpCode(otpValue); // Cập nhật state nhưng không dùng ngay lập tức
-            console.log("✅ Gửi OTP Response:", response);
-            console.log("otpCode từ API:", otpValue); // ✅ Đảm bảo in ra đúng giá trị
+            // console.log("✅ Gửi OTP Response:", response);
+            // console.log("otpCode từ API:", otpValue); // ✅ Đảm bảo in ra đúng giá trị
             if (response.status === 200) {
                 message.success({
                     content: `OTP của bạn là: ${otpValue}`,
@@ -85,7 +96,7 @@ const FirstForm = ({ form, setIsPhoneVerified }) => {
             }
 
             const response = await verifyOtp(user?.id, phoneNumber, otp);
-            console.log("✅ Xác thực OTP Response:", response);
+            // console.log("✅ Xác thực OTP Response:", response);
 
             if (response.status === 200) {
                 message.success("Xác thực thành công!");
@@ -118,7 +129,7 @@ const FirstForm = ({ form, setIsPhoneVerified }) => {
                     name="full_name"
                     rules={[{ required: true, message: "Vui lòng nhập tên người bán!" }]}
                 >
-                    <Input />
+                    <Input value={fullName} onChange={handleNameChange} />
                 </Form.Item>
 
                 {/* Input phone number */}
@@ -131,7 +142,7 @@ const FirstForm = ({ form, setIsPhoneVerified }) => {
                     ]}
                 >
                     <Space.Compact style={{ width: "100%" }}>
-                        <Input placeholder="Nhập số điện thoại" />
+                        <Input placeholder="Nhập số điện thoại" value={user?.phone_number} />
                         <Button
                             onClick={handleSendOtp}
                             type="primary"

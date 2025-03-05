@@ -15,8 +15,8 @@ const Product = () => {
     const [gundams, setGundams] = useState([]);
     const [filters, setFilters] = useState({
         selectedGrade: null,
-        condition: "all",
-        priceRange: [100, 1000]
+        // condition: "all",
+        // priceRange: [100, 1000]
     });
 
     const [loading, setLoading] = useState(true);
@@ -29,22 +29,24 @@ const Product = () => {
                 let response;
                 if (filters.selectedGrade) {
                     response = await GetGundamByGrade(filters.selectedGrade);
+                    // console.log("Trigger Filter Gundam:", response)
                 } else {
                     response = await GetGundams();
+                    // console.log("Trigger List All Gundam:", response)
                 }
 
-                let filteredData = response.data;
+                let filteredData = response?.data;
 
                 // Lọc theo tình trạng
-                if (filters.condition !== "all") {
-                    filteredData = filteredData.filter(gundam => gundam.condition === filters.condition);
-                }
+                // if (filters.condition !== "all") {
+                //     filteredData = filteredData.filter(gundam => gundam.condition === filters.condition);
+                // }
 
                 // Lọc theo giá
-                filteredData = filteredData.filter(gundam =>
-                    gundam.price >= filters.priceRange[0] * 1000 &&
-                    gundam.price <= filters.priceRange[1] * 1000
-                );
+                // filteredData = filteredData.filter(gundam =>
+                //     gundam.price >= filters.priceRange[0] * 1000 &&
+                //     gundam.price <= filters.priceRange[1] * 1000
+                // );
 
                 setGundams(filteredData);
             } catch (error) {
@@ -63,10 +65,18 @@ const Product = () => {
         setFilters(newFilters);
     };
 
-    // handleClicked to Link detail gundam
+
+    // Hàm chuyển tới trang Chi tiết Gundam
     const handleClickedDetailGundam = (slug) => {
-        navigate(`/product/${slug}`);
-    }
+        window.location.assign(`/product/${slug}`);
+    };
+
+
+    // ************** Hàm Format Tiền Việt *****************
+    const formatCurrencyVND = (price) => {
+        if (!price) return "0 vnd";
+        return price.toLocaleString("vi-VN") + " vnd";
+    };
 
     return (
         <>
@@ -139,7 +149,7 @@ const Product = () => {
                                                     >
                                                         <Meta
                                                             title={gundam.name}
-                                                            description={<span className="text-red-600 font-semibold">Giá: {gundam.price} VND</span>}
+                                                            description={<span className="text-red-600 font-semibold">{formatCurrencyVND(gundam?.price)}</span>}
                                                         />
                                                     </Card>
                                                 </Col>

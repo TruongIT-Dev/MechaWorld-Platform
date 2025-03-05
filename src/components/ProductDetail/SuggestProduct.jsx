@@ -36,8 +36,8 @@ const suggestedProducts = [
 export default function SuggestProduct() {
     return (
         <>
-            <div className="suggest-section">
-                <div className="mt-12 p-4 border rounded-lg shadow-sm">
+            <div className="suggest-section bg-white ">
+                <div className="mt-12 p-6 border rounded-lg shadow-sm">
                     <h2 className="text-xl font-bold text-gray-900">Gợi ý sản phẩm tương tự</h2>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-6">
                         {suggestedProducts.map((product) => (

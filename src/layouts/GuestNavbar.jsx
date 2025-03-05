@@ -40,14 +40,14 @@ const GuestNavbar = () => {
                 <>
                     <NavLink
                         to="/signIn"
-                        className="text-base font-semibold capitalize text-gray-900 hover:text-gray-500"
+                        className="text-lg font-semibold capitalize text-gray-900 hover:text-gray-500"
                     >
                         Đăng nhập
                     </NavLink>
                     <div className="h-4 border-l-2 border-l-black"></div>
                     <NavLink
                         to="/signIn"
-                        className="text-base font-semibold capitalize text-gray-900 hover:text-gray-500"
+                        className="text-lg font-semibold capitalize text-gray-900 hover:text-gray-500"
                     >
                         Đăng ký
                     </NavLink>

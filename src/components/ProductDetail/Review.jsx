@@ -35,7 +35,7 @@ export default function ReviewProduct() {
     };
     return (
         <>
-            <div className="comment-section">
+            <div className="comment-section bg-white rounded-lg shadow-lg">
                 {/* Comments Section */}
                 <div className="mt-12 p-4 border rounded-lg shadow-sm">
                     <h2 className="text-xl font-bold text-gray-900">Đánh giá và Bình luận</h2>
