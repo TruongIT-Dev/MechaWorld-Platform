@@ -2,6 +2,7 @@ import {
   UserSwitchOutlined,
   ShoppingOutlined,
   UserOutlined,
+  BankOutlined,
 } from '@ant-design/icons';
 import { Menu, Layout } from 'antd';
 import { Outlet, Link } from 'react-router-dom';
@@ -32,18 +33,26 @@ const items = [
       { key: "6", label: <Link to="#">Đơn trao đổi</Link> },
     ],
   },
-
+  {
+    key: "7",
+    icon: <BankOutlined className="text-lg text-red-500" />,
+    label: "Quản lý đấu giá",
+    children: [
+      { key: "8", label: <Link to="/profile/addProductAution">Tạo sản phẩm đấu giá</Link> },
+      { key: "9", label: <Link to="/profile/listProductAution">Danh sách sản phẩm đấu giá</Link> },
+    ],
+  },
   {
     key: "menu2",
     icon: <UserSwitchOutlined className="text-lg text-green-500" />,
     label: "Số dư & Giao dịch",
     children: [
-      { key: "7", label: <Link to="#">Số dư ví</Link> },
-      { key: "8", label: <Link to="#">Lịch sử giao dịch</Link> },
+      { key: "11", label: <Link to="#">Số dư ví</Link> },
+      { key: "12", label: <Link to="#">Lịch sử giao dịch</Link> },
     ],
   },
   {
-    key: "9",
+    key: "13",
     icon: <UserOutlined className="text-lg text-blue-500" />,
     label: "Rút tiền",
   },

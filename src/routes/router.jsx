@@ -52,10 +52,14 @@ export const ShopAuctionManagement = React.lazy(() => import("../components/Shop
 export const ShopOrderManagement = React.lazy(() => import("../components/Shop/ShopOrderManagement"));
 export const ShopReportManagement = React.lazy(() => import("../components/Shop/ShopReportManagement"));
 
-// Shop route
+// Aution route
 export const AutionList = React.lazy(() => import("../components/Aution/User/AutionList"));
 export const AutionDetail = React.lazy(() => import("../components/Aution/User/AutionDetail"));
 
+export const AddProductToAution = React.lazy(() => import("../components/Aution/shop/AddProductToAution"));
+export const ListProductToAution = React.lazy(() => import("../components/Aution/shop/ListProductToAution"));
+
+export const CensorProductToAution = React.lazy(() => import("../components/Aution/Moderator/CensorAution"));
 // Authentication route
 export const SignIn = React.lazy(() => import("../components/Sign"));
 

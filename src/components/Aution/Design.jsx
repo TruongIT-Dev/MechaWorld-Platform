@@ -20,6 +20,15 @@ const Title = ({ level, children, className }) => {
   return <Heading className={`${className} ${classes}`}>{children}</Heading>;
 };
 
+const CategoryDropDown = (props) => {
+  return (
+    <>
+      <Select id="category" />
+    </>
+  );
+};
+
+
 const Body = ({ children, className }) => {
   return <p className={`${className} text-base font-normal text-[rgb(107, 113, 119)]`}>{children}</p>;
 };

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Table, Button, Checkbox, message } from 'antd';
 import { Link } from "react-router-dom";
 import { useCart } from '../../context/CartContext';
-
+import { ShopOutlined } from '@ant-design/icons';
 const { Column } = Table;
 
 const Carts = () => {
@@ -44,7 +44,10 @@ const Carts = () => {
       {/* Duyệt qua từng seller và hiển thị bảng tương ứng */}
       {Object.entries(groupedCartItems).map(([sellerName, items]) => (
         <div key={sellerName} className="mb-8">
-          <h2 className="text-xl font-semibold mb-4">Người bán: {sellerName}</h2>
+          <div className="flex items-center mt-5 mb-5">
+                      <ShopOutlined className="text-xl text-gray-500 mr-2" />
+                      <p className="font-semibold text-lg">{sellerName}</p>
+                    </div>
           <Table
             dataSource={items}
             pagination={false}
@@ -70,30 +73,14 @@ const Carts = () => {
               width="33.33%"
             />
 
-            <Column
-              title="Thông tin người bán"
-              key="seller_name"
-              render={(text, record) => (
-                <div className="flex items-center">
-                  <img
-                    src={record.seller_avatar_url}
-                    alt={record.seller_name}
-                    className="w-16 h-16 object-cover rounded border border-gray-300 mr-4"
-                  />
-                  <div>
-                    <div className="font-semibold">{record.seller_name}</div>
-                  </div>
-                </div>
-              )}
-              width="33.33%"
-            />
+            
 
             <Column
               title="Đơn Giá"
               dataIndex="gundam_price"
               key="gundam_price"
               render={(price) => `${price.toLocaleString()} VNĐ`}
-              width="33.33%"
+              width="43.33%"
             />
 
             <Column
@@ -104,7 +91,7 @@ const Carts = () => {
                   Xóa
                 </Button>
               )}
-              width="10%"
+              width="20%"
             />
           </Table>
         </div>
