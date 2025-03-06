@@ -73,7 +73,7 @@ const UserNavbar = ({ user }) => {
     // Danh sách List Dropdown Menu
     const menuItems = [
         { to: "/profile/user", icon: <FaUser className="mr-2 text-blue-600" />, label: "Tài khoản của tôi" },
-        { to: "/registe-shop", icon: <FaStore className="mr-2 text-green-600" />, label: "Đăng ký bán hàng", role: "customer" },
+        { to: "/registe-shop", icon: <FaStore className="mr-2 text-green-600" />, label: "Đăng ký bán hàng", role: "member" },
         { to: "/shop/dashboard", icon: <FaStore className="mr-2 text-green-600" />, label: "Quản lý kho", role: "seller" },
         { to: "#", icon: <FaClipboardList className="mr-2 text-yellow-500" />, label: "Đơn mua" },
         { to: "#", icon: <FaSignOutAlt className="mr-2 text-red-500" />, label: "Đăng xuất", onClick: handleLogout },
@@ -113,21 +113,21 @@ const UserNavbar = ({ user }) => {
                     onMouseLeave={handleMouseLeave}
                 >
                     <button className="btn text-xl space-x-4 hover:text-blue-700 flex justify-center items-center m-0">
+                        <span className="text-sm font-semibold max-w-[200px] truncate">
+                            Xin chào, {user?.full_name}
+                        </span>
                         <img
                             src={user?.avatar_url}
                             className="w-[40px] h-[40px] rounded-full bg-white"
                             alt="avatar"
                         />
-                        <span className="text-sm font-semibold max-w-[120px] truncate">
-                            {user?.full_name}
-                        </span>
                     </button>
 
                     {isDropdownOpen && (
                         <div
                             data-aos="zoom-in"
                             data-aos-duration="300"
-                            className="absolute right-0 mt-2 min-w-[180px] max-w-[240px] bg-white border rounded-lg shadow-lg z-50"
+                            className="absolute right-0 mt-2 min-w-[200px] bg-white border rounded-lg shadow-lg z-50"
                         >
                             {filteredMenu.map((item, index) => (
                                 <NavLink

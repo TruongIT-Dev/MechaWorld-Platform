@@ -9,6 +9,7 @@ import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import { BrowserRouter } from "react-router-dom";
 import { GoogleOAuthProvider } from "@react-oauth/google";
+import { CartProvider } from "./context/CartContext.jsx";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <Provider store={store}>
@@ -16,7 +17,9 @@ ReactDOM.createRoot(document.getElementById("root")).render(
       <React.StrictMode>
         <BrowserRouter>
           <GoogleOAuthProvider clientId={import.meta.env.VITE_CLIENT_ID_SECRET}>
-            <App />
+            <CartProvider>
+              <App />
+            </CartProvider>
           </GoogleOAuthProvider>
         </BrowserRouter>
       </React.StrictMode>
