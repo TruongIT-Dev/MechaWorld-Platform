@@ -1,5 +1,7 @@
-import { useEffect, useState } from "react";
-import { FaWallet } from "react-icons/fa6";
+import {
+    //  useEffect,
+     useState } from "react";
+// import { FaWallet } from "react-icons/fa6";
 import { FaUser, FaSignOutAlt, FaClipboardList, FaStore } from "react-icons/fa";
 import { useDispatch } from "react-redux";
 import { NavLink } from "react-router-dom";
@@ -15,7 +17,6 @@ const UserNavbar = ({ user }) => {
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     // const isRole = useSelector(state => state.auth.user.role)
     // const [userData, setUserData] = useState(null);
-
     let timeoutId = null;
 
     // const navigate = useNavigate();
@@ -150,7 +151,9 @@ const UserNavbar = ({ user }) => {
 
 UserNavbar.propTypes = {
     user: PropTypes.shape({
-        avatar_url: PropTypes.string
+        avatar_url: PropTypes.string,
+        full_name: PropTypes.string,
+        role: PropTypes.string
     }).isRequired
 };
 

@@ -70,7 +70,12 @@ const ProfilePage = () => {
           setAvatar(e.target.result);
         } else {
           setAvatar(e.target.result);
-          await uploadAvatar(user.id, file);
+          const response = await uploadAvatar(user.id, file);
+        if (response.status === 200) {
+          message.success("Đổi ảnh thành công!");
+        } else {
+          message.error("Vui lòng kiểm tra lại ảnh!");
+        }
         }
       };
     };
@@ -83,7 +88,12 @@ const ProfilePage = () => {
 
       croppedCanvas.toBlob(async (blob) => {
         const file = new File([blob], "avatar.jpg", { type: "image/jpeg" });
-        await uploadAvatar(user.id, file);
+        const response = await uploadAvatar(user.id, file);
+        if (response.status === 200) {
+          message.success("Đổi ảnh thành công!");
+        } else {
+          message.error("Vui lòng kiểm tra lại ảnh!");
+        }
         const newAvatarURL = URL.createObjectURL(blob);
         setAvatar(newAvatarURL);
         console.log("load thành công đến đây")

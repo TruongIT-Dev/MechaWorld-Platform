@@ -26,6 +26,10 @@ export const authSlice = createAppSlice({
             state.access_token = null;
             state.access_token_expires_at = null;
         },
+        updateUser: (state, action) => {
+            state.isLoggedIn = true;
+            state.user = action.payload;
+        },
         // signup: (state, action) => {
             
         // },
@@ -34,5 +38,5 @@ export const authSlice = createAppSlice({
         }
     }   
 })
-export const { login, logout,updateUserProfile  } = authSlice.actions;
+export const { login, logout,updateUserProfile, updateUser  } = authSlice.actions;
 export default authSlice.reducer;
