@@ -6,8 +6,8 @@ import { verifyToken } from "../apis/Auth/APIAuth";
 import { useSelector } from "react-redux";
 
 const GuestNavbar = () => {
-    const [user, setUser] = useState(null);
-    const isLoggedIn = useSelector(state => state.auth.isLoggedIn); 
+    const [user, setUser] = useState(useSelector((state) => state?.auth?.user));
+    const isLoggedIn = useSelector(state => state.auth.isLoggedIn);
 
     useEffect(() => {
         const Access_token = Cookies.get("access_token");
@@ -16,6 +16,7 @@ const GuestNavbar = () => {
             verifyToken(Access_token)
                 .then(response => {
                     setUser(response.data);
+                    console.log("user Navbar:", user);
                 })
                 .catch(error => {
                     console.error("Lỗi từ API:", error);
@@ -34,7 +35,7 @@ const GuestNavbar = () => {
             {user ? (
                 <>
                     {/* User Profile */}
-                    <UserProfile user={user}/>
+                    <UserProfile user={user} />
                 </>
             ) : (
                 <>

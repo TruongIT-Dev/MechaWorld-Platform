@@ -7,6 +7,7 @@ import Cookies from 'js-cookie';
 import ReviewProduct from './Review';
 import SuggestProduct from './SuggestProduct';
 import ShopInfo from './ShopInfo';
+import ProductInfo from './ProductInfo';
 import { useCart } from '../../context/CartContext'; // Import useCart từ Context
 
 const product = {

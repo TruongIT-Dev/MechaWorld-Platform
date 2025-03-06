@@ -7,9 +7,9 @@ import { useSelector } from "react-redux";
 // import Spinner from "./components/Spinner";
 
 function App() {
-  const accessToken = useSelector((state) => state.auth.access_token);
-  const userId = useSelector((state) => state.auth.user);
-  console.log(accessToken, userId);
+  // const accessToken = useSelector((state) => state.auth.access_token);
+  // const userId = useSelector((state) => state.auth.user);
+  // console.log(accessToken, userId);
 
   return (
     <Suspense fallback={<div>Loading...</div>}>

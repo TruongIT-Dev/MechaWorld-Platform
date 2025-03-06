@@ -1,5 +1,6 @@
-import { Form, Input, Button, message, Space } from "antd";
+import { Form, Input, Button, message, Space, Modal } from "antd";
 import { useEffect, useState } from "react";
+import { PhoneOutlined, LockOutlined } from "@ant-design/icons";
 import Cookies from 'js-cookie';
 import { verifyToken } from '../../apis/Auth/APIAuth';
 import { useSelector } from "react-redux";
@@ -8,12 +9,22 @@ import { verifyOtp, verifyPhone } from "../../apis/User/APIUserProfile";
 const FirstForm = ({ form, setIsPhoneVerified }) => {
 
     const [user, setUser] = useState(useSelector((state) => state.auth.user));
+
+    const [email, setEmail] = useState(user?.email || "");
     const [fullName, setFullName] = useState(user?.full_name || "");
+    const [newPhoneNumber, setNewPhoneNumber] = useState(user?.phone_number || "")
 
+    const [phoneNumber, setPhoneNumber] = useState("");
+    const [modalVisible, setModalVisible] = useState(false);
+    const [step, setStep] = useState(1); // Step 1: Nhập SĐT, Step 2: Nhập OTP
 
-    const [otpVisible, setOtpVisible] = useState(false);
     const [otp, setOtp] = useState("");
     const [otpCode, setOtpCode] = useState("");
+    const [otpVisible, setOtpVisible] = useState(false);
+
+    const [countdown, setCountdown] = useState(60);
+    const [isResendDisabled, setIsResendDisabled] = useState(true);
+
 
     // Lấy Thông tin User từ Cookie
     useEffect(() => {
@@ -21,10 +32,17 @@ const FirstForm = ({ form, setIsPhoneVerified }) => {
         if (access_token) {
             try {
                 verifyToken(access_token).then(response => {
-                    // console.log("Data user", response.data);
+                    console.log("Data user", response.data);
                     setUser(response.data);
+                    setEmail(response.data.email);
                     setFullName(response.data.full_name);
-                })
+                    setNewPhoneNumber(response.data.phone_number);
+
+                    // Kiểm tra số điện thoại và cập nhật trạng thái xác thực
+                    if (response.data.phone_number) {
+                        setIsPhoneVerified(true);
+                    }
+                });
             } catch (error) {
                 console.error("Lỗi lấy Thông tin User:", error);
             }
@@ -35,10 +53,8 @@ const FirstForm = ({ form, setIsPhoneVerified }) => {
     // Hàm xử lý Thay đổi tên Shop
     useEffect(() => {
         if (user) {
-            // console.log("🔄 Cập nhật Form Cha với full_name:", user.full_name);
-            // console.log("🔄 Cập nhật Form Cha với phoneNumber:", user.phone_number);
-            form.setFieldsValue({ full_name: user.full_name });
-            form.setFieldsValue({ phone_number: user?.phone_number });
+            form.setFieldsValue({ full_name: user?.full_name });
+            form.setFieldsValue({ email: user?.email });
         }
     }, [user, form]);
 
@@ -51,26 +67,49 @@ const FirstForm = ({ form, setIsPhoneVerified }) => {
 
     // Gửi OTP
     const handleSendOtp = async () => {
-        try {
-            const phoneNumber = form.getFieldValue("phone_number");
-            if (!phoneNumber) {
-                message.error("Vui lòng nhập số điện thoại trước khi gửi OTP!");
-                return;
-            }
 
+        // Validate Ko nhập Sđt
+        if (!phoneNumber) {
+            message.error("Vui lòng nhập số điện thoại!");
+            return;
+        }
+
+        // Validate Nhập Sđt không hợp lệ
+        if (!/^[0-9]{10}$/.test(phoneNumber)) {
+            message.error("Số điện thoại không hợp lệ!");
+            return;
+        }
+
+
+        try {
             const response = await verifyPhone(phoneNumber);
-            const otpValue = response.data.otp_code; // ✅ Lấy trực tiếp từ response
+            const otpValue = response.data.otp_code;
 
             setOtpCode(otpValue); // Cập nhật state nhưng không dùng ngay lập tức
+
             // console.log("✅ Gửi OTP Response:", response);
             // console.log("otpCode từ API:", otpValue); // ✅ Đảm bảo in ra đúng giá trị
+
             if (response.status === 200) {
+                console.log("Gửi OTP thành công", response);
+
                 message.success({
                     content: `OTP của bạn là: ${otpValue}`,
                     duration: 10, // ⏳ Giữ thông báo trong 10 giây
                 });
-
+                setStep(2); // Chuyển qua bước nhập OTP
                 setOtpVisible(true);
+                setIsResendDisabled(true);
+                setCountdown(60);
+                const interval = setInterval(() => {
+                    setCountdown((prev) => {
+                        if (prev === 1) {
+                            clearInterval(interval);
+                            setIsResendDisabled(false);
+                        }
+                        return prev - 1;
+                    });
+                }, 1000);
             }
         } catch (error) {
             message.error("Không thể gửi OTP! Vui lòng thử lại.");
@@ -78,30 +117,26 @@ const FirstForm = ({ form, setIsPhoneVerified }) => {
     };
 
 
-
-    // Nhập OTP
-    const handleOtp = (value) => {
-        setOtp(value); // ✅ Đảm bảo nhận giá trị đúng từ Input.OTP
-        console.log("OTP nhập vào:", value);
-    };
-
-
-    // Xác thực OTP
+    // Hàm xác thực OTP
     const handleVerifyOtp = async () => {
-        try {
-            const phoneNumber = form.getFieldValue("phone_number");
-            if (!otp) {
-                message.error("Vui lòng nhập mã OTP!");
-                return;
-            }
+        console.log("📩 Đã gọi handleVerifyOtp");
+        console.log("🔢 OTP hiện tại:", otp);
 
+        if (!otp) {
+            message.error("Vui lòng nhập mã OTP!");
+            return;
+        }
+
+        try {
             const response = await verifyOtp(user?.id, phoneNumber, otp);
-            // console.log("✅ Xác thực OTP Response:", response);
+            console.log("✅ Xác thực OTP Response:", response);
 
             if (response.status === 200) {
                 message.success("Xác thực thành công!");
                 setOtpVisible(false);
+                setModalVisible(false); // Đảm bảo đúng cách đóng modal
                 setIsPhoneVerified(true);
+                setOtp("");
             } else {
                 message.error("OTP không đúng! Vui lòng kiểm tra lại.");
             }
@@ -110,9 +145,10 @@ const FirstForm = ({ form, setIsPhoneVerified }) => {
         }
     };
 
+
     return (
         <>
-            <div className="max-w-2xl mx-auto space-y-6 gap-4">
+            <div className="max-w-2xl mx-auto space-y-4 gap-4">
 
                 <div className="first-form-header">
                     <h2 className="text-xl font-bold">NHẬP THÔNG TIN CỦA SHOP</h2>
@@ -132,44 +168,106 @@ const FirstForm = ({ form, setIsPhoneVerified }) => {
                     <Input value={fullName} onChange={handleNameChange} />
                 </Form.Item>
 
-                {/* Input phone number */}
+                {/* Disply email */}
                 <Form.Item
-                    label={<span className="font-semibold">Số điện thoại</span>}
-                    name="phone_number"
-                    rules={[
-                        { required: true, message: "Vui lòng nhập số điện thoại!" },
-                        { pattern: /^[0-9]{10}$/, message: "Số điện thoại không hợp lệ!" },
-                    ]}
+                    label={<span className="font-semibold">Email</span>}
+                    name="email"
                 >
-                    <Space.Compact style={{ width: "100%" }}>
-                        <Input placeholder="Nhập số điện thoại" value={user?.phone_number} />
-                        <Button
-                            onClick={handleSendOtp}
-                            type="primary"
-                            className="bg-blue-500 hover:bg-blue-600"
-                        >
-                            Gửi mã OTP
-                        </Button>
-                    </Space.Compact>
+                    <Input disabled value={email} />
                 </Form.Item>
 
-                {otpVisible && (
-                    <div className="flex items-center space-x-4 mt-4">
-                        <Input.OTP
-                            placeholder="Nhập OTP"
-                            maxLength={6}
-                            value={otp}
-                            onChange={handleOtp}
-                        />
-                        <Button
-                            type="primary"
-                            onClick={handleVerifyOtp}
-                            className="bg-[#0056b3] hover:bg-[#4a90e2] text-white px-4 py-2 rounded"
-                        >
-                            Xác thực
-                        </Button>
+                {/* Display Phone Number */}
+                <Form.Item
+                    label={<span className="font-semibold">Số điện thoại</span>}
+                >
+                    <div className="flex items-center">
+                        {newPhoneNumber ? (
+                            <>
+                                <span className="">{user.phone_number}</span>
+                                <Button type="link" className="underline" onClick={() => setModalVisible(true)}>
+                                    Thay Đổi
+                                </Button>
+                            </>
+                        ) : (
+                            <Button type="link" className="text-green-500" onClick={() => setModalVisible(true)}>
+                                Thêm mới
+                            </Button>
+                        )}
                     </div>
-                )}
+                </Form.Item>
+
+                <Modal
+                    open={modalVisible}
+                    onCancel={() => {
+                        setModalVisible(false);
+                        setStep(1);
+                    }}
+                    footer={null}
+                    centered
+                    title={
+                        <div className="text-center font-semibold text-lg">
+                            {step === 1 ? "Cập nhật số điện thoại" : "Xác thực OTP"}
+                        </div>
+                    }
+                >
+                    <div className="text-center space-y-4">
+                        {/* Nhập Số Điện Thoại */}
+                        {step === 1 && (
+                            <>
+                                <PhoneOutlined className="text-4xl text-blue-500 mb-2" />
+                                <p className="text-gray-600">Vui lòng nhập số điện thoại mới</p>
+                                <Input
+                                    rules={[
+                                        { required: true, message: "Vui lòng nhập số điện thoại!" },
+                                        { pattern: /^[0-9]{10}$/, message: "Số điện thoại không hợp lệ!" },
+                                    ]}
+                                    size="large"
+                                    placeholder="Nhập số điện thoại"
+                                    value={phoneNumber}
+                                    onChange={(e) => setPhoneNumber(e.target.value)}
+                                />
+                                <Button
+                                    type="primary"
+                                    className="w-full bg-blue-500 hover:bg-blue-600"
+                                    onClick={handleSendOtp}
+                                >
+                                    Gửi mã OTP
+                                </Button>
+                            </>
+                        )}
+
+                        {/* Nhập OTP */}
+                        {step === 2 && (
+                            <>
+                                <LockOutlined className="text-4xl text-blue-500 mb-2" />
+                                <p className="text-gray-600">Nhập mã OTP đã gửi đến {phoneNumber}</p>
+                                <Input.OTP
+                                    size="large"
+                                    placeholder="Nhập mã OTP"
+                                    maxLength={6}
+                                    value={otp}
+                                    onChange={(value) => setOtp(value)}
+                                />
+                                <Button
+                                    type="primary"
+                                    className="w-full bg-green-500 hover:bg-green-600"
+                                    onClick={handleVerifyOtp}
+                                >
+                                    Xác thực OTP
+                                </Button>
+                                <div className="text-gray-500 text-sm mt-2">
+                                    {isResendDisabled ? (
+                                        `Gửi lại mã sau ${countdown}s`
+                                    ) : (
+                                        <Button type="link" onClick={handleSendOtp}>
+                                            Gửi lại OTP
+                                        </Button>
+                                    )}
+                                </div>
+                            </>
+                        )}
+                    </div>
+                </Modal>
             </div>
         </>
     );
