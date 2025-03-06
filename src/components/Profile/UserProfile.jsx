@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Form, Input, Upload, Button, message, Card, Modal, Row, Col } from 'antd';
+import { Form, Input, Upload, Button, message, Modal, Row, Col } from 'antd';
 import { UploadOutlined } from '@ant-design/icons';
 import {
   useSelector,
@@ -49,9 +49,9 @@ const ProfilePage = () => {
     }
   }, []);
 
-  const handleNameChange = (e) => {
-    setFullName(e.target.value);
-  };
+  // const handleNameChange = (e) => {
+  //   setFullName(e.target.value);
+  // };
   const onChange = (text) => {
     console.log('onChange:', text);
     setOtp(text);
