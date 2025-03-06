@@ -52,12 +52,13 @@ const ProfilePage = () => {
   const handleNameChange = (e) => {
     setFullName(e.target.value);
   };
-  // const handleData = (e) => {
-  //   const newPhone = e.target.value;
-  //   setPhoneNumber(newPhone);
-
-  //   dispatch(updateUserProfile({ ...user, phone_number: newPhone }));
-  // };
+  const onChange = (text) => {
+    console.log('onChange:', text);
+    setOtp(text);
+  };
+  const onInput = (value) => {
+    console.log('onInput:', value);
+  };
   const handleUpload = ({ file }) => {
     const reader = new FileReader();
     reader.onload = (e) => {
@@ -400,14 +401,15 @@ const ProfilePage = () => {
                     <>
                         <Form layout="vertical">
                             <Form.Item label="Nhập mã OTP">
-                                <Input type="number" maxLength={6} value={otp} onChange={(e) => setOtp(e.target.value)} />
+                                {/* <Input type="number" maxLength={6} value={otp} onChange={(e) => setOtp(e.target.value)} /> */}
+                                <Input.OTP length={6} value={otp} onChange={onChange} onInput={onInput} />
                             </Form.Item>
                         </Form>
                         <div className="flex justify-between">
                             <Button type="link" disabled={isCounting} onClick={handlePhoneSubmit}>
                                 {isCounting ? `Gửi lại sau ${countdown}s` : "Gửi lại OTP"}
                             </Button>
-                            <Button type="primary" onClick={handleVerifyOtp}>Xác thực</Button>                          
+                            <Button type="primary" onClick={handleVerifyOtp} className='bg-blue-500 hover:bg-blue-300'>Xác thực</Button>                          
                         </div>
                     </>
                 )}
