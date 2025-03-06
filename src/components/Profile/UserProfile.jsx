@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Form, Input, Upload, Button, message, Card, Modal, Row, Col } from 'antd';
+import { Form, Input, Upload, Button, message, Modal, Row, Col } from 'antd';
 import { UploadOutlined } from '@ant-design/icons';
 import {
   useSelector,
@@ -49,15 +49,16 @@ const ProfilePage = () => {
     }
   }, []);
 
-  const handleNameChange = (e) => {
-    setFullName(e.target.value);
-  };
-  // const handleData = (e) => {
-  //   const newPhone = e.target.value;
-  //   setPhoneNumber(newPhone);
-
-  //   dispatch(updateUserProfile({ ...user, phone_number: newPhone }));
+  // const handleNameChange = (e) => {
+  //   setFullName(e.target.value);
   // };
+  const onChange = (text) => {
+    console.log('onChange:', text);
+    setOtp(text);
+  };
+  const onInput = (value) => {
+    console.log('onInput:', value);
+  };
   const handleUpload = ({ file }) => {
     const reader = new FileReader();
     reader.onload = (e) => {
@@ -70,7 +71,12 @@ const ProfilePage = () => {
           setAvatar(e.target.result);
         } else {
           setAvatar(e.target.result);
-          await uploadAvatar(user.id, file);
+          const response = await uploadAvatar(user.id, file);
+        if (response.status === 200) {
+          message.success("Đổi ảnh thành công!");
+        } else {
+          message.error("Vui lòng kiểm tra lại ảnh!");
+        }
         }
       };
     };
@@ -83,12 +89,15 @@ const ProfilePage = () => {
 
       croppedCanvas.toBlob(async (blob) => {
         const file = new File([blob], "avatar.jpg", { type: "image/jpeg" });
-        await uploadAvatar(user.id, file);
-
+        const response = await uploadAvatar(user.id, file);
+        if (response.status === 200) {
+          message.success("Đổi ảnh thành công!");
+        } else {
+          message.error("Vui lòng kiểm tra lại ảnh!");
+        }
         const newAvatarURL = URL.createObjectURL(blob);
         setAvatar(newAvatarURL);
-
-        // 👉 Lưu avatar vào localStorage
+        console.log("load thành công đến đây")
         localStorage.setItem("user_avatar", newAvatarURL);
 
         setCropVisible(false);
@@ -129,10 +138,12 @@ const ProfilePage = () => {
   //   // Xác thực OTP
   const handleVerifyOtp = async () => {
     try {
-      const response = await verifyOtp(user.id, user.phone_number, otp);
+      const response = await verifyOtp(user.id, newPhoneNumber, otp);
       if (response.status === 200) {
         message.success("Xác thực thành công!");
+        console.log(otpVisible);
         setOtpVisible(false);
+        setPhoneModalVisible(false);
       } else {
         message.error("OTP không đúng! Vui lòng kiểm tra lại.");
       }
@@ -187,7 +198,14 @@ const ProfilePage = () => {
     // dispatch(updateUserProfile(updatedUser));
 
   };
-
+  const maskPhoneNumber = (phoneNumber) => {
+    if (!phoneNumber) {
+        return "Chưa đăng kí"; // Hoặc một giá trị mặc định khác
+    }
+    const visibleDigits = phoneNumber.slice(-4); // Lấy 4 số cuối
+    const maskedDigits = "*".repeat(phoneNumber.length - 4); // Tạo chuỗi dấu *
+    return maskedDigits + visibleDigits; // Kết hợp chuỗi dấu * và 4 số cuối
+};
 
   return (
     // <div className="flex justify-center mt-10">
@@ -338,13 +356,13 @@ const ProfilePage = () => {
             >
               {/* Tên tài khoản */}
               <Form.Item label="Tên tài khoản">
-                <Input value="truongnguyen00002" className='mt-3'/>
+                <Input value={fullName} className='mt-3' onChange={(e) => setFullName(e.target.value)}/>
               </Form.Item>
 
               {/* Email */}
               <Form.Item label="Email">
                 <div className="flex items-center mt-3">
-                  <Input value="dangtruong@gmail.com" disabled className="bg-gray-100" />
+                  <Input value={user.email} disabled className="bg-gray-100" />
                   <Button type="link" className="ml-2 text-blue-500">Thay Đổi</Button>
                 </div>
               </Form.Item>
@@ -352,20 +370,50 @@ const ProfilePage = () => {
               {/* Số điện thoại */}
               <Form.Item label="Số điện thoại">
                 <div className="flex items-center mt-3">
-                  <Input value="********07" disabled className="bg-gray-100" />
-                  <Button type="link" className="ml-2 text-blue-500">Thay Đổi</Button>
+                  <Input value={maskPhoneNumber(user?.phone_number) || "Chưa đăng kí"} disabled className="bg-gray-100" />
+                  <Button type="link" className="ml-2 text-blue-500" onClick={() => setPhoneModalVisible(true)}>{user?.phone_number ? "Thay đổi" : "Đăng ký"}</Button>
                 </div>
               </Form.Item>
-
+              
               {/* Nút Lưu */}
               <Form.Item wrapperCol={{ offset: 6 }}>
-                <Button type="primary" className="bg-red-500 hover:bg-red-600 px-6 py-2 rounded text-white">
+                <Button type="primary" className="bg-red-500 hover:bg-red-600 px-6 py-2 rounded text-white" onClick={onFinish}>
                   Lưu
                 </Button>
               </Form.Item>
             </Form>
           </Col>
-
+          <Modal
+                open={phoneModalVisible}
+                onCancel={() => setPhoneModalVisible(false)}
+                footer={null}
+                title={otpVisible ? "Xác thực OTP" : "Nhập số điện thoại"} >
+              {!otpVisible ? (
+                    <div className='flex justify-between items-center '>
+                        <Form layout="vertical">
+                            <Form.Item >
+                                <Input type="number" value={newPhoneNumber} onChange={(e) => setNewPhoneNumber(e.target.value)} className='items-center w-64'/>
+                            </Form.Item>
+                        </Form>
+                        <Button type="primary" onClick={handlePhoneSubmit} className='bg-blue-600 hover:bg-blue-300 mt-10'>Xác thực</Button>
+                    </div>
+                ) : (
+                    <>
+                        <Form layout="vertical">
+                            <Form.Item label="Nhập mã OTP">
+                                {/* <Input type="number" maxLength={6} value={otp} onChange={(e) => setOtp(e.target.value)} /> */}
+                                <Input.OTP length={6} value={otp} onChange={onChange} onInput={onInput} />
+                            </Form.Item>
+                        </Form>
+                        <div className="flex justify-between">
+                            <Button type="link" disabled={isCounting} onClick={handlePhoneSubmit}>
+                                {isCounting ? `Gửi lại sau ${countdown}s` : "Gửi lại OTP"}
+                            </Button>
+                            <Button type="primary" onClick={handleVerifyOtp} className='bg-blue-500 hover:bg-blue-300'>Xác thực</Button>                          
+                        </div>
+                    </>
+                )}
+          </Modal>
           <Col span={10} className="flex flex-col items-center">
             {/* Avatar Section */}
             <div className="flex flex-col items-center">
@@ -381,6 +429,42 @@ const ProfilePage = () => {
             </div>
           </Col>
         </Row>
+        {/* Modal Cropper */}
+        <Modal
+          open={cropVisible}
+          onCancel={() => setCropVisible(false)}
+          onOk={handleCrop}
+          title="Cắt ảnh"
+          // okButtonProps={{ styles:{ defaultHoverBorderColor}  }}
+          footer={[
+            <Button key="cancel" onClick={() => setCropVisible(false)} className="custom-cancel">
+              Hủy
+            </Button>,
+            <Button
+              key="crop"
+              type="primary"
+              onClick={handleCrop}
+              className="bg-[#0056b3] hover:bg-[#4a90e2] text-white px-4 py-2 rounded"
+            >
+              Cắt ảnh
+            </Button>,
+          ]}>
+            <Cropper
+              ref={cropperRef}
+              style={{ height: 300, width: "100%" }}
+              aspectRatio={1}
+              preview=".img-preview"
+              src={avatar}
+              viewMode={1}
+              minCropBoxHeight={100}
+              minCropBoxWidth={100}
+              background={false}
+              responsive={true}
+              autoCropArea={1}
+              checkOrientation={false}
+              onInitialized={(instance) => setCropper(instance)}
+            />
+        </Modal>
       </div>
     </div>
 

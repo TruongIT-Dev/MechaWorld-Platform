@@ -1,33 +1,30 @@
 import { NavLink } from "react-router-dom";
-import { useEffect, useState } from "react";
-import Cookies from "js-cookie";
+// import { useEffect, useState } from "react";
 import UserProfile from "./UserNavbar";
-import { verifyToken } from "../apis/Auth/APIAuth";
 import { useSelector } from "react-redux";
 
 const GuestNavbar = () => {
-    const [user, setUser] = useState(useSelector((state) => state?.auth?.user));
-    const isLoggedIn = useSelector(state => state.auth.isLoggedIn);
+    const [user] = useSelector(state => state.auth.user);
+    // const isLoggedIn = useSelector(state => state.auth.isLoggedIn); 
 
-    useEffect(() => {
-        const Access_token = Cookies.get("access_token");
+    // useEffect(() => {
+    //     const Access_token = Cookies.get("access_token");
 
-        if (Access_token) {
-            verifyToken(Access_token)
-                .then(response => {
-                    setUser(response.data);
-                    console.log("user Navbar:", user);
-                })
-                .catch(error => {
-                    console.error("Lỗi từ API:", error);
-                    setUser(null); // Nếu token hết hạn, reset user
-                    Cookies.remove("access_token");
-                    Cookies.remove("user");
-                });
-        } else {
-            setUser(null);
-        }
-    }, [isLoggedIn]);
+    //     if (Access_token) {
+    //         verifyToken(Access_token)
+    //             .then(response => {
+    //                 setUser(response.data);
+    //             })
+    //             .catch(error => {
+    //                 console.error("Lỗi từ API:", error);
+    //                 setUser(null); // Nếu token hết hạn, reset user
+    //                 Cookies.remove("access_token");
+    //                 Cookies.remove("user");
+    //             });
+    //     } else {
+    //         setUser(null);
+    //     }
+    // }, [isLoggedIn]);
 
     return (
         <div className="space-x-3 flex items-center relative">

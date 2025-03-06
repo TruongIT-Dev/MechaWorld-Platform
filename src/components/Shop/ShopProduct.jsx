@@ -1,18 +1,21 @@
-import { Table, Row, Button, InputNumber, Select, Space, Input } from "antd";
+import { Table, Row, Button, InputNumber, Select, Space, Input, Modal } from "antd";
 import { useEffect, useState } from "react";
 import { GetGundamByID } from "../../apis/Product/APIProduct";
-import Cookies from "js-cookie";
 import PropTypes from 'prop-types';
+import { useSelector } from "react-redux";
 
 const { Option } = Select;
 
 function ShopProduct({
   // isCreating,
   setIsCreating}) {
-  const user = JSON.parse(Cookies.get("user"));
+  // const user = JSON.parse(Cookies.get("user"));
+  const user = useSelector((state) => state.auth.user);
+  console.log("checking user data",user);
   const [gundamList, setGundamList] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
-  
+  const [sellModalVisible, setSellModalVisible] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState(null);
   // Bộ lọc giá tiền & phân khúc
   const [minPrice, setMinPrice] = useState(null);
   const [maxPrice, setMaxPrice] = useState(null);
@@ -28,6 +31,14 @@ function ShopProduct({
         console.error("Lỗi khi lấy danh sách sản phẩm:", error);
       });
   }, []);
+  const handleSellProduct = (product) => {
+    setSelectedProduct(product);
+    setSellModalVisible(true);
+  };
+
+  const handleEditProduct = (product) => {
+    console.log("Chỉnh sửa sản phẩm:", product);
+  };
 
   // Lọc dữ liệu khi có thay đổi
   useEffect(() => {
@@ -109,7 +120,18 @@ function ShopProduct({
     {
       title: "Hành động",
       key: "action",
-      render: () => <Button type="primary"className="bg-[#0056b3] hover:bg-[#4a90e2]">Chỉnh sửa</Button>,
+      render: (_, product) => (
+        <div className="flex flex-col space-y-2">
+          {/* Nút Đăng Bán */}
+          <Button type="primary" className="bg-green-600 hover:bg-green-500 w-28" onClick={() => handleSellProduct(product)}>
+            Đăng Bán
+          </Button>
+          {/* Nút Chỉnh Sửa */}
+          <Button className="bg-gray-600 hover:bg-gray-500 text-white w-28" onClick={() => handleEditProduct(product)}>
+            Chỉnh Sửa
+          </Button>
+        </div>
+      ),
       width: 100,
     },
   ];
@@ -121,7 +143,7 @@ function ShopProduct({
           <Space >
             <Input.Search placeholder="Tìm kiếm sản phẩm" onSearch={searchGundam} />
           </Space>
-          <InputNumber
+          {/* <InputNumber
             placeholder="Giá thấp nhất"
             min={0}
             value={minPrice}
@@ -132,7 +154,7 @@ function ShopProduct({
             min={0}
             value={maxPrice}
             onChange={setMaxPrice}
-          />
+          /> */}
           <Select placeholder="Lọc tình trạng" allowClear onChange={setSelectedCondition}>
             <Option value="new">Hàng mới</Option>
             <Option value="open box">Đã mở hộp</Option>
@@ -154,13 +176,25 @@ function ShopProduct({
               Thêm sản phẩm
             </Button>
         </Row>
-
-        <Table columns={columns} dataSource={filteredData} pagination={{
-                defaultPageSize: 10,
-            }}
-            scroll={{
-              y: 55 * 10,
-            }} />
+        <Table
+                    className={{}}
+                    columns={columns}
+                    dataSource={filteredData}
+                    pagination={{
+                        defaultPageSize: 20,
+                    }}
+                    scroll={{
+                      y: 55 * 10,
+                    }}
+                  />    
+        <Modal
+            title="Đăng Bán Sản Phẩm"
+            open={sellModalVisible}
+            onCancel={() => setSellModalVisible(false)}
+            footer={null}
+        >
+          <p>Chọn hình thức đăng bài cho <strong>{selectedProduct?.name}</strong></p>
+        </Modal>  
       </div>
     </div>
   );

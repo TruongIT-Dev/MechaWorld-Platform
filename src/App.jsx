@@ -1,15 +1,33 @@
 import { Routes, Route } from "react-router-dom";
-import { Suspense } from "react";
+import { Suspense, useEffect } from "react";
 // import router
 import { HomePage, ErrorPage, ProductPage, SignIn, ProfilePage, UserProfile, Collection, TradeHistory, OrderHistory, UserLayout, ProductDetailPage, ShopDashboard, ShopPage, ShopProductManagement, ShopTransaction, ExchangePage, ExchangeDetail, CartPage1, Checkout, WalletPage, AdvancedSetting, SettingAddress, ShopOrderManagement, ShopAuctionManagement, ShopReportManagement, ShopRegister, RegisterShopLayout, AutionList, AutionDetail } from "./routes/router";
-import { useSelector } from "react-redux";
-
+import { useDispatch, useSelector } from "react-redux";
+import Cookies from "js-cookie";
+import { verifyToken } from "./apis/Auth/APIAuth";
+import { logout, updateUser } from "./features/auth/authSlice";
 // import Spinner from "./components/Spinner";
 
 function App() {
-  // const accessToken = useSelector((state) => state.auth.access_token);
-  // const userId = useSelector((state) => state.auth.user);
-  // console.log(accessToken, userId);
+  const accessToken = useSelector((state) => state.auth.access_token);
+  const userId = useSelector((state) => state.auth.user);
+  console.log(accessToken, userId);
+  const dispatch = useDispatch();
+  useEffect(() => {
+    const accessToken = Cookies.get("access_token");
+    if (accessToken) {
+      verifyToken(accessToken).then((userData) => {
+        if (userData) {
+          console.log(userData)
+          dispatch(updateUser(userData.data)); 
+        } else {
+          dispatch(logout()); 
+        }
+      });
+    } else {
+      dispatch(logout()); 
+    }
+  }, [dispatch]); 
 
   return (
     <Suspense fallback={<div>Loading...</div>}>
