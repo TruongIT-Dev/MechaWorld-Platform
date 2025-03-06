@@ -71,7 +71,7 @@ import {
         <br />
         <Layout className=" flex">
           <Sider
-          className="bg-gray-100 items-center w-64 ml-5 mt-20" 
+          className="bg-gray-100 items-center w-64 ml-5 mt-20 h-fit" 
           >
           <Menu
           className='h-full w-64'
@@ -83,7 +83,7 @@ import {
          
   
           <Layout className="flex-1 px-10 py-4 mt-16 ml-10">
-            <Content className="bg-white rounded-lg shadow-md p-16 h-full">
+            <Content className="bg-white rounded-lg shadow-md p-6 h-full">
               <Outlet/>
             </Content>
           </Layout>

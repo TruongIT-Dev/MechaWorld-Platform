@@ -1,31 +1,31 @@
-import {  Table, Row, Space, Input, Tag } from "antd";
+import {  Table, Row, Space, Input, Tag, Button } from "antd";
 
 const columns = [
   {
     title: "Mã đơn hàng",
     dataIndex: "code",
-    width: 40,
+    width: 150,
   },
   {
     title: "Tên sản phẩm",
     dataIndex: "name",
-    width: 100,
+    width: 450,
   },
   {
     title: "Người mua",
     dataIndex: "buyer",
-    width: 50,
+    width: 100,
   },
   {
     title: "Giá bán",
     dataIndex: "price",
-    width: 50,
+    width: 150,
   },
   {
     title: "Trạng thái",
-    dataIndex: 'action',
-    key: 'action',
-    width: 50,
+    dataIndex: 'status',
+    key: 'status',
+    width: 100,
     render: (_, { action }) => {
       if (Array.isArray(action)) { 
         return (
@@ -34,6 +34,9 @@ const columns = [
               let color = '';
 
               switch (status) {
+                case 'appcepted':
+                  color = 'blue';
+                  break;
                 case 'Sold':
                   color = 'green';
                   break;
@@ -58,6 +61,9 @@ const columns = [
       } else { 
         let color = '';
         switch (action) {
+          case 'appcepted':
+            color = 'blue';
+            break;
           case 'Sold':
             color = 'green';
             break;
@@ -74,6 +80,15 @@ const columns = [
       }
     },
   },
+  {
+    title: "",
+    dataIndex: 'action',
+    key: 'action',
+    with: 60,
+    render: () => {
+      <Button type="primary"className="bg-[#0056b3] hover:bg-[#4a90e2]">Tùy chọn</Button>
+    },
+  }
 ];
 const dataSource = Array.from({
   length: 100,
@@ -91,6 +106,7 @@ function ShopOrderManagement() {
     <div>
       {/*Content */}
       <div className="container-content">
+      <h2 className="text-2xl font-semibold mb-6">Quản lý sản phẩm</h2>
         <Row>
           <Space style={{ marginBottom: 16 }}>
             <Input.Search placeholder="Tìm kiếm sản phẩm" />
