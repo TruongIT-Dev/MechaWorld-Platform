@@ -151,7 +151,7 @@ export default function ShopDashboard() {
             <Col span={12}>
              <br/>
              <br/>
-              <Button type="primary">Nạp tiền</Button>
+              <Button type="primary" className='bg-blue-600 hover:bg-blue-700'>Nạp tiền</Button>
             </Col>
           </Row>
         </Card>

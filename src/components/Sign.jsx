@@ -6,7 +6,6 @@ import { login } from "../features/auth/authSlice";
 import "../assets/css/sign.css";
 import Cookies from "js-cookie";
 import { loginEmail,loginGoogle,signupEmail } from "../apis/Auth/APIAuth";
-import { Alert } from 'antd';
 import { GoogleLogin } from "@react-oauth/google";
 import bgImage from "../assets/image/gundam_bg.jpg";
 
@@ -18,9 +17,9 @@ export default function Sign() {
   const [activeTab, setActiveTab] = useState(1); 
   const [loading, setLoading] = useState(false);
   const dispatch = useDispatch();
-  const [showAlert, setShowAlert] = useState(false);
-  const [alertMess, setAlertMess] = useState('');
-  const [alertType, setAlertType] = useState("error");
+  // const [showAlert, setShowAlert] = useState(false);
+  // const [alertMess, setAlertMess] = useState('');
+  // const [alertType, setAlertType] = useState("error");
 
   useEffect(() => {
     // /* global google */
@@ -51,9 +50,7 @@ export default function Sign() {
         path: "/",
       });
       message.success('Đăng nhập thành công! Trở về trang chủ.', 2);
-      setShowAlert(true);
       setTimeout(() => {
-        setShowAlert(false); 
         console.log("Login thành công");
         navigate("/");
     }, 100);
@@ -68,23 +65,15 @@ export default function Sign() {
   
   const onFinishSignUp = async (values) => {
     const { email, password, confirmPassword } = values;
-
+    console.log(email);
+    console.log(password);
+    console.log(confirmPassword);
     if (!validateEmail(email)) {
-      setAlertMess("Email không hợp lệ! Vui lòng nhập lại.");
-      setAlertType("error");
-        setShowAlert(true);
-        setTimeout(() => {
-          setShowAlert(false); 
-      }, 1800);
+      message.error('Email không hợp lệ! Vui lòng nhập lại.')
       return;
     }
     if (password !== confirmPassword) {
-      setAlertMess("Mật khẩu không khớp! Vui lòng kiểm tra lại.");
-      setAlertType("error");
-        setShowAlert(true);
-        setTimeout(() => {
-          setShowAlert(false); 
-      }, 1800);
+      message.error('Mật khẩu không khớp! Vui lòng kiểm tra lại."')
       return;
     }
     setLoading(true); 
@@ -92,29 +81,17 @@ export default function Sign() {
       const response = await signupEmail(email, password);
 
       if (response.status === 201) {
-        setAlertMess('Đăng ký tài khoản thành công!');
-        setAlertType("success");
-        setShowAlert(true);
+        message.success('Email đăng kí thành công! Trở về trang đang nhập.');
         setTimeout(() => {
           setActiveTab(1);
-          setShowAlert(false); 
+          return;
       }, 1800);
       }
     } catch (error) {
       if (error.response?.status === 409) {
-        setAlertMess("Email đã được đăng ký! Vui lòng chọn email khác.");
-        setAlertType('error');
-        setShowAlert(true);
-        setTimeout(() => {
-          setShowAlert(false); 
-      }, 800);
+        return message.error("Email đã được đăng ký! Vui lòng chọn email khác.");
       } else {
-        setAlertMess("Đăng ký thất bại! Vui lòng thử lại.");
-        setAlertType('error');
-        setShowAlert(true);
-        setTimeout(() => {
-          setShowAlert(false); 
-      }, 800);
+        return message.error("Đăng ký thất bại! Vui lòng thử lại.");
       }
     } finally {
       setLoading(false); // Tắt loading sau khi gọi API
@@ -133,9 +110,7 @@ export default function Sign() {
         });
 
         dispatch(login(response.data));
-        setShowAlert(true);
       setTimeout(() => {
-        setShowAlert(false); 
         navigate("/");
     }, 1500);
     })
@@ -290,7 +265,7 @@ export default function Sign() {
                     className="text-xs text-gray-500 uppercase dark:text-gray-400 hover:underline"
                     onClick={() => setActiveTab(2)}
                   >
-                    or sign up
+                    Chưa có tài khoản? Đăng kí
                   </button>
                   <span className="w-1/5 border-b dark:border-gray-400 md:w-1/4"></span>
                 </div>
@@ -329,19 +304,19 @@ export default function Sign() {
                     rules={[
                       { message: "Vui lòng nhập mật khẩu!", required: true },
                     ]}
-                    label="Password"
+                    label="Mật khẩu"
                   >
                     <Input type="password" className="" />
                   </Form.Item>
                   <Form.Item
-                    name="confirm-password"
+                    name="confirmPassword"
                     rules={[
                       {
                         message: "Vui lòng nhập lại mật khẩu!",
                         required: true,
                       },
                     ]}
-                    label="Confirm Password"
+                    label="Nhập lại mật khẩu"
                   >
                     <Input type="password" />
                   </Form.Item>
@@ -371,17 +346,7 @@ export default function Sign() {
           </div>
         </div>
       </div>
-      {showAlert && (
-        <Alert
-          className="fixed bottom-4 right-4 z-50 px-4 py-3 rounded"
-          message={alertMess}
-          type={alertType}
-          // type="error"
-          showIcon
-          closable
-          afterClose={() => setShowAlert(false)}
-        />
-      )}
+
     </>
   );
 }

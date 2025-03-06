@@ -61,7 +61,7 @@
     transform: translateY(-50%);
     font-size: 1em;
     transition: 0.5s ease;
-    color: #fff;
+    /* color: #fff; */
   }
   
   .forgot-pass {

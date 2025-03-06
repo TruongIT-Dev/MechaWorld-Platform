@@ -1,13 +1,16 @@
 import axios from 'axios';
 import Cookies from 'js-cookie';
 
+
+
 const baseURL = 'http://localhost:8080/v1/';
 // const baseURL = '/v1';
 // axios.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded';
+const accessToken = Cookies.get('access_token');
+
 
 // Tạo instance axios với baseURL và header chứa token
 const instance = axios.create({
-
     baseURL: baseURL,
     headers: {
         'Content-Type': 'application/json',
@@ -23,7 +26,7 @@ const instance = axios.create({
 
 // Lưu Token tại LocalStorage. Dự kiến sẽ đổi qua Cookie sau
 // Đã đổi qua cookie
-instance.defaults.headers.common = { 'Authorization': `Bearer ${Cookies.get('access_token')}` }
+instance.defaults.headers.common = { 'Authorization': `Bearer ${accessToken}`}
 
 // Thêm một bộ đón chặn request
 axios.interceptors.request.use(function (config) {
@@ -33,14 +36,17 @@ axios.interceptors.request.use(function (config) {
     //     const access_token = Cookies.get('access_token');
     //     config.headers.Authorization = `Bearer ${access_token}`
     //   }
-      const accessToken = Cookies.get('access_token');
-      console.log("đã qua request checking",accessToken);
-      if (accessToken) {
-          config.headers.Authorization = `Bearer ${accessToken}`; 
-      } else {
-        console.warn("⚠️ Access Token không tồn tại trong Cookies!");
-    }
-      return config;
+    //   const accessToken = Cookies.get('access_token');
+    //   console.log("đã qua request checking",accessToken);
+
+    const accessToken = Cookies.get('access_token'); 
+        if (accessToken) {
+            console.log(accessToken);
+            config.headers.Authorization = `Bearer ${accessToken}`;
+        } else {
+            console.warn("Không thấy access_token trong Cookies....");
+        }
+        return config;
     
 }, function (error) {
     // Làm gì đó với lỗi request

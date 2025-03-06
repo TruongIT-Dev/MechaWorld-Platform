@@ -105,7 +105,7 @@ function ShopTransaction() {
                 defaultPageSize: 20,
             }}
             scroll={{
-              y: 55 * 5,
+              y: 55 * 10,
             }}
           />
         </Row>

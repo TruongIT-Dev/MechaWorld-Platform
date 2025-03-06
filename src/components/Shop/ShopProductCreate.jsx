@@ -17,7 +17,8 @@ const ShopProductCreate = ({ setIsCreating }) => {
   const [primaryImage, setPrimaryImage] = useState(null); // Ảnh chính
   const [secondaryImages, setSecondaryImages] = useState([]); // Khởi tạo với mảng rỗng
   const [price, setPrice] = useState(null);
-  const [accessories, setAccessories] = useState([{ name: "", quantity: 1 }]);
+  // const [accessories, setAccessories] = useState([{ name: "", quantity: 1 }]);
+  const [accessories, setAccessories] = useState([]);
   const [isUploading, setIsUploading] = useState(false);
 
 
@@ -161,7 +162,7 @@ const handleFinish = (values) => {
     // images
     //   .filter((img) => img.url !== primaryImage)
     //   .forEach((img) => {
-    //     formData.append(`secondary_images`, img.file); // Axios tự động nhận diện mảng
+    //     formData.append(`secondary_images`, img.file);
     //   });
     //   console.log(formData);
     PostGundam(user.id, formData)
@@ -266,6 +267,7 @@ const handleFinish = (values) => {
                 <Input
                     placeholder="Tên phụ kiện"
                     value={accessory.name}
+                    className="w-60"
                     onChange={(e) => handleAccessoryChange(index, "name", e.target.value)}
                 />
                 <InputNumber

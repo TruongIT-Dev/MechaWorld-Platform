@@ -22,3 +22,6 @@ export const  PostGundam = (id, gundamData) => {
         },
       });
 }
+export const GetGundamByID = (id, gundamName) => {
+    return axios.get(`/users/${id}/gundams?name=${gundamName}`)
+}
