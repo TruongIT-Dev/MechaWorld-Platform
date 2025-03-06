@@ -144,7 +144,7 @@ const Checkout = () => {
         {!showPaymentOptions ? (
           <div className="p-3 border rounded flex items-center justify-between">
             <div className="flex items-center">
-              <img src={footerLogo} alt="wallet" className="max-w-[50px]" />
+              <img src={footerLogo} alt="wallet" className="max-w-[50px] mr-2" />
               <p className="text-sm font-semibold">{paymentMethod === 'GunPay' ? 'Thanh toán bằng ví ComZone' : 'Thanh toán khi nhận hàng'}</p>
             </div>
             {paymentMethod === 'GunPay' && <p className="text-red-500 text-xs">Số dư không đủ. <span className="text-blue-500 cursor-pointer">Nạp thêm</span></p>}
@@ -203,7 +203,7 @@ const Checkout = () => {
     {/* Nút đặt hàng  */}
     <Button 
       type="primary" 
-      className="w-full mt-4 bg-red-300 text-lg border-none cursor" 
+      className="w-full mt-4 bg-red-500 text-lg border-none cursor pb-4 pt-4" 
     >
       ĐẶT HÀNG
     </Button>

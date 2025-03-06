@@ -1,7 +1,36 @@
 import { Routes, Route } from "react-router-dom";
 import { Suspense } from "react";
 // import router
-import { HomePage, ErrorPage, ProductPage, SignIn, ProfilePage, UserProfile, Collection, TradeHistory, OrderHistory, UserLayout, ProductDetailPage, ShopDashboard, ShopPage, ShopProductManagement, ShopTransaction, ExchangePage, ExchangeDetail, CartPage1, Checkout, WalletPage, AdvancedSetting, SettingAddress, ShopOrderManagement, ShopAuctionManagement, ShopReportManagement, ShopRegister, RegisterShopLayout, AutionList, AutionDetail } from "./routes/router";
+import { HomePage, 
+  ErrorPage, 
+  ProductPage, 
+  SignIn, 
+  ProfilePage, 
+  UserProfile, 
+  Collection, 
+  TradeHistory, 
+  OrderHistory, 
+  UserLayout, 
+  ProductDetailPage, 
+  ShopDashboard, ShopPage, 
+  ShopProductManagement, 
+  ShopTransaction, ExchangePage, 
+  ExchangeDetail, 
+  CartPage1, 
+  Checkout, 
+  WalletPage, 
+  AdvancedSetting, 
+  SettingAddress, 
+  ShopOrderManagement, 
+  ShopAuctionManagement, 
+  ShopReportManagement, 
+  ShopRegister, 
+  RegisterShopLayout, 
+  AutionList, 
+  AutionDetail,
+  AddProductToAution,
+  ListProductToAution,
+  CensorProductToAution, } from "./routes/router";
 import { useSelector } from "react-redux";
 
 // import Spinner from "./components/Spinner";
@@ -41,6 +70,8 @@ function App() {
             <Route path="orderhistory" element={<OrderHistory />} />
             <Route path="advanced-setting" element={<AdvancedSetting />} />
             <Route path="address-setting" element={<SettingAddress />} />
+            <Route path="addProductAution" element={<AddProductToAution />} />
+            <Route path="listProductAution" element={<ListProductToAution />} />
           </Route>
 
           {/* Shop Route */}
@@ -57,8 +88,8 @@ function App() {
           {/* Aution Route */}
           <Route path="aution" element={<AutionList />} />
           <Route path="aution/detail" element={<AutionDetail />} />
-
-
+          
+          <Route path="admin/aution" element={<CensorProductToAution />} />
           {/* Error route */}
           <Route path="error" element={<ErrorPage />} />
           <Route path="*" element={<ErrorPage />} />

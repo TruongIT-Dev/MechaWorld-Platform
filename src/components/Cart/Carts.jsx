@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Table, Button, Checkbox, message } from 'antd';
 import { Link } from "react-router-dom";
 import { useCart } from '../../context/CartContext';
-
+import { ShopOutlined } from '@ant-design/icons';
 const { Column } = Table;
 
 const Carts = () => {
@@ -44,7 +44,10 @@ const Carts = () => {
       {/* Duyệt qua từng seller và hiển thị bảng tương ứng */}
       {Object.entries(groupedCartItems).map(([sellerName, items]) => (
         <div key={sellerName} className="mb-8">
-          <h2 className="text-xl font-semibold mb-4"> {sellerName}</h2>
+          <div className="flex items-center mt-5 mb-5">
+                      <ShopOutlined className="text-xl text-gray-500 mr-2" />
+                      <p className="font-semibold text-lg">{sellerName}</p>
+                    </div>
           <Table
             dataSource={items}
             pagination={false}
