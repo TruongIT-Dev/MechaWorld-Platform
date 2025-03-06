@@ -1,74 +1,30 @@
-import React, { useEffect, useState } from 'react';
-import { GetCart, DeleteCart } from '../apis/Cart/APICart';
-import { NavLink } from "react-router-dom";
+import React, { useState } from 'react';
+import { NavLink, Link } from "react-router-dom";
 import { FaCartShopping } from "react-icons/fa6";
-import { FiTrash2 } from 'react-icons/fi'
-import { Link } from 'react-router-dom';
+import { useCart } from '../context/CartContext';
 
 const CartContext = () => {
-    const [cartItems, setCartItems] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
+    const { cartItems, removeFromCart, loading, error } = useCart();
     const [isOpen, setIsOpen] = useState(false);
 
-    
-
-    const fetchCartItems = async () => {
-        try {
-            const response = await GetCart();
-            console.log("API response:", response); 
-            console.log("Response Data:", response.data); // Kiểm tra xem dữ liệu đúng chưa
-    
-            if (Array.isArray(response.data)) {
-                setCartItems(response.data);
-            } else {
-                console.error("Unexpected data format:", response.data);
-                setCartItems([]); 
-            }
-    
-            setLoading(false);
-        } catch (err) {
-            console.error("Error fetching cart:", err);
-            setError(err.message);
-            setLoading(false);
-            setCartItems([]); 
-        }
-    };
-    
-
-    useEffect(() => {
-        fetchCartItems();
-    }, []);
-
-
-    const handleRemoveItem = async (itemId) => {
-        try {
-            await DeleteCart(itemId);
-            fetchCartItems(); // Refresh the cart items after deletion
-        } catch (err) {
-            setError(err.message);
-        }
+    const calculateTotal = () => {
+        return cartItems.reduce((total, item) => total + item.gundam_price, 0);
     };
 
-    if (loading) return <div>Loading...</div>;
-    if (error) return <div>Error: {error}</div>;
+    if (loading) return <div className="text-center py-4">Loading...</div>;
+    if (error) return <div className="text-center text-red-500 py-4">Error: {error}</div>;
 
     return (
-        
         <div>
-            {/* Nút mở giỏ hàng */}
-            <div className="cart-section">
+            <div className="cart-section  ">
                 <button
-                    className="bg-gradient-to-r from-cyan-500 to-blue-600 text-white py-1 px-4 rounded-full flex items-center gap-3"
+                    className="bg-gradient-to-r from-cyan-500 to-blue-600 transition-all duration-200 text-white py-1 px-4 rounded-full flex items-center gap-3 group"
                     onClick={() => setIsOpen(true)}
-                >   
-                    <NavLink className="group-hover:block  hover:text-black capitalize transition-all duration-200" >
-                            Giỏ hàng
-                    </NavLink>
-
-                    <div className="flex relative">
+                >
+                    <span className="hidden sm:inline">Giỏ hàng</span>
+                    <div className="relative">
                         <FaCartShopping className="text-xl text-white drop-shadow-sm cursor-pointer" />
-                        <div className="bg-red-500 absolute -right-2 -bottom-2 text-[12px] w-[18px] h-[18px] text-white rounded-full flex justify-center items-center">
+                        <div className="bg-red-500 absolute -right-2 -bottom-2 text-xs w-5 h-5 flex items-center justify-center text-white rounded-full">
                             {cartItems.length}
                         </div>
                     </div>
@@ -76,87 +32,38 @@ const CartContext = () => {
             </div>
 
             {/* Modal giỏ hàng */}
-            <div
-                className={`w-full bg-white fixed top-0 h-full shadow-2xl md:w-[35vw] xl:max-w-[30vw] transform
-                     ${isOpen ? 'right-0' : '-right-full '} 
-                     transition-all duration-300 z-50 px-4 lg:px-[15px]`}
-            >
+            <div className={`fixed top-0 h-full max-h-screen bg-white shadow-2xl transition-transform duration-300 ${isOpen ? 'right-0' : '-right-full'} w-full sm:w-3/4 md:w-1/2 lg:w-1/3 xl:w-1/4 z-50 p-4 overflow-y-auto`}>
+                <div className="flex justify-between items-center border-b pb-4">
+                    <h2 className="uppercase font-semibold">Giỏ Hàng ({cartItems.length})</h2>
+                    <button className="text-red-500 text-2xl" onClick={() => setIsOpen(false)}>&times;</button>
+                </div>
 
-                <div className="p-4">
-                    <div className="flex justify-between items-center mb-4">
-                        <h2 className="uppercase text-sm font-semibold">Shopping Bag ({cartItems.length})</h2>
-                        <button
-                            className="text-red-500 text-xl"
-                            onClick={() => setIsOpen(false)}
-                        >
-                            &times;
-                        </button>
-                    </div>
-
-                    <ul className="flex flex-col gap-y-4 h-[520px] lg:h-[640px] overflow-y-auto overflow-x-hidden border-b px-2">
+                <div className='w-full min-h-[150px] flex flex-col gap-x-4'>
+                    <ul className="mt-4 h-[60vh] overflow-y-auto">
                         {cartItems.map((item) => (
-                            <li key={item.cart_item_id} 
-                                className="flex items-center gap-4 bg-white shadow-md p-4 rounded-lg border border-gray-200 hover:shadow-lg transition">
-                                
-                                {/* Hình ảnh sản phẩm */}
-                                <img 
-                                    src={item.gundam_image_url} 
-                                    alt={item.gundam_name} 
-                                    className="w-16 h-16 object-cover rounded-lg border border-gray-300"
-                                />
-                                
-                                {/* Thông tin sản phẩm */}
+                            <li key={item.cart_item_id} className="flex items-center gap-4 p-3 rounded-lg shadow-sm hover:shadow-md transition">
+                                <img src={item.gundam_image_url} alt={item.gundam_name} className="max-w-[80px]" />
                                 <div className="flex-1">
-                                    <h3 className="text-md font-semibold text-gray-800">{item.gundam_name}</h3>
-                                    <p className="text-sm text-gray-600">Price: <span className="text-red-500 font-semibold">${item.gundam_price}</span></p>
+                                    <h3 className="text-sm uppercase font-medium max-w-[240px] text-black hover:underline">{item.gundam_name}</h3>
+                                    <p className="text-sm text-gray-600">Giá: <span className="text-red-500 font-semibold">{item.gundam_price}vnd</span></p>
                                 </div>
-                                
-                                {/* Nút Xóa */}
-                                <button 
-                                    onClick={() => handleRemoveItem(item.cart_item_id)}
-                                    className="bg-red-500 text-white px-3 py-1 rounded-lg text-sm hover:bg-red-600 transition">
-                                    Remove
-                                </button>
+                                <button onClick={() => removeFromCart(item.cart_item_id)} className="bg-red-500 text-white px-3 py-1 rounded-md text-sm hover:bg-red-600">Xóa</button>
                             </li>
                         ))}
                     </ul>
+                </div>
 
-
-                    
-                    <div className=' flex flex-col gap-y-3 py-4'>
-                        <div className=' flex w-full justify-between items-center'>
-                            {/* total */}
-                            <div className='uppercase font-semibold'>
-                                <span className='mr-2'> Total: </span>
-                            </div>
-                            <div className='bg-red-500 cursor-pointer py4 bg-re-500 text-white w-12 h-12 flex 
-                                            justify-center items-center text-xl'><FiTrash2 />
-                            </div>
-                        </div>
-
-                        <Link 
-                            to={'/cart'} 
-                            className='bg-gray-200 flex p-4 justify-center items-center text-black w-full font-medium'>
-                                Xem Chi Tiết Giỏ Hàng
-                        </Link>  
-
-                        <Link
-                            to={'/checkout'}
-                            className='bg-black flex p-4 justify-center items-center text-white w-full font-medium'>
-                                Thanh Toán
-                        </Link>  
+                <div className="mt-4 border-t pt-4 flex flex-col gap-3 sticky bottom-0 bg-white py-4">
+                    <div className="flex justify-between items-center">
+                        <span className="font-semibold">Tổng:</span>
+                        <span className="font-semibold text-red-500">{calculateTotal()}vnd</span>
                     </div>
-
+                    <Link to='/cart' className="bg-gray-200 text-center py-3 rounded-lg hover:bg-gray-300">Xem Chi Tiết Giỏ Hàng</Link>
+                    <Link to='/checkout' className="bg-black text-white text-center py-3 rounded-lg hover:bg-gray-800">Thanh Toán</Link>
                 </div>
             </div>
 
-            {/* Overlay */}
-            {isOpen && (
-                <div
-                    className="fixed inset-0 bg-black bg-opacity-50 z-40"
-                    onClick={() => setIsOpen(false)}
-                ></div>
-            )}
+            {isOpen && <div className="fixed inset-0 bg-black bg-opacity-50 z-40" onClick={() => setIsOpen(false)}></div>}
         </div>
     );
 };

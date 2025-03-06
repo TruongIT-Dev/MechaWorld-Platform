@@ -7,8 +7,37 @@ import Cookies from 'js-cookie';
 import ReviewProduct from './Review';
 import SuggestProduct from './SuggestProduct';
 import ShopInfo from './ShopInfo';
-import ProductInfo from './ProductInfo';
+import { useCart } from '../../context/CartContext'; // Import useCart từ Context
 
+const product = {
+    name: 'Gundam RX-78-2',
+    price: '$299',
+    originalPrice: '$349',
+    discount: 15,
+    images: [
+        { src: 'https://i.ebayimg.com/images/g/GG4AAOSw3SpmO9qK/s-l1200.jpg', alt: 'Ảnh 1' },
+        { src: 'https://images-na.ssl-images-amazon.com/images/I/51qL8XPsDbS.jpg', alt: 'Ảnh 2' },
+        { src: 'https://i.ebayimg.com/images/g/GG4AAOSw3SpmO9qK/s-l1200.jpg', alt: 'Ảnh 3' },
+        { src: 'https://images.amain.com/cdn-cgi/image/f=auto,width=950/images/large/bas/bas2509667_2.jpg', alt: 'Ảnh 4' },
+    ],
+    description:
+        'Sở hữu mô hình Gundam RX-78-2 mang tính biểu tượng, được chế tác tỉ mỉ với từng chi tiết hoàn hảo. Một lựa chọn không thể thiếu cho bất kỳ fan Gundam nào!',
+    highlights: [
+        'Chi tiết cực kỳ chính xác',
+        'Chất liệu cao cấp',
+        'Bao gồm các phụ kiện và vũ khí',
+        'Kích thước tỷ lệ 1/100',
+    ],
+    details:
+        'Mô hình được sản xuất bởi Bandai, thuộc dòng sản phẩm Master Grade nổi tiếng. Gói sản phẩm bao gồm bộ phận ráp, sách hướng dẫn, và các decal dán chi tiết.',
+    shippingInfo: {
+        deliveryFee: 'Miễn phí',
+    },
+    seller: {
+        name: 'Gundam Store',
+        totalSales: '3.5k+',
+    },
+};
 
 const GundamProductPage = () => {
     const { slug } = useParams();
@@ -24,9 +53,7 @@ const GundamProductPage = () => {
     const [disableBuy, setDisableBuy] = useState(false);
     const [selectedImage, setSelectedImage] = useState(imageGundam[0]);
 
-
-
-    // ************ Fetch Data Deatail Gundam by Slug ******************
+    // Fetch chi tiết sản phẩm
     useEffect(() => {
         const fetchDetailGundamBySlug = async (slug) => {
             try {
@@ -35,18 +62,14 @@ const GundamProductPage = () => {
 
                 // Mapping condition từ tiếng Anh sang tiếng Việt
                 const conditionMapping = {
-                    "new": "Hộp mới nguyên dạng, chưa bóc seal, linh kiện không bị hư hại, đủ phụ kiện đi kèm",
+                    "new": "Hàng mới 100%",
                     "open box": "Đã mở hộp",
                     "second hand": "Đã qua sử dụng"
                 };
-
-                // Chuyển đổi condition nếu có
                 let gundamData = detailGundam?.data || {};
                 if (gundamData.condition) {
                     gundamData.condition = conditionMapping[gundamData.condition] || gundamData.condition;
                 }
-
-                // Cập nhật state
                 setIdGundam(gundamData.id || null);
                 setDetailGundam(gundamData);
                 setShopId(gundamData.owner_id || []);
@@ -55,7 +78,6 @@ const GundamProductPage = () => {
                 console.log("Fail to fetch detail gundam: No data detected!");
             }
         };
-
         fetchDetailGundamBySlug(slug);
     }, [slug]);
 
@@ -175,16 +197,12 @@ const GundamProductPage = () => {
         return price.toLocaleString("vi-VN") + " VND";
     };
 
-
-
-    // *************** Lưu Mảng Ảnh gundam *****************
+    // Cập nhật ảnh được chọn
     useEffect(() => {
         if (imageGundam.length > 0) {
             setSelectedImage(imageGundam[0]);
         }
     }, [imageGundam]);
-
-
 
     return (
         <div className="container mt-24 p-6 bg-gray-100">
@@ -211,7 +229,7 @@ const GundamProductPage = () => {
                                                 key={index}
                                                 src={image}
                                                 className={`w-20 h-20 object-cover cursor-pointer rounded-lg border 
-                ${selectedImage === image ? 'border-red-500' : 'border-gray-200'}`}
+                                                ${selectedImage === image ? 'border-red-500' : 'border-gray-200'}`}
                                                 onClick={() => setSelectedImage(image)}
                                             />
                                         ))}
@@ -295,5 +313,6 @@ const GundamProductPage = () => {
             </div>
         </div>
     );
-}
-export default GundamProductPage
+};
+
+export default GundamProductPage;

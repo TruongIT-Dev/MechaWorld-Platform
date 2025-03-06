@@ -44,7 +44,11 @@ axios.interceptors.response.use((response) => {
 export const GetCart = () => {
     return axios.get('/cart/items');
 }
-
+export const AddToCart = (id) => {
+    return axios.post(`/cart/items`, {
+        gundam_id: id,
+    },)
+}
 export const DeleteCart = (id) => {
     return axios.delete(`/cart/items/${id}`);
 }

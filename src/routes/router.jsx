@@ -49,6 +49,9 @@ export const ShopProductManagement = React.lazy(() => import("../components/Shop
 export const ShopPage= React.lazy(() => import("../components/Shop/ShopPage"));
 export const ShopTransaction = React.lazy(() => import("../components/Shop/ShopTransaction"));
 
+// Shop route
+export const AutionList = React.lazy(() => import("../components/Aution/User/AutionList"));
+export const AutionDetail = React.lazy(() => import("../components/Aution/User/AutionDetail"));
 
 // Authentication route
 export const SignIn = React.lazy(() => import("../components/Sign"));
