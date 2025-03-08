@@ -1,40 +1,43 @@
 import { Routes, Route } from "react-router-dom";
 import { Suspense, useEffect } from "react";
 // import router
-import { HomePage, 
-  ErrorPage, 
-  ProductPage, 
-  SignIn, 
-  ProfilePage, 
-  UserProfile, 
-  Collection, 
-  TradeHistory, 
-  OrderHistory, 
-  UserLayout, 
-  ProductDetailPage, 
-  ShopDashboard, ShopPage, 
-  ShopProductManagement, 
-  ShopTransaction, ExchangePage, 
-  ExchangeDetail, 
-  CartPage1, 
-  Checkout, 
-  WalletPage, 
-  AdvancedSetting, 
-  SettingAddress, 
-  ShopOrderManagement, 
-  ShopAuctionManagement, 
-  ShopReportManagement, 
-  ShopRegister, 
-  RegisterShopLayout, 
-  AutionList, 
+import {
+  HomePage,
+  ErrorPage,
+  ProductPage,
+  SignIn,
+  ProfilePage,
+  UserProfile,
+  Collection,
+  TradeHistory,
+  OrderHistory,
+  UserLayout,
+  ProductDetailPage,
+  ShopDashboard, ShopPage,
+  ShopProductManagement,
+  ShopTransaction, ExchangePage,
+  ExchangeDetail,
+  CartPage1,
+  Checkout,
+  WalletPage,
+  AdvancedSetting,
+  SettingAddress,
+  ShopOrderManagement,
+  ShopAuctionManagement,
+  ShopReportManagement,
+  ShopRegister,
+  RegisterShopLayout,
+  AutionList,
   AutionDetail,
   AddProductToAution,
   ListProductToAution,
-  CensorProductToAution, } from "./routes/router";
+  CensorProductToAution,
+} from "./routes/router";
 import { useDispatch, useSelector } from "react-redux";
 import Cookies from "js-cookie";
 import { verifyToken } from "./apis/Auth/APIAuth";
 import { logout, updateUser } from "./features/auth/authSlice";
+import Spinner from "./components/Spinner";
 // import Spinner from "./components/Spinner";
 
 function App() {
@@ -48,18 +51,18 @@ function App() {
       verifyToken(accessToken).then((userData) => {
         if (userData) {
           console.log(userData)
-          dispatch(updateUser(userData.data)); 
+          dispatch(updateUser(userData.data));
         } else {
-          dispatch(logout()); 
+          dispatch(logout());
         }
       });
     } else {
-      dispatch(logout()); 
+      dispatch(logout());
     }
-  }, [dispatch]); 
+  }, [dispatch]);
 
   return (
-    <Suspense fallback={<div>Loading...</div>}>
+    <Suspense fallback={<Spinner />}>
       <Routes>
         <Route path="/" element={<UserLayout />} >
           <Route index element={<HomePage />} />
@@ -106,7 +109,7 @@ function App() {
           {/* Aution Route */}
           <Route path="aution" element={<AutionList />} />
           <Route path="aution/detail" element={<AutionDetail />} />
-          
+
           <Route path="admin/aution" element={<CensorProductToAution />} />
           {/* Error route */}
           <Route path="error" element={<ErrorPage />} />

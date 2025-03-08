@@ -1,73 +1,172 @@
-import { Card } from "antd";
-import { CheckCircleOutlined, ThunderboltOutlined, CustomerServiceOutlined } from "@ant-design/icons";
+import React, { useState } from "react";
+import { Card, Typography, Divider, List } from "antd";
+import { CheckCircleOutlined, ThunderboltOutlined, CustomerServiceOutlined, DownOutlined, UpOutlined } from "@ant-design/icons";
 
+const { Text, Paragraph } = Typography;
 
-const ProductInfo = ({ info }) => {
+const ProductInfo = ({ info, assessories = [] }) => {
+    // State to track if accessories dropdown is expanded
+    const [accessoriesExpanded, setAccessoriesExpanded] = useState(false);
+
+    // Toggle accessories dropdown
+    const toggleAccessories = () => {
+        setAccessoriesExpanded(!accessoriesExpanded);
+    };
+
+    // Features section with icons
+    const shoppingFeatures = [
+        {
+            icon: <CheckCircleOutlined style={{ fontSize: '18px', color: '#52c41a' }} />,
+            text: "Được đồng kiểm khi nhận hàng"
+        },
+        {
+            icon: <ThunderboltOutlined style={{ fontSize: '18px', color: '#1890ff' }} />,
+            text: "Giao hàng nhanh chóng, đóng gói cẩn thận"
+        },
+        {
+            icon: <CustomerServiceOutlined style={{ fontSize: '18px', color: '#722ed1' }} />,
+            text: "Hỗ trợ 24/7 từ đội ngũ chuyên nghiệp"
+        }
+    ];
+
+    // Product details for display
+    const productDetails = [
+        { label: "Tỉ lệ", value: info?.scale },
+        { label: "Phân khúc", value: info?.grade },
+        { label: "Khối lượng", value: info?.weight ? `${info.weight} (gam)` : "" },
+        {
+            label: "Phụ kiện đi kèm",
+            value: assessories?.length > 0
+                ? (
+                    <div
+                        onClick={toggleAccessories}
+                        style={{
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'flex-end'
+                        }}
+                    >
+                        <Text>{assessories.length} phụ kiện</Text>
+                        {accessoriesExpanded ?
+                            <UpOutlined style={{ marginLeft: 8, fontSize: 12 }} /> :
+                            <DownOutlined style={{ marginLeft: 8, fontSize: 12 }} />
+                        }
+                    </div>
+                )
+                : "Không có",
+            hasDetails: assessories?.length > 0,
+            isDropdown: assessories?.length > 0
+        },
+        { label: "Nhà sản xuất", value: info?.manufacturer }
+    ];
+
     return (
-        <>
-            <div className="max-w-2xl mx-auto space-y-4">
-                {/* An tâm mua sắm */}
-                <Card className="shadow-md rounded-lg">
-                    <h2 className="text-xl font-semibold mb-3">An tâm mua sắm</h2>
-                    <div className="space-y-2">
-                        <p className="flex items-center gap-2">
-                            <CheckCircleOutlined className="text-green-500 text-lg" />
-                            Được đồng kiểm khi nhận hàng
-                        </p>
-                        <p className="flex items-center gap-2">
-                            <ThunderboltOutlined className="text-yellow-500 text-lg" />
-                            Giao hàng nhanh chóng, đóng gói cẩn thận
-                        </p>
-                        <p className="flex items-center gap-2">
-                            <CustomerServiceOutlined className="text-purple-500 text-lg" />
-                            Hỗ trợ 24/7 từ đội ngũ chuyên nghiệp
-                        </p>
+        <div className="product-info-container">
+            {/* Shopping confidence section */}
+            <Card title={<span className="text-xl font-bold">An tâm khi mua sắm</span>} style={{ marginBottom: 16 }}>
+                <List
+                    itemLayout="horizontal"
+                    dataSource={shoppingFeatures}
+                    renderItem={item => (
+                        <List.Item>
+                            <List.Item.Meta
+                                avatar={item.icon}
+                                title={item.text}
+                            />
+                        </List.Item>
+                    )}
+                />
+            </Card>
 
-                    </div>
-                </Card>
+            {/* Product details section */}
+            <Card title={<span className="text-xl font-bold">Thông tin chi tiết</span>} style={{ marginBottom: 16 }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                    <tbody>
+                        {productDetails.map((detail, index) => (
+                            <React.Fragment key={index}>
+                                <tr>
+                                    <td
+                                        style={{
+                                            padding: '8px 0',
+                                            width: '30%',
+                                            verticalAlign: 'top',
+                                            textAlign: 'left'
+                                        }}
+                                    >
+                                        <Text strong>{detail.label}</Text>
+                                    </td>
+                                    <td
+                                        style={{
+                                            padding: '8px 0',
+                                            width: '70%',
+                                            textAlign: 'right',
+                                            verticalAlign: 'top',
+                                            wordBreak: 'break-word'
+                                        }}
+                                    >
+                                        {detail.value}
+                                    </td>
+                                </tr>
 
-                {/* Thông tin chi tiết */}
-                <Card className="shadow-md rounded-lg">
-                    <h2 className="text-xl font-semibold mb-3">Thông tin chi tiết</h2>
-                    <div className="divide-y divide-gray-200">
-                        <div className="flex justify-between py-2">
-                            <span className="text-gray-500">Tỉ lệ</span>
-                            <span className="font-medium">{info?.scale}</span>
-                        </div>
-                        <div className="flex justify-between py-2">
-                            <span className="text-gray-500">Phân khúc</span>
-                            <span className="font-medium">{info?.grade}</span>
-                        </div>
-                        {/* <div className="flex justify-between py-2">
-                            <span className="text-gray-500">Tình trạng</span>
-                            <span className="font-medium">{info?.condition}</span>
-                        </div> */}
-                        <div className="flex justify-between py-2">
-                            <span className="text-gray-500">Khối lượng</span>
-                            <span className="font-medium">1.2kg</span>
-                        </div>
-                        <div className="flex justify-between py-2">
-                            <span className="text-gray-500">Phụ kiện đi kèm</span>
-                            <span className="font-medium">Đế trưng bày</span>
-                        </div>
-                        <div className="flex justify-between py-2">
-                            <span className="text-gray-500">Nhà sản xuất</span>
-                            <span className="font-medium">{info?.manufacturer}</span>
-                        </div>
-                        {/* <div className="flex justify-between py-2">
-                            <span className="text-gray-500">Xuất xứ</span>
-                            <span className="font-medium">Nhật Bản</span>
-                        </div> */}
-                    </div>
-                </Card>
+                                {/* Add accessories details if expanded */}
+                                {detail.hasDetails && accessoriesExpanded && (
+                                    <tr>
+                                        <td colSpan={2} style={{ paddingTop: '8px', paddingBottom: '8px' }}>
+                                            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                                                <tbody>
+                                                    {assessories.map((item, idx) => (
+                                                        <tr key={item.id}>
+                                                            <td style={{
+                                                                padding: '4px 16px',
+                                                                textAlign: 'left',
+                                                                // borderTop: idx === 0 ? '1px solid #f0f0f0' : 'none',
+                                                                // borderBottom: idx === assessories.length - 1 ? 'none' : '1px dashed #f0f0f0'
+                                                            }}>
+                                                                <Text className="text-gray-400">+ {item.name}</Text>
+                                                            </td>
+                                                            <td style={{
+                                                                padding: '4px 0',
+                                                                textAlign: 'right',
+                                                                // borderTop: idx === 0 ? '1px solid #f0f0f0' : 'none',
+                                                                // borderBottom: idx === assessories.length - 1 ? 'none' : '1px dashed #f0f0f0'
+                                                            }}>
+                                                                <Text className="text-gray-400">x {item.quantity}</Text>
+                                                            </td>
+                                                        </tr>
+                                                    ))}
+                                                </tbody>
+                                            </table>
+                                        </td>
+                                    </tr>
+                                )}
 
-                {/* Mô tả sản phẩm */}
-                <Card className="shadow-md rounded-lg">
-                    <h2 className="text-xl font-semibold text-gray-900">Mô tả sản phẩm</h2>
-                    <p className="mt-4 text-gray-700">{info?.description}</p>
-                </Card>
-            </div>
-        </>
-    )
-}
-export default ProductInfo
+                                {index < productDetails.length - 1 && (
+                                    <tr>
+                                        <td colSpan={2}>
+                                            <Divider style={{ margin: '4px 0' }} />
+                                        </td>
+                                    </tr>
+                                )}
+                            </React.Fragment>
+                        ))}
+                    </tbody>
+                </table>
+            </Card>
+
+            {/* Product description section */}
+            <Card title={<span className="text-xl font-bold">Mô tả sản phẩm</span>}>
+                <Paragraph
+                    style={{
+                        whiteSpace: "pre-wrap",
+                        wordBreak: "break-word"
+                    }}
+                >
+                    {info?.description}
+                </Paragraph>
+            </Card>
+        </div>
+    );
+};
+
+export default ProductInfo;

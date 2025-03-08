@@ -3,12 +3,14 @@ import { useEffect, useState } from "react";
 import { PhoneOutlined, LockOutlined } from "@ant-design/icons";
 import Cookies from 'js-cookie';
 import { verifyToken } from '../../apis/Auth/APIAuth';
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { verifyOtp, verifyPhone } from "../../apis/User/APIUserProfile";
+import { updateUser } from "../../features/auth/authSlice";
 
 const FirstForm = ({ form, setIsPhoneVerified }) => {
 
-    const [user, setUser] = useState(useSelector((state) => state.auth.user));
+    // const [user, setUser] = useState(useSelector((state) => state.auth.user));
+    const user = useSelector((state) => state.auth.user);
 
     const [email, setEmail] = useState(user?.email || "");
     const [fullName, setFullName] = useState(user?.full_name || "");
@@ -26,6 +28,16 @@ const FirstForm = ({ form, setIsPhoneVerified }) => {
     const [isResendDisabled, setIsResendDisabled] = useState(true);
 
 
+    const dispatch = useDispatch();
+
+    // Cập nhật các State khi user có thay đổi
+    useEffect(() => {
+        setEmail(user?.email || "");
+        setFullName(user?.full_name || "");
+        setNewPhoneNumber(user?.phone_number || "");
+    }, [user]);
+
+
     // Lấy Thông tin User từ Cookie
     useEffect(() => {
         const access_token = Cookies.get('access_token');
@@ -33,7 +45,7 @@ const FirstForm = ({ form, setIsPhoneVerified }) => {
             try {
                 verifyToken(access_token).then(response => {
                     console.log("Data user", response.data);
-                    setUser(response.data);
+                    // setUser(response.data);
                     setEmail(response.data.email);
                     setFullName(response.data.full_name);
                     setNewPhoneNumber(response.data.phone_number);
@@ -137,6 +149,14 @@ const FirstForm = ({ form, setIsPhoneVerified }) => {
                 setModalVisible(false); // Đảm bảo đúng cách đóng modal
                 setIsPhoneVerified(true);
                 setOtp("");
+                setStep(1);
+
+                // Cập nhật thông tin người dùng với số điện thoại mới
+                dispatch(updateUser({
+                    ...user,  // giữ lại các thông tin hiện có
+                    phone_number: phoneNumber  // cập nhật số điện thoại
+                }));
+
             } else {
                 message.error("OTP không đúng! Vui lòng kiểm tra lại.");
             }
@@ -183,13 +203,13 @@ const FirstForm = ({ form, setIsPhoneVerified }) => {
                     <div className="flex items-center">
                         {newPhoneNumber ? (
                             <>
-                                <span className="">{user.phone_number}</span>
+                                <span className="">{newPhoneNumber}</span>
                                 <Button type="link" className="underline" onClick={() => setModalVisible(true)}>
                                     Thay Đổi
                                 </Button>
                             </>
                         ) : (
-                            <Button type="link" className="text-green-500" onClick={() => setModalVisible(true)}>
+                            <Button type="link" className="text-green-600 underline" onClick={() => setModalVisible(true)}>
                                 Thêm mới
                             </Button>
                         )}

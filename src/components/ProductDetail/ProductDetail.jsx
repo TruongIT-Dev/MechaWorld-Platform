@@ -45,6 +45,8 @@ const GundamProductPage = () => {
     const navigate = useNavigate();
 
     const [detailGundam, setDetailGundam] = useState([]);
+    const [accessories, setAccessories] = useState([]);
+
     const [idGundam, setIdGundam] = useState(null);
     const [loadingAdded, setLoadingAdded] = useState(false);
     const [added, setAdded] = useState(false);
@@ -59,7 +61,7 @@ const GundamProductPage = () => {
         const fetchDetailGundamBySlug = async (slug) => {
             try {
                 const detailGundam = await GetGundamDetailBySlug(slug);
-                // console.log("detailGundam", detailGundam);
+                console.log("detailGundam", detailGundam);
 
                 // Mapping condition từ tiếng Anh sang tiếng Việt
                 const conditionMapping = {
@@ -67,14 +69,16 @@ const GundamProductPage = () => {
                     "open box": "Đã mở hộp",
                     "second hand": "Đã qua sử dụng"
                 };
-                let gundamData = detailGundam?.data || {};
+                let gundamData = detailGundam?.data?.Gundam || {};
+                let assessoriesData = detailGundam?.data?.accessories; 
                 if (gundamData.condition) {
                     gundamData.condition = conditionMapping[gundamData.condition] || gundamData.condition;
                 }
-                setIdGundam(gundamData.id || null);
                 setDetailGundam(gundamData);
-                setShopId(gundamData.owner_id || []);
-                setImageGundam(gundamData.image_urls || []);
+                setAccessories(assessoriesData);
+                setIdGundam(gundamData?.id || null);
+                setShopId(gundamData?.owner_id || []);
+                setImageGundam(gundamData?.image_urls || []);
             } catch (error) {
                 console.log("Fail to fetch detail gundam: No data detected!");
             }
@@ -242,7 +246,7 @@ const GundamProductPage = () => {
                         {/* Describe */}
                         <Col span={9}>
                             <div className="description-section">
-                                <ProductInfo info={detailGundam} />
+                                <ProductInfo info={detailGundam} assessories={accessories} />
                             </div>
                         </Col>
 
@@ -251,7 +255,7 @@ const GundamProductPage = () => {
                             <div className='space-y-4 sticky top-24'>
                                 <div className="p-4 border rounded-lg bg-white shadow-md space-y-3">
                                     {/* Product Name */}
-                                    <h1 className="text-xl font-bold text-gray-900">{detailGundam.name}</h1>
+                                    <h1 className="text-xl font-bold text-gray-900">{detailGundam?.name}</h1>
 
                                     {/* Price */}
                                     <div className="flex items-center space-x-4">

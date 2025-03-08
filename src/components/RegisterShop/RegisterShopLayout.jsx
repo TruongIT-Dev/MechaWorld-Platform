@@ -8,10 +8,10 @@ const RegisterShopLayout = () => {
             {/* Header */}
             <header className="bg-white shadow-md py-4">
                 <div className="container mx-auto flex justify-between items-center px-6">
-                    <NavLink to="/" className="text-red-400 font-bold text-3xl flex items-center">
+                    <NavLink to="/" className="text-blue-400 hover:text-blue-600 font-bold text-3xl flex items-center">
                         <FaStore className="text-4xl mr-2" /> MechaWorld
                     </NavLink>
-                    <span className="text-lg font-semibold text-gray-500">
+                    <span className="text-lg uppercase font-semibold text-black">
                         Đăng Ký Trở Thành Nhà Bán Hàng
                     </span>
                 </div>
