@@ -126,6 +126,7 @@ function ShopProduct({
     {
       title: "Trạng thái",
       key: "status",
+      width: 120,
       render: (_, product) => (
         <div className="flex flex-col space-y-2">
           {/* Nút Đăng Bán */}
@@ -143,7 +144,7 @@ function ShopProduct({
       title: "Hành động",
       dataIndex: "action",
       key: "action",
-      width: 60,
+      width: 120,
       render: () => {
         const menuItems = [
           { key: "edit", label: "✏️ Chỉnh sửa sản phẩm",  },
@@ -234,7 +235,7 @@ function ShopProduct({
               <Input type="number" max={7} min={1}/>
             </Form.Item>
             <Form.Item>
-              <Button type="submit" >
+              <Button type="submit" className="flex bg-blue-600 hover:bg-blue-400 text-white h-10 ml-36 mt-2">
                 Gửi yêu cầu đấu giá
               </Button>
             </Form.Item>

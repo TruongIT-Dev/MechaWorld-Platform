@@ -1,6 +1,6 @@
 import { Table, Tag, Image } from "antd";
 import { useEffect, useState } from "react";
-
+import { TiEyeOutline } from "react-icons/ti";
 const AuctionRequests = () => {
   const [requestData, setRequestData] = useState([]);
 
@@ -29,7 +29,7 @@ const AuctionRequests = () => {
   }, []);
 
   const columns = [
-    { title: "Ảnh Chính", dataIndex: "image", render: (text) => <Image width={100} src={text} /> },
+    { title: "Ảnh ", dataIndex: "image", render: (text) => <Image width={100} src={text} /> },
     { title: "Tên Gundam", dataIndex: "name" },
     { title: "Thời Lượng Đấu Giá", dataIndex: "duration" },
     { title: "Giá Khởi Điểm", dataIndex: "startPrice", render: (text) => `${text.toLocaleString()} VNĐ` },
@@ -38,6 +38,13 @@ const AuctionRequests = () => {
       title: "Trạng Thái Duyệt",
       dataIndex: "status",
       render: (text) => <Tag color={text === "Chờ duyệt" ? "orange" : "green"}>{text}</Tag>,
+    },
+    {
+      title: "Thao tác",
+      dataIndex: "actiton",
+      render: () => { 
+
+      }
     },
   ];
 

@@ -34,7 +34,7 @@ const AuctionList = () => {
   }, []);
 
   const columns = [
-    { title: "Ảnh Chính", dataIndex: "image", render: (text) => <Image width={100} src={text} /> },
+    { title: "Ảnh ", dataIndex: "image", render: (text) => <Image width={100} src={text} /> },
     { title: "Tên Gundam", dataIndex: "name" },
     { title: "Thời Gian Bắt Đầu", dataIndex: "startTime", render: (text) => moment(text).format("DD/MM/YYYY HH:mm") },
     { title: "Thời Gian Kết Thúc", dataIndex: "endTime", render: (text) => moment(text).format("DD/MM/YYYY HH:mm") },

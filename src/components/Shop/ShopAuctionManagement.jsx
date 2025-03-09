@@ -9,16 +9,27 @@ const ShopAuctionManagement = () => {
   const [activeTab, setActiveTab] = useState("auctions");
 
   return (
-    <div>
+    <div className="w-full">
       <h2 className="text-2xl font-semibold mb-4">Quản Lý Đấu Giá</h2>
-      <Tabs activeKey={activeTab} onChange={setActiveTab}>
-        <TabPane tab="📢 Quản lý đấu giá" key="auctions">
-          <AuctionList />
-        </TabPane>
-        <TabPane tab="📝 Quản lý yêu cầu đấu giá" key="requests">
-          <AuctionRequests />
-        </TabPane>
-      </Tabs>
+      <div className="max-w-7xl mx-auto ">
+        <Tabs
+          activeKey={activeTab}
+          onChange={setActiveTab}
+          className="mb-4 "
+          tabBarStyle={{ marginBottom: 0 }} 
+        >
+          <TabPane  tab={<span className="text-lg font-medium">📢 Quản lý đấu giá</span>} key="auctions" >
+            <div className="w-full">
+              <AuctionList />
+            </div>
+          </TabPane>
+          <TabPane tab={<span className="text-lg font-medium">📝 Quản lý yêu cầu đấu giá</span>} key="requests">
+            <div className="w-full">
+              <AuctionRequests />
+            </div>
+          </TabPane>
+        </Tabs>
+      </div>
     </div>
   );
 };
