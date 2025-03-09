@@ -1,4 +1,4 @@
-import { Table, Row, Button, InputNumber, Select, Space, Input, Modal, Dropdown, Form } from "antd";
+import { Table, Row, Button, InputNumber, Select, Space, Input, Modal, Dropdown, Form, Tag } from "antd";
 import { useEffect, useState } from "react";
 import { GetGundamByID } from "../../apis/Product/APIProduct";
 import PropTypes from 'prop-types';
@@ -11,7 +11,7 @@ function ShopProduct({
   setIsCreating}) {
   // const user = JSON.parse(Cookies.get("user"));
   const user = useSelector((state) => state.auth.user);
-  console.log("checking user data",user);
+  // console.log("checking user data",user);
   const [gundamList, setGundamList] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
   const [sellModalVisible, setSellModalVisible] = useState(false);
@@ -31,6 +31,7 @@ function ShopProduct({
       .then((response) => {
         setGundamList(response.data);
         setFilteredData(response.data);
+        console.log("Dử liệu lọc: ",filteredData);
       })
       .catch((error) => {
         console.error("Lỗi khi lấy danh sách sản phẩm:", error);
@@ -106,7 +107,7 @@ function ShopProduct({
       title: "Tình trạng sản phẩm",
       dataIndex: "condition",
       key: "condition",
-      width: 120,
+      width: 110,
       filters: [
         { text: "Hàng mới", value: "new" },
         { text: "Đã mở hộp", value: "open box" },
@@ -126,25 +127,53 @@ function ShopProduct({
     {
       title: "Trạng thái",
       key: "status",
-      width: 120,
-      render: (_, product) => (
-        <div className="flex flex-col space-y-2">
-          {/* Nút Đăng Bán */}
-          <Button type="primary" className="bg-green-600 hover:bg-green-500 w-28" onClick={() => handleSellProduct(product)}>
-            Đăng bán
-          </Button>
-          {/* Nút Chỉnh Sửa */}
-          <Button className="bg-red-600 hover:bg-red-400 text-white w-28" onClick={() => handleAuctionProduct(product)}>
-            Đấu giá
-          </Button>
-        </div>
-      ),
+      width: 95,
+      render: (_, product) => {
+        const { status } = product;
+    
+        if (status === "available") {
+          return (
+            <div className="flex flex-col space-y-2">
+              <Button
+                type="primary"
+                className="bg-green-600 hover:bg-green-500 w-28"
+                onClick={() => handleSellProduct(product)}
+              >
+                Đăng bán
+              </Button>
+              <Button
+                className="bg-red-600 hover:bg-red-400 text-white w-28"
+                onClick={() => handleAuctionProduct(product)}
+              >
+                Đấu giá
+              </Button>
+            </div>
+          );
+        }
+    
+        // Trạng thái khác -> render tag tương ứng
+        const statusMap = {
+          auction: { text: "Đang đấu giá", color: "blue" },
+          selling: { text: "Đang bán", color: "green" },
+          exchange: { text: "Đang trao đổi", color: "cyan" },
+        };
+    
+        const statusTag = statusMap[status];
+    
+        return statusTag ? (
+          <Tag color={statusTag.color} className="w-28 text-sm font-semibold h-6 text-center">
+            {statusTag.text.toUpperCase()}
+          </Tag>
+        ) : (
+          <Tag color="default">Không rõ</Tag>
+        );
+      },
     },
     {
       title: "Hành động",
       dataIndex: "action",
       key: "action",
-      width: 120,
+      width: 70,
       render: () => {
         const menuItems = [
           { key: "edit", label: "✏️ Chỉnh sửa sản phẩm",  },

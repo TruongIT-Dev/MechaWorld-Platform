@@ -10,13 +10,13 @@ const ShopAuctionManagement = () => {
 
   return (
     <div className="w-full">
-      <h2 className="text-2xl font-semibold mb-4">Quản Lý Đấu Giá</h2>
+      {/* <h2 className="text-2xl font-semibold mb-4">Quản Lý Đấu Giá</h2> */}
       <div className="max-w-7xl mx-auto ">
         <Tabs
           activeKey={activeTab}
           onChange={setActiveTab}
           className="mb-4 "
-          tabBarStyle={{ marginBottom: 0 }} 
+          tabBarStyle={{ marginBottom: 30 }} 
         >
           <TabPane  tab={<span className="text-lg font-medium">📢 Quản lý đấu giá</span>} key="auctions" >
             <div className="w-full">

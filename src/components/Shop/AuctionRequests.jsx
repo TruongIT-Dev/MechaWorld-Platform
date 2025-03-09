@@ -1,6 +1,9 @@
 import { Table, Tag, Image } from "antd";
 import { useEffect, useState } from "react";
 import { TiEyeOutline } from "react-icons/ti";
+import { NavLink } from "react-router-dom";
+import { CiEdit } from "react-icons/ci";
+import { MdOutlineDeleteOutline } from "react-icons/md";
 const AuctionRequests = () => {
   const [requestData, setRequestData] = useState([]);
 
@@ -41,11 +44,21 @@ const AuctionRequests = () => {
     },
     {
       title: "Thao tác",
-      dataIndex: "actiton",
-      render: () => { 
-
-      }
-    },
+      key: "action",
+      render: () => (
+        <div className="flex gap-2 items-center">
+          <NavLink to="#" className="font-medium text-indigo-500">
+            <TiEyeOutline size={25} />
+          </NavLink>
+          <NavLink to="#" className="font-medium text-green-600">
+            <CiEdit size={25} />
+          </NavLink>
+          <button className="font-medium text-red-500">
+            <MdOutlineDeleteOutline size={25} />
+          </button>
+        </div>
+      )
+    }
   ];
 
   return <Table columns={columns} dataSource={requestData} pagination={{ pageSize: 5 }} />;

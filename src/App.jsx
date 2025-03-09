@@ -32,6 +32,7 @@ import {
   AddProductToAution,
   ListProductToAution,
   CensorProductToAution,
+  ModeratorLayout,
 } from "./routes/router";
 import { useDispatch, useSelector } from "react-redux";
 import Cookies from "js-cookie";
@@ -115,12 +116,16 @@ function App() {
           <Route path="error" element={<ErrorPage />} />
           <Route path="*" element={<ErrorPage />} />
         </Route>
+        <Route path="moderator" element={<ModeratorLayout />} >
+
+        </Route>
 
         {/* Layout Đăng ký Shop */}
         <Route path="registe-shop" element={<RegisterShopLayout />}>
           <Route index element={<ShopRegister />} />
         </Route>
       </Routes>
+
     </Suspense>
   );
 

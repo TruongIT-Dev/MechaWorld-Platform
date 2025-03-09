@@ -1,11 +1,12 @@
 import {  
     ShoppingOutlined,
     LineChartOutlined,
+    BankOutlined,
   } from '@ant-design/icons';
   import {  Menu,Layout } from 'antd';
   import { Outlet, Link } from 'react-router-dom';
   import {  FaBoxOpen } from "react-icons/fa";
-  import {  MdOutlineGavel, MdOutlineReviews } from "react-icons/md";
+  import {   MdOutlineReviews } from "react-icons/md";
 
   const { Sider, Content } = Layout; 
   const items = [
@@ -36,7 +37,7 @@ import {
     },
     {
       key: '4',
-      icon: <MdOutlineGavel  />,
+      icon: <BankOutlined className="text-lg text-red-500" />,
       label: <Link to="/shop/auction-management">Quản lý đấu giá</Link>
     },
     {

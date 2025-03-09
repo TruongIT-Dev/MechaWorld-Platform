@@ -1,199 +1,144 @@
-import { Column, Pie } from '@antv/g2plot';
-import { each, groupBy } from '@antv/util';
-import { useEffect, useRef } from 'react';
-import { Button, Card, Col, Row, Statistic } from 'antd';
+import  { useEffect, useRef } from 'react';
+import { Card, Row, Col, Statistic, Button } from 'antd';
+import { Pie, Column } from '@antv/g2plot';
+import { groupBy } from '@antv/util';
 
-const data = 
-[
-    { "city": "Hcm", "type": "Card", "value": 14500 },
-    { "city": "Hcm", "type": "Figure", "value": 8500 },
-    { "city": "Hcm", "type": "Gundam", "value": 10000 },
-    { "city": "Hcm", "type": "Rider Belt", "value": 7000 },
-    { "city": "HN", "type": "Card", "value": 9000 },
-    { "city": "HN", "type": "Figure", "value": 8500 },
-    { "city": "HN", "type": "Gundam", "value": 11000 },
-    { "city": "HN", "type": "Rider Belt", "value": 6000 },
-    { "city": "HA", "type": "Card", "value": 14000 },
-    { "city": "HA", "type": "Figure", "value": 9000 },
-    { "city": "HA", "type": "Gundam", "value": 10000 },
-    { "city": "HA", "type": "Rider Belt", "value": 9000 },
-    { "city": "DN", "type": "Card", "value": 9000 },
-    { "city": "DN", "type": "Figure", "value": 8500 },
-    { "city": "DN", "type": "Gundam", "value": 10000 },
-    { "city": "DN", "type": "Rider Belt", "value": 6000 },
-    { "city": "QN", "type": "Card", "value": 18000 },
-    { "city": "QN", "type": "Figure", "value": 11000 },
-    { "city": "QN", "type": "Gundam", "value": 15000 },
-    { "city": "QN", "type": "Rider Belt", "value": 14000 }
-  ];
-export default function ShopDashboard() {
-    
-    const container1Ref = useRef(null); 
-    const container2Ref = useRef(null); 
-    const pieRef = useRef(null);       
-    const columnRef = useRef(null);
-    
-    useEffect(() => {
-      if (!data) {
-        return null; // Hoặc loading indicator, hoặc placeholder
-    }
-        let pie, column;
-        const pieData = ((originData) => {
-          const groupData = groupBy(originData, "type");
-          const result = [];
-          each(groupData, (values, k) => {
-            result.push({
-              type: k,
-              value: values.reduce((a, b) => a + b.value, 0),
-            });
-          });
-          return result;
-        })(data);
+const shopData = [
+  { city: 'Hcm', type: 'Card', value: 14500 },
+  { city: 'Hcm', type: 'Figure', value: 8500 },
+  { city: 'Hcm', type: 'Gundam', value: 10000 },
+  { city: 'Hcm', type: 'Rider Belt', value: 7000 },
+  { city: 'HN', type: 'Card', value: 9000 },
+  { city: 'HN', type: 'Figure', value: 8500 },
+  { city: 'HN', type: 'Gundam', value: 11000 },
+  { city: 'HN', type: 'Rider Belt', value: 6000 },
+  { city: 'HA', type: 'Card', value: 14000 },
+  { city: 'HA', type: 'Figure', value: 9000 },
+  { city: 'HA', type: 'Gundam', value: 10000 },
+  { city: 'HA', type: 'Rider Belt', value: 9000 },
+  { city: 'DN', type: 'Card', value: 9000 },
+  { city: 'DN', type: 'Figure', value: 8500 },
+  { city: 'DN', type: 'Gundam', value: 10000 },
+  { city: 'DN', type: 'Rider Belt', value: 6000 },
+  { city: 'QN', type: 'Card', value: 18000 },
+  { city: 'QN', type: 'Figure', value: 11000 },
+  { city: 'QN', type: 'Gundam', value: 15000 },
+  { city: 'QN', type: 'Rider Belt', value: 14000 },
+];
 
-    //pie chart 
-    pie = new Pie(container1Ref.current, {
-        data: pieData,
-        colorField: 'type',
-        angleField: 'value',
-        label: { type: 'inner' },
-        tooltip: false,
-        state: {
-            active: {
-                style: {
-                    lineWidth: 0,
-                },
-            },
-        },
-        interactions: [
-            {
-                type: 'element-highlight',
-                cfg: {
-                    showEnable: [{ trigger: 'element:mouseenter', action: 'cursor:pointer' }],
-                    end: [
-                        { trigger: 'element:mouseleave', action: 'cursor:default' },
-                        { trigger: 'element:mouseleave', action: 'element-highlight:reset' },
-                    ],
-                },
-            },
-        ],
-    });
-    //column chart 
-    column = new Column(container2Ref.current, {
-        data,
-        xField: 'city',
-        yField: 'value',
-        seriesField: 'type',
-        isGroup: 'true',
-        legend: false,
-        columnStyle: {
-            radius: [4, 4, 4, 0],
-        },
+const ShopDashboard = () => {
+  const pieRef = useRef(null);
+  const columnRef = useRef(null);
+  const pieChart = useRef(null);
+  const columnChart = useRef(null);
+
+  useEffect(() => {
+    // Tổng hợp dữ liệu Pie Chart
+    const pieData = Object.entries(groupBy(shopData, 'type')).map(([type, list]) => ({
+      type,
+      value: list.reduce((acc, item) => acc + item.value, 0),
+    }));
+
+    // Render Pie Chart
+    pieChart.current = new Pie(pieRef.current, {
+      data: pieData,
+      angleField: 'value',
+      colorField: 'type',
+      radius: 1,
+      innerRadius: 0.6,
+      label: {
+        type: 'spider',
+        content: '{name}\n{percentage}',
+      },
+      interactions: [{ type: 'element-active' }],
     });
 
-    pie.render();
-    // console.log('render pie');
-    column.render();
-    // console.log('render column');
-    pieRef.current = pie; 
-    columnRef.current = column; 
-    // change state when mouse on pie
-    pie.on('element:mouseover', (evt) => {
-      const eventData = evt.data;
-      if (eventData?.data) {
-        const type = eventData.data.type;
-        column.setState('selected', (datum) => datum.type === type);
-        column.setState('selected', (datum) => datum.type !== type, false);
-      }
-    });
-    pie.on('element:mouseleave', () => {
-      // cancel state selected 
-      column.setState('selected', () => true, false);
+    pieChart.current.render();
+
+    // Render Column Chart
+    columnChart.current = new Column(columnRef.current, {
+      data: shopData,
+      isGroup: true,
+      xField: 'city',
+      yField: 'value',
+      seriesField: 'type',
+      columnStyle: { radius: [4, 4, 0, 0] },
+      legend: { position: 'top' },
     });
 
-    pie.on('element:click', (evt) => {
-      const eventData = evt.data;
-      if (eventData?.data) {
-        const type = eventData.data.type;
-        pie.chart.changeData(pieData.filter((datum) => datum.type === type));
-        column.chart.changeData(data.filter((datum) => datum.type === type));
-      }
-    });
-    // dbclick to return normal state
-  pie.on('element:dblclick', () => {
-      pie.chart.changeData(pieData);
-      column.chart.changeData(data);
-    });
-    // console.log('checking if this show');
-    
+    columnChart.current.render();
 
-  return () => {
-    if (pieRef.current) {
-        pieRef.current.destroy();
-    }
-    if (columnRef.current) {
-        columnRef.current.destroy(); 
-    }
+    // Tương tác: Hover Pie -> Highlight Column
+    pieChart.current.on('element:mouseenter', (evt) => {
+      const type = evt.data?.data?.type;
+      columnChart.current.setState('active', (item) => item.type === type);
+    });
+
+    pieChart.current.on('element:mouseleave', () => {
+      columnChart.current.setState('active', () => false);
+    });
+
+    // Click Pie -> Lọc dữ liệu Column
+    pieChart.current.on('element:click', (evt) => {
+      const type = evt.data?.data?.type;
+      const filtered = shopData.filter((item) => item.type === type);
+      columnChart.current.changeData(filtered);
+    });
+
+    // Double click Pie -> Reset Column
+    pieChart.current.on('element:dblclick', () => {
+      columnChart.current.changeData(shopData);
+    });
+
+    return () => {
+      pieChart.current && pieChart.current.destroy();
+      columnChart.current && columnChart.current.destroy();
     };
-    },[]);
-
+  }, []);
 
   return (
-    <div className="flex container mx-auto p-4 gap-4">
-      {/* Cột bên trái (3 bảng) */}
-      <div className="w-1/2 flex flex-col gap-4">
-        {/* Bảng hiển thị số dư */}
-        <Card className="p-4 shadow-md">
-        <p className="text-2xl font-semibold">THỐNG KÊ</p>
-          <Row gutter={16}>
-            <Col span={12}>
-              <Statistic title="Số dư tài khoản (VND)" value={112893000} precision={2} />
-            </Col>
-            <Col span={12}>
-             <br/>
-             <br/>
-              <Button type="primary" className='bg-blue-600 hover:bg-blue-700'>Nạp tiền</Button>
-            </Col>
-          </Row>
-        </Card>
+    <div style={{ padding: '24px', background: '#f5f5f5', minHeight: '100vh' }}>
+      <Row gutter={16} style={{ marginBottom: 16 }}>
+        <Col span={8}>
+          <Card className=''>
+            <div className=' flex justify-around'>
+              <Statistic title="Số dư tài khoản (VND)" value={112893000}/>
+              <Button type="primary" className='mt-4 bg-blue-500 hover:bg-blue-400'>Nạp tiền</Button>
+            </div>
+          </Card>
+          
+        </Col>
+        <Col span={8}>
+          <Card>
+            <Statistic title="Tổng doanh thu tháng (VND)" value={5000000} />
+            <Statistic title="Sản phẩm đã bán" value={150} style={{ marginTop: 16 }} />
+          </Card>
+        </Col>
+        <Col span={8}>
+          <Card>
+            <Row gutter={16}>
+              <Col span={8}><Statistic title="Tổng sản phẩm" value={500} /></Col>
+              <Col span={8}><Statistic title="Đã bán" value={150} /></Col>
+              <Col span={8}><Statistic title="Đấu giá thành công" value={50} /></Col>
+            </Row>
+          </Card>
+        </Col>
+      </Row>
 
-        {/* Bảng hiển thị Tổng doanh thu tháng + sản phẩm đã bán */}
-        <Card className="p-4 shadow-md">
-          <Row gutter={16}>
-            <Col span={12}>
-              <Statistic title="Tổng doanh thu tháng (VND)" value={5000000} precision={2} />
-            </Col>
-            <Col span={12}>
-              <Statistic title="Sản phẩm đã bán" value={150} />
-            </Col>
-          </Row>
-        </Card>
-
-        {/* Bảng tổng số sản phẩm / sản phẩm đã bán / sản phẩm đã đấu giá */}
-        <Card className="p-4 shadow-md">
-          <Row gutter={16}>
-            <Col span={8}>
-              <Statistic title="Tổng sản phẩm" value={500} />
-            </Col>
-            <Col span={8}>
-              <Statistic title="Đã bán" value={150} />
-            </Col>
-            <Col span={8}>
-              <Statistic title="Đấu giá thành công" value={50} />
-            </Col>
-          </Row>
-        </Card>
-      </div>
-
-      {/* Cột bên phải (2 biểu đồ) */}
-      <div className="w-1/2 flex flex-col gap-4">
-        <Card className="p-4 shadow-md">
-          <div ref={container1Ref } className="h-60 w-full"></div>
-        </Card>
-        <Card className="p-4 shadow-md">
-          <div ref={container2Ref } className="h-60 w-full"></div>
-        </Card>
-      </div>
+      <Row gutter={16}>
+        <Col span={12}>
+          <Card title="Tỷ lệ doanh thu theo loại sản phẩm">
+            <div ref={pieRef} style={{ height: 360 }} />
+          </Card>
+        </Col>
+        <Col span={12}>
+          <Card title="Doanh thu theo thành phố và sản phẩm">
+            <div ref={columnRef} style={{ height: 360 }} />
+          </Card>
+        </Col>
+      </Row>
     </div>
   );
-}
+};
 
+export default ShopDashboard;

@@ -1,6 +1,8 @@
 import { Table, Tag, Image } from "antd";
 import moment from "moment";
 import { useEffect, useState } from "react";
+import { TiEyeOutline } from "react-icons/ti";
+import { NavLink } from "react-router-dom";
 
 const AuctionList = () => {
   const [auctionData, setAuctionData] = useState([]);
@@ -46,6 +48,17 @@ const AuctionList = () => {
       dataIndex: "status",
       render: (text) => <Tag color={text === "Đang diễn ra" ? "green" : "red"}>{text}</Tag>,
     },
+    {
+      title: "",
+      key: "action",
+      render: () => (
+        <div className="flex gap-2 items-center">
+          <NavLink to="#" className="font-medium text-indigo-500">
+            <TiEyeOutline size={25} />
+          </NavLink>
+        </div>
+      )
+    }
   ];
 
   return <Table columns={columns} dataSource={auctionData} pagination={{ pageSize: 5 }} />;

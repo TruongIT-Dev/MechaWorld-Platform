@@ -4,7 +4,7 @@ import React from "react";
 
 // Layout
 export const UserLayout = React.lazy(() => import('../pages/UserLayout'));
-
+export const ModeratorLayout = React.lazy(() => import('../pages/ModeratorLayout'));
 
 // Navigation Bar route
 export const HomePage = React.lazy(() => import('../pages/HomePage'));

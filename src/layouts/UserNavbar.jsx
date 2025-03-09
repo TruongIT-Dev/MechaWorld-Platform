@@ -15,8 +15,6 @@ import CartContext from "./CartContext";
 
 const UserNavbar = ({ user }) => {
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-    // const isRole = useSelector(state => state.auth.user.role)
-    // const [userData, setUserData] = useState(null);
     let timeoutId = null;
 
     // const navigate = useNavigate();
