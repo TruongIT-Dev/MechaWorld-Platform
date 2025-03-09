@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Form, Select, Input, Button, message, Table, Modal, Checkbox } from 'antd';
+import { Form, Select, Input, Button, message, Modal, Checkbox } from 'antd';
 import axios from 'axios';
-import { postUserAddresses, getUserAddresses } from '../../apis/User/APIUserProfile';
+import { postUserAddresses, getUserAddresses,updateAddress } from '../../apis/User/APIUserProfile';
 import { useSelector } from 'react-redux';
 
 const { Option } = Select;
@@ -13,29 +13,29 @@ const SettingAddress = () => {
   const [wards, setWards] = useState([]);
   const [selectedCity, setSelectedCity] = useState(null);
   const [selectedDistrict, setSelectedDistrict] = useState(null);
-  // const [addresses, setAddresses] = useState([]);
+  const [addresses, setAddresses] = useState([]);
   const [loading, setLoading] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isPickupAddress, setIsPickupAddress] = useState(false);
   const [isPrimary, setIsPrimary] = useState(true);
-
-
-  const [addresses, setAddresses] = useState([
-    {
-      id: 1,
-      name: "trần tuấn",
-      phone: "(+84) 394 211 201",
-      address: "23 văn đại, Xã Bảo Sơn, Huyện Lục Nam, Bắc Giang",
-      isDefault: true,
-    },
-    {
-      id: 2,
-      name: "Nguyễn Hữu Đăng Trường",
-      phone: "(+84) 385 145 207",
-      address: "169/27, Đường Số 11, Phường Bình Hưng Hòa, Quận Bình Tân, TP. Hồ Chí Minh",
-      isDefault: false,
-    },
-  ]);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editingAddress, setEditingAddress] = useState(null);
+  // const [addresses, setAddresses] = useState([
+  //   {
+  //     id: 1,
+  //     name: "trần tuấn",
+  //     phone: "(+84) 394 211 201",
+  //     address: "23 văn đại, Xã Bảo Sơn, Huyện Lục Nam, Bắc Giang",
+  //     isDefault: true,
+  //   },
+  //   {
+  //     id: 2,
+  //     name: "Nguyễn Hữu Đăng Trường",
+  //     phone: "(+84) 385 145 207",
+  //     address: "169/27, Đường Số 11, Phường Bình Hưng Hòa, Quận Bình Tân, TP. Hồ Chí Minh",
+  //     isDefault: false,
+  //   },
+  // ]);
 
   const user = useSelector((state) => state.auth.user);
   const ghn_api = 'https://dev-online-gateway.ghn.vn/shiip/public-api/master-data/';
@@ -64,6 +64,93 @@ const SettingAddress = () => {
       setLoading(false);
     }
   };
+  const setPrimaryAddress = async (addressID) => {
+    try {
+
+      await updateAddress(user.id, addressID, { is_primary: true });
+      message.success("Đã cập nhật địa chỉ mặc định!");
+      fetchUserAddresses();
+    } catch (error) {
+      message.error("Lỗi khi cập nhật địa chỉ mặc định!");
+      console.error(error);
+    }
+  };  
+  const handleEditAddress = async (address) => {
+    console.log("📌 Đang chỉnh sửa địa chỉ:", address);
+  
+    setIsEditing(true);
+    setEditingAddress(address);
+    setIsPrimary(address.is_primary);
+    
+    // Gán dữ liệu cơ bản trước
+    form.setFieldsValue({
+      full_name: address.full_name,
+      phone_number: address.phone_number,
+      address: address.detail,
+    });
+  
+    setIsModalVisible(true);
+  
+    try {
+      // 🟢 1. Lọc thành phố có tên trùng với `province_name`
+      const filteredCities = cities.filter((city) => city.ProvinceName === address.province_name);
+      console.log("✅ Thành phố tìm thấy:", filteredCities);
+  
+      if (filteredCities.length > 0) {
+        const selectedCityId = filteredCities[0].ProvinceID;
+        setSelectedCity(selectedCityId);
+        await fetchDistricts(selectedCityId); // 🟢 Load quận/huyện dựa vào thành phố
+  
+        // 🟢 2. Đợi `districts` cập nhật xong mới tiếp tục
+        setTimeout(async () => {
+          console.log("📌 Danh sách Quận/Huyện sau khi fetch:", districts);
+          const district = districts.find((d) => d.DistrictName === address.district_name);
+          console.log("✅ Quận/Huyện tìm thấy:", district);
+  
+          if (district) {
+            const selectedDistrictId = district.DistrictID;
+            setSelectedDistrict(selectedDistrictId);
+            await fetchWards(selectedDistrictId); // 🟢 Load danh sách phường/xã dựa vào quận/huyện
+            
+            // 🟢 3. Đợi `wards` cập nhật xong mới tiếp tục
+            setTimeout(() => {
+              console.log("📌 Danh sách Phường/Xã sau khi fetch:", wards);
+              const ward = wards.find((w) => w.WardName === address.ward_name);
+              console.log("✅ Phường/Xã tìm thấy:", ward);
+              
+              // Gán giá trị vào form
+              form.setFieldsValue({
+                city: selectedCityId,
+                district: district ? selectedDistrictId : undefined,
+                ward: ward ? ward.WardCode : undefined,
+              });
+            }, 200);
+          } else {
+            console.warn("⚠️ Không tìm thấy Quận/Huyện phù hợp");
+          }
+        }, 200);
+      } else {
+        console.warn("⚠️ Không tìm thấy Thành phố phù hợp");
+      }
+    } catch (error) {
+      console.error("❌ Lỗi khi load dữ liệu địa chỉ:", error);
+    }
+  };
+  
+  
+
+  const handleUpdateAddress = async (values) => {
+    if (!editingAddress) return;
+    try {
+      await updateAddress(user.id, editingAddress.id, values);
+      message.success("Cập nhật địa chỉ thành công!");
+      setIsModalVisible(false);
+      fetchUserAddresses();
+    } catch (error) {
+      message.error("Lỗi khi cập nhật địa chỉ!");
+      console.error(error);
+    }
+  };
 
   const fetchProvinces = async () => {
     try {
@@ -78,6 +165,7 @@ const SettingAddress = () => {
 
   const fetchDistricts = async (province_id) => {
     try {
+      console.log("chạy qua rồi");
       const response = await api.post(`district`, { province_id });
       setDistricts(response.data.data);
     } catch (error) {
@@ -170,20 +258,21 @@ const SettingAddress = () => {
           <div key={addr.id} className="border-b pb-4 mb-4">
             <div className="flex justify-between items-start">
               <div>
-                <p className="font-semibold text-base">{addr.name} <span className="text-gray-500">{addr.phone}</span></p>
-                <p className="text-gray-600">{addr.address}</p>
+                <p className="font-semibold text-base">{addr.full_name} <span className="text-gray-500">{addr.phone_number}</span></p>
+                <p className="text-gray-600">{addr.detail}</p>
               </div>
               <div className="space-x-2">
-                <Button type="link">Cập nhật</Button>
-                {!addr.isDefault && <Button type="link" danger>Xóa</Button>}
+                <Button type="link" onClick={() => handleEditAddress(addr)}>Cập nhật</Button>
+                {!addr.is_primary && <Button type="link" danger>Xóa</Button>}
               </div>
             </div>
 
             <div className="mt-2 flex items-center space-x-2">
-              {addr.isDefault ? (
+              {addr.is_primary ? (
                 <span className="px-2 py-1 text-xs font-semibold text-white bg-red-500 rounded">Mặc định</span>
               ) : (
-                <Button size="small" onClick={() => setDefaultAddress(addr.id)}>
+                // <Button size="small" onClick={() => setDefaultAddress(addr.id)}>
+                <Button size="small" onClick={() => setPrimaryAddress(addr.id)}>
                   Thiết lập mặc định
                 </Button>
               )}
@@ -196,7 +285,9 @@ const SettingAddress = () => {
         <Modal
           title="Thêm địa chỉ mới"
           open={isModalVisible}
+          form={form}
           onCancel={() => setIsModalVisible(false)}
+          onFinish={isEditing ? handleUpdateAddress : onFinish}
           footer={null}
         >
           <Form form={form} layout="vertical" onFinish={onFinish}>
@@ -235,12 +326,12 @@ const SettingAddress = () => {
             <Form.Item label="Số điện thoại" name="phone_number" rules={[{ required: true }]}>
               <Input placeholder="Nhập số điện thoại" />
             </Form.Item>
-
+            {/* 
             <Form.Item>
               <Checkbox checked={isPickupAddress} onChange={(e) => setIsPickupAddress(e.target.checked)}>
                 Có phải địa chỉ nhận đồ không?
               </Checkbox>
-            </Form.Item>
+            </Form.Item> */}
 
             <Form.Item>
               <Checkbox checked={isPrimary} onChange={(e) => setIsPrimary(e.target.checked)}>
@@ -250,7 +341,7 @@ const SettingAddress = () => {
 
             <Form.Item>
               <Button type="primary" htmlType="submit" className='bg-[#0056b3] hover:bg-[#4a90e2]'>
-                Lưu địa chỉ
+                {isEditing ? "Cập nhật địa chỉ" : "Lưu địa chỉ"}
               </Button>
             </Form.Item>
           </Form>

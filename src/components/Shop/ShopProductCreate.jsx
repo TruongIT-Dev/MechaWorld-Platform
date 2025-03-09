@@ -5,6 +5,8 @@ import Cookies from "js-cookie";
 import PropTypes from "prop-types";
 import { PostGundam,GetGrades } from "../../apis/Product/APIProduct";
 import ImageUpload from "./ImageUpload";
+import { InfoCircleOutlined } from '@ant-design/icons';
+
 
 const { Option } = Select;
 
@@ -212,25 +214,31 @@ const handleFinish = (values) => {
             </Select>
         </Form.Item>
 
-        <Form.Item name="condition" label="Tình trạng sản phẩm" rules={[{ required: true }]}>
+        <Form.Item name="condition" label="Tình trạng sản phẩm" rules={[{ required: true }]}
+            tooltip={{
+              title: 'Nếu là hàng mới: Hộp mới nguyên dạng, chưa bóc seal, linh kiện không bị hư hại, đủ phụ kiện đi kèm',
+              icon: <InfoCircleOutlined/>,
+            }}>
           <Select value={condition} onChange={setCondition}>
             <Option value="new">Hàng mới</Option>
             <Option value="open box">Đã mở hộp</Option>
             <Option value="second hand">Đã qua sử dụng</Option>
           </Select>
         </Form.Item>
-
+        {/* {condition == "new" && (
+          <a> Tình trạng sản phẩm: Hộp mới nguyên dạng, chưa bóc seal, linh kiện không bị hư hại, đủ phụ kiện đi kèm </a>
+        )} */}
         {condition !== "new" && (
           <Form.Item name="condition_description" label="Mô tả tình trạng">
             <Input.TextArea placeholder="Nhập mô tả chi tiết..." />
           </Form.Item>
         )}
 
-        <Form.Item name="manufacturer" label="Thương hiệu" rules={[{ required: true }]}>
+        <Form.Item name="manufacturer" label="Thương hiệu" rules={[{ required: true,message: "Vui lòng thêm thương hiệu" }]}>
           <Input placeholder="vd: Bandai, ect" />
         </Form.Item>
 
-        <Form.Item name="scale" label="Kích thước" rules={[{ required: true }]}>
+        <Form.Item name="scale" label="Kích thước" rules={[{ required: true, message: "Vui lòng chọn tỷ lệ sản phẩm!" }]}>
           <Select placeholder="Chọn kích thước">
             {scaleOptions.map((scale) => (
               <Option key={scale} value={scale}>
@@ -248,6 +256,10 @@ const handleFinish = (values) => {
             name="weight" 
             label="Cân nặng " 
             rules={[{ required: true, message: "Vui lòng nhập cân nặng!" }]}
+            tooltip={{
+              title: 'Dùng để tính chi phí vận chuyển. (3.500 vnd / 500g)',
+              icon: <InfoCircleOutlined/>,
+            }}
         >
             <InputNumber
                 min={1}
@@ -257,8 +269,9 @@ const handleFinish = (values) => {
             />
 
         </Form.Item>
-        <small>Dùng để tính chi phí vận chuyển. (3.500 vnd / 500g)</small>
-        <Form.Item name="description" label="Mô tả sản phẩm" rules={[{ required: true }]}>
+
+
+        <Form.Item name="description" label="Mô tả sản phẩm" rules={[{ required: true , message: "Vui lòng nhập mô tả sản phẩm!"}]}>
           <Input.TextArea />
         </Form.Item>
         <Form.Item label="Phụ kiện">

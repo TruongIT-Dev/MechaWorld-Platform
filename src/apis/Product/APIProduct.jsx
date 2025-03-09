@@ -15,7 +15,7 @@ export const GetGrades = () => {
 export const  PostGundam = (id, gundamData) => {
     const accessToken = Cookies.get('access_token');
     // console.log(accessToken);
-    return axios.post(`/users/${id}/gundams`, gundamData, {
+    return axios.post(`/sellers/${id}/gundams`, gundamData, {
         headers: {
           "Content-Type": "multipart/form-data",
           "Authorization": `Bearer ${accessToken}`
@@ -23,5 +23,5 @@ export const  PostGundam = (id, gundamData) => {
       });
 }
 export const GetGundamByID = (id, gundamName) => {
-    return axios.get(`/users/${id}/gundams?name=${gundamName}`)
+    return axios.get(`/sellers/${id}/gundams?name=${gundamName}`)
 }

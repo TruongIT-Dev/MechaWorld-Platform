@@ -4,7 +4,7 @@ import UserProfile from "./UserNavbar";
 import { useSelector } from "react-redux";
 
 const GuestNavbar = () => {
-    const [user] = useSelector(state => state.auth.user);
+    const [user] = useSelector(state => state.auth.user || "");
     // const isLoggedIn = useSelector(state => state.auth.isLoggedIn); 
 
     // useEffect(() => {

@@ -41,3 +41,6 @@ export const uploadAvatar = (id, file) => {
       },
     });
 }
+export const updateAddress = (id,addressId, addressData) => {
+    return axios.put(`/users/${id}/addresses/${addressId}`, addressData)
+}

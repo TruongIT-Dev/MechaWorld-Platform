@@ -1,9 +1,9 @@
-import { Table, Row, Button, InputNumber, Select, Space, Input, Modal } from "antd";
+import { Table, Row, Button, InputNumber, Select, Space, Input, Modal, Dropdown, Form } from "antd";
 import { useEffect, useState } from "react";
 import { GetGundamByID } from "../../apis/Product/APIProduct";
 import PropTypes from 'prop-types';
 import { useSelector } from "react-redux";
-
+import { MoreOutlined } from "@ant-design/icons";
 const { Option } = Select;
 
 function ShopProduct({
@@ -16,11 +16,16 @@ function ShopProduct({
   const [filteredData, setFilteredData] = useState([]);
   const [sellModalVisible, setSellModalVisible] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
+  const [form] = Form.useForm();
   // Bộ lọc giá tiền & phân khúc
   const [minPrice, setMinPrice] = useState(null);
   const [maxPrice, setMaxPrice] = useState(null);
   const [selectedCondition, setSelectedCondition] = useState(null);
   const [selectedGrade, setSelectedGrade] = useState(null);
+  // const [openMenuId, setOpenMenuId] = useState(null);
+  // const toggleMenu = (id) => {
+  //   setOpenMenuId(openMenuId === id ? null : id);
+  // };
   useEffect(() => {
     GetGundamByID(user.id,"")
       .then((response) => {
@@ -33,13 +38,13 @@ function ShopProduct({
   }, []);
   const handleSellProduct = (product) => {
     setSelectedProduct(product);
+    console.log("data đã lưu: ",selectedProduct);
+  };
+
+  const handleAuctionProduct = (product) => {
+    setSelectedProduct(product);
     setSellModalVisible(true);
   };
-
-  const handleEditProduct = (product) => {
-    console.log("Chỉnh sửa sản phẩm:", product);
-  };
-
   // Lọc dữ liệu khi có thay đổi
   useEffect(() => {
     let filtered = gundamList;
@@ -60,10 +65,11 @@ function ShopProduct({
     if (selectedGrade) {
       filtered = filtered.filter((item) => item.grade === selectedGrade);
     }
-
     setFilteredData(filtered);
   }, [minPrice, maxPrice, selectedCondition, selectedGrade, gundamList]);
-
+  const handleFinish = (values) => {
+    console.log("data input", values);
+  }
   const searchGundam = (values) => {
     console.log(values);
     GetGundamByID(user.id,values)
@@ -118,21 +124,39 @@ function ShopProduct({
       },
     },
     {
-      title: "Hành động",
-      key: "action",
+      title: "Trạng thái",
+      key: "status",
       render: (_, product) => (
         <div className="flex flex-col space-y-2">
           {/* Nút Đăng Bán */}
           <Button type="primary" className="bg-green-600 hover:bg-green-500 w-28" onClick={() => handleSellProduct(product)}>
-            Đăng Bán
+            Đăng bán
           </Button>
           {/* Nút Chỉnh Sửa */}
-          <Button className="bg-gray-600 hover:bg-gray-500 text-white w-28" onClick={() => handleEditProduct(product)}>
-            Chỉnh Sửa
+          <Button className="bg-red-600 hover:bg-red-400 text-white w-28" onClick={() => handleAuctionProduct(product)}>
+            Đấu giá
           </Button>
         </div>
       ),
-      width: 100,
+    },
+    {
+      title: "Hành động",
+      dataIndex: "action",
+      key: "action",
+      width: 60,
+      render: () => {
+        const menuItems = [
+          { key: "edit", label: "✏️ Chỉnh sửa sản phẩm",  },
+          { key: "preview", label: "👁️ Xem trước ", },
+          { key: "delete", label: "❌ xóa sản phẩm", },
+        ];
+        
+        return (
+          <Dropdown menu={{ items: menuItems }}>
+            <Button icon={<MoreOutlined />} />
+          </Dropdown>
+        );
+      },
     },
   ];
 
@@ -188,12 +212,34 @@ function ShopProduct({
                     }}
                   />    
         <Modal
-            title="Đăng Bán Sản Phẩm"
+            title="Đấu giá Sản Phẩm"
             open={sellModalVisible}
             onCancel={() => setSellModalVisible(false)}
             footer={null}
         >
-          <p>Chọn hình thức đăng bài cho <strong>{selectedProduct?.name}</strong></p>
+          <Form form={form} onFinish={handleFinish}>
+            <Form.Item label="giá khởi điểm (đ)" required name='start_price'>
+              <Input type="number" formatter={(value) =>`${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")} parser={(value) => value.replace(/[^0-9]/g, "")} />
+            </Form.Item>
+            <Form.Item label="Bước giá tối thiểu (đ)" required name='step'>
+              <Input type="number" formatter={(value) =>`${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")} parser={(value) => value.replace(/[^0-9]/g, "")} />
+            </Form.Item>
+              <Form.Item label="Mức cọc (đ)" required name='first_bind'>
+            <Input type="number" formatter={(value) =>`${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")} parser={(value) => value.replace(/[^0-9]/g, "")} />
+              </Form.Item>
+            <Form.Item label="Giá mua ngay (đ)" required name='final_price'>
+              <Input type="number" formatter={(value) =>`${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")} parser={(value) => value.replace(/[^0-9]/g, "")} />
+            </Form.Item>
+            <Form.Item label="Thời lượng đấu giá (1-7 Ngày)" required name='duration'>
+              <Input type="number" max={7} min={1}/>
+            </Form.Item>
+            <Form.Item>
+              <Button type="submit" >
+                Gửi yêu cầu đấu giá
+              </Button>
+            </Form.Item>
+
+          </Form>
         </Modal>  
       </div>
     </div>
