@@ -1,10 +1,7 @@
 import { createAppSlice } from "../../app/createAppSlice";
-import {}from "@reduxjs/toolkit"
+import { } from "@reduxjs/toolkit"
 
-
-
-
-const initialState ={
+const initialState = {
     isLoggedIn: false,
     user: null,
     access_token: null,
@@ -31,12 +28,12 @@ export const authSlice = createAppSlice({
             state.user = action.payload;
         },
         // signup: (state, action) => {
-            
+
         // },
         updateUserProfile: (state, action) => {
-            state.user = action.payload; 
+            state.user = action.payload;
         }
-    }   
+    }
 })
-export const { login, logout,updateUserProfile, updateUser  } = authSlice.actions;
+export const { login, logout, updateUserProfile, updateUser } = authSlice.actions;
 export default authSlice.reducer;

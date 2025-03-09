@@ -9,7 +9,7 @@ import FirstForm from "./FirstForm";
 import SecondForm from "./SecondForm";
 import ThirdForm from "./ThirdForm";
 import FourthForm from "./FourthForm";
-import { updateUserData } from "../../apis/User/APIUserProfile";
+import { BecomeSeller, updateUserData } from "../../apis/User/APIUserProfile";
 import { useSelector } from "react-redux";
 
 const { Step } = Steps;
@@ -26,16 +26,13 @@ export default function RegisterShop() {
   const [formData, setFormData] = useState({
     full_name: "",
     phone_number: "",
-    // city: "",
-    // district: "",
-    // ward:"",
     address: "",
     agreedToTerms: false,
   });
   const [isPhoneVerified, setIsPhoneVerified] = useState(false);
   const [canProceed, setCanProceed] = useState(true);
 
-  console.log("formData", formData);
+  // console.log("formData", formData);
 
   const steps = [
     {
@@ -89,30 +86,21 @@ export default function RegisterShop() {
 
   // Hàm btn Next - Prev
   const next = async () => {
-    // try {
-    //   const values = await form.validateFields();
-    //   setFormData((prev) => ({ ...prev, ...values }));
-    //   setCurrent((prev) => prev + 1);
-    // } catch (err) {
-    //   console.log("Validation Failed:", err);
-    // }
 
     try {
-      const values = await form.validateFields(); // Validate Form hiện tại
+      const values = await form.validateFields();
 
       if (current === 0) {
         // 🟢 Gọi API cập nhật Thông tin Shop
-        const response = await updateUserData(user?.id, values.full_name);
-        console.log("response Form 1", response);
+        await updateUserData(user?.id, values.full_name);
 
       } else if (current === 1) {
-        return;
         // 🟢 Gọi API cập nhật Cài đặt vận chuyển
-        // await updateShippingSettings({ shipping_option: values.shipping_option });
+        console.log("Form 2 done");
+
       } else if (current === 2) {
-        return;
         // 🟢 Gọi API cập nhật Điều khoản sử dụng
-        // await updateTerms({ accepted_terms: values.accepted_terms });
+        await BecomeSeller();
       }
 
       // Nếu API thành công thì mới chuyển bước
@@ -134,8 +122,10 @@ export default function RegisterShop() {
 
       message.success("Đăng ký thành công! Chuyển về trang chủ...");
       setTimeout(() => {
-        navigate("/");
+        navigate("/shop/dashboard");
+        window.location.reload();
       }, 2000);
+
     } catch (err) {
       console.error("Validation Failed:", err);
       message.error("Vui lòng kiểm tra lại thông tin!");
@@ -177,7 +167,7 @@ export default function RegisterShop() {
             </Button>
           ) : (
             <Button type="primary" onClick={handleSubmit} className="bg-green-500 mx-4 hover:bg-green-600">
-              Đăng ký Shop
+              Đến Shop của bạn
             </Button>
           )}
         </div>

@@ -73,9 +73,9 @@ const UserNavbar = ({ user }) => {
 
     // Danh sách List Dropdown Menu
     const menuItems = [
-        { to: "/profile/user", icon: <FaUser className="mr-2 text-blue-600" />, label: "Tài khoản của tôi" },
         { to: "/registe-shop", icon: <FaStore className="mr-2 text-green-600" />, label: "Đăng ký bán hàng", role: "member" },
-        { to: "/shop/dashboard", icon: <FaStore className="mr-2 text-green-600" />, label: "Quản lý kho", role: "seller" },
+        { to: "/shop/dashboard", icon: <FaStore className="mr-2 text-green-600" />, label: "Quản lý Shop", role: "seller" },
+        { to: "/profile/user", icon: <FaUser className="mr-2 text-blue-600" />, label: "Tài khoản" },
         { to: "#", icon: <FaClipboardList className="mr-2 text-yellow-500" />, label: "Đơn mua" },
         { to: "#", icon: <FaSignOutAlt className="mr-2 text-red-500" />, label: "Đăng xuất", onClick: handleLogout },
     ];
