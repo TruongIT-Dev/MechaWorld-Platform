@@ -13,7 +13,7 @@ const { Option } = Select;
 const ShopProductCreate = ({ setIsCreating }) => {
   const [form] = Form.useForm();
   const user = JSON.parse(Cookies.get("user")); // Lấy user từ cookies
-  const [condition, setCondition] = useState("new");
+  const [condition, setCondition] = useState("");
   const [grades, setGrades] = useState([]);
 //   const [images, setImages] = useState([]); // Lưu ảnh upload
   const [primaryImage, setPrimaryImage] = useState(null); // Ảnh chính
@@ -216,10 +216,10 @@ const handleFinish = (values) => {
 
         <Form.Item name="condition" label="Tình trạng sản phẩm" rules={[{ required: true }]}
             tooltip={{
-              title: 'Nếu là hàng mới: Hộp mới nguyên dạng, chưa bóc seal, linh kiện không bị hư hại, đủ phụ kiện đi kèm',
+              title: 'Mô tả tình trạng sản phẩm trong tường hợp có va trạng hoặc trầy xước thì tình trạng sẽ là - "Đã mở hộp"',
               icon: <InfoCircleOutlined/>,
             }}>
-          <Select value={condition} onChange={setCondition}>
+          <Select value={condition} onChange={setCondition} defaultValue="new">
             <Option value="new">Hàng mới</Option>
             <Option value="open box">Đã mở hộp</Option>
             <Option value="second hand">Đã qua sử dụng</Option>
@@ -228,9 +228,14 @@ const handleFinish = (values) => {
         {/* {condition == "new" && (
           <a> Tình trạng sản phẩm: Hộp mới nguyên dạng, chưa bóc seal, linh kiện không bị hư hại, đủ phụ kiện đi kèm </a>
         )} */}
-        {condition !== "new" && (
-          <Form.Item name="condition_description" label="Mô tả tình trạng">
-            <Input.TextArea placeholder="Nhập mô tả chi tiết..." />
+        {condition === 'new' && (
+          <div className="mb-4">
+            *Tình trạng sản phẩm: Hộp mới nguyên dạng, chưa bóc seal, linh kiện không bị hư hại, đủ phụ kiện đi kèm.
+          </div>
+        )}
+        {(condition === 'open box' || condition === 'second hand') &&(
+          <Form.Item name="condition_description" label="Mô tả tình trạng" rules={[{ required: true, message: 'Vui lòng nhập mô tả tình trạng sản phẩm' }]}>
+            <Input.TextArea placeholder="Nhập mô tả chi tiết tình trạng sản phẩm..." />
           </Form.Item>
         )}
 
