@@ -25,3 +25,6 @@ export const  PostGundam = (id, gundamData) => {
 export const GetGundamByID = (id, gundamName) => {
     return axios.get(`/sellers/${id}/gundams?name=${gundamName}`)
 }
+export  const SellingGundam = (id, gundamId) => {
+    return axios.patch(`/sellers/${id}/gundams/${gundamId}/sell`);
+}

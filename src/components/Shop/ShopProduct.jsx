@@ -39,6 +39,7 @@ function ShopProduct({
   }, []);
   const handleSellProduct = (product) => {
     setSelectedProduct(product);
+
     console.log("data đã lưu: ",selectedProduct);
   };
 
@@ -128,8 +129,8 @@ function ShopProduct({
       title: "Trạng thái",
       key: "status",
       width: 95,
-      render: (_, product) => {
-        const { status } = product;
+      render: (_, value) => {
+        const { status } = value;
     
         if (status === "available") {
           return (
@@ -137,13 +138,13 @@ function ShopProduct({
               <Button
                 type="primary"
                 className="bg-green-600 hover:bg-green-500 w-28"
-                onClick={() => handleSellProduct(product)}
+                onClick={() => handleSellProduct(value)}
               >
                 Đăng bán
               </Button>
               <Button
                 className="bg-red-600 hover:bg-red-400 text-white w-28"
-                onClick={() => handleAuctionProduct(product)}
+                onClick={() => handleAuctionProduct(value)}
               >
                 Đấu giá
               </Button>
