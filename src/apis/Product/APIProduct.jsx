@@ -28,3 +28,9 @@ export const GetGundamByID = (id, gundamName) => {
 export  const SellingGundam = (id, gundamId) => {
     return axios.patch(`/sellers/${id}/gundams/${gundamId}/sell`);
 }
+export const GetSellerStatus =  (id) => {
+    return axios.get(`/sellers/${id}/subscriptions/active`);
+}
+export const GetSellerData =  (id) => {
+    return axios.get(`/sellers/${id}`);
+}

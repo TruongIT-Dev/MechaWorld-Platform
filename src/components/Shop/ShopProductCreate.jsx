@@ -142,6 +142,7 @@ const handleFinish = (values) => {
     formData.append("weight", values.weight);
     formData.append("description", values.description);
     formData.append("price", values.price);
+    if (values.condition_description !== "" && values.condition_description !== undefined)
     formData.append("condition_description", values.condition_description);
     
     console.log("1st img",primaryImage);
@@ -222,7 +223,7 @@ const handleFinish = (values) => {
           <Select value={condition} onChange={setCondition} defaultValue="new">
             <Option value="new">Hàng mới</Option>
             <Option value="open box">Đã mở hộp</Option>
-            <Option value="second hand">Đã qua sử dụng</Option>
+            <Option value="used">Đã qua sử dụng</Option>
           </Select>
         </Form.Item>
         {/* {condition == "new" && (

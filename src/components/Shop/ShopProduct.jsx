@@ -1,6 +1,6 @@
 import { Table, Row, Button, InputNumber, Select, Space, Input, Modal, Dropdown, Form, Tag } from "antd";
 import { useEffect, useState } from "react";
-import { GetGundamByID } from "../../apis/Product/APIProduct";
+import { GetGundamByID, GetSellerData, GetSellerStatus, SellingGundam } from "../../apis/Product/APIProduct";
 import PropTypes from 'prop-types';
 import { useSelector } from "react-redux";
 import { MoreOutlined } from "@ant-design/icons";
@@ -38,9 +38,16 @@ function ShopProduct({
       });
   }, []);
   const handleSellProduct = (product) => {
-    setSelectedProduct(product);
+    // setSelectedProduct(product);
+    // const data = GetSellerStatus(user.id);
+    // console.log(data);
+    // console.log("data đã lưu: ",product);
+    // const checkDate = GetSellerData(user.id);
+    // console.log("Data id: ", checkDate);
+    SellingGundam(user.id,product.id).catch(response => {
+      console.log(response);
+    }) 
 
-    console.log("data đã lưu: ",selectedProduct);
   };
 
   const handleAuctionProduct = (product) => {

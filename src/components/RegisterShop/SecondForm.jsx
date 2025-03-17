@@ -145,7 +145,7 @@ const SecondForm = ({ user, setUser }) => {
         const addressData = {
             full_name: user.full_name,
             phone_number: user.phone_number,
-            detail: values.address,
+            detail: values.detail,
             ghn_ward_code: values.ward,
             ghn_district_id: values.district,
             ward_name: ward ? ward.WardName : "",
@@ -350,6 +350,7 @@ const SecondForm = ({ user, setUser }) => {
                                     console.log("Dữ liệu form: ", values);
                                     handleUpdateAddress(values, addresses);
                                 } else {
+                                    console.log("Dữ liệu form: ", values);
                                     handleAddNewAddress(values);
                                 }
                                 
