@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Button, Form, Input, message, Modal, Select, Spin, Typography } from 'antd';
 import axios from 'axios';
-import { getUserAddresses, postUserAddresses } from '../../apis/User/APIUserProfile';
+import { getUserAddresses, postUserAddresses, updateAddress } from '../../apis/User/APIUserProfile';
 
 import { PlusOutlined } from '@ant-design/icons';
 
@@ -46,7 +46,10 @@ const SecondForm = ({ user, setUser }) => {
         try {
             setLoading(true);
             const response = await getUserAddresses(user?.id);
-            setAddresses(response?.data);
+            // setAddresses(response?.data);
+            const pickupAddresses = response?.data?.filter(addr => addr.is_pickup_address === true);
+            // console.log(pickupAddresses);
+            setAddresses(pickupAddresses);
             console.log("Fetched User Addresses:", response);
         } catch (error) {
             console.error('Lỗi khi lấy danh sách địa chỉ:', error);
@@ -105,7 +108,34 @@ const SecondForm = ({ user, setUser }) => {
         form.setFieldsValue({ ward: undefined });
         fetchWards(value);
     };
-
+    const handleUpdateAddress = async (values, addresses) => {
+        console.log("Data load: ",values);
+        console.log("Data addresses load: ",addresses);
+        const city = cities.find(city => city.ProvinceID === values.city);
+        const district = districts.find(district => district.DistrictID === values.district);
+        const ward = wards.find(ward => ward.WardCode === values.ward);
+        const addressData = {
+            full_name: addresses.full_name,
+            phone_number: addresses.phone_number,
+            detail: values.detail,
+            ghn_ward_code: values.ward,
+            ghn_district_id: values.district,
+            ward_name: ward ? ward.WardName : "",
+            province_name: city ? city.ProvinceName : "",
+            district_name: district ? district.DistrictName : "",
+            is_pickup_address: true,
+            is_primary: isPrimary
+        };
+        try {
+          await updateAddress(user.id, addresses[0].id, addressData);
+          message.success("Cập nhật địa chỉ thành công!");
+          setModalVisible(false);
+          fetchUserAddresses();
+        } catch (error) {
+          message.error("Lỗi khi cập nhật địa chỉ!");
+          console.error(error);
+        }
+    };
     // Handle form submission for new address
     const handleAddNewAddress = async (values) => {
         const city = cities.find(city => city.ProvinceID === values.city);
@@ -121,7 +151,7 @@ const SecondForm = ({ user, setUser }) => {
             ward_name: ward ? ward.WardName : "",
             province_name: city ? city.ProvinceName : "",
             district_name: district ? district.DistrictName : "",
-            is_pickup_address: isPickupAddress,
+            is_pickup_address: true,
             is_primary: isPrimary
         };
 
@@ -143,23 +173,59 @@ const SecondForm = ({ user, setUser }) => {
     };
 
     // Pre-fill form when updating an address
-    const handleEdit = (address) => {
+    const handleEdit = async (address) => {
         setModalVisible(true);
-        // Set city and fetch districts
-        setSelectedCity(address.city_id);
-        fetchDistricts(address.city_id);
 
-        // Set district and fetch wards
-        setSelectedDistrict(address.district_id);
-        fetchWards(address.district_id);
-
-        // Pre-fill form values
         form.setFieldsValue({
-            city: address.city_id,
-            district: address.district_id,
-            ward: address.ward_code,
-            address: address.detail
+            full_name: address.full_name,
+            phone_number: address.phone_number,
+            detail: address.detail,
         });
+
+        try {
+            const filteredCities = cities.filter((city) => city.ProvinceName === address.province_name);
+            if (filteredCities.length > 0) {
+              const selectedCityId = filteredCities[0].ProvinceID;
+              setSelectedCity(selectedCityId);
+              console.log("Data city: ",filteredCities);
+                
+              const districtRes = await api.post(`district`, { province_id: selectedCityId });
+              const districtsData = districtRes.data.data;
+              setDistricts(districtsData);
+              
+                
+              const foundDistrict = districtsData.find((d) => d.DistrictName === address.district_name);
+              console.log("Data district: ",foundDistrict);
+              if (foundDistrict) {
+                const selectedDistrictId = foundDistrict.DistrictID;
+                setSelectedDistrict(selectedDistrictId);
+                
+                const wardRes = await api.post(`ward`, { district_id: selectedDistrictId });
+                const wardsData = wardRes.data.data;
+                setWards(wardsData);
+                
+        
+                const foundWard = wardsData.find((w) => w.WardName === address.ward_name);
+                console.log("Data ward: ", foundWard);
+                form.setFieldsValue({
+                  province_name: filteredCities ? filteredCities.ProvinceName : undefined,
+                  city: selectedCityId,
+                  district_name: foundDistrict ? foundDistrict.DistrictName : undefined,                    
+                  district: selectedDistrictId,
+                  ward_name: foundWard ? foundWard.WardName : undefined,
+                  ward: foundWard ? foundWard.WardCode : undefined,
+                });
+                
+              } else {
+                console.warn("⚠️ Không tìm thấy quận/huyện phù hợp.");
+              }
+            } else {
+              console.warn("⚠️ Không tìm thấy thành phố phù hợp.");
+            }
+          } catch (error) {
+            console.error("❌ Lỗi khi load địa chỉ:", error);
+          }
+        
     };
 
     return (
@@ -215,7 +281,7 @@ const SecondForm = ({ user, setUser }) => {
                             <Form.Item
                                 label={<span className="font-bold">Địa chỉ chi tiết</span>}
                             >
-                                <span className="block px-4 rounded-md">
+                                <span className="block px-4 rounded-md w-64">
                                     {addresses[0].detail}
                                 </span>
                             </Form.Item>
@@ -279,7 +345,14 @@ const SecondForm = ({ user, setUser }) => {
                         onClick={async () => {
                             try {
                                 const values = await form.validateFields();
-                                handleAddNewAddress(values);
+                                if (addresses.length > 0 ) {
+                                    console.log("Dữ liệu address ht: ", addresses);
+                                    console.log("Dữ liệu form: ", values);
+                                    handleUpdateAddress(values, addresses);
+                                } else {
+                                    handleAddNewAddress(values);
+                                }
+                                
                             } catch (error) {
                                 console.error("Validation Error:", error);
                             }
@@ -338,7 +411,7 @@ const SecondForm = ({ user, setUser }) => {
                     </Form.Item>
 
                     {/* Nhập địa chỉ cụ thể */}
-                    <Form.Item label="Địa chỉ cụ thể" name="address" rules={[{ required: true, message: 'Vui lòng nhập địa chỉ cụ thể' }]}>
+                    <Form.Item label="Địa chỉ cụ thể" name="detail" rules={[{ required: true, message: 'Vui lòng nhập địa chỉ cụ thể' }]}>
                         <Input.TextArea
                             placeholder="Ví dụ: 15 Nguyễn Trãi, Tòa nhà ABC, Lầu 10"
                             rows={3}

@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import axios from '../../utils/axios-custome';
 
 
@@ -43,6 +44,9 @@ export const uploadAvatar = (id, file) => {
 }
 export const updateAddress = (id,addressId, addressData) => {
     return axios.put(`/users/${id}/addresses/${addressId}`, addressData)
+}
+export const deleteAddress = (id,addressID)  => {
+    return axios.delete(`/users/${id}/addresses/${addressID}`)
 }
 export const BecomeSeller = () => {
     return axios.post('/users/become-seller');
