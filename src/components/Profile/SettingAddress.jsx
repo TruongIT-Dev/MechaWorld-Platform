@@ -3,6 +3,7 @@ import { Form, Select, Input, Button, message, Modal, Checkbox } from 'antd';
 import axios from 'axios';
 import { postUserAddresses, getUserAddresses,updateAddress, deleteAddress } from '../../apis/User/APIUserProfile';
 import { useSelector } from 'react-redux';
+import { InfoCircleOutlined } from '@ant-design/icons';
 
 const { Option } = Select;
 
@@ -267,7 +268,7 @@ const SettingAddress = () => {
       ward_name: ward ? ward.WardName : "",
       ghn_district_id: values.district,
       ghn_ward_code: values.ward,
-      phone_number: values.phone_number,
+      phone_number: values.phone_number || user.phone_number,
       is_pickup_address: isPickupAddress,
       is_primary: isPrimary
     };
@@ -399,7 +400,10 @@ const SettingAddress = () => {
             <Input />
           </Form.Item>
 
-          <Form.Item label="Số điện thoại" name="phone_number" rules={[{ required: true }]}>
+          <Form.Item label="Số điện thoại" name="phone_number" rules={[{ required: true }]} tooltip={{
+              title: 'Số điện thoại dùng để xác nhận bên vận chuyển khi giao hàng. Để trống sẽ mặc định lấy sđt của người dùng.',
+              icon: <InfoCircleOutlined/>,
+            }}>
             <Input placeholder="Nhập số điện thoại" />
           </Form.Item>
 
