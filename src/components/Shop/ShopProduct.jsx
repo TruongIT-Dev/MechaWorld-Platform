@@ -119,14 +119,14 @@ function ShopProduct({
       filters: [
         { text: "Hàng mới", value: "new" },
         { text: "Đã mở hộp", value: "open box" },
-        { text: "Đã qua sử dụng", value: "second hand" },
+        { text: "Đã qua sử dụng", value: "used" },
       ],
       onFilter: (value, record) => record.condition === value,
       render: (condition) => {
         const conditionMap = {
           new: "Hàng mới",
           "open box": "Đã mở hộp",
-          "second hand": "Đã qua sử dụng",
+          "used": "Đã qua sử dụng",
         };
         return conditionMap[condition] || condition;
 
@@ -220,7 +220,7 @@ function ShopProduct({
           <Select placeholder="Lọc tình trạng" allowClear onChange={setSelectedCondition}>
             <Option value="new">Hàng mới</Option>
             <Option value="open box">Đã mở hộp</Option>
-            <Option value="second hand">Đã qua sử dụng</Option>
+            <Option value="used">Đã qua sử dụng</Option>
           </Select>
           <Select placeholder="Lọc phân khúc" allowClear onChange={setSelectedGrade}>
             {[...new Set(gundamList.map((item) => item.grade))].map((grade) => (

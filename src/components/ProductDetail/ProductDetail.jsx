@@ -67,7 +67,7 @@ const GundamProductPage = () => {
                 const conditionMapping = {
                     "new": "Hàng mới 100%",
                     "open box": "Đã mở hộp",
-                    "second hand": "Đã qua sử dụng"
+                    "used": "Đã qua sử dụng"
                 };
                 let gundamData = detailGundam?.data?.Gundam || {};
                 let assessoriesData = detailGundam?.data?.accessories; 
