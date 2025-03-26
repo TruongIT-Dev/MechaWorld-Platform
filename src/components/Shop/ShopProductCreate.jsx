@@ -30,7 +30,7 @@ const ShopProductCreate = ({ setIsCreating }) => {
 //   const conditionOptions = {
 //     new: "Hộp mới nguyên dạng, chưa bóc seal, linh kiện không bị hư hại, đủ phụ kiện đi kèm",
 //     "open box": "Đã mở hộp, có thể đã thiếu phụ kiện hoặc có vết trầy xước nhẹ",
-//     "second hand": "Sản phẩm đã qua sử dụng, có dấu hiệu hao mòn hoặc đã được lắp ráp",
+//     "used": "Sản phẩm đã qua sử dụng, có dấu hiệu hao mòn hoặc đã được lắp ráp",
 //   };
   useEffect(() => {
     GetGrades()
@@ -220,7 +220,7 @@ const handleFinish = (values) => {
               title: 'Mô tả tình trạng sản phẩm trong tường hợp có va trạng hoặc trầy xước thì tình trạng sẽ là - "Đã mở hộp"',
               icon: <InfoCircleOutlined/>,
             }}>
-          <Select value={condition} onChange={setCondition} defaultValue="new">
+          <Select value={condition} onChange={setCondition} >
             <Option value="new">Hàng mới</Option>
             <Option value="open box">Đã mở hộp</Option>
             <Option value="used">Đã qua sử dụng</Option>
@@ -234,7 +234,7 @@ const handleFinish = (values) => {
             *Tình trạng sản phẩm: Hộp mới nguyên dạng, chưa bóc seal, linh kiện không bị hư hại, đủ phụ kiện đi kèm.
           </div>
         )}
-        {(condition === 'open box' || condition === 'second hand') &&(
+        {(condition === 'open box' || condition === 'used') &&(
           <Form.Item name="condition_description" label="Mô tả tình trạng" rules={[{ required: true, message: 'Vui lòng nhập mô tả tình trạng sản phẩm' }]}>
             <Input.TextArea placeholder="Nhập mô tả chi tiết tình trạng sản phẩm..." />
           </Form.Item>
