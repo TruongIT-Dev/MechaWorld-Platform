@@ -47,7 +47,7 @@ function ShopProduct({
     SellingGundam(user.id,product.id).catch(response => {
       console.log(response);
     }) 
-
+    window.location.reload();
   };
 
   const handleAuctionProduct = (product) => {
@@ -76,9 +76,11 @@ function ShopProduct({
     }
     setFilteredData(filtered);
   }, [minPrice, maxPrice, selectedCondition, selectedGrade, gundamList]);
+
   const handleFinish = (values) => {
     console.log("data input", values);
   }
+
   const searchGundam = (values) => {
     console.log(values);
     GetGundamByID(user.id,values)
