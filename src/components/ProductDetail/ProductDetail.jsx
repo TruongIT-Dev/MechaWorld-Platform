@@ -8,37 +8,6 @@ import ReviewProduct from './Review';
 import SuggestProduct from './SuggestProduct';
 import ShopInfo from './ShopInfo';
 import ProductInfo from './ProductInfo';
-import { useCart } from '../../context/CartContext'; // Import useCart từ Context
-
-const product = {
-    name: 'Gundam RX-78-2',
-    price: '$299',
-    originalPrice: '$349',
-    discount: 15,
-    images: [
-        { src: 'https://i.ebayimg.com/images/g/GG4AAOSw3SpmO9qK/s-l1200.jpg', alt: 'Ảnh 1' },
-        { src: 'https://images-na.ssl-images-amazon.com/images/I/51qL8XPsDbS.jpg', alt: 'Ảnh 2' },
-        { src: 'https://i.ebayimg.com/images/g/GG4AAOSw3SpmO9qK/s-l1200.jpg', alt: 'Ảnh 3' },
-        { src: 'https://images.amain.com/cdn-cgi/image/f=auto,width=950/images/large/bas/bas2509667_2.jpg', alt: 'Ảnh 4' },
-    ],
-    description:
-        'Sở hữu mô hình Gundam RX-78-2 mang tính biểu tượng, được chế tác tỉ mỉ với từng chi tiết hoàn hảo. Một lựa chọn không thể thiếu cho bất kỳ fan Gundam nào!',
-    highlights: [
-        'Chi tiết cực kỳ chính xác',
-        'Chất liệu cao cấp',
-        'Bao gồm các phụ kiện và vũ khí',
-        'Kích thước tỷ lệ 1/100',
-    ],
-    details:
-        'Mô hình được sản xuất bởi Bandai, thuộc dòng sản phẩm Master Grade nổi tiếng. Gói sản phẩm bao gồm bộ phận ráp, sách hướng dẫn, và các decal dán chi tiết.',
-    shippingInfo: {
-        deliveryFee: 'Miễn phí',
-    },
-    seller: {
-        name: 'Gundam Store',
-        totalSales: '3.5k+',
-    },
-};
 
 const GundamProductPage = () => {
     const { slug } = useParams();
@@ -199,7 +168,7 @@ const GundamProductPage = () => {
     // ************** Hàm Format Tiền Việt *****************
     const formatCurrencyVND = (price) => {
         if (!price) return "0 vnd";
-        return price.toLocaleString("vi-VN") + " VND";
+        return price.toLocaleString("vi-VN");
     };
 
     // Cập nhật ảnh được chọn
@@ -210,7 +179,7 @@ const GundamProductPage = () => {
     }, [imageGundam]);
 
     return (
-        <div className="container mt-24 p-6 bg-gray-100">
+        <div className="container mt-32 p-6 bg-gray-100">
             <div className="wrapper mx-40">
                 {/* Main Section */}
                 <div className="top-section">
@@ -260,7 +229,7 @@ const GundamProductPage = () => {
                                     {/* Price */}
                                     <div className="flex items-center space-x-4">
                                         <p className="text-2xl font-semibold text-red-500">
-                                            Giá: {formatCurrencyVND(detailGundam?.price)}
+                                            Giá: {formatCurrencyVND(detailGundam?.price)}<small className='text-base underline'>đ</small>
                                         </p>
                                     </div>
 

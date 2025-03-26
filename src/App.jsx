@@ -33,13 +33,14 @@ import {
   ListProductToAution,
   CensorProductToAution,
   ModeratorLayout,
+  SignUp,
 } from "./routes/router";
-import { useDispatch, useSelector } from "react-redux";
 import Cookies from "js-cookie";
-import { verifyToken } from "./apis/Auth/APIAuth";
-import { logout, updateUser } from "./features/auth/authSlice";
 import Spinner from "./components/Spinner";
-// import Spinner from "./components/Spinner";
+import { verifyToken } from "./apis/Auth/APIAuth";
+import { useDispatch, useSelector } from "react-redux";
+import { logout, updateUser } from "./features/auth/authSlice";
+import PageLoading from "./components/PageLoading";
 
 function App() {
   const accessToken = useSelector((state) => state.auth.access_token);
@@ -63,70 +64,82 @@ function App() {
   }, [dispatch]);
 
   return (
-    <Suspense fallback={<Spinner />}>
-      <Routes>
-        <Route path="/" element={<UserLayout />} >
-          <Route index element={<HomePage />} />
-          <Route path="/product" element={<ProductPage />} />
-          <Route path="/product/:slug" element={<ProductDetailPage />} />
-          <Route path="/exchange" element={<ExchangePage />} />
-          <Route path="/exchange-detail" element={<ExchangeDetail />} />
+    <>
+      <PageLoading /> {/* Hiệu ứng loading khi chuyển trang */}
+      <Suspense fallback={<Spinner />}> {/* Loading khi tải component */}
+        <Routes>
+          <Route path="/" element={<UserLayout />} >
+            <Route index element={<HomePage />} />
 
-          {/* Login route */}
-          <Route path="signIn" element={<SignIn />} />
+            <Route path="product" element={<ProductPage />} />
+            <Route path="product/:slug" element={<ProductDetailPage />} />
+            <Route path="exchange" element={<ExchangePage />} />
+            <Route path="exchange-detail" element={<ExchangeDetail />} />
 
-          {/* Cart route */}
-          <Route path="cart" element={<CartPage1 />} />
+            {/* Cart route */}
+            <Route path="cart" element={<CartPage1 />} />
 
-          {/* Checkout route */}
-          <Route path="checkout" element={<Checkout />} />
+            {/* Checkout route */}
+            <Route path="checkout" element={<Checkout />} />
 
-          {/* Wallet user route */}
-          <Route path="wallet" element={<WalletPage />} />
+            {/* Wallet user route */}
+            <Route path="wallet" element={<WalletPage />} />
 
-          {/* Profile Route */}
-          <Route path="profile" element={<ProfilePage />}>
-            <Route path="user" element={<UserProfile />} />
-            <Route path="collection" element={<Collection />} />
-            <Route path="tradehistory" element={<TradeHistory />} />
-            <Route path="orderhistory" element={<OrderHistory />} />
-            <Route path="advanced-setting" element={<AdvancedSetting />} />
-            <Route path="address-setting" element={<SettingAddress />} />
-            <Route path="addProductAution" element={<AddProductToAution />} />
-            <Route path="listProductAution" element={<ListProductToAution />} />
+            {/* Profile Route */}
+            <Route path="profile" element={<ProfilePage />}>
+              <Route path="user" element={<UserProfile />} />
+              <Route path="collection" element={<Collection />} />
+              <Route path="tradehistory" element={<TradeHistory />} />
+              <Route path="orderhistory" element={<OrderHistory />} />
+              <Route path="advanced-setting" element={<AdvancedSetting />} />
+              <Route path="address-setting" element={<SettingAddress />} />
+              <Route path="addProductAution" element={<AddProductToAution />} />
+              <Route path="listProductAution" element={<ListProductToAution />} />
+            </Route>
+
+            {/* Shop Route */}
+            <Route path="shop" element={<ShopPage />}>
+              <Route path="dashboard" element={<ShopDashboard />} />
+              <Route path="management" element={<ShopProductManagement />} />
+              <Route path="transition" element={<ShopTransaction />} />
+              <Route path="order-management" element={<ShopOrderManagement />} />
+              <Route path="auction-management" element={<ShopAuctionManagement />} />
+              <Route path="report-management" element={<ShopReportManagement />} />
+              {/* <Route path="setting" element={<UserProfile />} /> */}
+            </Route>
+
+            {/* Aution Route */}
+            <Route path="aution" element={<AutionList />} />
+            <Route path="aution/detail" element={<AutionDetail />} />
+
+            <Route path="admin/aution" element={<CensorProductToAution />} />
+
+
+            {/* Error route */}
+            <Route path="error" element={<ErrorPage />} />
+            <Route path="*" element={<ErrorPage />} />
           </Route>
 
-          {/* Shop Route */}
-          <Route path="shop" element={<ShopPage />}>
-            <Route path="dashboard" element={<ShopDashboard />} />
-            <Route path="management" element={<ShopProductManagement />} />
-            <Route path="transition" element={<ShopTransaction />} />
-            <Route path="order-management" element={<ShopOrderManagement />} />
-            <Route path="auction-management" element={<ShopAuctionManagement />} />
-            <Route path="report-management" element={<ShopReportManagement />} />
-            {/* <Route path="setting" element={<UserProfile />} /> */}
+          {/* Những Route khác */}
+
+          {/* Login & Signup */}
+          <Route path="member">
+            <Route path="login" index element={<SignIn />} />
+            <Route path="signup" element={<SignUp />} />
           </Route>
 
-          {/* Aution Route */}
-          <Route path="aution" element={<AutionList />} />
-          <Route path="aution/detail" element={<AutionDetail />} />
+          <Route path="moderator" element={<ModeratorLayout />} >
 
-          <Route path="admin/aution" element={<CensorProductToAution />} />
-          {/* Error route */}
-          <Route path="error" element={<ErrorPage />} />
-          <Route path="*" element={<ErrorPage />} />
-        </Route>
-        <Route path="moderator" element={<ModeratorLayout />} >
+          </Route>
 
-        </Route>
+          {/* Layout Đăng ký Shop */}
+          <Route path="registe-shop" element={<RegisterShopLayout />}>
+            <Route index element={<ShopRegister />} />
+          </Route>
+        </Routes>
 
-        {/* Layout Đăng ký Shop */}
-        <Route path="registe-shop" element={<RegisterShopLayout />}>
-          <Route index element={<ShopRegister />} />
-        </Route>
-      </Routes>
-
-    </Suspense>
+      </Suspense>
+    </>
   );
 
 }

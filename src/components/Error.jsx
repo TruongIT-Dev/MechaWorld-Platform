@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom'
 const Error = () => {
     return (
         <>
-            <div className="container mx-auto py-12 wow fadeInUp" data-wow-delay="0.1s">
+            <div className="container mx-auto py-12 mt-40">
                 <div className="text-center">
                     <div className="flex justify-center">
                         <div className="max-w-lg">

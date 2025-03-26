@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
-import { NavLink, Link } from "react-router-dom";
-import { FaCartShopping } from "react-icons/fa6";
+import { useState } from 'react';
+import { Link } from "react-router-dom";
 import { useCart } from '../context/CartContext';
+
+import { ShoppingCartOutlined } from '@ant-design/icons';
+import { Tooltip } from 'antd';
 
 const CartContext = () => {
     const { cartItems, removeFromCart, loading, error } = useCart();
@@ -16,19 +18,20 @@ const CartContext = () => {
 
     return (
         <div>
-            <div className="cart-section  ">
-                <button
-                    className="bg-gradient-to-r from-cyan-500 to-blue-600 transition-all duration-200 text-white py-1 px-4 rounded-full flex items-center gap-3 group"
-                    onClick={() => setIsOpen(true)}
-                >
-                    <span className="hidden sm:inline">Giỏ hàng</span>
-                    <div className="relative">
-                        <FaCartShopping className="text-xl text-white drop-shadow-sm cursor-pointer" />
-                        <div className="bg-red-500 absolute -right-2 -bottom-2 text-xs w-5 h-5 flex items-center justify-center text-white rounded-full">
-                            {cartItems.length}
+            <div className="cart-section">
+                <Tooltip placement="bottom" title="Giỏ hàng">
+                    <button
+                        className="flex justify-center items-center m-0 relative"
+                        onClick={() => setIsOpen(true)}
+                    >
+                        <div className="relative">
+                            <ShoppingCartOutlined className="text-2xl text-black drop-shadow-sm cursor-pointer" />
+                            <div className="bg-gray-500 absolute -right-2 -bottom-2 text-xs w-4 h-4 flex items-center justify-center text-white rounded-full">
+                                {cartItems.length}
+                            </div>
                         </div>
-                    </div>
-                </button>
+                    </button>
+                </Tooltip>
             </div>
 
             {/* Modal giỏ hàng */}

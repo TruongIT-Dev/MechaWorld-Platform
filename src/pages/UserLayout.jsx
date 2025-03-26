@@ -10,7 +10,7 @@ const UserLayout = () => {
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-           <Layout>
+            <Layout>
                 <Navbar />
 
                 {/* CONTENT */}
@@ -22,9 +22,9 @@ const UserLayout = () => {
 
                 {/* FOOTER */}
                 <Footer />
-             </Layout> 
+            </Layout>
         </div>
-        
+
     )
 }
 export default UserLayout

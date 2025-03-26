@@ -12,6 +12,11 @@ export const ProductPage = React.lazy(() => import('../components/Product/Produc
 export const ExchangePage = React.lazy(() => import('../components/Exchange/Exchange'));
 
 
+// SignIn & SignUp - Authentication route
+export const SignIn = React.lazy(() => import("../components/Login/SignIn"));
+export const SignUp = React.lazy(() => import("../components/Login/SignUp"));
+
+
 // Detail Page route
 export const ProductDetailPage = React.lazy(() => import('../components/ProductDetail/ProductDetail'));
 export const ExchangeDetail = React.lazy(() => import('../components/ExchangeDetail/ExchangeDetail'));
@@ -60,8 +65,7 @@ export const AddProductToAution = React.lazy(() => import("../components/Aution/
 export const ListProductToAution = React.lazy(() => import("../components/Aution/shop/ListProductToAution"));
 
 export const CensorProductToAution = React.lazy(() => import("../components/Aution/Moderator/CensorAution"));
-// Authentication route
-export const SignIn = React.lazy(() => import("../components/Sign"));
+
 
 // 404 page route
 export const ErrorPage = React.lazy(() => import("../components/Error"));

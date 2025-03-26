@@ -1,13 +1,13 @@
 /********** Template CSS **********/
-:root {}
+/* :root {} */
 
-.fw-medium {
+/* .fw-medium {
     font-weight: 600 !important;
 }
 
 .fw-semi-bold {
     font-weight: 700 !important;
-}
+} */
 
 .back-to-top {
     position: fixed;
@@ -33,11 +33,11 @@
 }
 
 /*** Navbar ***/
-.dropdown-toggle::after {
+/* .dropdown-toggle::after {
     border: none;
     content: "\f107";
     font-family: "Font Awesome 5 Free";
     font-weight: 900;
     vertical-align: middle;
     margin-left: 8px;
-}
+} */

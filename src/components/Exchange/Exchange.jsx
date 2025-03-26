@@ -49,14 +49,12 @@ const exchangeRequests = [
     },
 ];
 
-const noGundams = [];
-
 export default function Exchange() {
     const [search, setSearch] = useState('');
 
     return (
         <div className="container">
-            <div className="max-w-4xl mx-auto mt-24 p-4">
+            <div className="max-w-4xl mx-auto mt-32 p-4">
                 {/* Header Search */}
                 <div className="mb-4 py-4 rounded-lg flex space-x-4 items-center">
                     <Button type="default" color='primary' size='large' icon={<PlusOutlined />} className='w-1/4 text-white bg-slate-600'>Đăng bài Trao đổi</Button>

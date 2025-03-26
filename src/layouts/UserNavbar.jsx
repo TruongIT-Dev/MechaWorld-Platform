@@ -1,42 +1,23 @@
-import {
-    //  useEffect,
-     useState } from "react";
-// import { FaWallet } from "react-icons/fa6";
-import { FaUser, FaSignOutAlt, FaClipboardList, FaStore } from "react-icons/fa";
+import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { NavLink } from "react-router-dom";
-import PropTypes from 'prop-types';
-// import { UserOutlined } from "@ant-design/icons";
-import Cookies from "js-cookie";
 import { logout } from "../features/auth/authSlice";
+import { FaUser, FaSignOutAlt, FaClipboardList, FaStore } from "react-icons/fa";
 
-import Notification from "./Notification";
+import Cookies from "js-cookie";
+import PropTypes from 'prop-types';
+
 import CartContext from "./CartContext";
+import Notification from "./Notification";
 
 const UserNavbar = ({ user }) => {
+
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     let timeoutId = null;
 
     // const navigate = useNavigate();
     const dispatch = useDispatch();
 
-
-    // const user = useSelector((state) => state.auth.user);
-
-    // useEffect(() => {
-    //     const storedUser = localStorage.getItem('user');
-    //     if (storedUser) {
-    //         try {
-    //             setUserData(JSON.parse(storedUser));
-    //         } catch (error) {
-    //             console.error("Lỗi từ localStorage:", error);
-    //             localStorage.removeItem('user');
-    //         }
-    //     }
-    // }, []);
-    // useEffect(() => {
-    //     console.log(user);
-    // }, []);
 
     // Hover Enter hiện dropdown
     const handleMouseEnter = () => {
@@ -90,17 +71,6 @@ const UserNavbar = ({ user }) => {
 
                 <div className="h-6 border-l-2 border-l-black"></div>
 
-                {/* Ví tiền ảo */}
-                {/* <div className="cart-section">
-                    <button className="bg-gradient-to-r from-cyan-500 to-blue-600 transition-all duration-200 text-white py-1 px-4 rounded-full flex items-center gap-3 group">
-                        <NavLink className="group-hover:block hover:text-black capitalize transition-all duration-200" to="/wallet">
-                            Ví Cá Nhân
-                        </NavLink>
-                        <FaWallet className="text-xl text-white drop-shadow-sm cursor-pointer" />
-                    </button>
-                </div>
-                <div className="h-4 border-l-2 border-l-black"></div> */}
-
                 {/* Thông báo Component */}
                 <Notification />
 
@@ -112,8 +82,8 @@ const UserNavbar = ({ user }) => {
                     onMouseLeave={handleMouseLeave}
                 >
                     <button className="btn text-xl space-x-4 hover:text-blue-700 flex justify-center items-center m-0">
-                        <span className="text-sm font-semibold max-w-[200px] truncate">
-                            Xin chào, {user?.full_name}
+                        <span className="text-sm font-semibold max-w-[140px] truncate">
+                            {user?.full_name}
                         </span>
                         <img
                             src={user?.avatar_url}

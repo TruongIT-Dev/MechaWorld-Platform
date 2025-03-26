@@ -14,7 +14,7 @@ window.addEventListener("load", function () {
 
                 if (currentScrollY > lastScrollY) {
                     if (currentScrollY > 50 && !isScrollingDown) {
-                        navbar.style.top = "-100px"; // Ẩn Navbar
+                        navbar.style.top = "-120px"; // Ẩn Navbar
                         isScrollingDown = true;
                     }
                 } else {

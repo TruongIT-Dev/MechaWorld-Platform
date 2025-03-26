@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { HomeOutlined, UserOutlined } from '@ant-design/icons';
-import { Card, Col, Row, Button, Breadcrumb } from 'antd';
+import { Card, Col, Row, Button, Breadcrumb, Empty } from 'antd';
 
 import { GetGundamByGrade, GetGundams } from '../../apis/Product/APIProduct';
 import FilterSidebar from './ProductFilter';
@@ -18,8 +18,6 @@ const Product = () => {
         // condition: "all",
         // priceRange: [100, 1000]
     });
-
-    const [loading, setLoading] = useState(true);
 
 
     // Gọi API khi bộ lọc thay đổi
@@ -75,7 +73,7 @@ const Product = () => {
     // ************** Hàm Format Tiền Việt *****************
     const formatCurrencyVND = (price) => {
         if (!price) return "0 vnd";
-        return price.toLocaleString("vi-VN") + " vnd";
+        return price.toLocaleString("vi-VN");
     };
 
     return (
@@ -116,8 +114,8 @@ const Product = () => {
                             <div className="product-car bg-white shadow-lg rounded-lg p-4">
 
                                 {/* Top Filter */}
-                                <div className="flex justify-between items-center">
-                                    <h1 className="text-lg font-semibold">THỂ LOẠI: <span className='font-normal'>HG</span></h1>
+                                <div className="flex justify-between items-start">
+                                    {/* <h1 className="text-lg font-semibold">THỂ LOẠI: <span className='font-normal'>HG</span></h1> */}
                                     <div className="flex items-center space-x-2">
                                         <span className="font-medium">Sắp xếp:</span>
                                         <Button className="border rounded-md">Mới nhất</Button>
@@ -149,13 +147,15 @@ const Product = () => {
                                                     >
                                                         <Meta
                                                             title={gundam.name}
-                                                            description={<span className="text-red-600 font-semibold">{formatCurrencyVND(gundam?.price)}</span>}
+                                                            description={<span className="text-red-600 text-base font-semibold">{formatCurrencyVND(gundam?.price)}<small className='text-sm underline'>đ</small></span>}
                                                         />
                                                     </Card>
                                                 </Col>
                                             ))
                                         ) : (
-                                            <p className="text-center text-gray-500">Không có sản phẩm nào.</p>
+                                            <div className='w-full h-[420px] flex items-center justify-center'>
+                                                <Empty description="Không tìm thấy sản phẩm" />
+                                            </div>
                                         )}
                                     </Row>
                                 </div>

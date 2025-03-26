@@ -3,8 +3,6 @@ import { useSelector } from "react-redux"
 import UserNavbar from "./UserNavbar";
 import GuestNavbar from "./GuestNavbar";
 
-import Logo from '../assets/image/web-logo.png';
-
 const Menu = [
   {
     id: 1,
@@ -26,50 +24,12 @@ const Menu = [
     name: "Trao đổi",
     link: "/exchange",
   },
-  {
-    id: 5,
-    name: "Phụ kiện",
-    link: "/#",
-  },
+  // {
+  //   id: 5,
+  //   name: "Phụ kiện",
+  //   link: "/#",
+  // },
 ];
-
-// const DropdownLinks = [
-//   {
-//     id: 1,
-//     name: "Entry Grade",
-//     link: "/#",
-//   },
-//   {
-//     id: 2,
-//     name: "High Grade",
-//     link: "/#",
-//   },
-//   {
-//     id: 3,
-//     name: "Master Grade",
-//     link: "/#",
-//   },
-//   {
-//     id: 4,
-//     name: "Perfect Grade",
-//     link: "/#",
-//   },
-//   {
-//     id: 5,
-//     name: "Real Grade",
-//     link: "/#",
-//   },
-//   {
-//     id: 6,
-//     name: "Super Deformed",
-//     link: "/#",
-//   },
-//   {
-//     id: 7,
-//     name: "None Grade",
-//     link: "/#",
-//   },
-// ];
 
 
 const Navbar = () => {
@@ -78,7 +38,7 @@ const Navbar = () => {
   return (
     <div className="main-navbar fixed w-full bg-white dark:text-white shadow-md z-40 top-0 transition-all duration-300">
       {/* upper Navbar */}
-      <div className="p-2 bg-blue-300">
+      <div className="p-4 bg-blue-300">
         <div className="container flex justify-between items-center">
           <div className="flex items-center">
             {/* <img src={Logo} alt="Logo MechaWorld" className="w-[90px] h-[50px] object-contain" /> */}
@@ -88,12 +48,12 @@ const Navbar = () => {
           </div>
 
           {/* search bar */}
-          <div className="flex justify-between items-center gap-4">
+          <div className="flex justify-between items-center gap-10">
             <div className="relative group hidden sm:block">
               <input
                 type="text"
-                placeholder="Tìm kiếm..."
-                className="w-[200px] sm:w-[200px] group-hover:w-[300px] transition-all duration-300 rounded-full border border-gray-300 px-2 py-1 focus:outline-none focus:border-1 focus:border-primary dark:border-gray-500 dark:bg-gray-800"
+                placeholder="Bạn muốn tìm kiếm sản phẩm Gundam gì...."
+                className="w-[200px] sm:w-[350px] group-hover:w-[450px] transition-all duration-300 rounded-full border border-gray-300 p-2 focus:outline-none focus:border-1 focus:border-blue-700 dark:border-gray-500 dark:bg-gray-800"
               />
             </div>
 
@@ -113,37 +73,19 @@ const Navbar = () => {
             <li key={data.id}>
               <NavLink
                 to={data.link}
-                className="inline-block text-base px-4 py-2 hover:text-blue-700 hover:font-semibold duration-200 uppercase"
+                className={({ isActive }) =>
+                  `inline-block text-base px-4 py-2 uppercase 
+                transition-all duration-300 ease-in-out 
+                ${isActive
+                    ? 'text-blue-500 font-bold'
+                    : 'hover:text-blue-500 hover:font-bold text-gray-700'
+                  }`
+                }
               >
                 {data.name}
               </NavLink>
             </li>
           ))}
-          {/* <li className="group relative cursor-pointer">
-            <NavLink
-              to="/product"
-              className="flex items-center text-base hover:text-blue-700 hover:font-semibold gap-[2px] py-2 uppercase"
-            >
-              Sản phẩm
-              <span>
-                <FaCaretDown className="transition-all duration-200 group-hover:rotate-180" />
-              </span>
-            </NavLink>
-            <div className="absolute z-[9999] hidden group-hover:block w-[350px] rounded-md bg-white p-2 text-black shadow-md">
-              <ul className="grid grid-cols-2">
-                {DropdownLinks.map((data) => (
-                  <li key={data.id}>
-                    <NavLink
-                      to={data.link}
-                      className="inline-block w-full rounded-md p-2 hover:bg-gray-200"
-                    >
-                      {data.name}
-                    </NavLink>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </li> */}
         </ul>
       </div>
     </div>
