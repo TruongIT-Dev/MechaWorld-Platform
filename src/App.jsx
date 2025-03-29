@@ -8,7 +8,6 @@ import {
   SignIn,
   ProfilePage,
   UserProfile,
-  Collection,
   TradeHistory,
   OrderHistory,
   UserLayout,
@@ -20,7 +19,6 @@ import {
   CartPage1,
   Checkout,
   WalletPage,
-  AdvancedSetting,
   SettingAddress,
   ShopOrderManagement,
   ShopAuctionManagement,
@@ -86,12 +84,10 @@ function App() {
             <Route path="wallet" element={<WalletPage />} />
 
             {/* Profile Route */}
-            <Route path="profile" element={<ProfilePage />}>
+            <Route path="member/profile" element={<ProfilePage />}>
               <Route path="user" element={<UserProfile />} />
-              <Route path="collection" element={<Collection />} />
               <Route path="tradehistory" element={<TradeHistory />} />
               <Route path="orderhistory" element={<OrderHistory />} />
-              <Route path="advanced-setting" element={<AdvancedSetting />} />
               <Route path="address-setting" element={<SettingAddress />} />
               <Route path="addProductAution" element={<AddProductToAution />} />
               <Route path="listProductAution" element={<ListProductToAution />} />

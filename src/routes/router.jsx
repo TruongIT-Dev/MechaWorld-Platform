@@ -39,9 +39,7 @@ export const ProfilePage = React.lazy(() => import("../components/Profile/Profil
 export const UserProfile = React.lazy(() => import("../components/Profile/UserProfile"));
 export const OrderHistory = React.lazy(() => import("../components/Profile/OrderHistory"));
 export const TradeHistory = React.lazy(() => import("../components/Profile/TradeHistory"));
-export const Collection = React.lazy(() => import("../components/Profile/Collection"));
 export const SettingAddress = React.lazy(() => import("../components/Profile/SettingAddress"));
-export const AdvancedSetting = React.lazy(() => import("../components/Profile/AdvancedSetting"));
 
 
 // Register Shop route

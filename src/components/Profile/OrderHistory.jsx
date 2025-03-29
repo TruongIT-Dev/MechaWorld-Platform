@@ -82,11 +82,12 @@ const OrderHistory = () => {
       {/* Hiển thị danh sách đơn hàng theo từng cửa hàng */}
       {ordersByShop.map((shop, index) => (
         <Card key={index} className="border rounded-lg shadow-sm mb-4">
+          
           {/* Header - Tên cửa hàng + Nút Chat / Xem Shop */}
           <div className="flex justify-between items-center border-b pb-2 mb-4">
             <div className="flex items-center gap-3">
-              <Avatar size={40} src={shop.shopIcon} icon={<ShopOutlined />} />
-              <span className="font-semibold text-lg">{shop.shopName}</span>
+              <Avatar size={30} src={shop.shopIcon} icon={<ShopOutlined />} />
+              <span className="font-semibold text-base">{shop.shopName}</span>
               <Tag color={shop.statusColor}>{shop.status}</Tag>
             </div>
             <div className="flex gap-2">
@@ -99,7 +100,7 @@ const OrderHistory = () => {
           <div className="space-y-4 border-b pb-4">
             {shop.orders.map((order) => (
               <div key={order.id} className="flex items-center gap-4">
-                <Avatar shape="square" size={60} src={order.image} />
+                <Avatar shape="square" size={40} src={order.image} />
                 <div className="flex-1">
                   <p className="font-semibold">{order.productName}</p>
                 </div>
@@ -111,12 +112,8 @@ const OrderHistory = () => {
           {/* Footer - Tổng tiền & Nút hành động */}
           <div className="flex justify-between items-center mt-4">
             <p className="text-lg font-semibold text-red-500">Thành tiền: {shop.totalPrice}đ</p>
-            <Button type="primary" danger>Liên Hệ Người Bán</Button>
+            <Button type="primary" className="bg-blue-500">Xem chi tiết</Button>
           </div>
-          {/* <div className="flex justify-end gap-2 mt-2">
-            <Button type="primary" danger>Mua Lại</Button>
-            <Button>Xem Chi Tiết</Button>
-          </div> */}
         </Card>
       ))}
     </div>
