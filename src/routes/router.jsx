@@ -66,6 +66,17 @@ export const ListProductToAution = React.lazy(() => import("../components/Aution
 
 export const CensorProductToAution = React.lazy(() => import("../components/Aution/Moderator/CensorAution"));
 
+// Moderator route
+export const ModFeedbacks = React.lazy(() => import("../components/Moderator/ModFeedbacks"));
+export const ModOrders = React.lazy(() => import("../components/Moderator/ModOrders"));
+export const ModTransactions = React.lazy(() => import("../components/Moderator/ModTransactions"));
+export const ModGundams = React.lazy(() => import("../components/Moderator/ModGundams"));
+export const ModUsers = React.lazy(() => import("../components/Moderator/ModUsers"));
+export const ModRefunds = React.lazy(() => import("../components/Moderator/ModRefunds"));
+export const ModAuctions = React.lazy(() => import("../components/Moderator/ModAuctions"));
+export const ModExchanges = React.lazy(() => import("../components/Moderator/ModExchanges"));
+
+
 
 // 404 page route
 export const ErrorPage = React.lazy(() => import("../components/Error"));
