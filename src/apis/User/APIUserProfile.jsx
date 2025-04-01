@@ -3,7 +3,7 @@ import axios from '../../utils/axios-custome';
 
 
 export const verifyOtp = (id, phone, opt) => {
-    return axios.post('/otp/phone/verify', {
+    return axios.post('/otp/phone_number/verify', {
         user_id: id,
         phone_number: phone,
         otp_code: opt
@@ -19,7 +19,7 @@ export const getUser = (id) => {
     return axios.get(`/users/${id}`)
 }
 export const verifyPhone = (phone) => {
-    return axios.post('/otp/phone/generate', {
+    return axios.post('/otp/phone_number/generate', {
         phone_number: phone
     })
 }
