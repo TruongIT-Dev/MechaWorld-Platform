@@ -1,61 +1,308 @@
 import { useState } from "react";
-import { signupEmail } from "../../apis/Auth/APIAuth";
-import { Form, Input, Button, message, Typography } from "antd";
-
+import { Form, Input, Button, Typography, Steps, message, Modal } from "antd";
+import { NavLink } from "react-router-dom";
 import Footer from "../../layouts/Footer";
 import Logo from '../../assets/image/logo4.png';
-import { NavLink } from "react-router-dom";
+import { sendOTPEmail, verifyEmail } from "../../apis/Auth/APIAuth";
 
 export default function SignUp() {
-
     const [form] = Form.useForm();
+    const [emailForm] = Form.useForm();
+    const [otpForm] = Form.useForm();
     const { Title, Text } = Typography;
 
     const [loading, setLoading] = useState(false);
+    const [currentStep, setCurrentStep] = useState(0);
+    const [verifiedEmail, setVerifiedEmail] = useState("");
+    const [countdown, setCountdown] = useState(0);
+    const [modalVisible, setModalVisible] = useState(false);
 
+    const [email, setEmail] = useState("");
+    const [otpEmail, setOtpEmail] = useState("");
 
-    const onFinishSignUpFailed = (errorInfo) => {
-        console.log("Failed:", errorInfo);
-    };
-
-    const onFinishSignUp = async (values) => {
-        const { email, password, confirmPassword } = values;
-        console.log(email);
-        console.log(password);
-        console.log(confirmPassword);
-        if (!validateEmail(email)) {
-            message.error('Email không hợp lệ! Vui lòng nhập lại.')
-            return;
-        }
-        if (password !== confirmPassword) {
-            message.error('Mật khẩu không khớp! Vui lòng kiểm tra lại."')
-            return;
-        }
+    // Hàm gửi email để nhận OTP
+    const sendOTP = async () => {
         setLoading(true);
         try {
-            const response = await signupEmail(email, password);
+            // API call để gửi OTP
+            const response = await sendOTPEmail(email);
+            console.log("Đã gửi OTP đến email:", response);
 
-            if (response.status === 201) {
-                message.success('Email đăng kí thành công! Trở về trang đang nhập.');
-                setTimeout(() => {
-                    return;
-                }, 1800);
-            }
+            // Giả lập thành công
+            message.success(`Mã OTP đã được gửi đến ${email}`);
+            setVerifiedEmail(email);
+
+            // Bắt đầu đếm ngược 60 giây
+            setCountdown(60);
+            const timer = setInterval(() => {
+                setCountdown(prevCount => {
+                    if (prevCount <= 1) {
+                        clearInterval(timer);
+                        return 0;
+                    }
+                    return prevCount - 1;
+                });
+            }, 1000);
+
         } catch (error) {
-            if (error.response?.status === 409) {
-                return message.error("Email đã được đăng ký! Vui lòng chọn email khác.");
-            } else {
-                return message.error("Đăng ký thất bại! Vui lòng thử lại.");
-            }
+            console.error("Lỗi khi gửi OTP:", error);
+            message.error("Có lỗi xảy ra khi gửi mã OTP. Vui lòng thử lại.");
         } finally {
-            setLoading(false); // Tắt loading sau khi gọi API
+            setLoading(false);
         }
     };
 
-    const validateEmail = (email) => {
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        return emailRegex.test(email);
+    // Xác thực OTP
+    const verifyOTP = async (values) => {
+        // console.log("VerifyOTP active:", values);
+
+        setLoading(true);
+        try {
+            // API call để xác thực OTP
+            const response = await verifyEmail(verifiedEmail, values.otp);
+
+            console.log(response);
+
+            // Giả lập thành công
+            message.success("Xác thực email thành công!");
+            setCurrentStep(1); // Chuyển đến bước tiếp theo
+
+        } catch (error) {
+            console.error("Lỗi khi xác thực OTP:", error);
+            message.error("Mã OTP không chính xác. Vui lòng thử lại.");
+        } finally {
+            setLoading(false);
+        }
     };
+
+    // Gửi lại OTP
+    const resendOTP = () => {
+        if (countdown === 0 && verifiedEmail) {
+            sendOTP(verifiedEmail);
+        }
+
+    };
+
+    // Xử lý submitting form email
+    const onFinishEmail = (values) => {
+        sendOTP(values.email);
+    };
+
+    // Xử lý submitting form đăng ký
+    const onFinishSignUp = async (values) => {
+        setLoading(true);
+        try {
+            // Kiểm tra mật khẩu trùng khớp
+            if (values.password !== values["re-password"]) {
+                message.error("Mật khẩu và nhập lại mật khẩu không khớp!");
+                return;
+            }
+
+            // Tạo payload kết hợp email đã xác thực và thông tin đăng ký
+            const payload = {
+                email: verifiedEmail,
+                username: values.username,
+                password: values.password
+            };
+
+            // API call giả định để đăng ký
+            // const response = await axios.post('/api/register', payload);
+            console.log("Đăng ký tài khoản với thông tin:", payload);
+
+            // Giả lập thành công
+            message.success("Đăng ký tài khoản thành công!");
+
+            // Hiển thị modal thông báo thành công
+            setModalVisible(true);
+
+        } catch (error) {
+            console.error("Lỗi khi đăng ký:", error);
+            message.error("Có lỗi xảy ra khi đăng ký. Vui lòng thử lại.");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // Validate email
+    const validateEmail = (_, value) => {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!value || emailRegex.test(value)) {
+            return Promise.resolve();
+        }
+        return Promise.reject(new Error('Email không hợp lệ!'));
+    };
+
+    // Hàm quay lại bước trước
+    const goBack = () => {
+        setCurrentStep(0);
+        otpForm.resetFields();
+    };
+
+    // Render form email và OTP
+    const renderEmailVerification = () => (
+        <>
+            {/* {verifiedEmail && !countdown ? ( */}
+            {verifiedEmail ? (
+                <Form
+                    form={otpForm}
+                    name="otp-verification"
+                    layout="vertical"
+                    onFinish={verifyOTP}
+                    style={{ width: 310 }}
+                >
+                    <Form.Item
+                        name="otp"
+                        label="Mã OTP"
+                        rules={[{ required: true, message: "Vui lòng nhập mã OTP!" }]}
+                    >
+                        <Input.OTP size="large" placeholder="Nhập mã OTP 6 số" maxLength={6} />
+                    </Form.Item>
+
+                    <div className="text-sm mb-4">
+                        <p>Mã OTP đã được gửi đến: <strong>{verifiedEmail}</strong></p>
+                        <Button
+                            type="link"
+                            className="p-0"
+                            onClick={resendOTP}
+                            disabled={countdown > 0}
+                        >
+                            Gửi lại mã OTP {countdown > 0 ? `(${countdown}s)` : ''}
+                        </Button>
+                    </div>
+
+                    <Form.Item>
+                        <div className="flex gap-2">
+                            <Button onClick={() => {
+                                setVerifiedEmail("");
+                                emailForm.resetFields();
+                            }} className="flex-1">
+                                Đổi email
+                            </Button>
+                            <Button
+                                type="primary"
+                                htmlType="submit"
+                                loading={loading}
+                                className="bg-blue-500 flex-1"
+                            >
+                                Xác nhận
+                            </Button>
+                        </div>
+                    </Form.Item>
+                </Form>
+            ) : (
+                <Form
+                    form={emailForm}
+                    name="email-verification"
+                    layout="vertical"
+                    onFinish={onFinishEmail}
+                    style={{ width: 310 }}
+                >
+                    <Form.Item
+                        name="email"
+                        label="Email"
+                        rules={[
+                            { required: true, message: "Vui lòng nhập email!" },
+                            { validator: validateEmail }
+                        ]}
+                    >
+                        <Input size="large" placeholder="Nhập email của bạn" onChange={(e) => setEmail(e.target.value)} />
+                    </Form.Item>
+
+                    {verifiedEmail && countdown > 0 && (
+                        <div className="text-sm mb-4">
+                            <p>Mã OTP đã được gửi đến: <strong>{verifiedEmail}</strong></p>
+                            <p>Vui lòng đợi {countdown}s để gửi lại mã</p>
+                        </div>
+                    )}
+
+                    {verifiedEmail && (
+                        <div className="text-sm mb-4">
+                            <p>Mã OTP đã được gửi đến: <strong>{verifiedEmail}</strong></p>
+                            <p>Vui lòng đợi ... để gửi lại mã</p>
+                        </div>
+                    )}
+
+                    <Form.Item>
+                        <Button
+                            type="primary"
+                            htmlType="submit"
+                            loading={loading}
+                            className="bg-blue-500 uppercase w-full"
+                        >
+                            {verifiedEmail ? "Gửi lại mã OTP" : "Gửi mã xác thực"}
+                        </Button>
+                    </Form.Item>
+                </Form>
+            )}
+        </>
+    );
+
+    // Render form đăng ký
+    const renderSignUpForm = () => (
+        <Form
+            form={form}
+            name="signup"
+            layout="vertical"
+            onFinish={onFinishSignUp}
+            style={{ width: 310 }}
+            autoComplete="off"
+        >
+            <div className="mb-4">
+                <p className="text-sm">Email đã xác thực: <strong>{verifiedEmail}</strong></p>
+                <Button type="link" className="p-0" onClick={goBack}>
+                    Thay đổi email
+                </Button>
+            </div>
+
+            <Form.Item
+                name="username"
+                label="Tên người dùng"
+                rules={[{ required: true, message: "Vui lòng nhập tên người dùng!" }]}
+            >
+                <Input size="large" />
+            </Form.Item>
+
+            <Form.Item
+                name="password"
+                label="Mật khẩu"
+                rules={[
+                    { required: true, message: "Vui lòng nhập mật khẩu!" },
+                    { min: 6, message: "Mật khẩu phải có ít nhất 6 ký tự!" }
+                ]}
+            >
+                <Input.Password size="large" />
+            </Form.Item>
+
+            <Form.Item
+                name="re-password"
+                label="Nhập lại mật khẩu"
+                rules={[
+                    { required: true, message: "Vui lòng nhập lại mật khẩu!" },
+                    ({ getFieldValue }) => ({
+                        validator(_, value) {
+                            if (!value || getFieldValue('password') === value) {
+                                return Promise.resolve();
+                            }
+                            return Promise.reject(new Error('Mật khẩu không khớp!'));
+                        },
+                    }),
+                ]}
+            >
+                <Input.Password size="large" />
+            </Form.Item>
+
+            <Form.Item>
+                <Button
+                    type="primary"
+                    htmlType="submit"
+                    loading={loading}
+                    className="bg-blue-500 uppercase w-full"
+                >
+                    Đăng ký
+                </Button>
+            </Form.Item>
+        </Form>
+    );
 
     return (
         <>
@@ -63,7 +310,6 @@ export default function SignUp() {
             <header className="w-full bg-white py-3 px-40 flex justify-between items-center shadow">
                 {/* Logo + Text */}
                 <div className="flex items-center space-x-3">
-                    {/* Thay thế phần SVG bằng ảnh logo Shopee nếu bạn có file */}
                     <div className="flex items-center text-blue-400 font-bold text-3xl space-x-4">
                         <img src={Logo} alt="Ảnh Logo" className="w-14 h-14 rounded-full" />
                         <p>MechaWorld</p>
@@ -76,7 +322,6 @@ export default function SignUp() {
                 </a>
             </header>
 
-
             {/* CONTENT */}
             <div className="flex-1 bg-blue-400 flex justify-center items-center py-10">
                 {/* Container chia layout 50:50 */}
@@ -84,7 +329,6 @@ export default function SignUp() {
                     {/* Cột bên trái: Logo và thông tin */}
                     <div className="w-1/2 flex flex-col justify-center items-center text-white text-center px-8">
                         <div>
-                            {/* SVG logo, có thể thay bằng ảnh thực nếu có */}
                             <img src={Logo} alt="Ảnh Logo" className="w-96 h-96 rounded-full" />
                         </div>
                         <p className="text-2xl font-bold mt-2">
@@ -98,55 +342,11 @@ export default function SignUp() {
                             <div className="bg-white shadow-lg rounded-3xl p-8 md:p-10">
                                 <Title level={2} className="text-center mb-6">Đăng Ký</Title>
 
-                                <Form
-                                    style={{width: 310}}
-                                    form={form}
-                                    name="signin"
-                                    layout='vertical'
-                                    // onFinish={onFinish}
-                                    // onFinishFailed={onFinishFailed}
-                                    autoComplete="off"
-                                >
-                                    <Form.Item
-                                        name="email"
-                                        label="E-mail"
-                                        rules={[{ required: true, message: "Vui lòng nhập email!" }]}
-                                    >
-                                        <Input size="large" />
-                                    </Form.Item>
+                                <Steps
+                                    current={currentStep}
+                                />
 
-                                    <Form.Item
-                                        name="password"
-                                        label="Mật khẩu"
-                                        rules={[{ required: true, message: "Vui lòng nhập mật khẩu!" }]}
-                                    >
-                                        <Input.Password size="large" />
-                                    </Form.Item>
-
-                                    <Form.Item
-                                        name="re-password"
-                                        label="Nhập lại mật khẩu"
-                                        rules={[{ required: true, message: "Vui lòng nhập mật khẩu!" }]}
-                                    >
-                                        <Input.Password size="large" />
-                                    </Form.Item>
-
-                                    <Form.Item>
-                                        <Button
-                                            type="primary"
-                                            htmlType="submit"
-                                            className="bg-blue-500 uppercase w-full"
-                                        >
-                                            Đăng ký
-                                        </Button>
-                                    </Form.Item>
-                                </Form>
-
-                                {/* <div className="flex items-center justify-between mt-6">
-                                    <span className="flex-1 border-t border-gray-300"></span>
-                                    <span className="mx-2 text-gray-400 uppercase text-sm">Hoặc</span>
-                                    <span className="flex-1 border-t border-gray-300"></span>
-                                </div> */}
+                                {currentStep === 0 ? renderEmailVerification() : renderSignUpForm()}
 
                                 <div className="flex items-center justify-center mt-4">
                                     <Text className="text-gray-500 mr-2">Đã có Tài khoản ?</Text>
@@ -163,9 +363,28 @@ export default function SignUp() {
                 </div>
             </div>
 
+            {/* Modal thông báo đăng ký thành công */}
+            <Modal
+                title="Đăng ký thành công"
+                open={modalVisible}
+                footer={[
+                    <Button
+                        key="login"
+                        type="primary"
+                        onClick={() => window.location.href = '/member/login'}
+                        className="bg-blue-500"
+                    >
+                        Đăng nhập ngay
+                    </Button>
+                ]}
+                onCancel={() => setModalVisible(false)}
+            >
+                <p>Chúc mừng! Bạn đã đăng ký tài khoản thành công với email: <strong>{verifiedEmail}</strong></p>
+                <p>Hãy đăng nhập để bắt đầu trải nghiệm MechaWorld!</p>
+            </Modal>
 
             {/* FOOTER */}
             <Footer />
         </>
-    )
+    );
 }
