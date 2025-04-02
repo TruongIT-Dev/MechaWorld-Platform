@@ -37,7 +37,7 @@ export const sendOTPEmail = (email) => {
 export const verifyEmail = (email, otp) => {
   return axios.post('/otp/email/verify', {
     email: email,
-    otp: otp,
+    otp_code: otp,
   },
     {
       headers: {
@@ -47,17 +47,22 @@ export const verifyEmail = (email, otp) => {
   )
 }
 
-export const signupEmail = (email, password) => {
+
+export const signupEmail = (email, fullname, password) => {
   return axios.post('/users', {
     email: email,
+    full_name: fullname,
     password: password
-  }, {
-    headers: {
-      "Content-Type": "application/json",
-    },
-    withCredentials: true,
-  });
+  },
+    {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    }
+  );
 }
+
+
 export const verifyToken = (access_token) => {
   return axios.post('tokens/verify', {
     access_token: access_token

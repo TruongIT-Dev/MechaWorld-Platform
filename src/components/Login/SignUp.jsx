@@ -3,11 +3,10 @@ import { Form, Input, Button, Typography, Steps, message, Modal } from "antd";
 import { NavLink } from "react-router-dom";
 import Footer from "../../layouts/Footer";
 import Logo from '../../assets/image/logo4.png';
-import { sendOTPEmail, verifyEmail } from "../../apis/Auth/APIAuth";
+import { sendOTPEmail, signupEmail, verifyEmail } from "../../apis/Auth/APIAuth";
 
 export default function SignUp() {
     const [form] = Form.useForm();
-    const [emailForm] = Form.useForm();
     const [otpForm] = Form.useForm();
     const { Title, Text } = Typography;
 
@@ -17,11 +16,9 @@ export default function SignUp() {
     const [countdown, setCountdown] = useState(0);
     const [modalVisible, setModalVisible] = useState(false);
 
-    const [email, setEmail] = useState("");
-    const [otpEmail, setOtpEmail] = useState("");
 
-    // Hàm gửi email để nhận OTP
-    const sendOTP = async () => {
+    // Hàm Nhập Email để nhận OTP xác thực
+    const sendOTP = async (email) => {
         setLoading(true);
         try {
             // API call để gửi OTP
@@ -52,21 +49,19 @@ export default function SignUp() {
         }
     };
 
-    // Xác thực OTP
+    // Hàm Xác Thực OTP
     const verifyOTP = async (values) => {
-        // console.log("VerifyOTP active:", values);
-
         setLoading(true);
         try {
-            // API call để xác thực OTP
-            const response = await verifyEmail(verifiedEmail, values.otp);
+            // Đảm bảo OTP là string
+            const otpString = String(values?.otp);
 
-            console.log(response);
+            // API call để xác thực OTP
+            await verifyEmail(verifiedEmail, otpString);
 
             // Giả lập thành công
             message.success("Xác thực email thành công!");
             setCurrentStep(1); // Chuyển đến bước tiếp theo
-
         } catch (error) {
             console.error("Lỗi khi xác thực OTP:", error);
             message.error("Mã OTP không chính xác. Vui lòng thử lại.");
@@ -74,6 +69,7 @@ export default function SignUp() {
             setLoading(false);
         }
     };
+
 
     // Gửi lại OTP
     const resendOTP = () => {
@@ -83,38 +79,30 @@ export default function SignUp() {
 
     };
 
+
     // Xử lý submitting form email
     const onFinishEmail = (values) => {
-        sendOTP(values.email);
+        sendOTP(values?.email);
     };
 
-    // Xử lý submitting form đăng ký
+
+    // Hàm xử lý Đăng ký
     const onFinishSignUp = async (values) => {
+        console.log("Submited Form đăng ký:", values);
+        console.log("verifiedEmail:", verifiedEmail);
         setLoading(true);
         try {
-            // Kiểm tra mật khẩu trùng khớp
             if (values.password !== values["re-password"]) {
                 message.error("Mật khẩu và nhập lại mật khẩu không khớp!");
                 return;
             }
 
-            // Tạo payload kết hợp email đã xác thực và thông tin đăng ký
-            const payload = {
-                email: verifiedEmail,
-                username: values.username,
-                password: values.password
-            };
-
-            // API call giả định để đăng ký
-            // const response = await axios.post('/api/register', payload);
-            console.log("Đăng ký tài khoản với thông tin:", payload);
-
-            // Giả lập thành công
-            message.success("Đăng ký tài khoản thành công!");
-
-            // Hiển thị modal thông báo thành công
+            await signupEmail(
+                verifiedEmail,           // email
+                values?.fullname,        // full_name
+                values?.password         // password
+            );
             setModalVisible(true);
-
         } catch (error) {
             console.error("Lỗi khi đăng ký:", error);
             message.error("Có lỗi xảy ra khi đăng ký. Vui lòng thử lại.");
@@ -123,6 +111,7 @@ export default function SignUp() {
         }
     };
 
+
     // Validate email
     const validateEmail = (_, value) => {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -130,12 +119,6 @@ export default function SignUp() {
             return Promise.resolve();
         }
         return Promise.reject(new Error('Email không hợp lệ!'));
-    };
-
-    // Hàm quay lại bước trước
-    const goBack = () => {
-        setCurrentStep(0);
-        otpForm.resetFields();
     };
 
     // Render form email và OTP
@@ -153,7 +136,10 @@ export default function SignUp() {
                     <Form.Item
                         name="otp"
                         label="Mã OTP"
-                        rules={[{ required: true, message: "Vui lòng nhập mã OTP!" }]}
+                        rules={[
+                            { required: true, message: "Vui lòng nhập mã OTP!" },
+                            { pattern: /^[0-9]{6}$/, message: "OTP phải gồm 6 chữ số!" }
+                        ]}
                     >
                         <Input.OTP size="large" placeholder="Nhập mã OTP 6 số" maxLength={6} />
                     </Form.Item>
@@ -171,27 +157,18 @@ export default function SignUp() {
                     </div>
 
                     <Form.Item>
-                        <div className="flex gap-2">
-                            <Button onClick={() => {
-                                setVerifiedEmail("");
-                                emailForm.resetFields();
-                            }} className="flex-1">
-                                Đổi email
-                            </Button>
-                            <Button
-                                type="primary"
-                                htmlType="submit"
-                                loading={loading}
-                                className="bg-blue-500 flex-1"
-                            >
-                                Xác nhận
-                            </Button>
-                        </div>
+                        <Button
+                            type="primary"
+                            htmlType="submit"
+                            loading={loading}
+                            className="bg-blue-500 w-full"
+                        >
+                            Xác nhận
+                        </Button>
                     </Form.Item>
                 </Form>
             ) : (
                 <Form
-                    form={emailForm}
                     name="email-verification"
                     layout="vertical"
                     onFinish={onFinishEmail}
@@ -205,7 +182,7 @@ export default function SignUp() {
                             { validator: validateEmail }
                         ]}
                     >
-                        <Input size="large" placeholder="Nhập email của bạn" onChange={(e) => setEmail(e.target.value)} />
+                        <Input size="large" placeholder="Nhập email của bạn" />
                     </Form.Item>
 
                     {verifiedEmail && countdown > 0 && (
@@ -247,15 +224,8 @@ export default function SignUp() {
             style={{ width: 310 }}
             autoComplete="off"
         >
-            <div className="mb-4">
-                <p className="text-sm">Email đã xác thực: <strong>{verifiedEmail}</strong></p>
-                <Button type="link" className="p-0" onClick={goBack}>
-                    Thay đổi email
-                </Button>
-            </div>
-
             <Form.Item
-                name="username"
+                name="fullname"
                 label="Tên người dùng"
                 rules={[{ required: true, message: "Vui lòng nhập tên người dùng!" }]}
             >
@@ -267,11 +237,22 @@ export default function SignUp() {
                 label="Mật khẩu"
                 rules={[
                     { required: true, message: "Vui lòng nhập mật khẩu!" },
-                    { min: 6, message: "Mật khẩu phải có ít nhất 6 ký tự!" }
+                    { min: 8, message: "Mật khẩu phải có ít nhất 8 ký tự!" },
+                    {
+                        pattern: /^(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/,
+                        message: (
+                            <>
+                                Mật khẩu phải chứa ít nhất 1 chữ hoa <br />
+                                Mật khẩu phải chứa ít nhất 1 chữ số <br />
+                                Mật khẩu phải chứa ít nhất 1 ký tự đặc biệt!
+                            </>
+                        ),
+                    }
                 ]}
             >
                 <Input.Password size="large" />
             </Form.Item>
+
 
             <Form.Item
                 name="re-password"
@@ -367,6 +348,7 @@ export default function SignUp() {
             <Modal
                 title="Đăng ký thành công"
                 open={modalVisible}
+                width={600}
                 footer={[
                     <Button
                         key="login"
