@@ -8,7 +8,8 @@ import Cookies from "js-cookie";
 import PropTypes from 'prop-types';
 
 import CartContext from "./CartContext";
-import Notification from "./Notification";
+import Notification from "../components/Notification/Notification";
+import ChatBox from "../components/Chat/ChatBox";
 
 const UserNavbar = ({ user }) => {
 
@@ -54,8 +55,8 @@ const UserNavbar = ({ user }) => {
     const menuItems = [
         { to: "/registe-shop", icon: <FaStore className="mr-2 text-green-600" />, label: "Đăng ký bán hàng", role: "member" },
         { to: "/shop/dashboard", icon: <FaStore className="mr-2 text-green-600" />, label: "Quản lý Shop", role: "seller" },
-        { to: "/profile/user", icon: <FaUser className="mr-2 text-blue-600" />, label: "Tài khoản" },
-        { to: "#", icon: <FaClipboardList className="mr-2 text-yellow-500" />, label: "Đơn mua" },
+        { to: "/member/profile/user", icon: <FaUser className="mr-2 text-blue-600" />, label: "Tài khoản" },
+        { to: "/member/profile/orderHistory", icon: <FaClipboardList className="mr-2 text-yellow-500" />, label: "Đơn mua" },
         { to: "#", icon: <FaSignOutAlt className="mr-2 text-red-500" />, label: "Đăng xuất", onClick: handleLogout },
     ];
 
@@ -68,12 +69,15 @@ const UserNavbar = ({ user }) => {
 
                 {/* Cart */}
                 <CartContext />
-
                 <div className="h-6 border-l-2 border-l-black"></div>
 
                 {/* Thông báo Component */}
                 <Notification />
+                <div className="h-6 border-l-2 border-l-black"></div>
 
+
+                {/* Chat Box */}
+                <ChatBox />
                 <div className="h-6 border-l-2 border-l-black"></div>
 
                 <div

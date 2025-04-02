@@ -1,16 +1,17 @@
-import { useEffect, useState } from "react";
-import { Steps, Button, Form, message } from "antd";
-import { FaStore } from "react-icons/fa";
-import { useNavigate } from "react-router-dom";
 import Cookies from 'js-cookie';
-import { verifyToken } from '../../apis/Auth/APIAuth';
+import { useSelector } from "react-redux";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { Steps, Button, Form, message } from "antd";
+import { ShopOutlined ,TruckOutlined, ContainerOutlined, FileDoneOutlined } from "@ant-design/icons";
 
 import FirstForm from "./FirstForm";
 import SecondForm from "./SecondForm";
 import ThirdForm from "./ThirdForm";
 import FourthForm from "./FourthForm";
+
+import { verifyToken } from '../../apis/Auth/APIAuth';
 import { BecomeSeller, updateUserData } from "../../apis/User/APIUserProfile";
-import { useSelector } from "react-redux";
 
 const { Step } = Steps;
 
@@ -37,7 +38,7 @@ export default function RegisterShop() {
   const steps = [
     {
       title: "Thông tin Shop",
-      icon: <FaStore />,
+      icon: <ShopOutlined />,
       content: <FirstForm
         form={form}
         setIsPhoneVerified={setIsPhoneVerified}
@@ -45,12 +46,14 @@ export default function RegisterShop() {
     },
     {
       title: "Cài đặt vận chuyển",
+      icon: <TruckOutlined />,
       content: <SecondForm
         user={user}
       />,
     },
     {
       title: "Điều khoản sử dụng",
+      icon: <ContainerOutlined />,
       content: <ThirdForm
         formData={formData}
         setFormData={setFormData}
@@ -59,6 +62,7 @@ export default function RegisterShop() {
     },
     {
       title: "Hoàn tất",
+      icon: <FileDoneOutlined />,
       content: <FourthForm />,
     },
   ];
@@ -136,8 +140,8 @@ export default function RegisterShop() {
     <div className="container mx-auto p-6 bg-white">
       <Steps
         current={current}
-        onChange={setCurrent} // Cho phép click vào Step để chuyển bước
-        progressDot
+        // onChange={setCurrent}
+        // progressDot
         className="max-w-5xl mx-auto mb-6"
       >
         {steps.map((step, index) => (

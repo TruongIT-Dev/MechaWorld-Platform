@@ -39,7 +39,7 @@ const GundamProductPage = () => {
                     "used": "Đã qua sử dụng"
                 };
                 let gundamData = detailGundam?.data?.Gundam || {};
-                let assessoriesData = detailGundam?.data?.accessories; 
+                let assessoriesData = detailGundam?.data?.accessories;
                 if (gundamData.condition) {
                     gundamData.condition = conditionMapping[gundamData.condition] || gundamData.condition;
                 }
@@ -186,7 +186,7 @@ const GundamProductPage = () => {
                     <Row gutter={24}>
                         {/* Image */}
                         <Col span={8}>
-                            <div className="image-section sticky top-24">
+                            <div className="image-section sticky top-16">
                                 {/* Main Display Image */}
                                 <div className="flex justify-center items-center bg-white shadow-md rounded-md">
                                     <img
@@ -221,7 +221,7 @@ const GundamProductPage = () => {
 
                         {/* Add to card */}
                         <Col span={7}>
-                            <div className='space-y-4 sticky top-24'>
+                            <div className='space-y-4 sticky top-16'>
                                 <div className="p-4 border rounded-lg bg-white shadow-md space-y-3">
                                     {/* Product Name */}
                                     <h1 className="text-xl font-bold text-gray-900">{detailGundam?.name}</h1>
@@ -271,7 +271,7 @@ const GundamProductPage = () => {
                                     </button>
                                 </div>
                                 {/* Seller Info */}
-                                <div className="shop-info sticky ">
+                                <div className="sticky">
                                     <ShopInfo shopID={shopId} />
                                 </div>
                             </div>

@@ -1,4 +1,4 @@
-import { Form, Input, Button, message, Space, Modal } from "antd";
+import { Form, Input, Button, message, Modal } from "antd";
 import { useEffect, useState } from "react";
 import { PhoneOutlined, LockOutlined } from "@ant-design/icons";
 import Cookies from 'js-cookie';
@@ -209,7 +209,7 @@ const FirstForm = ({ form, setIsPhoneVerified }) => {
                                 </Button>
                             </>
                         ) : (
-                            <Button type="link" className="text-green-600 underline" onClick={() => setModalVisible(true)}>
+                            <Button type="link" className="text-blue-500 underline" onClick={() => setModalVisible(true)}>
                                 Thêm mới
                             </Button>
                         )}

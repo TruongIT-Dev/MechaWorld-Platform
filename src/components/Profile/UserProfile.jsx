@@ -1,20 +1,17 @@
-import { useState, useEffect, useRef } from 'react';
-import { Form, Input, Upload, Button, message, Modal, Row, Col } from 'antd';
-import { UploadOutlined } from '@ant-design/icons';
-import {
-  useSelector,
-  // useDispatch 
-} from 'react-redux';
-import { updateUserData, uploadAvatar, verifyOtp, verifyPhone } from '../../apis/User/APIUserProfile';
 import Cookies from 'js-cookie';
 import { Cropper } from 'react-cropper';
-import "cropperjs/dist/cropper.css";
-import "../../assets/css/userProfile.css"
-// import { updateUserProfile } from '../../features/auth/authSlice';
+import { useSelector} from 'react-redux';
+import { UploadOutlined } from '@ant-design/icons';
+import { useState, useEffect, useRef } from 'react';
 import { verifyToken } from '../../apis/Auth/APIAuth';
+import { Form, Input, Upload, Button, message, Modal, Row, Col } from 'antd';
+import { updateUserData, uploadAvatar, verifyOtp, verifyPhone } from '../../apis/User/APIUserProfile';
+
+import "cropperjs/dist/cropper.css";
+
+
 const ProfilePage = () => {
   const [form] = Form.useForm();
-  // const dispatch = useDispatch();
   const [user, setUser] = useState(useSelector((state) => state.auth.user));
   const [avatar, setAvatar] = useState(user?.avatar_url);
   const [cropVisible, setCropVisible] = useState(false);
@@ -49,16 +46,18 @@ const ProfilePage = () => {
     }
   }, []);
 
-  // const handleNameChange = (e) => {
-  //   setFullName(e.target.value);
-  // };
+
   const onChange = (text) => {
     console.log('onChange:', text);
     setOtp(text);
   };
+
+
   const onInput = (value) => {
     console.log('onInput:', value);
   };
+
+
   const handleUpload = ({ file }) => {
     const reader = new FileReader();
     reader.onload = (e) => {
@@ -82,6 +81,8 @@ const ProfilePage = () => {
     };
     reader.readAsDataURL(file);
   };
+
+
   const handleCrop = async () => {
     if (cropper) {
       const croppedCanvas = cropper.getCroppedCanvas();
@@ -104,6 +105,8 @@ const ProfilePage = () => {
       }, "image/jpeg");
     }
   };
+
+
   //   const handleUpdateUser = async () => {
   //     if (!fullName.trim()) {
   //         message.error("Tên không được để trống!");
@@ -135,6 +138,9 @@ const ProfilePage = () => {
   //     setOtp(e.target.value);
   //     console.log(e.target.value);
   //   }
+
+
+
   //   // Xác thực OTP
   const handleVerifyOtp = async () => {
     try {
@@ -151,6 +157,7 @@ const ProfilePage = () => {
       message.error("Lỗi khi xác thực OTP.");
     }
   };
+
 
   const handlePhoneSubmit = async () => {
     if (!newPhoneNumber) {
@@ -171,6 +178,8 @@ const ProfilePage = () => {
     }
   };
 
+
+
   const startCountdown = () => {
     let timeLeft = 60;
     const interval = setInterval(() => {
@@ -186,7 +195,6 @@ const ProfilePage = () => {
 
   const onFinish = (values) => {
     console.log('Success:', values);
-    // localStorage.setItem('user', JSON.stringify(updatedUser));
     updateUserData(user.id, fullName).then(response => {
       console.log(response);
       if (response.status == 200) {
@@ -195,12 +203,11 @@ const ProfilePage = () => {
     }).catch(error => {
       return message.error(error);
     })
-    // dispatch(updateUserProfile(updatedUser));
 
   };
   const maskPhoneNumber = (phoneNumber) => {
     if (!phoneNumber) {
-      return "Chưa đăng kí"; // Hoặc một giá trị mặc định khác
+      return "Chưa đăng kí";
     }
     const visibleDigits = phoneNumber.slice(-4); // Lấy 4 số cuối
     const maskedDigits = "*".repeat(phoneNumber.length - 4); // Tạo chuỗi dấu *
@@ -208,139 +215,6 @@ const ProfilePage = () => {
   };
 
   return (
-    // <div className="flex justify-center mt-10">
-    //     <div className="flex items-center space-x-6">
-    //       {/* Avatar */}
-    //       <Upload
-    //         showUploadList={false}
-    //         customRequest={handleUpload}
-    //         accept="image/*"
-    //       >
-    //         <div className="w-32 h-32 border rounded-full overflow-hidden cursor-pointer">
-    //           <img
-    //             src={avatar || "/default-avatar.png"}
-    //             alt="Avatar"
-    //             className="w-full h-full object-cover"
-    //           />
-    //         </div>
-    //         <Button className="mt-2" icon={<UploadOutlined />}>
-    //           Upload Avatar
-    //         </Button>
-    //       </Upload>
-
-    //       {/* Thông tin User */}
-    //       <div className="flex-1">
-    //         <Form
-    //           layout="vertical"
-    //           form={form}
-    //           className=""
-    //           labelCol={{ span: 24 }}
-    //           wrapperCol={{ span: 24 }}
-    //           onFinish={onFinish}
-    //         >
-    //           <Form.Item label="Tên người dùng" className="mb-3 ">
-    //             <Input value={fullName} onChange={handleNameChange} />
-    //           </Form.Item>
-    //           <Form.Item label="Email" className="mb-3 ">
-    //             <Input value={user?.email} readOnly className="h-10" disabled />
-    //           </Form.Item>
-    //           <Form.Item className="mb-3">
-    //             {/* <Input value={user?.role} readOnly className="h-10 w-fit" /> */}
-    //             Số điện thoại : {user?.phone_number || "Chưa đăng kí số điện thoại"}
-    //             <Button type="link" onClick={() => setPhoneModalVisible(true)}>
-    //               {user?.phone_number ? "Thay đổi" : "Đăng ký"}
-    //             </Button>
-    //             {/* {user?.role} */}
-    //           </Form.Item>
-    //           <Form.Item>
-    //             <Button
-    //               type="primary"
-    //               htmlType="submit"
-    //               className="bg-[#0056b3] hover:bg-[#4a90e2] text-white px-4 py-2 rounded "
-    //             >
-    //               Lưu thay đổi
-    //             </Button>
-    //           </Form.Item>
-    //         </Form>
-    //       </div>
-    //     </div>
-
-    //     {/* Số điện thoại + OTP */}
-    //     <Modal
-    //       open={phoneModalVisible}
-    //       onCancel={() => setPhoneModalVisible(false)}
-    //       footer={null}
-    //       title={otpVisible ? "Xác thực OTP" : "Nhập số điện thoại"}
-    //     >
-    //       {!otpVisible ? (
-    //         <>
-    //           <Form layout="vertical">
-    //             <Form.Item label="Số điện thoại">
-    //               <Input type="number" value={newPhoneNumber} onChange={(e) => setNewPhoneNumber(e.target.value)} />
-    //             </Form.Item>
-    //           </Form>
-    //           <Button type="primary" onClick={handlePhoneSubmit}>Xác thực</Button>
-    //         </>
-    //       ) : (
-    //         <>
-    //           <Form layout="vertical">
-    //             <Form.Item label="Nhập mã OTP">
-    //               <Input type="number" maxLength={6} value={otp} onChange={(e) => setOtp(e.target.value)} />
-    //             </Form.Item>
-    //           </Form>
-    //           <div className="flex justify-between">
-    //             <Button type="primary" onClick={handleVerifyOtp}>Xác thực</Button>
-    //             <Button type="link" disabled={isCounting} onClick={handlePhoneSubmit}>
-    //               {isCounting ? `Gửi lại sau ${countdown}s` : "Gửi lại OTP"}
-    //             </Button>
-    //           </div>
-    //         </>
-    //       )}
-    //     </Modal>
-
-    //   {/* Modal Cropper */}
-    //   <Modal
-    //     open={cropVisible}
-    //     onCancel={() => setCropVisible(false)}
-    //     onOk={handleCrop}
-    //     title="Cắt ảnh"
-    //     // okButtonProps={{ styles:{ defaultHoverBorderColor}  }}
-    //     footer={[
-    //       <Button
-    //         key="cancel"
-    //         onClick={() => setCropVisible(false)}
-    //         className="custom-cancel"
-    //       >
-    //         Hủy
-    //       </Button>,
-    //       <Button
-    //         key="crop"
-    //         type="primary"
-    //         onClick={handleCrop}
-    //         className="bg-[#0056b3] hover:bg-[#4a90e2] text-white px-4 py-2 rounded"
-    //       >
-    //         Cắt ảnh
-    //       </Button>,
-    //     ]}
-    //   >
-    //     <Cropper
-    //       ref={cropperRef}
-    //       style={{ height: 300, width: "100%" }}
-    //       aspectRatio={1}
-    //       preview=".img-preview"
-    //       src={avatar}
-    //       viewMode={1}
-    //       minCropBoxHeight={100}
-    //       minCropBoxWidth={100}
-    //       background={false}
-    //       responsive={true}
-    //       autoCropArea={1}
-    //       checkOrientation={false}
-    //       onInitialized={(instance) => setCropper(instance)}
-    //     />
-    //     {/* {console.log("avattar: ",avatar)}; */}
-    //   </Modal>
-    // </div>
     <div className="container w-full p-10">
       <h2 className="text-2xl font-semibold">Hồ Sơ Của Tôi</h2>
       <p className="text-gray-500 mb-6">Quản lý thông tin hồ sơ để bảo mật tài khoản</p>
@@ -467,8 +341,6 @@ const ProfilePage = () => {
         </Modal>
       </div>
     </div>
-
-
   );
 };
 
