@@ -32,6 +32,14 @@ import {
   CensorProductToAution,
   ModeratorLayout,
   SignUp,
+  ModFeedbacks,
+  ModAuctions,
+  ModOrders,
+  ModTransactions,
+  ModRefunds,
+  ModGundams,
+  ModUsers,
+  ModExchanges,
 } from "./routes/router";
 import Cookies from "js-cookie";
 import Spinner from "./components/Spinner";
@@ -125,7 +133,15 @@ function App() {
           </Route>
 
           <Route path="moderator" element={<ModeratorLayout />} >
-
+            <Route index element={<ModUsers />} /> 
+            <Route path="mod-users" element={<ModUsers />} />
+            <Route path="mod-auctions" element={<ModAuctions />} />
+            <Route path="mod-orders" element={<ModOrders />} />
+            <Route path="mod-transactions" element={<ModTransactions />} />
+            <Route path="mod-refunds" element={<ModRefunds />} />
+            <Route path="mod-gundams" element={<ModGundams />} />
+            <Route path="mod-feedbacks" element={<ModFeedbacks />} />
+            <Route path="mod-exchanges" element={<ModExchanges />} />
           </Route>
 
           {/* Layout Đăng ký Shop */}

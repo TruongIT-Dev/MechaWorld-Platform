@@ -1,6 +1,6 @@
 import { Table, Row, Button, InputNumber, Select, Space, Input, Modal, Dropdown, Form, Tag, Col } from "antd";
 import { useEffect, useState } from "react";
-import { GetGundamByID, GetSellerData, GetSellerStatus, SellingGundam } from "../../apis/Product/APIProduct";
+import { GetGundamByID, SellingGundam } from "../../apis/Product/APIProduct";
 import PropTypes from 'prop-types';
 import { useSelector } from "react-redux";
 import { MoreOutlined, PlusOutlined } from "@ant-design/icons";
@@ -17,7 +17,7 @@ function ShopProduct({
   const [gundamList, setGundamList] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
   const [sellModalVisible, setSellModalVisible] = useState(false);
-  const [selectedProduct, setSelectedProduct] = useState(null);
+  // const [selectedProduct, setSelectedProduct] = useState(null);
   const [form] = Form.useForm();
   // Bộ lọc giá tiền & phân khúc
   const [minPrice, setMinPrice] = useState(null);
@@ -53,7 +53,8 @@ function ShopProduct({
   };
 
   const handleAuctionProduct = (product) => {
-    setSelectedProduct(product);
+    // setSelectedProduct(product);
+    console.log("data đã lưu: ",product);
     setSellModalVisible(true);
   };
   // Lọc dữ liệu khi có thay đổi
