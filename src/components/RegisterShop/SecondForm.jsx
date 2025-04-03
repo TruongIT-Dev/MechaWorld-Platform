@@ -4,11 +4,13 @@ import axios from 'axios';
 import { getUserAddresses, postUserAddresses, updateAddress } from '../../apis/User/APIUserProfile';
 
 import { PlusOutlined } from '@ant-design/icons';
+import { useSelector } from 'react-redux';
 
 const { Option } = Select;
 const { Title, Text, Paragraph } = Typography;
 
 const SecondForm = ({ user, setUser }) => {
+    user = useSelector((state) => state.auth.user);
     const [form] = Form.useForm();
     const [loading, setLoading] = useState(false);
     const [addresses, setAddresses] = useState([]);
@@ -37,6 +39,7 @@ const SecondForm = ({ user, setUser }) => {
 
     // Fetch user addresses on component mount
     useEffect(() => {
+
         fetchUserAddresses();
         fetchProvinces();
     }, []);

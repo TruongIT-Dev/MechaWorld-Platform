@@ -1,12 +1,12 @@
-import { Table, Row, Button, InputNumber, Select, Space, Input, Modal, Dropdown, Form, Tag, Col } from "antd";
+import { Table, Row, Button, Select, Input, Modal, Dropdown, Form, Tag, Col } from "antd";
 import { useEffect, useState } from "react";
-import { GetGundamByID, SellingGundam } from "../../apis/Product/APIProduct";
+import { GetGundamByID, SellingGundam,RestoreGundam } from "../../apis/Product/APIProduct";
 import PropTypes from 'prop-types';
 import { useSelector } from "react-redux";
 import { MoreOutlined, PlusOutlined } from "@ant-design/icons";
 
 
-const { Option } = Select;
+// const { Option } = Select;
 
 function ShopProduct({
   // isCreating,
@@ -20,8 +20,8 @@ function ShopProduct({
   // const [selectedProduct, setSelectedProduct] = useState(null);
   const [form] = Form.useForm();
   // Bộ lọc giá tiền & phân khúc
-  const [minPrice, setMinPrice] = useState(null);
-  const [maxPrice, setMaxPrice] = useState(null);
+  // const [minPrice, setMinPrice] = useState(null);
+  // const [maxPrice, setMaxPrice] = useState(null);
   const [selectedCondition, setSelectedCondition] = useState(null);
   const [selectedGrade, setSelectedGrade] = useState(null);
   // const [openMenuId, setOpenMenuId] = useState(null);
@@ -57,17 +57,44 @@ function ShopProduct({
     console.log("data đã lưu: ",product);
     setSellModalVisible(true);
   };
+  const handleMenuClick = (key, record) => {
+    switch (key) {
+      case "edit":
+        console.log("📝 Chỉnh sửa sản phẩm:", record);
+        break;
+  
+      case "preview":
+        console.log("👁️ Xem trước sản phẩm:", record);
+        break;
+  
+      case "delete":
+        console.log("❌ Xóa sản phẩm:", record);
+        break;
+  
+      case "unsell":
+        console.log("🚫 Hủy bán sản phẩm:", record);
+        RestoreGundam(user.id, record.id).catch(response => {
+          console.log(response);
+        })
+        window.location.reload();
+        break;
+  
+      default:
+        console.log("⚠️ Không có hành động nào được chọn!");
+    }
+  };
+
   // Lọc dữ liệu khi có thay đổi
   useEffect(() => {
     let filtered = gundamList;
 
     // Lọc theo giá
-    if (minPrice !== null) {
-      filtered = filtered.filter((item) => item.price >= minPrice);
-    }
-    if (maxPrice !== null) {
-      filtered = filtered.filter((item) => item.price <= maxPrice);
-    }
+    // if (minPrice !== null) {
+    //   filtered = filtered.filter((item) => item.price >= minPrice);
+    // }
+    // if (maxPrice !== null) {
+    //   filtered = filtered.filter((item) => item.price <= maxPrice);
+    // }
 
     // Lọc theo tình trạng
     if (selectedCondition) {
@@ -78,7 +105,7 @@ function ShopProduct({
       filtered = filtered.filter((item) => item.grade === selectedGrade);
     }
     setFilteredData(filtered);
-  }, [minPrice, maxPrice, selectedCondition, selectedGrade, gundamList]);
+  }, [ selectedCondition, selectedGrade, gundamList]);
 
   const handleFinish = (values) => {
     console.log("data input", values);
@@ -188,16 +215,25 @@ function ShopProduct({
       dataIndex: "action",
       key: "action",
       width: 100,
-      render: () => {
+      render: (_, record) => {
         const menuItems = [
           { key: "edit", label: "✏️ Chỉnh sửa sản phẩm", },
           { key: "preview", label: "👁️ Xem trước ", },
           { key: "delete", label: "❌ xóa sản phẩm", },
         ];
 
+        if (record.status === "published") {
+          menuItems.push({ key: "unsell", label: "🚫 Hủy bán sản phẩm" });
+        }
+
         return (
           <div className="flex items-center justify-center">
-            <Dropdown menu={{ items: menuItems }}>
+            <Dropdown
+              menu={{
+                items: menuItems,
+                onClick: ({ key }) => handleMenuClick(key, record),
+              }}
+            >
               <Button icon={<MoreOutlined />} />
             </Dropdown>
           </div>
