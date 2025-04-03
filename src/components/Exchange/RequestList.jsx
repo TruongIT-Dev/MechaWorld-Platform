@@ -69,6 +69,9 @@ const fakeRequests = [
             GundamPic,
             GundamPic2,
             GundamPic3,
+            GundamPic3,
+            GundamPic3,
+            GundamPic3,
         ],
         category: 'Trao đổi - Perfect Grade',
         time: '2024-03-28T09:15:00',
@@ -172,7 +175,7 @@ export default function RequestList() {
                 open={isModalOpen}
                 onCancel={handleCloseModal}
                 footer={null}
-                width={1000}
+                width={800}
                 className='mt-0'
                 title={<span className="text-lg font-bold">Chi tiết trao đổi</span>}
             >

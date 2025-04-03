@@ -143,7 +143,7 @@ function ShopProduct({
       render: (_, value) => {
         const { status } = value;
 
-        if (status === "available") {
+        if (status === "in store") {
           return (
             <div className="flex flex-col space-y-2">
               <Button
@@ -165,9 +165,11 @@ function ShopProduct({
 
         // Trạng thái khác -> render tag tương ứng
         const statusMap = {
-          auction: { text: "Đang đấu giá", color: "blue" },
-          selling: { text: "Đang bán", color: "green" },
+          auctioning: { text: "Đang đấu giá", color: "blue" },
+          published: { text: "Đang bán", color: "green" },
           exchange: { text: "Đang trao đổi", color: "cyan" },
+          processing: { text: "Đang trao đổi", color: "yellow" },
+          "pending auction approval": { text: "Đang trao đổi", color: "yellow" },
         };
 
         const statusTag = statusMap[status];

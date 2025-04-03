@@ -40,6 +40,7 @@ import {
   ModGundams,
   ModUsers,
   ModExchanges,
+  ExchangeRequestForm,
 } from "./routes/router";
 import Cookies from "js-cookie";
 import Spinner from "./components/Spinner";
@@ -77,21 +78,37 @@ function App() {
           <Route path="/" element={<UserLayout />} >
             <Route index element={<HomePage />} />
 
+            {/* Product Route */}
             <Route path="product" element={<ProductPage />} />
             <Route path="product/:slug" element={<ProductDetailPage />} />
+
+            
+            {/* Aution Route */}
+            <Route path="aution" element={<AutionList />} />
+            <Route path="aution/detail" element={<AutionDetail />} />
+
+            <Route path="admin/aution" element={<CensorProductToAution />} />
+
+
+            {/* Exchange Route */}
             <Route path="exchange" element={<ExchangePage />} />
-            <Route path="exchange-detail" element={<ExchangeDetail />} />
+            <Route path="exchange/request" element={<ExchangeRequestForm/>} />
+            <Route path="/exchange/detail" element={<ExchangeDetail />} />
+
 
             {/* Cart route */}
             <Route path="cart" element={<CartPage1 />} />
 
+            
             {/* Checkout route */}
             <Route path="checkout" element={<Checkout />} />
 
+            
             {/* Wallet user route */}
             <Route path="wallet" element={<WalletPage />} />
 
-            {/* Profile Route */}
+            
+            {/* Member Profile Route */}
             <Route path="member/profile" element={<ProfilePage />}>
               <Route path="user" element={<UserProfile />} />
               <Route path="tradehistory" element={<TradeHistory />} />
@@ -101,6 +118,7 @@ function App() {
               <Route path="listProductAution" element={<ListProductToAution />} />
             </Route>
 
+            
             {/* Shop Route */}
             <Route path="shop" element={<ShopPage />}>
               <Route path="dashboard" element={<ShopDashboard />} />
@@ -109,14 +127,7 @@ function App() {
               <Route path="order-management" element={<ShopOrderManagement />} />
               <Route path="auction-management" element={<ShopAuctionManagement />} />
               <Route path="report-management" element={<ShopReportManagement />} />
-              {/* <Route path="setting" element={<UserProfile />} /> */}
             </Route>
-
-            {/* Aution Route */}
-            <Route path="aution" element={<AutionList />} />
-            <Route path="aution/detail" element={<AutionDetail />} />
-
-            <Route path="admin/aution" element={<CensorProductToAution />} />
 
 
             {/* Error route */}
@@ -132,6 +143,7 @@ function App() {
             <Route path="signup" element={<SignUp />} />
           </Route>
 
+          {/* Moderator Route */}
           <Route path="moderator" element={<ModeratorLayout />} >
             <Route index element={<ModUsers />} /> 
             <Route path="mod-users" element={<ModUsers />} />
@@ -143,6 +155,8 @@ function App() {
             <Route path="mod-feedbacks" element={<ModFeedbacks />} />
             <Route path="mod-exchanges" element={<ModExchanges />} />
           </Route>
+
+          {/* Admin Route */}
 
           {/* Layout Đăng ký Shop */}
           <Route path="registe-shop" element={<RegisterShopLayout />}>

@@ -17,7 +17,7 @@ axios.interceptors.response.use((response) => {
     return response;
 }, async (error) => {
     const originalRequest = error.config;
-    if (error.response.status === 401 && !originalRequest._retry) {
+    if (error?.response?.status === 401 && !originalRequest._retry) {
         originalRequest._retry = true;
 
         // Gọi API refresh token để lấy access_token mới

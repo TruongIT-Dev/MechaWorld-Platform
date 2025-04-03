@@ -17,9 +17,8 @@ export const SignIn = React.lazy(() => import("../components/Login/SignIn"));
 export const SignUp = React.lazy(() => import("../components/Login/SignUp"));
 
 
-// Detail Page route
+// Product Detail Page route
 export const ProductDetailPage = React.lazy(() => import('../components/ProductDetail/ProductDetail'));
-export const ExchangeDetail = React.lazy(() => import('../components/ExchangeDetail/ExchangeDetail'));
 
 
 // Cart route
@@ -34,7 +33,7 @@ export const Checkout = React.lazy(() => import('../components/Checkout/checkout
 export const WalletPage = React.lazy(() => import('../components/Wallet/WalletUser'));
 
 
-// Profile route
+// Member Profile route
 export const ProfilePage = React.lazy(() => import("../components/Profile/Profiles"));
 export const UserProfile = React.lazy(() => import("../components/Profile/UserProfile"));
 export const OrderHistory = React.lazy(() => import("../components/Profile/OrderHistory"));
@@ -54,6 +53,11 @@ export const ShopTransaction = React.lazy(() => import("../components/Shop/ShopT
 export const ShopAuctionManagement = React.lazy(() => import("../components/Shop/ShopAuctionManagement"));
 export const ShopOrderManagement = React.lazy(() => import("../components/Shop/ShopOrderManagement"));
 export const ShopReportManagement = React.lazy(() => import("../components/Shop/ShopReportManagement"));
+
+
+// Exchange Route
+export const ExchangeDetail = React.lazy(() => import("../components/Exchange/ExchangeDetail"));
+export const ExchangeRequestForm = React.lazy(() => import("../components/Exchange/ExchangeRequestForm"));
 
 // Aution route
 export const AutionList = React.lazy(() => import("../components/Aution/User/AutionList"));
