@@ -28,7 +28,7 @@ export const authSlice = createAppSlice({
             state.user = action.payload;
         },
         // signup: (state, action) => {
-
+            
         // },
         updateUserProfile: (state, action) => {
             state.user = action.payload;

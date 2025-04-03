@@ -61,7 +61,11 @@ export const signupEmail = (email, fullname, password) => {
     }
   );
 }
-
+export const checkEmail = (email) => {
+  return axios.get('/users/check-email', {
+    email: email,
+  })
+}
 
 export const verifyToken = (access_token) => {
   return axios.post('tokens/verify', {
