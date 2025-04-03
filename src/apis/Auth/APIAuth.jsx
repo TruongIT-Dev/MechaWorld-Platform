@@ -62,7 +62,7 @@ export const signupEmail = (email, fullname, password) => {
   );
 }
 export const checkEmail = (email) => {
-  return axios.get('/users/check-email', {
+  return axios.get('/check-email', {
     email: email,
   })
 }
