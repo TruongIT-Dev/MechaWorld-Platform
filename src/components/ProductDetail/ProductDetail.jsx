@@ -25,6 +25,8 @@ const GundamProductPage = () => {
     const [disableBuy, setDisableBuy] = useState(false);
     const [selectedImage, setSelectedImage] = useState(imageGundam[0]);
 
+
+
     // Fetch chi tiết sản phẩm
     useEffect(() => {
         const fetchDetailGundamBySlug = async (slug) => {
@@ -38,7 +40,7 @@ const GundamProductPage = () => {
                     "open box": "Đã mở hộp",
                     "used": "Đã qua sử dụng"
                 };
-                let gundamData = detailGundam?.data?.Gundam || {};
+                let gundamData = detailGundam?.data || {};
                 let assessoriesData = detailGundam?.data?.accessories;
                 if (gundamData.condition) {
                     gundamData.condition = conditionMapping[gundamData.condition] || gundamData.condition;
@@ -233,42 +235,36 @@ const GundamProductPage = () => {
                                         </p>
                                     </div>
 
-
                                     {/* Gundam Info */}
                                     <div className="space-y-2 text-sm">
                                         <p className='text-green-600 font-semibold'><span className="font-semibold text-black">Tình trạng:</span> {detailGundam.condition}</p>
                                     </div>
 
                                     {/* Buy Button */}
-                                    <button
-                                        type="button"
-                                        className={`w-full py-3 rounded-lg font-semibold transition ${disableBuy ? "bg-gray-300 text-gray-400 cursor-not-allowed" : "bg-red-500 text-white hover:bg-red-600"
-                                            }`}
-                                        onClick={disableBuy ? null : () => handleBuyNow(idGundam)}
-                                        disabled={disableBuy}
-                                    >
-                                        Mua ngay
-                                    </button>
+                                    {!disableBuy && (
+                                        <button
+                                            type="button"
+                                            className="w-full py-3 rounded-lg font-semibold transition bg-red-500 text-white hover:bg-red-600"
+                                            onClick={() => handleBuyNow(idGundam)}
+                                        >
+                                            Mua ngay
+                                        </button>
+                                    )}
 
                                     {/* Add to Cart Button */}
-                                    <button
-                                        type="button"
-                                        onClick={() => handleAddToCart(idGundam)}
-                                        disabled={disableBuy || loadingAdded || added}
-                                        className={`w-full py-3 rounded-lg font-semibold transition 
-    ${disableBuy ? "bg-gray-300 text-gray-400 cursor-not-allowed" :
-                                                added ? "bg-green-500 text-white hover:bg-green-600" :
-                                                    "bg-gray-300 text-black hover:bg-gray-400"}
-  `}
-                                    >
-                                        {disableBuy
-                                            ? "🚫 Không thể mua"
-                                            : added
-                                                ? "✅ Đã thêm vào giỏ hàng"
-                                                : loadingAdded
-                                                    ? "Đang thêm..."
-                                                    : "Thêm vào giỏ hàng"}
-                                    </button>
+                                    {!disableBuy && (
+                                        <button
+                                            type="button"
+                                            onClick={() => handleAddToCart(idGundam)}
+                                            disabled={loadingAdded || added}
+                                            className={`w-full py-3 rounded-lg font-semibold transition 
+            ${added ? "bg-green-500 text-white hover:bg-green-600" : "bg-gray-300 text-black hover:bg-gray-400"}
+        `}
+                                        >
+                                            {added ? "✅ Đã thêm vào giỏ hàng" : loadingAdded ? "Đang thêm..." : "Thêm vào giỏ hàng"}
+                                        </button>
+                                    )}
+
                                 </div>
                                 {/* Seller Info */}
                                 <div className="sticky">
