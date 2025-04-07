@@ -41,32 +41,36 @@ axios.interceptors.response.use((response) => {
     return Promise.reject(error);
 });
 
-export const GetCart = () => {
-    return axios.get('/cart/items');
-}
-export const AddToCart = (id) => {
-    return axios.post(`/cart/items`, {
-        gundam_id: id,
-    },)
-}
-export const DeleteCart = (id) => {
-    return axios.delete(`/cart/items/${id}`);
-}
 
-export const CheckoutCart = (checkoutData) => {
-    return axios.post('/orders', {
-        buyer_address_id: checkoutData.buyer_address_id,
-        delivery_fee: checkoutData.delivery_fee,
-        expected_delivery_time: checkoutData.expected_delivery_time,
-        gundam_ids: checkoutData.gundam_ids,
-        items_subtotal: checkoutData.items_subtotal,
-        payment_method: checkoutData.payment_method,
-        seller_id: checkoutData.seller_id,
-        total_amount: checkoutData.total_amount,
-        note: checkoutData.note || ''
-    }, {
-        headers: {
-            'Content-Type': 'application/json',
-        },
-    });
-}
+export const AddMoney = async (amount, description, redirectUrl) => {
+    try {
+        // Kiểm tra các tham số đầu vào
+        if (!amount || amount <= 0) {
+            throw new Error('Số tiền không hợp lệ');
+        }
+
+        // Đảm bảo URL đúng format
+        const validRedirectUrl = redirectUrl.startsWith('http') ? redirectUrl : `https://${redirectUrl}`;
+        
+        const response = await axios.post('/wallet/zalopay/create', { // Sửa từ zalopay sang ralopay
+            amount,
+            description,
+            redirect_url: validRedirectUrl
+        }, {
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            timeout: 10000 // Thêm timeout
+        });
+
+        // Kiểm tra response
+        if (!response.data) {
+            throw new Error('Không nhận được dữ liệu từ server');
+        }
+
+        return response;
+    } catch (error) {
+        console.error('Chi tiết lỗi:', error.response?.data || error.message);
+        throw new Error(error.response?.data?.message || 'Lỗi khi tạo đơn hàng');
+    }
+};
