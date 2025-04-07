@@ -52,3 +52,21 @@ export const AddToCart = (id) => {
 export const DeleteCart = (id) => {
     return axios.delete(`/cart/items/${id}`);
 }
+
+export const CheckoutCart = (checkoutData) => {
+    return axios.post('/orders', {
+        buyer_address_id: checkoutData.buyer_address_id,
+        delivery_fee: checkoutData.delivery_fee,
+        expected_delivery_time: checkoutData.expected_delivery_time,
+        gundam_ids: checkoutData.gundam_ids,
+        items_subtotal: checkoutData.items_subtotal,
+        payment_method: checkoutData.payment_method,
+        seller_id: checkoutData.seller_id,
+        total_amount: checkoutData.total_amount,
+        note: checkoutData.note || ''
+    }, {
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    });
+}
