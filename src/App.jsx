@@ -42,6 +42,7 @@ import {
   ModExchanges,
   ExchangeRequestForm,
   ExchangeGundamManagement,
+  ExchangeDetailInformation,
 } from "./routes/router";
 import Cookies from "js-cookie";
 import Spinner from "./components/Spinner";
@@ -106,7 +107,7 @@ function App() {
             {/* Exchange Route */}
             <Route path="exchange/request" element={<ExchangeRequestForm />} />
             <Route path="/exchange/detail" element={<ExchangeDetail />} />
-
+            <Route path="/exchange/detail/section" element={<ExchangeDetailInformation />} />
 
             {/* Cart route */}
             <Route path="cart" element={<CartPage1 />} />

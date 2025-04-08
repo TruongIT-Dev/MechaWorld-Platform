@@ -3,7 +3,7 @@ import { Form, Input, Button, Typography, Steps, message, Modal } from "antd";
 import { NavLink } from "react-router-dom";
 import Footer from "../../layouts/Footer";
 import Logo from '../../assets/image/logo4.png';
-import { sendOTPEmail, signupEmail, verifyEmail } from "../../apis/Auth/APIAuth";
+import { sendOTPEmail, signupEmail, verifyEmail,checkEmail } from "../../apis/Auth/APIAuth";
 
 export default function SignUp() {
     const [form] = Form.useForm();
@@ -21,7 +21,13 @@ export default function SignUp() {
     const sendOTP = async (email) => {
         setLoading(true);
         try {
+            // Kiểm tra xem email đã được nhập hay chưa
+            const emailCheck = await checkEmail(email);        
             // API call để gửi OTP
+            if (emailCheck?.data?.exists === "true") {
+                message.error("Email đã tồn tại trong hệ thống!");
+                return;
+            }
             const response = await sendOTPEmail(email);
             console.log("Đã gửi OTP đến email:", response);
 

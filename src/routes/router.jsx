@@ -59,6 +59,7 @@ export const ShopReportManagement = React.lazy(() => import("../components/Shop/
 export const ExchangeDetail = React.lazy(() => import("../components/Exchange/ExchangeDetail"));
 export const ExchangeRequestForm = React.lazy(() => import("../components/Exchange/ExchangeRequestForm"));
 export const ExchangeGundamManagement = React.lazy(() => import("../components/Exchange/ExchangeGundamManagement"));
+export const ExchangeDetailInformation = React.lazy(() => import("../components/Exchange/ExchangeDetailInformation"));
 
 // Aution route
 export const AutionList = React.lazy(() => import("../components/Aution/User/AutionList"));
