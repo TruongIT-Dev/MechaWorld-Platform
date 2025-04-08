@@ -186,14 +186,15 @@ const GundamProductPage = () => {
                 {/* Main Section */}
                 <div className="top-section">
                     <Row gutter={24}>
+
                         {/* Image */}
-                        <Col span={8}>
+                        <Col span={7}>
                             <div className="image-section sticky top-16">
                                 {/* Main Display Image */}
                                 <div className="flex justify-center items-center bg-white shadow-md rounded-md">
                                     <img
                                         src={selectedImage}
-                                        className="w-full h-[750px] max-w-full max-h-96 object-contain"
+                                        className="w-full h-[700px] max-w-full max-h-80 object-contain"
                                     />
                                 </div>
 
@@ -215,7 +216,7 @@ const GundamProductPage = () => {
                         </Col>
 
                         {/* Describe */}
-                        <Col span={9}>
+                        <Col span={10}>
                             <div className="description-section">
                                 <ProductInfo info={detailGundam} assessories={accessories} />
                             </div>

@@ -166,6 +166,18 @@ const FirstForm = ({ form, setIsPhoneVerified }) => {
     };
 
 
+
+    const prefixSelector = (
+        <div className="bg-gray-100 border-r border-gray-300 px-2 mr-2 flex items-center h-full">
+            <img
+                src="https://upload.wikimedia.org/wikipedia/commons/2/21/Flag_of_Vietnam.svg"
+                alt="Vietnam flag"
+                className="w-5 h-3 mr-1"
+            />
+            (+84)
+        </div>
+    );
+
     return (
         <>
             <div className="max-w-2xl mx-auto space-y-4 gap-4">
@@ -223,10 +235,11 @@ const FirstForm = ({ form, setIsPhoneVerified }) => {
                         setStep(1);
                     }}
                     footer={null}
+                    width={450}
                     centered
                     title={
                         <div className="text-center font-semibold text-lg">
-                            {step === 1 ? "Cập nhật số điện thoại" : "Xác thực OTP"}
+                            {step === 1 ? "Cập nhật số điện thoại" : "Xác Thực Mã OTP"}
                         </div>
                     }
                 >
@@ -234,22 +247,32 @@ const FirstForm = ({ form, setIsPhoneVerified }) => {
                         {/* Nhập Số Điện Thoại */}
                         {step === 1 && (
                             <>
-                                <PhoneOutlined className="text-4xl text-blue-500 mb-2" />
-                                <p className="text-gray-600">Vui lòng nhập số điện thoại mới</p>
-                                <Input
-                                    rules={[
-                                        { required: true, message: "Vui lòng nhập số điện thoại!" },
-                                        { pattern: /^[0-9]{10}$/, message: "Số điện thoại không hợp lệ!" },
-                                    ]}
-                                    size="large"
-                                    placeholder="Nhập số điện thoại"
-                                    value={phoneNumber}
-                                    onChange={(e) => setPhoneNumber(e.target.value)}
-                                />
+                                <div className="flex flex-col items-center mb-4">
+                                    <div className="bg-blue-100 p-3 rounded-full mb-2">
+                                        <PhoneOutlined className="text-3xl text-blue-500" />
+                                    </div>
+                                    <p className="text-gray-600 mb-4">Vui lòng nhập số điện thoại để <br /> nhận mã kích hoạt OTP!</p>
+                                </div>
+
+                                <div className="mb-4">
+                                    <Input
+                                        addonBefore={prefixSelector}
+                                        size="large"
+                                        placeholder="Nhập số điện thoại"
+                                        value={phoneNumber}
+                                        onChange={(e) => setPhoneNumber(e.target.value)}
+                                        className="mb-1"
+                                    />
+                                    {!/^[0-9]{10}$/.test(phoneNumber) && phoneNumber &&
+                                        <div className="text-red-500 text-center text-sm mt-1">Số điện thoại không hợp lệ!</div>
+                                    }
+                                </div>
+
                                 <Button
                                     type="primary"
-                                    className="w-full bg-blue-500 hover:bg-blue-600"
+                                    className="w-full bg-blue-500 hover:bg-blue-600 h-10"
                                     onClick={handleSendOtp}
+                                    disabled={!/^[0-9]{10}$/.test(phoneNumber)}
                                 >
                                     Gửi mã OTP
                                 </Button>
@@ -260,7 +283,7 @@ const FirstForm = ({ form, setIsPhoneVerified }) => {
                         {step === 2 && (
                             <>
                                 <LockOutlined className="text-4xl text-blue-500 mb-2" />
-                                <p className="text-gray-600">Nhập mã OTP đã gửi đến {phoneNumber}</p>
+                                <p className="text-gray-600 text-base">Nhập mã OTP đã gửi đến <strong>{phoneNumber}</strong></p>
                                 <Input.OTP
                                     size="large"
                                     placeholder="Nhập mã OTP"
@@ -270,7 +293,7 @@ const FirstForm = ({ form, setIsPhoneVerified }) => {
                                 />
                                 <Button
                                     type="primary"
-                                    className="w-full bg-green-500 hover:bg-green-600"
+                                    className="w-full bg-blue-500"
                                     onClick={handleVerifyOtp}
                                 >
                                     Xác thực OTP

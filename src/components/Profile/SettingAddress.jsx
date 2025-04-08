@@ -318,7 +318,7 @@ const SettingAddress = () => {
       <div className="container p-10">
         <div className="flex justify-between pb-4 border-b items-center mb-4">
           <h2 className="text-2xl font-semibold">Địa chỉ của tôi</h2>
-          <Button type="primary" onClick={() => setIsModalVisible(true)} style={{ marginBottom: 16 }} className='bg-red-500 p-4 text-white hover:bg-red-600 transition-colors'>
+          <Button type="primary" onClick={() => setIsModalVisible(true)} style={{ marginBottom: 16 }} className='bg-blue-500 p-4 text-white hover:bg-red-600 transition-colors'>
             Thêm địa chỉ mới
           </Button>
         </div>

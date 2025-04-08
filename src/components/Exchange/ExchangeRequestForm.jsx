@@ -2,8 +2,6 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 export default function ExchangeRequestForm() {
-
-
     const navigate = useNavigate();
 
     // State cho thông tin sản phẩm của receiver
@@ -18,7 +16,8 @@ export default function ExchangeRequestForm() {
         description: 'Gundam Wing Zero Custom phiên bản giới hạn, còn nguyên seal.'
     });
 
-    // State cho modal
+    // State cho step của modal
+    const [modalStep, setModalStep] = useState(1);
     const [isModalOpen, setIsModalOpen] = useState(false);
 
     // State cho thông tin sản phẩm đang được thêm vào
@@ -33,14 +32,54 @@ export default function ExchangeRequestForm() {
     // State cho danh sách sản phẩm của requester
     const [requesterProducts, setRequesterProducts] = useState([]);
 
+    // Danh sách Gundam có sẵn trong kho của user
+    const [inventoryProducts, setInventoryProducts] = useState([
+        {
+            id: 101,
+            name: 'RX-78-2 Gundam',
+            image: '/api/placeholder/200/150',
+            condition: 'Đã lắp ráp',
+            scale: '1/144 RG',
+            description: 'Gundam cổ điển đầu tiên, đã lắp ráp và sơn một số chi tiết.'
+        },
+        {
+            id: 102,
+            name: 'Zaku II',
+            image: '/api/placeholder/200/150',
+            condition: 'Chưa mở hộp',
+            scale: '1/100 MG',
+            description: 'MS-06 Zaku II phiên bản Master Grade, còn nguyên seal.'
+        },
+        {
+            id: 103,
+            name: 'Unicorn Gundam',
+            image: '/api/placeholder/200/150',
+            condition: 'Đã sơn',
+            scale: '1/144 RG',
+            description: 'Unicorn Gundam bản RG đã hoàn thiện với sơn chi tiết và panel lining.'
+        }
+    ]);
+
     // Xử lý mở modal
     const openModal = () => {
+        setModalStep(1);
         setIsModalOpen(true);
     };
 
     // Xử lý đóng modal
     const closeModal = () => {
         setIsModalOpen(false);
+        setModalStep(1);
+    };
+
+    // Chuyển sang bước chọn từ kho
+    const goToInventorySelection = () => {
+        setModalStep(2);
+    };
+
+    // Chuyển sang bước thêm mới
+    const goToAddNewProduct = () => {
+        setModalStep(3);
     };
 
     // Xử lý thay đổi thông tin sản phẩm mới
@@ -50,6 +89,12 @@ export default function ExchangeRequestForm() {
             ...newProduct,
             [name]: value
         });
+    };
+
+    // Xử lý chọn sản phẩm từ kho
+    const handleSelectFromInventory = (product) => {
+        setRequesterProducts([...requesterProducts, product]);
+        closeModal();
     };
 
     // Xử lý thêm sản phẩm mới
@@ -168,21 +213,23 @@ export default function ExchangeRequestForm() {
                         </div>
                     ) : null}
 
-                    {/* Card để thêm sản phẩm mới */}
-                    <div
-                        className="border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center p-6 cursor-pointer hover:bg-gray-50 transition"
-                        onClick={openModal}
-                    >
-                        <div className="text-center">
-                            <div className="mx-auto bg-gray-100 rounded-full w-16 h-16 flex items-center justify-center mb-3">
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                                </svg>
+                    {/* Card để thêm sản phẩm mới - Chỉ hiển thị khi chưa có sản phẩm nào */}
+                    {requesterProducts.length === 0 && (
+                        <div
+                            className="border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center p-6 cursor-pointer hover:bg-gray-50 transition"
+                            onClick={openModal}
+                        >
+                            <div className="text-center">
+                                <div className="mx-auto bg-gray-100 rounded-full w-16 h-16 flex items-center justify-center mb-3">
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                                    </svg>
+                                </div>
+                                <h3 className="font-medium text-lg mb-1">Thêm Gundam</h3>
+                                <p className="text-gray-500 text-sm">Nhấn để thêm sản phẩm trao đổi</p>
                             </div>
-                            <h3 className="font-medium text-lg mb-1">Thêm Gundam</h3>
-                            <p className="text-gray-500 text-sm">Nhấn để thêm sản phẩm trao đổi</p>
                         </div>
-                    </div>
+                    )}
                 </div>
             </div>
 
@@ -202,121 +249,226 @@ export default function ExchangeRequestForm() {
                 </button>
             </div>
 
-            {/* Modal thêm sản phẩm */}
+            {/* Modal cho các bước */}
             {isModalOpen && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
                     <div className="bg-white rounded-lg p-6 w-full max-w-md max-h-screen overflow-y-auto">
-                        <div className="flex justify-between items-center mb-4">
-                            <h3 className="text-xl font-semibold">Thêm Gundam để trao đổi</h3>
-                            <button
-                                onClick={closeModal}
-                                className="text-gray-500 hover:text-gray-700"
-                            >
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                </svg>
-                            </button>
-                        </div>
+                        {/* Step 1: Chọn phương thức */}
+                        {modalStep === 1 && (
+                            <div>
+                                <div className="flex justify-between items-center mb-6">
+                                    <h3 className="text-xl font-semibold">Chọn phương thức thêm Gundam</h3>
+                                    <button
+                                        onClick={closeModal}
+                                        className="text-gray-500 hover:text-gray-700"
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                        </svg>
+                                    </button>
+                                </div>
 
-                        <form onSubmit={handleAddProduct}>
-                            <div className="mb-4">
-                                <label className="block text-gray-700 mb-1">Tên Gundam *</label>
-                                <input
-                                    type="text"
-                                    name="name"
-                                    value={newProduct.name}
-                                    onChange={handleInputChange}
-                                    className="w-full border rounded-lg px-3 py-2"
-                                    required
-                                />
-                            </div>
-
-                            <div className="mb-4">
-                                <label className="block text-gray-700 mb-1">Tình trạng *</label>
-                                <select
-                                    name="condition"
-                                    value={newProduct.condition}
-                                    onChange={handleInputChange}
-                                    className="w-full border rounded-lg px-3 py-2"
-                                >
-                                    <option value="Mới">Mới</option>
-                                    <option value="Chưa mở hộp">Chưa mở hộp</option>
-                                    <option value="Đã lắp ráp">Đã lắp ráp</option>
-                                    <option value="Đã sơn">Đã sơn</option>
-                                    <option value="Cũ">Cũ</option>
-                                </select>
-                            </div>
-
-                            <div className="mb-4">
-                                <label className="block text-gray-700 mb-1">Tỷ lệ</label>
-                                <select
-                                    name="scale"
-                                    value={newProduct.scale}
-                                    onChange={handleInputChange}
-                                    className="w-full border rounded-lg px-3 py-2"
-                                >
-                                    <option value="1/144 HG">1/144 HG</option>
-                                    <option value="1/144 RG">1/144 RG</option>
-                                    <option value="1/100 MG">1/100 MG</option>
-                                    <option value="1/60 PG">1/60 PG</option>
-                                    <option value="SD">SD</option>
-                                    <option value="Khác">Khác</option>
-                                </select>
-                            </div>
-
-                            <div className="mb-4">
-                                <label className="block text-gray-700 mb-1">Mô tả</label>
-                                <textarea
-                                    name="description"
-                                    value={newProduct.description}
-                                    onChange={handleInputChange}
-                                    className="w-full border rounded-lg px-3 py-2"
-                                    rows="3"
-                                ></textarea>
-                            </div>
-
-                            <div className="mb-6">
-                                <label className="block text-gray-700 mb-1">Hình ảnh</label>
-                                <div className="border border-dashed rounded-lg p-4 text-center">
-                                    <input
-                                        type="file"
-                                        accept="image/*"
-                                        onChange={handleImageChange}
-                                        className="hidden"
-                                        id="image-upload"
-                                    />
-                                    <label htmlFor="image-upload" className="cursor-pointer block">
-                                        <div className="mx-auto bg-gray-100 rounded-full w-12 h-12 flex items-center justify-center mb-2">
-                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                <div className="space-y-4">
+                                    <div
+                                        className="border rounded-lg p-4 hover:bg-gray-50 cursor-pointer transition flex items-center"
+                                        onClick={goToInventorySelection}
+                                    >
+                                        <div className="bg-blue-100 rounded-full w-12 h-12 flex items-center justify-center mr-4">
+                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
                                             </svg>
                                         </div>
-                                        <span className="text-blue-600">Tải ảnh lên</span>
-                                        <p className="text-sm text-gray-500 mt-1">PNG, JPG (Max. 5MB)</p>
-                                    </label>
+                                        <div>
+                                            <h4 className="font-medium text-lg">Chọn từ kho</h4>
+                                            <p className="text-gray-600 text-sm">Chọn một Gundam có sẵn trong kho của bạn</p>
+                                        </div>
+                                    </div>
+
+                                    <div
+                                        className="border rounded-lg p-4 hover:bg-gray-50 cursor-pointer transition flex items-center"
+                                        onClick={goToAddNewProduct}
+                                    >
+                                        <div className="bg-green-100 rounded-full w-12 h-12 flex items-center justify-center mr-4">
+                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <h4 className="font-medium text-lg">Thêm mới</h4>
+                                            <p className="text-gray-600 text-sm">Thêm một Gundam mới chưa có trong kho</p>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
+                        )}
 
-                            <div className="flex justify-end">
-                                <button
-                                    type="button"
-                                    onClick={closeModal}
-                                    className="px-4 py-2 border rounded-lg mr-2 hover:bg-gray-50"
-                                >
-                                    Hủy
-                                </button>
-                                <button
-                                    type="submit"
-                                    disabled={!newProduct.name}
-                                    className={`px-4 py-2 rounded-lg ${newProduct.name
-                                            ? 'bg-blue-600 text-white hover:bg-blue-700'
-                                            : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                                        }`}
-                                >
-                                    Thêm sản phẩm
-                                </button>
+                        {/* Step 2: Chọn từ kho */}
+                        {modalStep === 2 && (
+                            <div>
+                                <div className="flex justify-between items-center mb-4">
+                                    <h3 className="text-xl font-semibold">Chọn Gundam từ kho</h3>
+                                    <button
+                                        onClick={closeModal}
+                                        className="text-gray-500 hover:text-gray-700"
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                        </svg>
+                                    </button>
+                                </div>
+
+                                <div className="space-y-3 max-h-96 overflow-y-auto mb-4">
+                                    {inventoryProducts.map((product) => (
+                                        <div
+                                            key={product.id}
+                                            className="border rounded-lg p-3 hover:bg-blue-50 cursor-pointer transition flex"
+                                            onClick={() => handleSelectFromInventory(product)}
+                                        >
+                                            <div className="flex-shrink-0 w-24 h-24 mr-3">
+                                                <img
+                                                    src={product.image}
+                                                    alt={product.name}
+                                                    className="w-full h-full object-cover rounded"
+                                                />
+                                            </div>
+                                            <div className="flex-grow">
+                                                <h4 className="font-medium">{product.name}</h4>
+                                                <div className="text-sm text-gray-600 mt-1">
+                                                    <p className="mb-1">Tình trạng: {product.condition}</p>
+                                                    <p>Tỷ lệ: {product.scale}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+
+                                <div className="flex justify-between">
+                                    <button
+                                        onClick={() => setModalStep(1)}
+                                        className="px-4 py-2 border rounded-lg hover:bg-gray-50"
+                                    >
+                                        Quay lại
+                                    </button>
+                                </div>
                             </div>
-                        </form>
+                        )}
+
+                        {/* Step 3: Thêm mới */}
+                        {modalStep === 3 && (
+                            <div>
+                                <div className="flex justify-between items-center mb-4">
+                                    <h3 className="text-xl font-semibold">Thêm Gundam mới</h3>
+                                    <button
+                                        onClick={closeModal}
+                                        className="text-gray-500 hover:text-gray-700"
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                        </svg>
+                                    </button>
+                                </div>
+
+                                <form onSubmit={handleAddProduct}>
+                                    <div className="mb-4">
+                                        <label className="block text-gray-700 mb-1">Tên Gundam *</label>
+                                        <input
+                                            type="text"
+                                            name="name"
+                                            value={newProduct.name}
+                                            onChange={handleInputChange}
+                                            className="w-full border rounded-lg px-3 py-2"
+                                            required
+                                        />
+                                    </div>
+
+                                    <div className="mb-4">
+                                        <label className="block text-gray-700 mb-1">Tình trạng *</label>
+                                        <select
+                                            name="condition"
+                                            value={newProduct.condition}
+                                            onChange={handleInputChange}
+                                            className="w-full border rounded-lg px-3 py-2"
+                                        >
+                                            <option value="Mới">Mới</option>
+                                            <option value="Chưa mở hộp">Chưa mở hộp</option>
+                                            <option value="Đã lắp ráp">Đã lắp ráp</option>
+                                            <option value="Đã sơn">Đã sơn</option>
+                                            <option value="Cũ">Cũ</option>
+                                        </select>
+                                    </div>
+
+                                    <div className="mb-4">
+                                        <label className="block text-gray-700 mb-1">Tỷ lệ</label>
+                                        <select
+                                            name="scale"
+                                            value={newProduct.scale}
+                                            onChange={handleInputChange}
+                                            className="w-full border rounded-lg px-3 py-2"
+                                        >
+                                            <option value="1/144 HG">1/144 HG</option>
+                                            <option value="1/144 RG">1/144 RG</option>
+                                            <option value="1/100 MG">1/100 MG</option>
+                                            <option value="1/60 PG">1/60 PG</option>
+                                            <option value="SD">SD</option>
+                                            <option value="Khác">Khác</option>
+                                        </select>
+                                    </div>
+
+                                    <div className="mb-4">
+                                        <label className="block text-gray-700 mb-1">Mô tả</label>
+                                        <textarea
+                                            name="description"
+                                            value={newProduct.description}
+                                            onChange={handleInputChange}
+                                            className="w-full border rounded-lg px-3 py-2"
+                                            rows="3"
+                                        ></textarea>
+                                    </div>
+
+                                    <div className="mb-6">
+                                        <label className="block text-gray-700 mb-1">Hình ảnh</label>
+                                        <div className="border border-dashed rounded-lg p-4 text-center">
+                                            <input
+                                                type="file"
+                                                accept="image/*"
+                                                onChange={handleImageChange}
+                                                className="hidden"
+                                                id="image-upload"
+                                            />
+                                            <label htmlFor="image-upload" className="cursor-pointer block">
+                                                <div className="mx-auto bg-gray-100 rounded-full w-12 h-12 flex items-center justify-center mb-2">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                                    </svg>
+                                                </div>
+                                                <span className="text-blue-600">Tải ảnh lên</span>
+                                                <p className="text-sm text-gray-500 mt-1">PNG, JPG (Max. 5MB)</p>
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex justify-between">
+                                        <button
+                                            type="button"
+                                            onClick={() => setModalStep(1)}
+                                            className="px-4 py-2 border rounded-lg hover:bg-gray-50"
+                                        >
+                                            Quay lại
+                                        </button>
+                                        <button
+                                            type="submit"
+                                            disabled={!newProduct.name}
+                                            className={`px-4 py-2 rounded-lg ${newProduct.name
+                                                    ? 'bg-blue-600 text-white hover:bg-blue-700'
+                                                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                                }`}
+                                        >
+                                            Thêm sản phẩm
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        )}
                     </div>
                 </div>
             )}

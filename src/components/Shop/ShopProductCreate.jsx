@@ -5,7 +5,7 @@ import Cookies from "js-cookie";
 import PropTypes from "prop-types";
 import { PostGundam,GetGrades } from "../../apis/Product/APIProduct";
 import ImageUpload from "./ImageUpload";
-import { InfoCircleOutlined } from '@ant-design/icons';
+import { InfoCircleOutlined, UploadOutlined, CloseOutlined, PlusOutlined } from '@ant-design/icons';
 
 
 const { Option } = Select;
@@ -197,54 +197,40 @@ const handleFinish = (values) => {
   
 
   return (
-    <div>
-      <h2 className="text-2xl font-semibold mb-4">Thêm Sản Phẩm Mới</h2>
+    <div className="bg-white p-6 rounded-lg shadow-sm mx-auto">
+      <h2 className="text-2xl font-semibold mb-6 text-gray-800 border-b pb-3">Thêm Sản Phẩm Gundam Mới</h2>
 
-      <Form form={form} layout="vertical" onFinish={handleFinish}>
-        <Form.Item name="name" label="Tên Gundam" rules={[{ required: true, message: "Vui lòng nhập tên sản phẩm!" }]}>
+      <Form form={form} layout="vertical" onFinish={handleFinish} className="grid grid-cols-12 gap-x-4">
+        <Form.Item
+          name="name"
+          label="Tên Gundam"
+          rules={[{ required: true, message: "Vui lòng nhập tên sản phẩm!" }]}
+          className="col-span-12"
+        >
           <Input placeholder="VD: MGEX 1/100 Strike Freedom Gundam" />
         </Form.Item>
 
-        <Form.Item name="grade_id" label="Phân khúc" rules={[{ required: true, message: "Vui lòng chọn phân khúc!" }]}>
-            <Select placeholder="Chọn phân khúc">
-                {grades.map((grade) => (
-                <Option key={grade.id} value={grade.id}>
-                    {grade.display_name} {/* Hiển thị display_name nhưng gửi id */}
-                </Option>
-                ))}
-            </Select>
-        </Form.Item>
-
-        <Form.Item name="condition" label="Tình trạng sản phẩm" rules={[{ required: true }]}
-            tooltip={{
-              title: 'Mô tả tình trạng sản phẩm trong tường hợp có va trạng hoặc trầy xước thì tình trạng sẽ là - "Đã mở hộp"',
-              icon: <InfoCircleOutlined/>,
-            }}>
-          <Select value={condition} onChange={setCondition} >
-            <Option value="new">Hàng mới</Option>
-            <Option value="open box">Đã mở hộp</Option>
-            <Option value="used">Đã qua sử dụng</Option>
+        <Form.Item
+          name="grade_id"
+          label="Phân khúc"
+          rules={[{ required: true, message: "Vui lòng chọn phân khúc!" }]}
+          className="col-span-6"
+        >
+          <Select placeholder="Chọn phân khúc">
+            {grades.map((grade) => (
+              <Option key={grade.id} value={grade.id}>
+                {grade.display_name}
+              </Option>
+            ))}
           </Select>
         </Form.Item>
-        {/* {condition == "new" && (
-          <a> Tình trạng sản phẩm: Hộp mới nguyên dạng, chưa bóc seal, linh kiện không bị hư hại, đủ phụ kiện đi kèm </a>
-        )} */}
-        {condition === 'new' && (
-          <div className="mb-4">
-            *Tình trạng sản phẩm: Hộp mới nguyên dạng, chưa bóc seal, linh kiện không bị hư hại, đủ phụ kiện đi kèm.
-          </div>
-        )}
-        {(condition === 'open box' || condition === 'used') &&(
-          <Form.Item name="condition_description" label="Mô tả tình trạng" rules={[{ required: true, message: 'Vui lòng nhập mô tả tình trạng sản phẩm' }]}>
-            <Input.TextArea placeholder="Nhập mô tả chi tiết tình trạng sản phẩm..." />
-          </Form.Item>
-        )}
 
-        <Form.Item name="manufacturer" label="Thương hiệu" rules={[{ required: true,message: "Vui lòng thêm thương hiệu" }]}>
-          <Input placeholder="vd: Bandai, ect" />
-        </Form.Item>
-
-        <Form.Item name="scale" label="Kích thước" rules={[{ required: true, message: "Vui lòng chọn tỷ lệ sản phẩm!" }]}>
+        <Form.Item
+          name="scale"
+          label="Kích thước"
+          rules={[{ required: true, message: "Vui lòng chọn tỷ lệ sản phẩm!" }]}
+          className="col-span-6"
+        >
           <Select placeholder="Chọn kích thước">
             {scaleOptions.map((scale) => (
               <Option key={scale} value={scale}>
@@ -254,108 +240,164 @@ const handleFinish = (values) => {
           </Select>
         </Form.Item>
 
-        {/* <Form.Item name="weight" label="Cân nặng (để tính phí vận chuyển)" rules={[{ required: true }]}>
-          <Input type="number" min={1} suffix="gram" />
-          <small className="text-gray-500">* Để tính toán chi phí vận chuyển</small>
-        </Form.Item> */}
-        <Form.Item 
-            name="weight" 
-            label="Cân nặng " 
-            rules={[{ required: true, message: "Vui lòng nhập cân nặng!" }]}
-            tooltip={{
-              title: 'Dùng để tính chi phí vận chuyển. (3.500 vnd / 500g)',
-              icon: <InfoCircleOutlined/>,
-            }}
+        <Form.Item
+          name="condition"
+          label="Tình trạng sản phẩm"
+          rules={[{ required: true }]}
+          tooltip={{
+            title: 'Mô tả tình trạng sản phẩm trong tường hợp có va trạng hoặc trầy xước thì tình trạng sẽ là - "Đã mở hộp"',
+            icon: <InfoCircleOutlined />,
+          }}
+          className="col-span-6"
         >
-            <InputNumber
-                min={1}
-                addonAfter="gram"
-                style={{ width: "100%" }}
-                parser={(value) => value.replace(/[^0-9]/g, "")}
-            />
-
-        </Form.Item>
-
-
-        <Form.Item name="description" label="Mô tả sản phẩm" rules={[{ required: true , message: "Vui lòng nhập mô tả sản phẩm!"}]}>
-          <Input.TextArea />
-        </Form.Item>
-        <Form.Item label="Phụ kiện">
-            {accessories.map((accessory, index) => (
-                <div key={index} className="flex space-x-2 mb-2">
-                <Input
-                    placeholder="Tên phụ kiện"
-                    value={accessory.name}
-                    className="w-60"
-                    onChange={(e) => handleAccessoryChange(index, "name", e.target.value)}
-                />
-                <InputNumber
-                    min={1}
-                    placeholder="Số lượng"
-                    value={accessory.quantity}
-                    onChange={(value) => handleAccessoryChange(index, "quantity", value)}
-                />
-                <Button danger onClick={() => handleRemoveAccessory(index)}>❌</Button>
-                </div>
-            ))}
-            <Button type="dashed" onClick={handleAddAccessory}>➕ Thêm Phụ Kiện</Button>
+          <Select value={condition} onChange={setCondition}>
+            <Option value="new">Hàng mới</Option>
+            <Option value="open box">Đã mở hộp</Option>
+            <Option value="used">Đã qua sử dụng</Option>
+          </Select>
         </Form.Item>
 
         <Form.Item
-            label="Giá bán"
-            name="price"
-            rules={[{ required: true, message: "Vui lòng nhập giá bán!" }]}
+          name="manufacturer"
+          label="Thương hiệu"
+          rules={[{ required: true, message: "Vui lòng thêm thương hiệu" }]}
+          className="col-span-6"
         >
-            <InputNumber
-                value={price}
-                onChange={handlePriceChange}
-                min={0}
-                style={{ width: "100%" }}
-                formatter={(value) => 
-                    `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-                }
-                // parser={(value) => value.replace(/,|VNĐ/g, "")} // Chuyển về số nguyên
-                parser={(value) => value.replace(/[^0-9]/g, "")}
-                suffix="VNĐ"
+          <Input placeholder="VD: Bandai, Kotobukiya..." />
+        </Form.Item>
+
+        {condition === 'new' && (
+          <div className="col-span-12 mb-4 p-3 bg-blue-50 text-blue-700 rounded-md border border-blue-200">
+            <p className="text-sm"><strong>Lưu ý:</strong> Tình trạng sản phẩm: Hộp mới nguyên dạng, chưa bóc seal, linh kiện không bị hư hại, đủ phụ kiện đi kèm.</p>
+          </div>
+        )}
+
+        {(condition === 'open box' || condition === 'used') && (
+          <Form.Item
+            name="condition_description"
+            label="Mô tả tình trạng"
+            rules={[{ required: true, message: 'Vui lòng nhập mô tả tình trạng sản phẩm' }]}
+            className="col-span-12"
+          >
+            <Input.TextArea rows={3} placeholder="Nhập mô tả chi tiết tình trạng sản phẩm..." />
+          </Form.Item>
+        )}
+
+        <Form.Item
+          name="weight"
+          label="Cân nặng"
+          rules={[{ required: true, message: "Vui lòng nhập cân nặng!" }]}
+          tooltip={{
+            title: 'Dùng để tính chi phí vận chuyển. (3.500 vnd / 500g)',
+            icon: <InfoCircleOutlined />,
+          }}
+          className="col-span-6"
+        >
+          <InputNumber
+            min={1}
+            addonAfter="gram"
+            style={{ width: "100%" }}
+            parser={(value) => value.replace(/[^0-9]/g, "")}
+          />
+        </Form.Item>
+
+        <Form.Item
+          label="Giá bán"
+          name="price"
+          rules={[{ required: true, message: "Vui lòng nhập giá bán!" }]}
+          className="col-span-6"
+        >
+          <InputNumber
+            value={price}
+            onChange={handlePriceChange}
+            min={0}
+            style={{ width: "100%" }}
+            formatter={(value) =>
+              `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+            }
+            parser={(value) => value.replace(/[^0-9]/g, "")}
+            addonAfter="VNĐ"
+          />
+        </Form.Item>
+
+        <Form.Item
+          name="description"
+          label="Mô tả sản phẩm"
+          rules={[{ required: true, message: "Vui lòng nhập mô tả sản phẩm!" }]}
+          className="col-span-12"
+        >
+          <Input.TextArea rows={4} placeholder="Mô tả chi tiết về sản phẩm, đặc điểm nổi bật..." />
+        </Form.Item>
+
+        <div className="col-span-12">
+          <Form.Item label="Phụ kiện" className="mb-2">
+            <div className="border p-4 rounded-md bg-gray-50">
+              {accessories.length === 0 && (
+                <div className="text-gray-500 text-sm mb-2">Chưa có phụ kiện nào được thêm</div>
+              )}
+              {accessories.map((accessory, index) => (
+                <div key={index} className="flex items-center space-x-2 mb-2">
+                  <Input
+                    placeholder="Tên phụ kiện"
+                    value={accessory.name}
+                    className="flex-grow"
+                    onChange={(e) => handleAccessoryChange(index, "name", e.target.value)}
+                  />
+                  <InputNumber
+                    min={1}
+                    placeholder="SL"
+                    value={accessory.quantity}
+                    className="w-16"
+                    onChange={(value) => handleAccessoryChange(index, "quantity", value)}
+                  />
+                  <Button
+                    danger
+                    icon={<CloseOutlined />}
+                    onClick={() => handleRemoveAccessory(index)}
+                    size="small"
+                  />
+                </div>
+              ))}
+              <Button
+                type="dashed"
+                onClick={handleAddAccessory}
+                icon={<PlusOutlined />}
+                className="mt-2"
+              >
+                Thêm Phụ Kiện
+              </Button>
+            </div>
+          </Form.Item>
+        </div>
+
+        <Form.Item label="Hình ảnh sản phẩm" className="col-span-12">
+          <div className="border p-4 rounded-md">
+            <ImageUpload
+              primaryImage={primaryImage}
+              setPrimaryImage={setPrimaryImage}
+              secondaryImages={secondaryImages}
+              setSecondaryImages={setSecondaryImages}
             />
+          </div>
         </Form.Item>
 
-        <Form.Item label="Tải lên hình ảnh">
-            <ImageUpload 
-                // onImagesChange={(data) => form.setFieldsValue(data)}  
-                primaryImage={primaryImage} 
-                setPrimaryImage={setPrimaryImage}
-                secondaryImages={secondaryImages} 
-                setSecondaryImages={setSecondaryImages} />
-        </Form.Item>
-
-
-        <Form.Item>
-            <Button
-                type="primary"
-                htmlType="submit"
-                className="bg-[#0056b3] hover:bg-[#4a90e2]"
-                disabled={isUploading}
-            >
-                {isUploading ? "Đang tải dữ liệu ..." : "Đăng ký sản phẩm"}
-            </Button>
-            <Button
-                onClick={() => setIsCreating(false)}
-                className="ml-2"
-                disabled={isUploading} 
-            >
-                Hủy
-            </Button>
-        </Form.Item>
-
-        {/* <Form.Item>
-          <Button type="primary" htmlType="submit" className="bg-[#0056b3] hover:bg-[#4a90e2]">
-            Đăng kí sản phẩm
-          </Button>
-          <Button onClick={() => setIsCreating(false)} className="ml-2">
+        <div className="col-span-12 flex justify-end space-x-3 mt-4 pt-4 border-t">
+          <Button
+            onClick={() => setIsCreating(false)}
+            disabled={isUploading}
+          >
             Hủy
           </Button>
-        </Form.Item> */}
+          <Button
+            type="primary"
+            htmlType="submit"
+            className="bg-blue-600 hover:bg-blue-700"
+            icon={<UploadOutlined />}
+            disabled={isUploading}
+          >
+            {isUploading ? "Đang tải dữ liệu..." : "Đăng ký sản phẩm"}
+          </Button>
+        </div>
       </Form>
     </div>
   );

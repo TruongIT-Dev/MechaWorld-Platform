@@ -1,22 +1,23 @@
-import { Layout, Row, Col, Modal } from 'antd';
+// Exchange.tsx
+import { Layout, Row, Col } from 'antd';
 import UserProfile from './UserProfile';
-import RequestList from './RequestList';
+import { Outlet } from 'react-router-dom';
 
 export default function Exchange() {
     return (
         <Layout className="bg-gray-100 mt-36 mb-6 mx-40 px-4">
             <div className="container mx-auto">
                 <Row gutter={[16, 16]}>
-                    {/* Thông tin người dùng */}
+                    {/* Sidebar trái */}
                     <Col xs={24} md={6}>
                         <div className="sticky top-16">
                             <UserProfile />
                         </div>
                     </Col>
 
-                    {/* Danh sách yêu cầu */}
+                    {/* Phần nội dung động bên phải */}
                     <Col xs={24} md={18}>
-                        <RequestList />
+                        <Outlet />
                     </Col>
                 </Row>
             </div>
