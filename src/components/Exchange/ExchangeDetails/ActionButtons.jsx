@@ -25,7 +25,7 @@ const ActionButtons = ({
           (!exchangeData.isRequestUser ? (
             <AcceptOrRejectButtons
               exchangeId={exchangeData.exchange.id}
-              fetchExchangeDetails={fetchExchangeDetails}
+              // fetchExchangeDetails={fetchExchangeDetails}
             />
           ) : (
             <button className="w-full py-2 rounded-lg border border-gray-500 font-light cursor-default">
@@ -45,7 +45,7 @@ const ActionButtons = ({
           (!exchangeData.isRequestUser ? (
             <ConfirmDealsButton
               exchangeDetail={exchangeData}
-              fetchExchangeDetails={fetchExchangeDetails}
+              // fetchExchangeDetails={fetchExchangeDetails}
             />
           ) : (
             <button className="w-full py-2 rounded-lg border border-gray-500 font-light cursor-default">

@@ -155,20 +155,20 @@ const Checkout = () => {
             className="w-full"
           >
             <div className="flex items-center justify-between">
-              <Radio value="GunPay">
+              <Radio value="wallet">
                 <div className="flex items-center justify-between w-full p-2 border border-transparent hover:border-gray-200 rounded-md">
                   <div className="flex items-center">
                     <img src={footerLogo} alt="wallet" className="max-w-[50px] mr-3" />
                     <div>
                       <p className="font-medium text-base">Thanh toán bằng ví ComZone</p>
-                      {paymentMethod === 'GunPay' && (
+                      {paymentMethod === 'wallet' && (
                         <p className="text-red-500 text-xs mt-1">
                           Số dư không đủ. <span className="text-blue-500 cursor-pointer">Nạp thêm</span>
                         </p>
                       )}
                     </div>
                   </div>
-                  {paymentMethod === 'GunPay' && (
+                  {paymentMethod === 'wallet' && (
                     <div className="bg-blue-50 text-blue-600 px-2 py-1 rounded-md text-xs font-medium">
                       Đã chọn
                     </div>
