@@ -42,6 +42,8 @@ import {
   ModExchanges,
   ExchangeRequestForm,
   ExchangeDetailInformation,
+  ExchangeGundamManagement,
+
 } from "./routes/router";
 import Cookies from "js-cookie";
 import Spinner from "./components/Spinner";
@@ -49,6 +51,7 @@ import { verifyToken } from "./apis/Auth/APIAuth";
 import { useDispatch, useSelector } from "react-redux";
 import { logout, updateUser } from "./features/auth/authSlice";
 import PageLoading from "./components/PageLoading";
+import RequestList from "./components/Exchange/RequestList";
 
 function App() {
   const accessToken = useSelector((state) => state.auth.access_token);
@@ -83,7 +86,7 @@ function App() {
             <Route path="product" element={<ProductPage />} />
             <Route path="product/:slug" element={<ProductDetailPage />} />
 
-            
+
             {/* Aution Route */}
             <Route path="aution" element={<AutionList />} />
             <Route path="aution/detail" element={<AutionDetail />} />
@@ -92,34 +95,40 @@ function App() {
 
 
             {/* Exchange Route */}
-            <Route path="exchange" element={<ExchangePage />} />
-            <Route path="exchange/request" element={<ExchangeRequestForm/>} />
+            <Route path="/exchange" element={<ExchangePage />}>
+              <Route path="list" element={<RequestList />} />
+              {/* <Route path="manage" element={<ManageRequests />} /> */}
+              <Route path="manage-gundam" element={<ExchangeGundamManagement />} />
+              {/* <Route path="history" element={<ExchangeHistory />} /> */}
+
+              {/* Default khi không có gì khớp */}
+              <Route index element={<RequestList />} />
+            </Route>
+
+            {/* Exchange Route */}
+            <Route path="exchange/request" element={<ExchangeRequestForm />} />
             <Route path="/exchange/detail" element={<ExchangeDetail />} />
             <Route path="/exchange/detail/section" element={<ExchangeDetailInformation />} />
 
             {/* Cart route */}
             <Route path="cart" element={<CartPage1 />} />
 
-            
+
             {/* Checkout route */}
             <Route path="checkout" element={<Checkout />} />
 
-            
-            {/* Wallet user route */}
-            <Route path="wallet" element={<WalletPage />} />
-
-            
             {/* Member Profile Route */}
             <Route path="member/profile" element={<ProfilePage />}>
               <Route path="user" element={<UserProfile />} />
               <Route path="tradehistory" element={<TradeHistory />} />
               <Route path="orderhistory" element={<OrderHistory />} />
+              <Route path="wallet" element={<WalletPage />} />
               <Route path="address-setting" element={<SettingAddress />} />
               <Route path="addProductAution" element={<AddProductToAution />} />
               <Route path="listProductAution" element={<ListProductToAution />} />
             </Route>
 
-            
+
             {/* Shop Route */}
             <Route path="shop" element={<ShopPage />}>
               <Route path="dashboard" element={<ShopDashboard />} />
@@ -146,7 +155,7 @@ function App() {
 
           {/* Moderator Route */}
           <Route path="moderator" element={<ModeratorLayout />} >
-            <Route index element={<ModUsers />} /> 
+            <Route index element={<ModUsers />} />
             <Route path="mod-users" element={<ModUsers />} />
             <Route path="mod-auctions" element={<ModAuctions />} />
             <Route path="mod-orders" element={<ModOrders />} />

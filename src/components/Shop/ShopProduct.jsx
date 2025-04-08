@@ -1,10 +1,10 @@
-import { Table, Row, Button, Select, Input, Modal, Dropdown, Form, Tag, Col } from "antd";
+import { Table, Row, Button, Select, Input, Modal, Dropdown, Form, Tag, Col, Typography } from "antd";
 import { useEffect, useState } from "react";
-import { GetGundamByID, SellingGundam,RestoreGundam } from "../../apis/Product/APIProduct";
+import { GetGundamByID, SellingGundam, RestoreGundam } from "../../apis/Product/APIProduct";
 import PropTypes from 'prop-types';
 import { useSelector } from "react-redux";
 import { MoreOutlined, PlusOutlined } from "@ant-design/icons";
-
+import { ExclamationCircleOutlined } from '@ant-design/icons';
 
 // const { Option } = Select;
 
@@ -28,6 +28,14 @@ function ShopProduct({
   // const toggleMenu = (id) => {
   //   setOpenMenuId(openMenuId === id ? null : id);
   // };
+
+
+  // Modal Xác nhận Đăng bán Sản phẩm
+  const [confirmSell, setConfirmSell] = useState(false);
+  const [isConfirmedSell, setIsConfirmedSell] = useState(false);
+
+
+
   useEffect(() => {
     GetGundamByID(user.id, "")
       .then((response) => {
@@ -54,7 +62,7 @@ function ShopProduct({
 
   const handleAuctionProduct = (product) => {
     // setSelectedProduct(product);
-    console.log("data đã lưu: ",product);
+    console.log("data đã lưu: ", product);
     setSellModalVisible(true);
   };
   const handleMenuClick = (key, record) => {
@@ -62,15 +70,15 @@ function ShopProduct({
       case "edit":
         console.log("📝 Chỉnh sửa sản phẩm:", record);
         break;
-  
+
       case "preview":
         console.log("👁️ Xem trước sản phẩm:", record);
         break;
-  
+
       case "delete":
         console.log("❌ Xóa sản phẩm:", record);
         break;
-  
+
       case "unsell":
         console.log("🚫 Hủy bán sản phẩm:", record);
         RestoreGundam(user.id, record.id).catch(response => {
@@ -78,7 +86,7 @@ function ShopProduct({
         })
         window.location.reload();
         break;
-  
+
       default:
         console.log("⚠️ Không có hành động nào được chọn!");
     }
@@ -105,7 +113,7 @@ function ShopProduct({
       filtered = filtered.filter((item) => item.grade === selectedGrade);
     }
     setFilteredData(filtered);
-  }, [ selectedCondition, selectedGrade, gundamList]);
+  }, [selectedCondition, selectedGrade, gundamList]);
 
   const handleFinish = (values) => {
     console.log("data input", values);
@@ -169,24 +177,79 @@ function ShopProduct({
       width: 100,
       render: (_, value) => {
         const { status } = value;
+        const { Text } = Typography;
+
+        const showConfirmModal = () => {
+          setConfirmSell(true);
+        };
+
+        const handleConfirmSellProduct = async () => {
+          setIsConfirmedSell(true);
+          try {
+            await handleSellProduct(value);
+            setConfirmSell(false);
+          } catch (error) {
+            console.error("Lỗi khi đăng bán sản phẩm:", error);
+          } finally {
+            setIsConfirmedSell(false);
+          }
+        };
+
+        // Giả định hàm xử lý khi người dùng bấm nút đấu giá
+        const handleAuctionButtonClick = () => {
+          handleAuctionProduct(value);
+        };
 
         if (status === "in store") {
           return (
-            <div className="flex flex-col space-y-2">
-              <Button
-                type="primary"
-                className="bg-green-600 hover:bg-green-500 w-28"
-                onClick={() => handleSellProduct(value)}
+            <>
+              <div className="flex flex-col space-y-2">
+                <Button
+                  type="primary"
+                  className="bg-green-600 hover:bg-green-500 w-28"
+                  onClick={showConfirmModal}
+                >
+                  Đăng bán
+                </Button>
+                <Button
+                  className="bg-red-600 hover:bg-red-400 text-white w-28"
+                  onClick={handleAuctionButtonClick}
+                >
+                  Đấu giá
+                </Button>
+              </div>
+
+              {/* Modal Confirm Đăng bán Sản phẩm */}
+              <Modal
+                width={500}
+                title="Xác nhận đăng bán sản phẩm"
+                open={confirmSell}
+                onCancel={() => setConfirmSell(false)}
+                footer={[
+                  <Button key="cancel" onClick={() => setConfirmSell(false)} disabled={isConfirmedSell}>
+                    Hủy
+                  </Button>,
+                  <Button
+                    key="submit"
+                    type="primary"
+                    onClick={handleConfirmSellProduct}
+                    loading={isConfirmedSell}
+                    danger
+                  >
+                    Xác nhận đăng bán
+                  </Button>
+                ]}
+                centered
               >
-                Đăng bán
-              </Button>
-              <Button
-                className="bg-red-600 hover:bg-red-400 text-white w-28"
-                onClick={() => handleAuctionProduct(value)}
-              >
-                Đấu giá
-              </Button>
-            </div>
+                <div className="flex flex-col items-center text-center py-4">
+                  <ExclamationCircleOutlined className="text-blue-500 text-5xl mb-4" />
+                  <Text>
+                    Bạn chắc chắn muốn đăng bán sản phẩm này chứ? <br />
+                    Sản phẩm sẽ được bày bán và người mua có thể xem & đặt hàng.
+                  </Text>
+                </div>
+              </Modal>
+            </>
           );
         }
 
@@ -195,8 +258,8 @@ function ShopProduct({
           auctioning: { text: "Đang đấu giá", color: "blue" },
           published: { text: "Đang bán", color: "green" },
           exchange: { text: "Đang trao đổi", color: "cyan" },
-          processing: { text: "Đang trao đổi", color: "yellow" },
-          "pending auction approval": { text: "Đang trao đổi", color: "yellow" },
+          processing: { text: "Đang xử lý", color: "yellow" },
+          "pending auction approval": { text: "Chờ duyệt đấu giá", color: "yellow" },
         };
 
         const statusTag = statusMap[status];
