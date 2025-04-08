@@ -62,7 +62,9 @@ export const signupEmail = (email, fullname, password) => {
   );
 }
 export const checkEmail = (email) => {
-  return axios.get(`/check-email?email=${encodeURIComponent(email)}`, {
+  return axios.post(`/check-email?email`,{
+    email: email
+  }, {
     headers: {
       "Content-Type": "application/json",
     },

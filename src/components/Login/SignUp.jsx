@@ -24,8 +24,9 @@ export default function SignUp() {
             // Kiểm tra xem email đã được nhập hay chưa
             const emailCheck = await checkEmail(email);        
             // API call để gửi OTP
-            if (emailCheck?.data?.exists === "true") {
-                message.error("Email đã tồn tại trong hệ thống!");
+            console.log("emailCheck", emailCheck);
+            if (emailCheck?.data?.exists === true) {
+                message.error("Email đã tồn tại trong hệ thống! Vui lòng quay lại trang đăng nhập.");
                 return;
             }
             const response = await sendOTPEmail(email);
