@@ -98,16 +98,16 @@ function App() {
               {/* <Route path="manage" element={<ManageRequests />} /> */}
               <Route path="manage-gundam" element={<ExchangeGundamManagement />} />
               {/* <Route path="history" element={<ExchangeHistory />} /> */}
-              
+
               {/* Default khi không có gì khớp */}
               <Route index element={<RequestList />} />
             </Route>
-            
+
             {/* Exchange Route */}
             <Route path="exchange/request" element={<ExchangeRequestForm />} />
             <Route path="/exchange/detail" element={<ExchangeDetail />} />
 
-            
+
             {/* Cart route */}
             <Route path="cart" element={<CartPage1 />} />
 
@@ -115,16 +115,12 @@ function App() {
             {/* Checkout route */}
             <Route path="checkout" element={<Checkout />} />
 
-
-            {/* Wallet user route */}
-            <Route path="wallet" element={<WalletPage />} />
-
-
             {/* Member Profile Route */}
             <Route path="member/profile" element={<ProfilePage />}>
               <Route path="user" element={<UserProfile />} />
               <Route path="tradehistory" element={<TradeHistory />} />
               <Route path="orderhistory" element={<OrderHistory />} />
+              <Route path="wallet" element={<WalletPage />} />
               <Route path="address-setting" element={<SettingAddress />} />
               <Route path="addProductAution" element={<AddProductToAution />} />
               <Route path="listProductAution" element={<ListProductToAution />} />

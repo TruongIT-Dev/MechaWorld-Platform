@@ -37,17 +37,17 @@ export default function Profile() {
       label: <Link to="#">Lịch sử đấu giá</Link>,
     },
     {
-      key: "/member/profile/balance",
+      key: "/member/profile/wallet",
       icon: <WalletOutlined className="text-lg text-green-500" />,
-      label: <Link to="#">Số dư & Giao dịch</Link>,
+      label: <Link to="/member/profile/wallet">Số dư & Giao dịch</Link>,
     },
   ];
 
   return (
     <Layout className="container">
-      
+
       {/* Sidebar - Menu */}
-      <Sider width={250} className="bg-white shadow-md h-fit rounded-lg p-4 mt-36">
+      <Sider width={250} className="bg-white shadow-md h-fit rounded-lg p-4 mt-36 mb-4">
         <div className='flex flex-col'>
           <div className="flex items-center py-2 gap-3 border-b">
             <img
@@ -59,7 +59,7 @@ export default function Profile() {
               <p className="font-bold">{user?.full_name}</p>
 
               <div className='flex items-center space-x-2 text-sm text-gray-400'>
-                <EditOutlined className='mt-1'/>
+                <EditOutlined className='mt-1' />
                 <Link to="/member/profile/user">
                   Sửa hồ sơ
                 </Link>
