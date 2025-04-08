@@ -33,6 +33,7 @@ const ExchangeInformationSection = ({
   const isFailed = ["FAILED", "REJECTED"].includes(exchangeData.status);
   // console.log("check exchange data", exchangeData);
   console.log("check selectedAddress", selectedAddress);
+  console.log("check exchangeData", exchangeData);
   useEffect(() => {
     if (isFailed) {
       fetchUserRefundRequest();

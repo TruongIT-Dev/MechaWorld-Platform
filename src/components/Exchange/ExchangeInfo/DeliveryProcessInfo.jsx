@@ -10,7 +10,7 @@ const DeliveryProcessInfo = (
   const [receiveDelivery, setReceiveDelivery] = useState('');
   const [sendDelivery, setSendDelivery] = useState('');
   const [isShowingReceivedDelivery, setIsShowingReceivedDelivery] =useState(true);
-  const [userRefundRequest, setUserRefundRequest] = useState(false);
+  const [userRefundRequest, setUserRefundRequest] = useState();
   const [isRefundRequest, setIsRefundRequest] = useState(false);
   const fakeDelivery = {
     id: 1,
@@ -142,7 +142,7 @@ const DeliveryProcessInfo = (
                 </div>
                 <div>
                   <h3>
-                    Thời gian dữ kiếm: 
+                    Thời gian dự kiếm: 
                   </h3>
                 </div>
 

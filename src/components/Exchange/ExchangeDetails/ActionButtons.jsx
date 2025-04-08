@@ -23,10 +23,11 @@ const ActionButtons = ({
       <div className="relative w-full flex flex-col items-stretch justify-center px-2 mt-1">
         {currentStage === 0 &&
           (!exchangeData.isRequestUser ? (
-            <AcceptOrRejectButtons
-              exchangeId={exchangeData.exchange.id}
-              fetchExchangeDetails={fetchExchangeDetails}
-            />
+            // <AcceptOrRejectButtons
+            //   exchangeId={exchangeData.exchange.id}
+            //   // fetchExchangeDetails={fetchExchangeDetails}
+            // />
+            <div> checking 1</div>
           ) : (
             <button className="w-full py-2 rounded-lg border border-gray-500 font-light cursor-default">
               Yêu cầu đang chờ để được chấp nhận...
@@ -43,10 +44,11 @@ const ActionButtons = ({
         {currentStage === 1 &&
           oppositeCurrentStage === 2 &&
           (!exchangeData.isRequestUser ? (
-            <ConfirmDealsButton
-              exchangeDetail={exchangeData}
-              fetchExchangeDetails={fetchExchangeDetails}
-            />
+            // <ConfirmDealsButton
+            //   exchangeDetail={exchangeData}
+            //   // fetchExchangeDetails={fetchExchangeDetails}
+            // />
+            <div> xác nhận deal</div>
           ) : (
             <button className="w-full py-2 rounded-lg border border-gray-500 font-light cursor-default">
               Đang chờ người yêu cầu trao đổi xác nhận...
@@ -54,11 +56,12 @@ const ActionButtons = ({
           ))}
 
         {currentStage === 2 && (
-          <ConfirmDeliveryButton
-            exchangeId={exchangeData.exchange.id}
-            selectedAddress={selectedAddress}
-            fetchExchangeDetails={fetchExchangeDetails}
-          />
+          // <ConfirmDeliveryButton
+          //   exchangeId={exchangeData.exchange.id}
+          //   selectedAddress={selectedAddress}
+          //   fetchExchangeDetails={fetchExchangeDetails}
+          // />
+          <div> confirm</div>
         )}
       </div>
     )
