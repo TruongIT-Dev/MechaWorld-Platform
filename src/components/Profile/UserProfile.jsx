@@ -1,6 +1,6 @@
 import Cookies from 'js-cookie';
 import { Cropper } from 'react-cropper';
-import { useSelector} from 'react-redux';
+import { useSelector } from 'react-redux';
 import { UploadOutlined } from '@ant-design/icons';
 import { useState, useEffect, useRef } from 'react';
 import { verifyToken } from '../../apis/Auth/APIAuth';
@@ -219,7 +219,7 @@ const ProfilePage = () => {
       <h2 className="text-2xl font-semibold">Hồ Sơ Của Tôi</h2>
       <p className="text-gray-500 mb-6">Quản lý thông tin hồ sơ để bảo mật tài khoản</p>
       <div className="border-t-2 p-6">
-        <Row gutter={24} align="middle">
+        <Row ow gutter={24} align="middle">
           <Col span={14}>
             <Form
               form={form}
@@ -230,12 +230,12 @@ const ProfilePage = () => {
             >
               {/* Tên tài khoản */}
               <Form.Item label="Tên tài khoản">
-                <Input value={fullName} className='mt-3' onChange={(e) => setFullName(e.target.value)} />
+                <Input value={fullName} onChange={(e) => setFullName(e.target.value)} />
               </Form.Item>
 
               {/* Email */}
               <Form.Item label="Email">
-                <div className="flex items-center mt-3">
+                <div className="flex items-center">
                   <Input value={user.email} disabled className="bg-gray-100" />
                   <Button type="link" className="ml-2 text-blue-500">Thay Đổi</Button>
                 </div>
@@ -243,7 +243,7 @@ const ProfilePage = () => {
 
               {/* Số điện thoại */}
               <Form.Item label="Số điện thoại">
-                <div className="flex items-center mt-3">
+                <div className="flex items-center">
                   <Input value={maskPhoneNumber(user?.phone_number) || "Chưa đăng kí"} disabled className="bg-gray-100" />
                   <Button type="link" className="ml-2 text-blue-500" onClick={() => setPhoneModalVisible(true)}>{user?.phone_number ? "Thay đổi" : "Đăng ký"}</Button>
                 </div>
@@ -251,8 +251,8 @@ const ProfilePage = () => {
 
               {/* Nút Lưu */}
               <Form.Item wrapperCol={{ offset: 6 }}>
-                <Button type="primary" className="bg-red-500 hover:bg-red-600 px-6 py-2 rounded text-white" onClick={onFinish}>
-                  Lưu
+                <Button type="primary" className="bg-blue-500 px-6 py-2 rounded text-white" onClick={onFinish}>
+                  Cập nhật
                 </Button>
               </Form.Item>
             </Form>

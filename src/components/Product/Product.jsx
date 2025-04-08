@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { HomeOutlined, UserOutlined } from '@ant-design/icons';
 import { Card, Col, Row, Button, Breadcrumb, Empty } from 'antd';
 
@@ -9,7 +8,6 @@ import FilterSidebar from './ProductFilter';
 const Product = () => {
 
     const { Meta } = Card;
-    const navigate = useNavigate();
 
     // useState
     const [gundams, setGundams] = useState([]);
@@ -20,27 +18,29 @@ const Product = () => {
     });
 
 
-    // Gọi API khi bộ lọc thay đổi
     useEffect(() => {
         const fetchGundams = async () => {
             try {
                 let response;
                 if (filters.selectedGrade) {
                     response = await GetGundamByGrade(filters.selectedGrade);
-                    // console.log("Trigger Filter Gundam:", response)
+                    // console.log("Trigger Filter Gundam:", response);
                 } else {
                     response = await GetGundams();
-                    // console.log("Trigger List All Gundam:", response)
+                    // console.log("Trigger List All Gundam:", response);
                 }
 
-                let filteredData = response?.data;
+                let filteredData = response?.data || [];
 
-                // Lọc theo tình trạng
+                // ❗️Lọc chỉ những Gundam có status là "published"
+                filteredData = filteredData.filter(gundam => gundam.status === "published");
+
+                // ❓Lọc thêm theo condition nếu cần
                 // if (filters.condition !== "all") {
                 //     filteredData = filteredData.filter(gundam => gundam.condition === filters.condition);
                 // }
 
-                // Lọc theo giá
+                // ❓Lọc theo khoảng giá nếu có
                 // filteredData = filteredData.filter(gundam =>
                 //     gundam.price >= filters.priceRange[0] * 1000 &&
                 //     gundam.price <= filters.priceRange[1] * 1000
@@ -54,6 +54,7 @@ const Product = () => {
 
         fetchGundams();
     }, [filters]);
+
 
     console.log("gundams", gundams);
 

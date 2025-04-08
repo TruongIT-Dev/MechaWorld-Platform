@@ -1,12 +1,11 @@
 import React, { useState } from 'react';
-import { Table, Button, Checkbox, message } from 'antd';
+import { Table, Button, Checkbox, Card, Divider, Tag, Empty, Spin } from 'antd';
+import { ShopOutlined, DeleteOutlined, ShoppingCartOutlined, RightOutlined } from '@ant-design/icons';
 import { Link } from "react-router-dom";
 import { useCart } from '../../context/CartContext';
-import { ShopOutlined } from '@ant-design/icons';
-const { Column } = Table;
 
 const Carts = () => {
-  const { cartItems, removeFromCart, loading } = useCart(); // Sử dụng cartItems và removeFromCart từ Context
+  const { cartItems, removeFromCart, loading } = useCart();
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const [selectAll, setSelectAll] = useState(false);
 
@@ -27,101 +26,161 @@ const Carts = () => {
       .reduce((sum, item) => sum + item.gundam_price, 0);
   };
 
-  // Xử lý chọn dòng trong bảng
-  const onSelectChange = (selectedKeys) => {
-    setSelectedRowKeys(selectedKeys);
+  // Xử lý chọn một mục
+  const handleSelectItem = (cartItemId) => {
+    const newSelectedRowKeys = selectedRowKeys.includes(cartItemId)
+      ? selectedRowKeys.filter(key => key !== cartItemId)
+      : [...selectedRowKeys, cartItemId];
+
+    setSelectedRowKeys(newSelectedRowKeys);
+    setSelectAll(newSelectedRowKeys.length === cartItems.length);
   };
 
-  const rowSelection = {
-    selectedRowKeys,
-    onChange: onSelectChange,
+  // Xử lý xóa sản phẩm
+  const handleRemoveItem = (cartItemId) => {
+    removeFromCart(cartItemId);
+    // Cập nhật selectedRowKeys sau khi xóa
+    setSelectedRowKeys(selectedRowKeys.filter(key => key !== cartItemId));
   };
 
-  if (loading) return <div>Loading...</div>;
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <Spin size="large" />
+      </div>
+    );
+  }
+
+  if (cartItems.length === 0) {
+    return (
+      <div className="container mx-auto mt-36 flex justify-center items-center h-[300px] mb-14 px-4">
+        <Empty
+          image={Empty.PRESENTED_IMAGE_SIMPLE}
+          description={
+            <span className="text-gray-500 text-lg">
+              Giỏ hàng của bạn đang trống
+            </span>
+          }
+        >
+          <Link to="/">
+            <Button type="primary" className="bg-blue-500">
+              Tiếp tục mua sắm
+            </Button>
+          </Link>
+        </Empty>
+      </div>
+    );
+  }
 
   return (
-    <div className="container mx-auto mt-44 mb-14">
-      {/* Duyệt qua từng seller và hiển thị bảng tương ứng */}
+    <div className="container mx-auto mt-36 mb-20 px-4">
+      <div className='w-full'>
+        <div className="flex items-center justify-center mb-6">
+          <div className='w-fit flex items-center bg-white shadow-lg rounded-full p-5'>
+            <div className='mt-2'>
+              <ShoppingCartOutlined className="text-4xl text-blue-500" />
+            </div>
+            <h1 className="text-lg font-bold mt-2 px-2 uppercase">Giỏ hàng của bạn</h1>
+          </div>
+        </div>
+      </div>
+
+      {/* Thanh chọn tất cả */}
+      {/* <Card className="mb-4 shadow-sm">
+        <div className="flex items-center">
+          <Checkbox checked={selectAll} onChange={handleSelectAll}>
+            <span className="font-medium">Chọn tất cả ({cartItems.length} sản phẩm)</span>
+          </Checkbox>
+        </div>
+      </Card> */}
+
+      {/* Duyệt qua từng seller và hiển thị sản phẩm */}
       {Object.entries(groupedCartItems).map(([sellerName, items]) => (
-        <div key={sellerName} className="mb-8">
-          <div className="flex items-center mt-5 mb-5">
-                      <ShopOutlined className="text-xl text-gray-500 mr-2" />
-                      <p className="font-semibold text-lg">{sellerName}</p>
-                    </div>
-          <Table
-            dataSource={items}
-            pagination={false}
-            rowSelection={rowSelection}
-            rowKey="cart_item_id"
-            style={{ width: '100%' }}
-          >
-            <Column
-              title="Sản Phẩm"
-              key="product"
-              render={(text, record) => (
-                <div className="flex items-center">
-                  <img
-                    src={record.gundam_image_url}
-                    alt={record.gundam_name}
-                    className="w-16 h-16 object-cover rounded border border-gray-300 mr-4"
-                  />
-                  <div>
-                    <div className="font-semibold">{record.gundam_name}</div>
-                  </div>
+        <Card key={sellerName} className="mb-6 shadow-sm">
+          <div className="flex items-center mb-4">
+            <div className="flex items-center bg-gray-100 px-3 py-2 rounded-lg">
+              <ShopOutlined className="text-lg text-gray-500 mr-2" />
+              <span className="font-semibold">{sellerName}</span>
+            </div>
+          </div>
+
+          <Divider className="my-2" />
+
+          {items.map(item => (
+            <div key={item.cart_item_id} className="py-4 flex items-center border-b last:border-b-0">
+              <Checkbox
+                checked={selectedRowKeys.includes(item.cart_item_id)}
+                onChange={() => handleSelectItem(item.cart_item_id)}
+                className="mr-4"
+              />
+
+              <div className="flex flex-1 items-center">
+                <img
+                  src={item.gundam_image_url}
+                  alt={item.gundam_name}
+                  className="w-20 h-20 object-cover rounded border border-gray-200 mr-4"
+                />
+
+                <div className="flex-1">
+                  <h3 className="font-medium text-lg mb-1">{item.gundam_name}</h3>
+                  <p className="text-red-500 font-semibold text-lg">
+                    {item.gundam_price.toLocaleString()} VNĐ
+                  </p>
                 </div>
-              )}
-              width="33.33%"
-            />
 
-            
-
-            <Column
-              title="Đơn Giá"
-              dataIndex="gundam_price"
-              key="gundam_price"
-              render={(price) => `${price.toLocaleString()} VNĐ`}
-              width="43.33%"
-            />
-
-            <Column
-              title="Hành động"
-              key="actions"
-              render={(text, record) => (
-                <Button danger onClick={() => removeFromCart(record.cart_item_id)}>
+                <Button
+                  danger
+                  icon={<DeleteOutlined />}
+                  onClick={() => handleRemoveItem(item.cart_item_id)}
+                  className="ml-4"
+                >
                   Xóa
                 </Button>
-              )}
-              width="20%"
-            />
-          </Table>
-        </div>
+              </div>
+            </div>
+          ))}
+        </Card>
       ))}
 
-      {/* Thanh điều khiển dưới cùng */}
-      <div className="flex justify-between items-center p-4 bg-gray-100 shadow-md rounded-lg mt-4">
-        <Checkbox checked={selectAll} onChange={handleSelectAll}>
-          Chọn tất cả
-        </Checkbox>
-        <p className="font-semibold">
-          Tổng thanh toán: <span className="text-red-500 text-lg">₫{totalPrice().toLocaleString()}</span>
-        </p>
-        <Link
-          to={{
-            pathname: "/checkout",
-            state: {
-              selectedItems: cartItems.filter(item => selectedRowKeys.includes(item.cart_item_id)),
-            },
-          }}
-        >
-          <Button
-            type="primary"
-            size="large"
-            className="bg-red-500 border-none"
-            disabled={selectedRowKeys.length === 0}
-          >
-            Mua Hàng
-          </Button>
-        </Link>
+      {/* Thanh thanh toán cố định */}
+      <div className="bg-white shadow-lg border-t border-gray-200 z-10 py-3">
+        <div className="container mx-auto px-4 flex items-center justify-between">
+          <div className="flex items-center">
+            <Checkbox
+              checked={selectAll}
+              onChange={handleSelectAll}
+              className="mr-4"
+            >
+              <span className="font-medium">Tất cả ({cartItems.length})</span>
+            </Checkbox>
+          </div>
+
+          <div className="flex items-center">
+            <div className="mr-6">
+              <span className="text-gray-600 mr-2">Tổng thanh toán:</span>
+              <span className="text-xl font-bold text-red-500">{totalPrice().toLocaleString()} VNĐ</span>
+            </div>
+
+            <Link
+              to={{
+                pathname: "/checkout",
+                state: {
+                  selectedItems: cartItems.filter(item => selectedRowKeys.includes(item.cart_item_id)),
+                },
+              }}
+            >
+              <Button
+                type="primary"
+                size="large"
+                icon={<RightOutlined />}
+                className="bg-red-500 border-none flex items-center"
+                disabled={selectedRowKeys.length === 0}
+              >
+                Mua Hàng
+              </Button>
+            </Link>
+          </div>
+        </div>
       </div>
     </div>
   );

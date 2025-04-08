@@ -1,14 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, Button, Radio, Divider, message, Table } from 'antd';
-import { ShoppingCartOutlined, EnvironmentOutlined, ShopOutlined } from '@ant-design/icons';
+import { MoneyCollectOutlined, EnvironmentOutlined, ShopOutlined } from '@ant-design/icons';
 import { getUserAddresses } from '../../apis/User/APIUserProfile';
-import { CheckoutCart } from '../../apis/Cart/APICart'; 
+import { CheckoutCart } from '../../apis/Cart/APICart';
 import { useCart } from '../../context/CartContext';
 import { useLocation } from 'react-router-dom';
 import Cookies from 'js-cookie';
 import footerLogo from "../../assets/image/icon/iconwallet.png";
-
-const { Column } = Table;
 
 const groupByShop = (items) => {
   return items.reduce((acc, item) => {
@@ -98,20 +96,15 @@ const Checkout = () => {
                 <p className="text-lg">{userAddress.detail}, {userAddress.ward_name}, {userAddress.district_name}, {userAddress.province_name}</p>
               </div>
             ) : <p className="text-lg">Chưa có địa chỉ nhận hàng</p>}
-            <Button type="link" className="ml-auto text-blue-500 text-lg">Thay Đổi</Button>
+            <Button type="link" className="ml-auto text-blue-300 hover:text-blue-900 text-base underline">Thay Đổi</Button>
           </div>
         </Card>
 
         {/* Giỏ hàng */}
         <Card className="mb-4">
-          <div className="flex items-center">
-            <ShoppingCartOutlined className="text-2xl text-gray-500 mr-2" />
-            <p className="font-semibold text-xl">Giỏ hàng</p>
-          </div>
-
           {Object.entries(groupedCartItems).map(([shopName, items]) => (
             <div key={shopName}>
-              <div className="flex items-center mt-5 mb-5">
+              <div className="flex items-center mb-5">
                 <ShopOutlined className="text-xl text-gray-500 mr-2" />
                 <p className="font-semibold text-lg">{shopName}</p>
               </div>
@@ -121,10 +114,10 @@ const Checkout = () => {
                   key="product"
                   render={(text, record) => (
                     <div className="flex items-center">
-                      <img src={record.gundam_image_url} alt={record.gundam_name} className="w-14 h-14 object-cover rounded border border-gray-300 mr-3" />
+                      <img src={record.gundam_image_url} alt={record.gundam_name} className="w-16 h-16 object-cover rounded border border-gray-300 mr-3" />
                       <div>
-                        <p className="font-semibold text-sm">{record.gundam_name}</p>
-                        <p className="text-xs text-gray-500">{record.seller_name}</p>
+                        <p className="text-base">{record.gundam_name}</p>
+                        {/* <p className="text-xs text-gray-500">{record.seller_name}</p> */}
                       </div>
                     </div>
                   )}
@@ -141,50 +134,65 @@ const Checkout = () => {
 
           {/* Ghi chú và vận chuyển */}
           <Card className="mb-4 border-none">
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <p className="font-semibold text-base mb-2">Ghi chú</p>
-                <input
-                  type="text"
-                  placeholder="Nhập ghi chú..."
-                  className="w-full p-2 border rounded"
-                  value={note}
-                  onChange={(e) => setNote(e.target.value)}
-                />
-              </div>
-              <div>
-                <p className="font-semibold text-base mb-2">Thông tin vận chuyển</p>
-                <p className="flex justify-between text-sm text-gray-600">Dự kiến nhận hàng: <span className="font-semibold">Thứ 4, ngày 5 tháng 3 năm 2025</span></p>
-                <p className="flex justify-between text-sm text-gray-600">Phí giao hàng: <span className="font-semibold">{shippingFee.toLocaleString()} VNĐ</span></p>
-                <p className="flex justify-between font-semibold text-lg mt-2">Tổng tiền: <span className="font-semibold">{finalPrice.toLocaleString()} VNĐ</span></p>
-              </div>
+            <div className='border-b-2 py-2 space-y-2'>
+              <p className="text-xl font-bold mb-2">Thông tin vận chuyển</p>
+              <p className="flex justify-between text-sm text-gray-600">Dự kiến nhận hàng: <span className="font-semibold">Thứ 4, ngày 5 tháng 3 năm 2025</span></p>
+              <p className="flex justify-between text-sm text-gray-600">Phí giao hàng: <span className="font-semibold">{shippingFee.toLocaleString()} VNĐ</span></p>
             </div>
+
+            <p className="flex justify-between font-semibold text-lg mt-4">Tạm tính: <span className="font-semibold">{finalPrice.toLocaleString()} VNĐ</span></p>
           </Card>
         </Card>
 
         {/* Phương thức thanh toán */}
-        <Card className="mb-4">
-          <div className="flex justify-between items-center">
-            <p className="font-semibold text-base">Phương thức thanh toán</p>
-            <Button type="link" className="text-blue-500 text-sm" onClick={() => setShowPaymentOptions(true)}>Thay đổi</Button>
-          </div>
-          {!showPaymentOptions ? (
-            <div className="p-3 border rounded flex items-center justify-between">
-              <div className="flex items-center">
-                <img src={footerLogo} alt="wallet" className="max-w-[50px] mr-2" />
-                <p className="text-sm font-semibold">{paymentMethod === 'GunPay' ? 'Thanh toán bằng ví ComZone' : 'Thanh toán khi nhận hàng'}</p>
-              </div>
-              {paymentMethod === 'GunPay' && <p className="text-red-500 text-xs">Số dư không đủ. <span className="text-blue-500 cursor-pointer">Nạp thêm</span></p>}
+        <Card
+          title={<div className="font-bold text-lg">Phương thức thanh toán</div>}
+          className="mb-4"
+        >
+          <Radio.Group
+            value={paymentMethod}
+            onChange={(e) => setPaymentMethod(e.target.value)}
+            className="w-full"
+          >
+            <div className="flex items-center justify-between">
+              <Radio value="GunPay">
+                <div className="flex items-center justify-between w-full p-2 border border-transparent hover:border-gray-200 rounded-md">
+                  <div className="flex items-center">
+                    <img src={footerLogo} alt="wallet" className="max-w-[50px] mr-3" />
+                    <div>
+                      <p className="font-medium text-base">Thanh toán bằng ví ComZone</p>
+                      {paymentMethod === 'GunPay' && (
+                        <p className="text-red-500 text-xs mt-1">
+                          Số dư không đủ. <span className="text-blue-500 cursor-pointer">Nạp thêm</span>
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                  {paymentMethod === 'GunPay' && (
+                    <div className="bg-blue-50 text-blue-600 px-2 py-1 rounded-md text-xs font-medium">
+                      Đã chọn
+                    </div>
+                  )}
+                </div>
+              </Radio>
+
+              <Radio value="cod">
+                <div className="flex items-center justify-between w-full p-2 border border-transparent hover:border-gray-200 rounded-md">
+                  <div className="flex items-center">
+                    <div className="flex items-center justify-center w-[40px] h-[40px] bg-gray-100 rounded-md mr-3">
+                      <MoneyCollectOutlined className="text-xl text-gray-500" />
+                    </div>
+                    <p className="font-medium text-base">Thanh toán khi nhận hàng</p>
+                  </div>
+                  {paymentMethod === 'cod' && (
+                    <div className="bg-blue-50 text-blue-600 px-2 py-1 rounded-md text-xs font-medium">
+                      Đã chọn
+                    </div>
+                  )}
+                </div>
+              </Radio>
             </div>
-          ) : (
-            <Radio.Group value={paymentMethod} onChange={(e) => {
-              setPaymentMethod(e.target.value);
-              setShowPaymentOptions(false);
-            }}>
-              <Radio.Button value="GunPay" className="text-sm">Ví ComZone</Radio.Button>
-              <Radio.Button value="cod" className="text-sm">Thanh toán khi nhận hàng</Radio.Button>
-            </Radio.Group>
-          )}
+          </Radio.Group>
         </Card>
       </div>
 
@@ -193,16 +201,16 @@ const Checkout = () => {
         <Card>
           <div className="flex justify-between items-center">
             <p className="text-xl font-bold">ĐƠN HÀNG</p>
-            <a href="/cart" className="text-blue-500 text-sm">Quay lại giỏ hàng</a>
+            <a href="/cart" className="text-blue-300 text-sm">Quay lại giỏ hàng</a>
           </div>
           <p className="text-gray-500 mt-2">{selectedItems.length} sản phẩm</p>
           <Divider />
           <div className="flex justify-between text-lg mt-2">
-            <p className="text-gray-600">Tổng tiền hàng:</p>
+            <p className="text-dark">Tổng đơn hàng:</p>
             <p className="font-semibold">{totalPrice.toLocaleString()} đ</p>
           </div>
           <div className="flex justify-between text-lg mt-2">
-            <p className="text-gray-600">Tổng tiền giao hàng:</p>
+            <p className="text-dark">Phí giao hàng:</p>
             <p className="font-semibold">{shippingFee.toLocaleString()} đ</p>
           </div>
           <Divider />
@@ -216,7 +224,8 @@ const Checkout = () => {
           </p>
           <Button
             type="primary"
-            className="w-full mt-4 bg-red-500 text-lg border-none cursor pb-4 pt-4"
+            danger
+            className="w-full mt-4 text-lg border-none cursor pb-4 pt-4"
             onClick={handleCheckout}
           >
             ĐẶT HÀNG
