@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useState,useEffect } from 'react';
 import { Table, Button, Card, Modal, Input, message, Steps, QRCode, Tabs, Tooltip } from 'antd';
 import { ArrowUpOutlined, ArrowDownOutlined, LoadingOutlined, WalletOutlined, EyeInvisibleOutlined, EyeOutlined } from '@ant-design/icons';
 import { AddMoney } from '../../apis/Wallet/APIWallet'; // Giữ nguyên import hàm AddMoney
-
+import { checkWallet } from '../../apis/User/APIUserProfile';
+import { useSelector } from 'react-redux';
 const { Step } = Steps;
 const { TabPane } = Tabs;
 
@@ -19,9 +20,24 @@ const WalletPage = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
   const [paymentData, setPaymentData] = useState(null);
-
+  const userId = useSelector((state) => state.auth.user.id);
 
   const [showBalance, setShowBalance] = useState(true);
+
+  useEffect(() => {
+    checkWallet(userId).then((response) => {
+      console.log('API Response:', response.data);
+      setBalance(response.data.balance);
+    }).catch((error) => {
+      console.error('Lỗi API:', {
+        message: error.message,
+        response: error.response?.data,
+        config: error.config
+      });
+      message.error('Lỗi khi lấy thông tin ví. Vui lòng thử lại sau.');
+    });
+
+  }, []);
 
   // Giữ nguyên hàm API tạo đơn hàng ZabPay
   const createZabPayOrder = async (amount) => {

@@ -51,3 +51,6 @@ export const deleteAddress = (id,addressID)  => {
 export const BecomeSeller = () => {
     return axios.post('/users/become-seller');
 }
+export const checkWallet = (id) => {
+    return axios.get(`/users/${id}/wallet`)
+}

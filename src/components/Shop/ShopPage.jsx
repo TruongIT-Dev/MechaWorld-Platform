@@ -109,7 +109,7 @@ export default function ShopPage() {
         </Sider>
 
         <Layout className="flex-1 py-4 ml-6 mt-32">
-          <Content className="bg-white rounded-lg shadow-md p-6 h-full">
+          <Content className="bg-white rounded-lg shadow-md p-6 h-full min-w-full max-w-fix">
             <Outlet />
           </Content>
         </Layout>

@@ -155,23 +155,6 @@ const ImageUpload = ({ primaryImage, setPrimaryImage, secondaryImages, setSecond
         >
         {secondaryImages.length < 5 && "+ Thêm ảnh"}
         </Upload>
-        {/* Hiển thị danh sách ảnh phụ */}
-        {/* <div className="flex flex-wrap mt-4 gap-3">
-          {secondaryImages.map((img, index) => (
-            <div key={index} className="relative w-[200px] h-[200px] border rounded-lg overflow-hidden"> */}
-              {/* Hiển thị ảnh */}
-              {/* <img src={img.url} alt="Uploaded" className="w-full h-full object-cover" /> */}
-
-              {/* Nút xóa ảnh phụ */}
-              {/* <button
-                className="absolute top-2 right-2 bg-white p-1 rounded-full text-red-500"
-                onClick={() => handleRemoveImage(index)}
-              >
-                <CloseCircleFilled />
-              </button>
-            </div>
-          ))}
-        </div> */}
 
 
       </div>
