@@ -74,7 +74,7 @@ const columns = (handleAction, handleModal, handleModalCheck) => [
       }
 
       if (record.status === "packaging" && !record.is_packaged) {
-        menuItems.push({ key: "packaged", label: "📦 Đã đóng gói sản phẩm", onClick: () => handleModal() });
+        menuItems.push({ key: "packaged", label: "📦 Đã đóng gói sản phẩm", onClick: () => handleModal(record) });
       }
 
       menuItems.push({ key: "cancel", label: "❌ Hủy đơn hàng", onClick: () => handleAction(record, "cancel") });
@@ -113,6 +113,8 @@ function ShopOrderManagement() {
   const [isModalPackageCheckVisible, setIsModalPackageCheckVisible] = useState(false);
   const [packagingImages, setPackagingImages] = useState([]);
   const [selectedOrder, setSelectedOrder] = useState([]);
+  const [selectedOrderImage, setSelectedOrderImage] = useState([]);
+
   // Xử lý thay đổi trạng thái đơn hàng
   const handleAction = async (record, actionKey) => {
     if (actionKey === "accept") {
@@ -136,7 +138,9 @@ function ShopOrderManagement() {
       console.log("Xác nhận hủy đơn hàng:", record);
     }
   };
-  const handleModal = () => {
+  const handleModal = (record) => {
+    setSelectedOrder(record);
+    console.log(selectedOrder);
     setIsModalPackageVisible(true);
     console.log(isModalPackageVisible);
   }
@@ -162,12 +166,15 @@ function ShopOrderManagement() {
   , []);
   const handlePackagingConfirm = async (sellerId, orderId, packagingImages) => {
     try {
+      console.log(packagingImages);
       const formData = new FormData();
+
       packagingImages.forEach((file) => {
-        console.log(file);
-        formData.append("packaging_images", file.originFileObj);
+        formData.append("package_images", file.originFileObj);
       });
+  
       const response = await packagingOrder(sellerId, orderId, formData);
+
       console.log("Packaging response: ", response.data);
       if (response.status === 200) {
         message.success("Đóng gói thành công!");
@@ -185,9 +192,11 @@ function ShopOrderManagement() {
   
   }
   const handleModalCheck = (record) => {
-    setSelectedOrder(record.packaging_images);
+    // setSelectedOrderImage(record);
+    setSelectedOrderImage(record.packaging_images || []);
     setIsModalPackageCheckVisible(true);
-    console.log("check",record)
+    console.log("checking data",record);
+    console.log("checking data2",selectedOrderImage);
 
   }
 
@@ -258,13 +267,14 @@ function ShopOrderManagement() {
         open={isModalPackageVisible}
         onCancel={() => setIsModalPackageVisible(false)}
         footer={null}
+
       >
         <form
           onSubmit={(e) => {
             e.preventDefault();
-            const formData = new FormData(e.target);
-            const packagingImages = formData.getAll("packaging_images");
-            handlePackagingConfirm(OrderData.seller_id, OrderData.id, packagingImages);
+            // const formData = new FormData(e.target);
+            // const packagingImages = formData.getAll("packaging_images");
+            handlePackagingConfirm(selectedOrder.seller_id, selectedOrder.id, packagingImages);
           }}
         >
           <p className="text-red-500 font-semibold">
@@ -287,8 +297,8 @@ function ShopOrderManagement() {
               {packagingImages.length < 5 && "+ Thêm ảnh"}
             </Upload>
           </div>
-          <div className="text-right">
-            <Button type="primary" htmlType="submit">
+          <div className="text-right  ">
+            <Button type="primary" htmlType="submit" className="bg-blue-400 hover:bg-blue-700">
               Xác thực giao hàng
             </Button>
           </div>
@@ -303,7 +313,7 @@ function ShopOrderManagement() {
         <p>Hình ảnh sản phẩm đóng gói:</p>
         <br />
         <div className="grid grid-cols-2 gap-4">
-          {selectedOrder.map((image, index) => (
+          {Array.isArray(selectedOrderImage) && selectedOrderImage.map((image, index) => (
             <img
               key={index}
               src={image}
@@ -311,6 +321,7 @@ function ShopOrderManagement() {
               className="w-full h-auto rounded shadow"
             />
           ))}
+
         </div>
       </Modal>
     </div>
