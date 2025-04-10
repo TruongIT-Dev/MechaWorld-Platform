@@ -1,7 +1,9 @@
-import  { useEffect, useRef } from 'react';
-import { Card, Row, Col, Statistic, Button } from 'antd';
+import  { useEffect, useRef, useState } from 'react';
+import { Card, Row, Col, Statistic, Button, message } from 'antd';
 import { Pie, Column } from '@antv/g2plot';
 import { groupBy } from '@antv/util';
+import { checkWallet } from '../../apis/User/APIUserProfile';
+import { useSelector } from 'react-redux';
 
 const shopData = [
   { city: 'Hcm', type: 'Card', value: 14500 },
@@ -31,8 +33,24 @@ const ShopDashboard = () => {
   const columnRef = useRef(null);
   const pieChart = useRef(null);
   const columnChart = useRef(null);
+  const [balance, setBalance] = useState(0);
+  const userId = useSelector((state) => state.auth.user.id);
 
   useEffect(() => {
+    console.log(userId);
+    // Lấy thông tin ví
+    checkWallet(userId).then((response) => {
+      console.log('API Response:', response.data);
+      setBalance(response.data.balance);
+    }).catch((error) => {
+      console.error('Lỗi API:', {
+        message: error.message,
+        response: error.response?.data,
+        config: error.config
+      });
+      message.error('Lỗi khi lấy thông tin ví. Vui lòng thử lại sau.');
+    });
+
     // Tổng hợp dữ liệu Pie Chart
     const pieData = Object.entries(groupBy(shopData, 'type')).map(([type, list]) => ({
       type,
@@ -102,7 +120,7 @@ const ShopDashboard = () => {
         <Col span={8}>
           <Card className=''>
             <div className=' flex justify-around'>
-              <Statistic title="Số dư tài khoản (VND)" value={112893000}/>
+              <Statistic title="Số dư tài khoản (VND)" value={balance}/>
               <Button type="primary" className='mt-4 bg-blue-500 hover:bg-blue-400'>Nạp tiền</Button>
             </div>
           </Card>
