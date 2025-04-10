@@ -610,11 +610,14 @@ const Checkout = () => {
                     <img src={footerLogo} alt="wallet" className="max-w-[50px] mr-3" />
                     <div>
                       <p className="font-medium text-base">Thanh toán bằng ví ComZone</p>
+                      <p className="text-gray-500 text-xs mt-1">
+                          Số dư: {userBalance.toLocaleString()} đ
+                        </p>
                       {paymentMethod === 'wallet' && userBalance<finalPrice && (
                         <p className="text-red-500 text-xs mt-1">
                           Số dư không đủ. <span className="text-blue-500 cursor-pointer">Nạp thêm</span>
                         </p>
-                      )}
+                      ) }
                     </div>
                   </div>
                   {paymentMethod === 'wallet' && (
