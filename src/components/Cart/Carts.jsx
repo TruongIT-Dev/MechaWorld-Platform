@@ -71,6 +71,7 @@ const Carts = () => {
       </div>
     );
   }
+  console.log("Selected items to checkout:", cartItems.filter(item => selectedRowKeys.includes(item.cart_item_id)));
 
   return (
     <div className="container mx-auto mt-36 mb-20 px-4">
@@ -165,8 +166,8 @@ const Carts = () => {
               to={{
                 pathname: "/checkout",
                 state: {
-                  selectedItems: cartItems.filter(item => selectedRowKeys.includes(item.cart_item_id)),
-                },
+                  selectedItems: cartItems.filter(item => selectedRowKeys.includes(item.cart_item_id))
+                }
               }}
             >
               <Button

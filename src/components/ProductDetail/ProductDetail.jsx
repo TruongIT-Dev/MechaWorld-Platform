@@ -8,6 +8,7 @@ import ReviewProduct from './Review';
 import SuggestProduct from './SuggestProduct';
 import ShopInfo from './ShopInfo';
 import ProductInfo from './ProductInfo';
+import { useCart } from '../../context/CartContext';
 
 const GundamProductPage = () => {
     const { slug } = useParams();
@@ -24,7 +25,8 @@ const GundamProductPage = () => {
     const [userId, setUserId] = useState("");
     const [disableBuy, setDisableBuy] = useState(false);
     const [selectedImage, setSelectedImage] = useState(imageGundam[0]);
-
+    const { cartItems, addToCart, loading } = useCart();
+    
 
 
     // Fetch chi tiết sản phẩm
@@ -106,39 +108,21 @@ const GundamProductPage = () => {
 
     // Handle Add To Cart
     const handleAddToCart = async (id) => {
-        setLoadingAdded(true);
-
         try {
-            // Kiểm tra nếu chưa đăng nhập
-            if (!userId) {
-                message.error('Bạn cần phải Đăng nhập trước!');
-                navigate('/signIn');
-                return;
-            }
-
-            // Tạo độ trễ trước khi thêm vào giỏ hàng
-            setTimeout(async () => {
-                try {
-                    // Gọi API để thêm vào giỏ hàng
-                    const response = await AddToCart(id);
-                    if (response?.data) {
-                        setAdded(true);
-                        message.success('Đã thêm vào giỏ hàng.');
-                    }
-                } catch (error) {
-                    message.error("Lỗi khi thêm vào giỏ hàng!");
-                    console.error("Error:", error);
-                } finally {
-                    setLoadingAdded(false);
-                }
-            }, 1500); // Độ trễ 1.5 giây
-
+          if (!userId) {
+            message.error('Bạn cần phải Đăng nhập trước!');
+            navigate('/signIn');
+            return;
+          }
+          
+          await addToCart({ id }); // Sử dụng hàm addToCart từ context
+          message.success('Đã thêm vào giỏ hàng.');
+          
         } catch (error) {
-            message.error("Lỗi Added Cart!");
-            console.error("Error:", error);
-            setLoadingAdded(false);
+          message.error("Lỗi khi thêm vào giỏ hàng!");
+          console.error("Error:", error);
         }
-    };
+      };
 
 
     // Handle Buy Instant
