@@ -44,10 +44,7 @@ const ActionButtons = ({
         {currentStage === 1 &&
           oppositeCurrentStage === 2 &&
           (!exchangeData.isRequestUser ? (
-            // <ConfirmDealsButton
-            //   exchangeDetail={exchangeData}
-            //   // fetchExchangeDetails={fetchExchangeDetails}
-            // />
+
             <div> xác nhận deal</div>
           ) : (
             <button className="w-full py-2 rounded-lg border border-gray-500 font-light cursor-default">
@@ -56,11 +53,7 @@ const ActionButtons = ({
           ))}
 
         {currentStage === 2 && (
-          // <ConfirmDeliveryButton
-          //   exchangeId={exchangeData.exchange.id}
-          //   selectedAddress={selectedAddress}
-          //   fetchExchangeDetails={fetchExchangeDetails}
-          // />
+
           <div> confirm</div>
         )}
       </div>

@@ -204,7 +204,7 @@ function ShopOrderManagement() {
   const [OrderData, setOrderData] = useState([]);
   const userId = useSelector((state) => state.auth.user.id);
   const [isModalPackageVisible, setIsModalPackageVisible] = useState(false);
-  const [isModalDetailVisible, setIsModalDetailVisible] = useState(false);
+  // const [isModalDetailVisible, setIsModalDetailVisible] = useState(false);
   const [isModalPackageCheckVisible, setIsModalPackageCheckVisible] = useState(false);
   const [packagingImages, setPackagingImages] = useState([]);
   const [selectedOrder, setSelectedOrder] = useState([]);

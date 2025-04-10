@@ -9,6 +9,7 @@ import Cookies from 'js-cookie';
 import axios from 'axios';
 import footerLogo from "../../assets/image/icon/iconwallet.png";
 import { useSelector } from 'react-redux';
+import { checkWallet } from '../../apis/User/APIUserProfile';
 
 const { Column } = Table;
 const { Option } = Select;
@@ -44,7 +45,7 @@ const Checkout = () => {
   const [addresses, setAddresses] = useState([]);
   const [form] = Form.useForm();
   const [shippingFee, setShippingFee] = useState(0);
-
+  const [userBalance, setUserBalance] = useState(0);
   const [rawExpectedDeliveryDate, setRawExpectedDeliveryDate] = useState('');
   const [expectedDeliveryDate, setExpectedDeliveryDate] = useState('');
 
@@ -174,6 +175,15 @@ const Checkout = () => {
         setLoading(false);
       }
     };
+    const fetchUserBalance = async () => {
+      try {
+        const response = await checkWallet(userData.id);
+        setUserBalance(response.data.balance);
+      } catch (error) {
+        console.error('Lỗi khi fetch số dư:', error);
+      }
+    };
+    fetchUserBalance();
     fetchCheckoutData();
     fetchProvinces();
   }, []);
@@ -600,11 +610,14 @@ const Checkout = () => {
                     <img src={footerLogo} alt="wallet" className="max-w-[50px] mr-3" />
                     <div>
                       <p className="font-medium text-base">Thanh toán bằng ví ComZone</p>
-                      {paymentMethod === 'wallet' && (
+                      <p className="text-gray-500 text-xs mt-1">
+                          Số dư: {userBalance.toLocaleString()} đ
+                        </p>
+                      {paymentMethod === 'wallet' && userBalance<finalPrice && (
                         <p className="text-red-500 text-xs mt-1">
                           Số dư không đủ. <span className="text-blue-500 cursor-pointer">Nạp thêm</span>
                         </p>
-                      )}
+                      ) }
                     </div>
                   </div>
                   {paymentMethod === 'wallet' && (

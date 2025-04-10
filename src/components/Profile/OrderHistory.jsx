@@ -35,10 +35,9 @@ const OrderHistory = () => {
     try {
       const response = await GetListOrderHistory();
       const rawOrders = response.data;
-
+      
       // Lấy danh sách seller_id duy nhất
-      const sellerIds = [...new Set(rawOrders.map(o => o.seller_id))];
-
+      const sellerIds = [...new Set(rawOrders.map(o => o.order.seller_id))];
       // Gọi song song API lấy thông tin shop
       const sellerInfoMap = {};
       await Promise.all(sellerIds.map(async (id) => {
@@ -50,25 +49,27 @@ const OrderHistory = () => {
 
       // Gom đơn theo shop
       const grouped = rawOrders.reduce((acc, order) => {
-        const sellerId = order.seller_id;
+        const sellerId = order.order.seller_id;
         if (!acc[sellerId]) {
           const shopInfo = sellerInfoMap[sellerId];
+          console.log(order);
           acc[sellerId] = {
             shopName: shopInfo.full_name,
             shopIcon: shopInfo.avatar_url,
-            status: convertStatus(order.status),
-            statusColor: getStatusColor(order.status),
+            status: convertStatus(order.order.status),
+            statusColor: getStatusColor(order.order.status),
             orders: [],
-            totalPrice: formatCurrency(order.total_amount),
+            totalPrice: formatCurrency(order.order.total_amount),
           };
         }
 
         acc[sellerId].orders.push({
           id: order.id,
-          productName: `Đơn hàng #${order.code}`,
-          image: "https://source.unsplash.com/100x100/?package",
+          productName: `Đơn hàng #${order.order.code}`,
+          image: order.order.packaging_images[0] || "https://source.unsplash.com/100x100/?product",
+          // image: "https://source.unsplash.com/100x100/?package",
           quantity: 1,
-          price: formatCurrency(order.total_amount),
+          price: formatCurrency(order.order.total_amount),
         });
 
         return acc;
@@ -86,8 +87,8 @@ const OrderHistory = () => {
   const convertStatus = (status) => {
     const map = {
       pending: "Chờ xử lý",
-      packing: "Đang đóng gói",
-      shipping: "Đang giao hàng",
+      packaging: "Đang đóng gói",
+      delivering: "Đang giao hàng",
       delivered: "Đã giao",
       completed: "Hoàn tất",
       cancelled: "Đã hủy",
@@ -99,8 +100,8 @@ const OrderHistory = () => {
   const getStatusColor = (status) => {
     const colorMap = {
       pending: "orange",
-      packing: "blue",
-      shipping: "cyan",
+      packaging: "blue",
+      delivering: "cyan",
       delivered: "lime",
       completed: "green",
       cancelled: "red",

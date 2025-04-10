@@ -37,22 +37,23 @@ export default function PlaceDeposit({
 
 
       // const deliveryDetails = deliDetailsRes.data;
-      const deliveryDetails = [
+      const fakedeliveryDetails = [
         {
           deliveryFee: 50000,
           estDeliveryTime: moment().add(3, "days"),
-
-        }
+        },
       ];
+      const firstDelivery = fakedeliveryDetails[0]; 
 
       setDeliveryDetails({
-        fee: deliveryDetails.deliveryFee,
-        estTime: deliveryDetails.estDeliveryTime,
+        fee: firstDelivery.deliveryFee,
+        estTime: firstDelivery.estDeliveryTime,
       });
+
 
       setTotal(
         exchange.depositAmount +
-          deliveryDetails.deliveryFee +
+        firstDelivery.deliveryFee +
           (exchangeDetails.exchange.compensateUser &&
           exchangeDetails.exchange.compensateUser.id === firstUser.id
             ? exchange.compensationAmount
@@ -69,6 +70,8 @@ export default function PlaceDeposit({
 
   useEffect(() => {
     fetchDeliveryFeeAndDeliveryTime();
+    console.log(deliveryDetails);
+    console.log(exchangeDetails);
   }, []);
 
   const formatDate =
