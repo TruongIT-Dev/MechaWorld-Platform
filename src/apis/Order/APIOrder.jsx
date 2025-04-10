@@ -13,12 +13,11 @@ export const confirmOrder = (sellerId,orderId) => {
     withCredentials: true,
   });
 }
-export const packagingOrder = (sellerId,orderId,packaging_images) => {
-    return axios.patch(`/sellers/${sellerId}/orders/${orderId}/packaging`, {packaging_images}, {
+export const packagingOrder = (sellerId,orderId,packagingData) => {
+    return axios.patch(`/sellers/${sellerId}/orders/${orderId}/package`, packagingData, {
         headers: {
         "Content-Type": "multipart/form-data",
         },
-        withCredentials: true,
     });
 }
 

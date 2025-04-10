@@ -179,7 +179,7 @@ const ExchangeDetailInformation = () => {
           },         
         ],
         initialStage: {
-          firstUser:4, // Bước hiện tại của người dùng đầu tiên
+          firstUser:3, // Bước hiện tại của người dùng đầu tiên
           secondUser: 1, // Bước hiện tại của người dùng thứ hai
         },
 
