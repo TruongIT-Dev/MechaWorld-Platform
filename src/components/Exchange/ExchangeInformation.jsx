@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import PropTypes from 'prop-types';
-import { Modal, Card, Button } from 'antd';
+import { Modal, Card, Button, Avatar } from 'antd';
 
 const ExchangeInformation = ({
   firstCurrentStage,
@@ -13,9 +13,11 @@ const ExchangeInformation = ({
 }) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isModal2Visible, setIsModal2Visible] = useState(false);
-
+  const [isCheckboxChecked, setIsCheckboxChecked] = useState(false);
   const handleViewDetails = () => {
     setIsModalVisible(true);
+    console.log("first gundam group", firstGundamGroup);
+    console.log("second gundam group", secondGundamGroup);
   };
 
   const handleCloseModal = () => {
@@ -27,6 +29,7 @@ const ExchangeInformation = ({
 
   const handleCloseModal2 = () => {
     setIsModal2Visible(false);
+    setIsCheckboxChecked(false);
   };
 
   return (
@@ -56,7 +59,25 @@ const ExchangeInformation = ({
         footer={null}
       >
         <h2>Lưu ý:</h2>
-        <p> Sau khi hủy giao dịch, </p>
+        <p> Nếu dừng trao đổi, bạn sẽ không thể tiếp tục thảo luận hay trò truyện với <Avatar src={secondUser.avatar}/> {secondUser.name} về cuộc trao đổi này.</p>
+        <p className='text-red-500 mt-2'> *Hành động này không thể hoàn tác.</p>
+        <br />
+        <div className="flex justify-end gap-2 mt-4">
+        <div className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              id="confirmStopExchange"
+              onChange={(e) => setIsCheckboxChecked(e.target.checked)}
+            />
+            <label htmlFor="confirmStopExchange" className="text-sm">
+              Tôi xác nhận muốn dừng giao dịch
+            </label>
+          </div>
+          <Button type="primary" danger disabled={!isCheckboxChecked} onClick={handleCloseModal2}>
+            Dừng trao đổi
+          </Button>
+          <Button onClick={handleCloseModal2} >Tiếp tục trao đổi</Button>
+        </div>
 
       </Modal>
 
@@ -69,18 +90,36 @@ const ExchangeInformation = ({
       >
         <div className="modal-content">
           <Card title={`Gundam của ${firstUser.name}`} className="gundam-card">
-            <p>{firstGundamGroup.name}</p>
-            <p>{firstGundamGroup.grade}</p>
-            <p>{firstGundamGroup.scale}</p>
-            <p>{firstGundamGroup.condition}</p>
-            <p>{firstGundamGroup.manufacturer}</p>
+            {firstGundamGroup?.[0]?.gundams?.length > 0 ? (
+              firstGundamGroup[0].gundams.map((gundam) => (
+                <div key={gundam.id} className="mb-4">
+                  <p><strong>Tên:</strong> {gundam.name}</p>
+                  <p><strong>Grade:</strong> {gundam.grade}</p>
+                  <p><strong>Scale:</strong> {gundam.scale}</p>
+                  <p><strong>Condition:</strong> {gundam.condition}</p>
+                  <p><strong>Manufacturer:</strong> {gundam.manufacturer}</p>
+                  {/* <img src={{gundam.}} alt="" /> */}
+                </div>
+              ))
+            ) : (
+              <p>Không có Gundam nào để hiển thị.</p>
+            )}
           </Card>
+
           <Card title={`Gundam của ${secondUser.name}`} className="gundam-card">
-            <p>{secondGundamGroup.name}</p>
-            <p>{secondGundamGroup.grade}</p>
-            <p>{secondGundamGroup.scale}</p>
-            <p>{secondGundamGroup.condition}</p>
-            <p>{secondGundamGroup.description}</p>
+            {secondGundamGroup?.[0]?.gundams?.length > 0 ? (
+              secondGundamGroup[0].gundams.map((gundam) => (
+                <div key={gundam.id} className="mb-4">
+                  <p><strong>Tên:</strong> {gundam.name}</p>
+                  <p><strong>Grade:</strong> {gundam.grade}</p>
+                  <p><strong>Scale:</strong> {gundam.scale}</p>
+                  <p><strong>Condition:</strong> {gundam.condition}</p>
+                  <p><strong>Manufacturer:</strong> {gundam.manufacturer}</p>
+                </div>
+              ))
+            ) : (
+              <p>Không có Gundam nào để hiển thị.</p>
+            )}
           </Card>
         </div>
       </Modal>
