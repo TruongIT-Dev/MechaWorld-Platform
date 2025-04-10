@@ -38,19 +38,27 @@ export const CartProvider = ({ children }) => {
     };
 
     // Hàm thêm sản phẩm vào giỏ hàng
-    const addToCart = async (item) => {
-        try {
-            const response = await AddToCart(item.id); // Gọi API thêm vào giỏ hàng
-            const newItem = response.data; // Giả sử API trả về sản phẩm vừa thêm vào
-            setCartItems((prevItems) => {
-                const updatedItems = [...prevItems, newItem];
-                console.log("Số lượng sản phẩm trong giỏ hàng sau khi thêm:", updatedItems.length);
-                return updatedItems;
-            });
-        } catch (error) {
-            console.error("Error adding to cart:", error);
+// Trong CartContext.js
+const addToCart = async (item) => {
+    try {
+      const response = await AddToCart(item.id);
+      const newItem = response.data;
+      
+      // Kiểm tra xem sản phẩm đã có trong giỏ hàng chưa
+      setCartItems(prevItems => {
+        const existingItem = prevItems.find(i => i.gundam_id === newItem.gundam_id);
+        if (existingItem) {
+          return prevItems; // Không làm gì nếu đã có
         }
-    };
+        return [...prevItems, newItem];
+      });
+      
+      return newItem; // Trả về item mới để có thể sử dụng nếu cần
+    } catch (error) {
+      console.error("Error adding to cart:", error);
+      throw error; // Ném lỗi để component có thể bắt
+    }
+  };
 
     // Hàm xóa sản phẩm khỏi giỏ hàng
     const removeFromCart = async (itemId) => {

@@ -74,3 +74,7 @@ export const AddMoney = async (amount, description, redirectUrl) => {
         throw new Error(error.response?.data?.message || 'Lỗi khi tạo đơn hàng');
     }
 };
+
+export const GetMoney = async (id) => {
+    return axios.get(`users/${id}/wallet/`);
+}

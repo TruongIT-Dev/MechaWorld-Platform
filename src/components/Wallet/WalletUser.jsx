@@ -14,7 +14,7 @@ const transactionData = [
 ];
 
 const WalletPage = () => {
-  const [balance, setBalance] = useState(5000000);
+  const [balance, setBalance] = useState(0);
   const [isDepositModalVisible, setIsDepositModalVisible] = useState(false);
   const [depositAmount, setDepositAmount] = useState(0);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -109,13 +109,21 @@ const WalletPage = () => {
     }
   };
 
-  const handlePaymentComplete = () => {
-    setBalance(balance + depositAmount);
+const handlePaymentComplete = async () => {
+  try {
+    // Refresh balance after successful payment
+    const userId = localStorage.getItem('userId');
+    const response = await GetMoney(userId);
+    if (response.data && response.data.balance !== undefined) {
+      setBalance(response.data.balance);
+    }
+    
     setIsProcessing(false);
     setCurrentStep(0);
     setIsDepositModalVisible(false);
     message.success(`Nạp tiền thành công ${depositAmount.toLocaleString()} VNĐ`);
 
+    // Add to transaction history
     transactionData.unshift({
       key: Date.now().toString(),
       type: 'Nạp tiền',
@@ -123,7 +131,11 @@ const WalletPage = () => {
       date: new Date().toISOString().split('T')[0],
       status: 'Thành công'
     });
-  };
+  } catch (error) {
+    console.error('Failed to refresh balance:', error);
+    message.error('Nạp tiền thành công nhưng không thể cập nhật số dư');
+  }
+};
 
   // Column Bảng Lịch sử Giao dịch
   const columns = [
@@ -173,11 +185,9 @@ const WalletPage = () => {
         </h2>
 
         <Tabs defaultActiveKey="1" type="card">
-          {/* Tab 1: Ví và hành động */}
           <TabPane tab="Nạp / Rút & Số dư ví" key="1">
             <Card className="shadow-md rounded-lg overflow-hidden">
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-center px-4 py-6">
-                {/* Bên trái: Icon ví + số dư */}
                 <div className="flex items-center space-x-4">
                   <div className="bg-blue-100 text-blue-600 p-4 rounded-full">
                     <WalletOutlined className="text-3xl" />
@@ -185,16 +195,22 @@ const WalletPage = () => {
                   <div>
                     <h2 className="text-lg font-medium text-gray-700 mb-1">Số dư ví</h2>
                     <div className="flex items-center space-x-2">
-                      <span className="text-2xl font-semibold text-gray-900">
-                        {showBalance ? `₫ ${balance.toLocaleString()} VNĐ` : "••••••••"}
-                      </span>
-                      <Tooltip title={showBalance ? "Ẩn số dư" : "Hiện số dư"}>
-                        <Button
-                          icon={showBalance ? <EyeInvisibleOutlined /> : <EyeOutlined />}
-                          onClick={() => setShowBalance(!showBalance)}
-                          type="text"
-                        />
-                      </Tooltip>
+                      {loadingBalance ? (
+                        <LoadingOutlined />
+                      ) : (
+                        <>
+                          <span className="text-2xl font-semibold text-gray-900">
+                            {showBalance ? `₫ ${balance.toLocaleString()} VNĐ` : "••••••••"}
+                          </span>
+                          <Tooltip title={showBalance ? "Ẩn số dư" : "Hiện số dư"}>
+                            <Button
+                              icon={showBalance ? <EyeInvisibleOutlined /> : <EyeOutlined />}
+                              onClick={() => setShowBalance(!showBalance)}
+                              type="text"
+                            />
+                          </Tooltip>
+                        </>
+                      )}
                     </div>
                   </div>
                 </div>
