@@ -30,3 +30,12 @@ export const getOrder = (orderId) => {
     withCredentials: true,
   });
 }
+
+export const receivedOrder = (orderId) => {
+  return axios.patch(`/orders/${orderId}/received`, {
+    headers: {
+      "Content-Type": "application/json",
+    },
+    withCredentials: true,
+  });
+}
