@@ -21,22 +21,6 @@ const SettingAddress = () => {
   const [isPrimary, setIsPrimary] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const [editingAddress, setEditingAddress] = useState(null);
-  // const [addresses, setAddresses] = useState([
-  //   {
-  //     id: 1,
-  //     name: "trần tuấn",
-  //     phone: "(+84) 394 211 201",
-  //     address: "23 văn đại, Xã Bảo Sơn, Huyện Lục Nam, Bắc Giang",
-  //     isDefault: true,
-  //   },
-  //   {
-  //     id: 2,
-  //     name: "Nguyễn Hữu Đăng Trường",
-  //     phone: "(+84) 385 145 207",
-  //     address: "169/27, Đường Số 11, Phường Bình Hưng Hòa, Quận Bình Tân, TP. Hồ Chí Minh",
-  //     isDefault: false,
-  //   },
-  // ]);
 
   const user = useSelector((state) => state.auth.user);
   const ghn_api = 'https://dev-online-gateway.ghn.vn/shiip/public-api/master-data/';

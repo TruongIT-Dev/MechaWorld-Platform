@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { Table, Row, Input, Tag, Button, Dropdown,Modal, message, Upload } from "antd";
-import { MoreOutlined } from "@ant-design/icons";
-import { getOrder,confirmOrder,packagingOrder } from "../../apis/Order/APIOrder";
+import { Table, Row, Input, Tag, Button, Dropdown, Modal, message, Upload, Space, Tooltip } from "antd";
+import { StopOutlined, EllipsisOutlined, UserOutlined, DollarOutlined, WalletOutlined, BankOutlined, MobileOutlined, CreditCardOutlined, ClockCircleOutlined, CheckCircleOutlined, GiftOutlined, CarOutlined, FileTextOutlined, CheckOutlined, CloseCircleOutlined, QuestionCircleOutlined, MessageOutlined, EyeOutlined } from "@ant-design/icons";
+import { getOrder, confirmOrder, packagingOrder } from "../../apis/Order/APIOrder";
 import { useSelector } from "react-redux";
 
 // Trạng thái đơn hàng với màu sắc tương ứng
@@ -21,69 +21,164 @@ const columns = (handleAction, handleModal, handleModalCheck) => [
     title: "Mã đơn hàng",
     dataIndex: "code",
     width: 150,
+    render: (code) => <span className="font-semibold">{code}</span>,
   },
-  // {
-  //   title: "Tên sản phẩm",
-  //   dataIndex: "name",
-  //   width: 250,
-  // },
   {
-    title: "Người mua",
+    title: "Khách hàng",
     dataIndex: "buyer_id",
-    width: 100,
+    width: 120,
+    render: (buyerId, record) => (
+      <div className="flex items-center">
+        <UserOutlined className="mr-2 text-blue-500" />
+        <span>{record.buyer_name || buyerId.substring(0, 8)}</span>
+      </div>
+    ),
   },
   {
-    title: "Giá trị đơn hàng",
-    dataIndex: "items_subtotal",
+    title: "Tổng tiền",
+    dataIndex: "total_amount",
+    width: 140,
+    render: (total) => <span className="text-red-500 font-semibold">{total.toLocaleString()} đ</span>,
+  },
+  {
+    title: "Ngày đặt",
+    dataIndex: "created_at",
     width: 150,
-    render: (price) => <span className="text-red-500 font-semibold">{price.toLocaleString()} đ</span>,
+    render: (date) => {
+      const orderDate = new Date(date);
+      return (
+        <span>
+          {orderDate.toLocaleDateString('vi-VN', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+          })}
+        </span>
+      );
+    },
   },
   {
-    title: "Phương thức thanh toán",
+    title: "Thanh toán",
     dataIndex: "payment_method",
-    width: 110,
+    width: 120,
+    render: (method) => {
+      const paymentIcons = {
+        'cod': <DollarOutlined className="text-green-500 mr-1" />,
+        'wallet': <WalletOutlined className="text-blue-500 mr-1" />,
+        'bank': <BankOutlined className="text-purple-500 mr-1" />,
+        'momo': <MobileOutlined className="text-pink-500 mr-1" />
+      };
+
+      const paymentLabels = {
+        'cod': 'Tiền mặt',
+        'wallet': 'Ví điện tử',
+        'bank': 'Ngân hàng',
+        'momo': 'MoMo'
+      };
+
+      return (
+        <div className="flex items-center">
+          {paymentIcons[method] || <CreditCardOutlined className="mr-1" />}
+          <span>{paymentLabels[method] || method}</span>
+        </div>
+      );
+    }
   },
   {
     title: "Trạng thái",
     dataIndex: "status",
-    key: "status",
-    width: 120,
-    render: (status) => (
-      <Tag color={orderStatusColors[status] || "volcano"}>{status.toUpperCase()}</Tag>
+    width: 130,
+    render: (status) => {
+      const statusConfig = {
+        'pending': { color: 'blue', icon: <ClockCircleOutlined />, text: 'Chờ xử lý' },
+        'packaging': { color: 'purple', icon: <GiftOutlined />, text: 'Đang đóng gói' },
+        'delivering': { color: 'orange', icon: <CarOutlined />, text: 'Đang vận chuyển' },
+        'delivered': { color: 'green', icon: <CheckOutlined />, text: 'Đã giao hàng' },
+        'completed': { color: 'green', icon: <CheckOutlined />, text: 'Đã hoàn thành' },
+        'failed': { color: 'green', icon: <CheckOutlined />, text: 'Giao hàng thất bại' },
+        'cancelled': { color: 'red', icon: <CloseCircleOutlined />, text: 'Đã hủy' }
+      };
+
+      const config = statusConfig[status] || { color: 'volcano', icon: <QuestionCircleOutlined />, text: status };
+
+      return (
+        <Tag color={config.color} icon={config.icon} className="px-2 py-1">
+          {config.text}
+        </Tag>
+      );
+    }
+  },
+  {
+    title: "Ghi chú",
+    dataIndex: "note",
+    width: 150,
+    render: (note) => (
+      note ?
+        <Tooltip title={note}>
+          <div className="truncate max-w-xs cursor-help">
+            <MessageOutlined className="mr-1 text-gray-500" />{note}
+          </div>
+        </Tooltip>
+        :
+        <span className="text-gray-400">Không có</span>
     ),
   },
   {
-    title: "Note",
-    dataIndex: "note",
-    width: 150,
-  },
-  {
-    title: "Hành động",
-    dataIndex: "action",
+    title: "Thao tác",
     key: "action",
-    width: 150,
+    fixed: 'right',
+    width: 100,
     render: (_, record) => {
       const menuItems = [];
 
       if (record.status === "pending") {
-        menuItems.push({ key: "accept", label: "✅ Chấp nhận đơn hàng", onClick: () => handleAction(record, "accept") });
+        menuItems.push({
+          key: "accept",
+          label: "Xác nhận đơn",
+          icon: <CheckOutlined className="text-green-500" />,
+          onClick: () => handleAction(record, "accept")
+        });
       }
 
       if (record.is_packaged) {
-        menuItems.push({ key: "viewPackage", label: "📦 Xem chi tiết đóng gói" ,onClick: () => handleModalCheck(record)});
+        menuItems.push({
+          key: "viewPackage",
+          label: "Xem đóng gói",
+          icon: <EyeOutlined className="text-blue-500" />,
+          onClick: () => handleModalCheck(record)
+        });
       }
 
       if (record.status === "packaging" && !record.is_packaged) {
-        menuItems.push({ key: "packaged", label: "📦 Đã đóng gói sản phẩm", onClick: () => handleModal(record) });
+        menuItems.push({
+          key: "packaged",
+          label: "Đã đóng gói",
+          icon: <GiftOutlined className="text-purple-500" />,
+          onClick: () => handleModal(record)
+        });
       }
 
-      menuItems.push({ key: "cancel", label: "❌ Hủy đơn hàng", onClick: () => handleAction(record, "cancel") });
-      menuItems.push({ key: "detail", label: "Chi tiết đơn hàng" });
+      menuItems.push({
+        key: "detail",
+        label: "Chi tiết",
+        icon: <FileTextOutlined className="text-blue-500" />
+      });
 
+      if (["pending", "confirmed", "packaging"].includes(record.status)) {
+        menuItems.push({
+          key: "cancel",
+          label: "Hủy đơn",
+          icon: <StopOutlined className="text-red-500" />,
+          danger: true,
+          onClick: () => handleAction(record, "cancel")
+        });
+      }
       return (
-        <Dropdown menu={{ items: menuItems }}>
-          <Button icon={<MoreOutlined />} />
-        </Dropdown>
+        <Space size="small">
+          <Dropdown menu={{ items: menuItems }} placement="bottomRight" trigger={['click']}>
+            <Button type="text" icon={<EllipsisOutlined />} className="flex items-center justify-center" />
+          </Dropdown>
+        </Space>
       );
     },
   },
@@ -151,11 +246,11 @@ function ShopOrderManagement() {
   //     order.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
   //     (statusFilter ? order.status === statusFilter : true)
   // );
-  
+
   useEffect(() => {
     const fetchOrders = async () => {
       // Giả lập gọi API để lấy dữ liệu đơn hàng
-      
+
       const response = await getOrder(userId);
       console.log("Orders: ", response.data);
       setOrderData(response.data);
@@ -163,7 +258,7 @@ function ShopOrderManagement() {
 
     fetchOrders();
   }
-  , []);
+    , []);
   const handlePackagingConfirm = async (sellerId, orderId, packagingImages) => {
     try {
       console.log(packagingImages);
@@ -172,7 +267,7 @@ function ShopOrderManagement() {
       packagingImages.forEach((file) => {
         formData.append("package_images", file.originFileObj);
       });
-  
+
       const response = await packagingOrder(sellerId, orderId, formData);
 
       console.log("Packaging response: ", response.data);
@@ -182,21 +277,21 @@ function ShopOrderManagement() {
         setTimeout(() => {
           window.location.reload();
         }, 800);
-        
+
       } else {
         console.error("Đóng gói thất bại!");
       }
     } catch (error) {
       console.error("Error while packaging order:", error);
     }
-  
+
   }
   const handleModalCheck = (record) => {
     // setSelectedOrderImage(record);
     setSelectedOrderImage(record.packaging_images || []);
     setIsModalPackageCheckVisible(true);
-    console.log("checking data",record);
-    console.log("checking data2",selectedOrderImage);
+    console.log("checking data", record);
+    console.log("checking data2", selectedOrderImage);
 
   }
 
@@ -215,7 +310,7 @@ function ShopOrderManagement() {
     // setSecondaryImages([...packagingImages, ...newFiles]);
     setPackagingImages(fileList);
   };
-  
+
   // Xử lý khi xóa ảnh
   const handleRemoveImage = (file) => {
     setPackagingImages((prevImages) => prevImages.filter((img) => img.uid !== file.uid));
@@ -224,7 +319,7 @@ function ShopOrderManagement() {
 
 
   return (
-    <div>
+    <div className="">
       {/* Tiêu đề */}
       <h2 className="text-2xl font-semibold mb-6">Quản lý đơn hàng</h2>
 
