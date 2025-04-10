@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { Card, Button, Radio, Divider, message, Table, Modal, Form, Select, Input, Checkbox } from 'antd';
-import { ShoppingCartOutlined, EnvironmentOutlined, ShopOutlined, InfoCircleOutlined } from '@ant-design/icons';
+import { ShoppingCartOutlined, EnvironmentOutlined, ShopOutlined, MoneyCollectOutlined } from '@ant-design/icons';
 import { getUserAddresses, postUserAddresses, updateAddress } from '../../apis/User/APIUserProfile';
-import { CheckoutCart } from '../../apis/Cart/APICart'; 
+import { CheckoutCart } from '../../apis/Cart/APICart';
 import { useCart } from '../../context/CartContext';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import Cookies from 'js-cookie';
 import axios from 'axios';
 import footerLogo from "../../assets/image/icon/iconwallet.png";
+import { useSelector } from 'react-redux';
 
 const { Column } = Table;
 const { Option } = Select;
@@ -22,7 +23,11 @@ const groupByShop = (items) => {
 };
 
 const Checkout = () => {
+
   const location = useLocation();
+  const user = useSelector((state) => state.auth.user);
+  const navigate = useNavigate();
+
   const { cartItems } = useCart();
   const [userAddress, setUserAddress] = useState(null);
   const [paymentMethod, setPaymentMethod] = useState('wallet');
@@ -39,7 +44,11 @@ const Checkout = () => {
   const [addresses, setAddresses] = useState([]);
   const [form] = Form.useForm();
   const [shippingFee, setShippingFee] = useState(0);
+
+  const [rawExpectedDeliveryDate, setRawExpectedDeliveryDate] = useState('');
   const [expectedDeliveryDate, setExpectedDeliveryDate] = useState('');
+
+
   const [isCalculatingShipping, setIsCalculatingShipping] = useState(false);
 
   const userCookie = Cookies.get('user');
@@ -54,15 +63,15 @@ const Checkout = () => {
 
   const calculateShippingFee = async () => {
     if (!userAddress || !selectedItems.length) return;
-  
+
     setIsCalculatingShipping(true);
-    
+
     try {
       const shopAddress = {
-        district_id: 1454, 
-        ward_code: "21012" 
+        district_id: 1454,
+        ward_code: "21012"
       };
-  
+
       const response = await axios.post(
         'https://dev-online-gateway.ghn.vn/shiip/public-api/v2/shipping-order/fee',
         {
@@ -70,9 +79,9 @@ const Checkout = () => {
           from_ward_code: shopAddress.ward_code,
           to_district_id: userAddress.ghn_district_id,
           to_ward_code: userAddress.ghn_ward_code,
-          service_id: 0, 
-          service_type_id: 2, 
-          weight: selectedItems.length * 200, 
+          service_id: 0,
+          service_type_id: 2,
+          weight: selectedItems.length * 200,
           insurance_value: totalPrice,
           coupon: null
         },
@@ -84,10 +93,10 @@ const Checkout = () => {
           }
         }
       );
-  
+
       const feeData = response.data.data;
       setShippingFee(feeData.total);
-      
+
       // Tính toán ngày dự kiến giao hàng
       const leadTimeResponse = await axios.post(
         'https://dev-online-gateway.ghn.vn/shiip/public-api/v2/shipping-order/leadtime',
@@ -105,30 +114,34 @@ const Checkout = () => {
           }
         }
       );
-  
+
       const leadTimeData = leadTimeResponse.data.data;
       const deliveryDate = new Date();
       deliveryDate.setDate(deliveryDate.getDate() + leadTimeData.leadtime);
-      setExpectedDeliveryDate(formatDeliveryDate(deliveryDate));
-      
+      setRawExpectedDeliveryDate(deliveryDate); // Lưu đối tượng Date gốc
+      setExpectedDeliveryDate(formatDeliveryDate(deliveryDate)); // Lưu chuỗi đã định dạng
+
     } catch (error) {
       console.error('Lỗi khi tính phí vận chuyển:', error);
       message.error('Không thể tính phí vận chuyển. Vui lòng thử lại sau.');
       const fallbackDate = new Date();
       fallbackDate.setDate(fallbackDate.getDate() + 3);
+      setRawExpectedDeliveryDate(deliveryDate); // Lưu đối tượng Date gốc
       setExpectedDeliveryDate(formatDeliveryDate(fallbackDate));
     } finally {
       setIsCalculatingShipping(false);
     }
   };
-  
+
   const formatDeliveryDate = (date) => {
-    const days = ['Chủ Nhật', 'Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7'];
-    const dayName = days[date.getDay()];
-    const day = date.getDate();
+    // Các ngày trong tuần bằng tiếng Việt
+    const daysOfWeek = ['Chủ nhật', 'Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7'];
+    const day = daysOfWeek[date.getDay()];
+    const dateNum = date.getDate();
     const month = date.getMonth() + 1;
     const year = date.getFullYear();
-    return `${dayName}, ngày ${day} tháng ${month} năm ${year}`;
+
+    return `${day}, ngày ${dateNum} tháng ${month} năm ${year}`;
   };
 
   const ghn_api = 'https://dev-online-gateway.ghn.vn/shiip/public-api/master-data/';
@@ -214,14 +227,14 @@ const Checkout = () => {
     const ward = wards.find(ward => ward.WardCode === values.ward);
 
     const addressData = {
-      full_name: values.full_name,
+      full_name: user.full_name,
       detail: values.detail,
       province_name: city ? city.ProvinceName : "",
       district_name: district ? district.DistrictName : "",
       ward_name: ward ? ward.WardName : "",
       ghn_district_id: values.district,
       ghn_ward_code: values.ward,
-      phone_number: values.phone_number,
+      phone_number: values.phone_number || user.phone_number,
       is_primary: isPrimary
     };
 
@@ -263,16 +276,16 @@ const Checkout = () => {
       message.error("Vui lòng chọn địa chỉ giao hàng.");
       return;
     }
-  
+
     if (isCalculatingShipping) {
       message.warning("Vui lòng đợi hệ thống tính toán phí vận chuyển");
       return;
     }
-  
+
     const orderPayload = {
       buyer_address_id: userAddress.id,
       delivery_fee: shippingFee,
-      expected_delivery_time: expectedDeliveryDate,
+      expected_delivery_time: rawExpectedDeliveryDate,
       gundam_ids: selectedItems.map(item => item.gundam_id),
       items_subtotal: totalPrice,
       note: note,
@@ -281,10 +294,12 @@ const Checkout = () => {
       total_amount: totalPrice + shippingFee,
       completed_at: null
     };
-  
+
     try {
       const res = await CheckoutCart(orderPayload);
       message.success("Đặt hàng thành công!");
+      navigate('/member/profile/orderHistory');
+
       console.log("Order response:", res.data);
     } catch (error) {
       console.error("Checkout error:", error);
@@ -312,8 +327,8 @@ const Checkout = () => {
                 <p className="text-lg">{userAddress.detail}, {userAddress.ward_name}, {userAddress.district_name}, {userAddress.province_name}</p>
               </div>
             ) : <p className="text-lg">Chưa có địa chỉ nhận hàng</p>}
-            <Button 
-              type="link" 
+            <Button
+              type="link"
               className="ml-auto text-blue-500 text-lg"
               onClick={() => setIsAddressModalVisible(true)}
             >
@@ -322,41 +337,52 @@ const Checkout = () => {
           </div>
         </Card>
 
-        {/* Address Selection Modal */}
         <Modal
-          title="Chọn địa chỉ giao hàng"
+          title={<h2 className="text-xl font-bold text-blue-600">Chọn địa chỉ giao hàng</h2>}
           open={isAddressModalVisible}
           onCancel={() => setIsAddressModalVisible(false)}
           footer={null}
           width={800}
+          centered
         >
-          <div className="mb-4">
-            <h3 className="font-semibold mb-2">Địa chỉ đã lưu</h3>
+          {/* Danh sách địa chỉ đã lưu */}
+          <div className="mb-6">
+            <h3 className="text-lg font-semibold mb-3 text-gray-700">Địa chỉ đã lưu</h3>
             {addresses.length > 0 ? (
-              <div className="space-y-3">
+              <div className="grid gap-3">
                 {addresses.map(address => (
-                  <div 
-                    key={address.id} 
-                    className={`p-3 border rounded cursor-pointer ${userAddress?.id === address.id ? 'border-blue-500 bg-blue-50' : ''}`}
+                  <div
+                    key={address.id}
                     onClick={() => {
                       setUserAddress(address);
                       setIsAddressModalVisible(false);
                     }}
+                    className={`transition-all duration-200 rounded-lg border cursor-pointer p-4 hover:shadow-md ${userAddress?.id === address.id
+                      ? 'border-blue-500 bg-blue-50'
+                      : 'border-gray-200 bg-white'
+                      }`}
                   >
-                    <div className="flex justify-between">
+                    <div className="flex justify-between items-start gap-4">
                       <div>
-                        <p className="font-semibold">{address.full_name} ({address.phone_number})</p>
-                        <p>{address.detail}, {address.ward_name}, {address.district_name}, {address.province_name}</p>
+                        <p className="font-semibold text-gray-800">
+                          {address.full_name} ({address.phone_number})
+                        </p>
+                        <p className="text-gray-600 text-sm mt-1">
+                          {address.detail}, {address.ward_name}, {address.district_name}, {address.province_name}
+                        </p>
                       </div>
                       {address.is_primary ? (
-                        <span className="px-2 py-1 text-xs font-semibold text-white bg-red-500 rounded h-fit">Mặc định</span>
+                        <span className="px-2 py-0.5 text-xs font-medium text-white bg-red-500 rounded shadow">
+                          Mặc định
+                        </span>
                       ) : (
-                        <Button 
-                          size="small" 
+                        <Button
+                          size="small"
                           onClick={(e) => {
                             e.stopPropagation();
                             handleSetPrimaryAddress(address);
                           }}
+                          className="text-sm"
                         >
                           Đặt mặc định
                         </Button>
@@ -366,26 +392,25 @@ const Checkout = () => {
                 ))}
               </div>
             ) : (
-              <p>Bạn chưa có địa chỉ nào</p>
+              <p className="text-gray-500 italic">Bạn chưa có địa chỉ nào</p>
             )}
           </div>
 
-          <Divider>Hoặc thêm địa chỉ mới</Divider>
+          <Divider className="text-gray-400">Hoặc thêm địa chỉ mới</Divider>
 
+          {/* Form thêm địa chỉ mới */}
           <Form
             form={form}
             layout="vertical"
             onFinish={onFinishAddress}
+            className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4"
           >
-            <Form.Item label="Họ và tên" name="full_name" rules={[{ required: true }]}>
-              <Input />
-            </Form.Item>
-
-            <Form.Item label="Số điện thoại" name="phone_number" rules={[{ required: true }]}>
-              <Input />
-            </Form.Item>
-
-            <Form.Item label="Thành phố" name="city" rules={[{ required: true }]}>
+            <Form.Item
+              label="Thành phố"
+              name="city"
+              rules={[{ required: true, message: 'Vui lòng chọn thành phố' }]}
+              className="col-span-1"
+            >
               <Select onChange={handleCityChange} placeholder="Chọn thành phố">
                 {cities.map((city) => (
                   <Option key={city.ProvinceID} value={city.ProvinceID}>
@@ -395,7 +420,12 @@ const Checkout = () => {
               </Select>
             </Form.Item>
 
-            <Form.Item label="Quận/Huyện" name="district" rules={[{ required: true }]}>
+            <Form.Item
+              label="Quận/Huyện"
+              name="district"
+              rules={[{ required: true, message: 'Vui lòng chọn quận/huyện' }]}
+              className="col-span-1"
+            >
               <Select
                 onChange={handleDistrictChange}
                 placeholder="Chọn quận/huyện"
@@ -409,7 +439,12 @@ const Checkout = () => {
               </Select>
             </Form.Item>
 
-            <Form.Item label="Phường/Xã" name="ward" rules={[{ required: true }]}>
+            <Form.Item
+              label="Phường/Xã"
+              name="ward"
+              rules={[{ required: true, message: 'Vui lòng chọn phường/xã' }]}
+              className="col-span-1"
+            >
               <Select placeholder="Chọn phường/xã" disabled={!selectedDistrict}>
                 {wards.map((ward) => (
                   <Option key={ward.WardCode} value={ward.WardCode}>
@@ -419,17 +454,26 @@ const Checkout = () => {
               </Select>
             </Form.Item>
 
-            <Form.Item label="Địa chỉ cụ thể" name="detail" rules={[{ required: true }]}>
-              <Input />
+            <Form.Item
+              label="Địa chỉ cụ thể"
+              name="detail"
+              rules={[{ required: true, message: 'Vui lòng nhập địa chỉ cụ thể' }]}
+              className="col-span-1"
+            >
+              <Input placeholder="Ví dụ: Số nhà, tên đường..." />
             </Form.Item>
 
-            <Form.Item>
-              <Checkbox checked={isPrimary} onChange={(e) => setIsPrimary(e.target.checked)}>
+            <Form.Item className="col-span-2 -mt-2">
+              <Checkbox
+                checked={isPrimary}
+                onChange={(e) => setIsPrimary(e.target.checked)}
+                className="text-sm"
+              >
                 Đặt làm địa chỉ mặc định
               </Checkbox>
             </Form.Item>
 
-            <Form.Item>
+            <Form.Item className="col-span-2 text-right">
               <Button type="primary" htmlType="submit" className="bg-blue-500">
                 Lưu địa chỉ
               </Button>
@@ -437,52 +481,73 @@ const Checkout = () => {
           </Form>
         </Modal>
 
-        {/* Rest of your checkout page remains the same */}
-        {/* Giỏ hàng */}
+
+        {/* Nội dung Thanh toán */}
         <Card className="mb-4">
-          <div className="flex items-center">
-            <ShoppingCartOutlined className="text-2xl text-gray-500 mr-2" />
-            <p className="font-semibold text-xl">Giỏ hàng</p>
-          </div>
+          {Object.entries(groupedCartItems).map(([shopName, items]) => {
+            // Tính tổng tiền sản phẩm của shop
+            const shopTotal = items.reduce((sum, item) => sum + item.gundam_price, 0);
+            // Giả định phí vận chuyển cho shop này
+            const shopShippingFee = isCalculatingShipping ? 'Đang tính...' : Math.round(shippingFee * (items.length / selectedItems.length)).toLocaleString() + ' đ';
+            // Tổng đơn shop
+            const shopFinalTotal = isCalculatingShipping ?
+              'Đang tính...' :
+              (shopTotal + Math.round(shippingFee * (items.length / selectedItems.length))).toLocaleString() + ' đ';
 
-          {Object.entries(groupedCartItems).map(([shopName, items]) => (
-            <div key={shopName}>
-              <div className="flex items-center mt-5 mb-5">
-                <ShopOutlined className="text-xl text-gray-500 mr-2" />
-                <p className="font-semibold text-lg">{shopName}</p>
-              </div>
-              <Table dataSource={items} pagination={false} rowKey="cart_item_id">
-                <Table.Column
-                  title="Sản phẩm"
-                  key="product"
-                  render={(text, record) => (
-                    <div className="flex items-center">
-                      <img src={record.gundam_image_url} alt={record.gundam_name} className="w-14 h-14 object-cover rounded border border-gray-300 mr-3" />
-                      <div>
-                        <p className="font-semibold text-sm">{record.gundam_name}</p>
-                        <p className="text-xs text-gray-500">{record.seller_name}</p>
+            return (
+              <div key={shopName} className="mb-6 border-b pb-4">
+                {/* Tên Shop */}
+                <div className="flex items-center mt-5 mb-5">
+                  <ShopOutlined className="text-xl text-gray-500 mr-2" />
+                  <p className="font-semibold text-lg">{shopName}</p>
+                </div>
+
+                {/* Items Shop đó */}
+                <Table dataSource={items} pagination={false} rowKey="cart_item_id">
+                  <Table.Column
+                    title="Sản phẩm"
+                    key="product"
+                    render={(text, record) => (
+                      <div className="flex items-center">
+                        <img src={record.gundam_image_url} alt={record.gundam_name} className="w-14 h-14 object-cover rounded border border-gray-300 mr-3" />
+                        <div>
+                          <p className="font-semibold text-sm">{record.gundam_name}</p>
+                          <p className="text-xs text-gray-500">{record.seller_name}</p>
+                        </div>
                       </div>
-                    </div>
-                  )}
-                />
-                <Table.Column
-                  title="Thành tiền"
-                  dataIndex="gundam_price"
-                  key="gundam_price"
-                  render={(price) => `${price.toLocaleString()} đ`}
-                />
+                    )}
+                    width="75%"
+                  />
+                  <Table.Column
+                    title="Thành tiền"
+                    dataIndex="gundam_price"
+                    key="gundam_price"
+                    render={(price) => `${price.toLocaleString()} đ`}
+                    align="right"
+                    width="25%"
+                  />
+                </Table>
 
-                <Table.Column
-                  title="Phí vận chuyển"
-                  dataIndex=""
-                  key=""
-                  render={() => isCalculatingShipping ? 'Đang tính...' : `${Math.round(shippingFee / selectedItems.length).toLocaleString()} đ`}
-                />
-              </Table>
-            </div>
-          ))}
+                {/* Tạm tính cho đơn hàng của shop này */}
+                <div className="bg-gray-50 p-4 rounded mt-2">
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-gray-600">Tạm tính ({items.length} sản phẩm):</span>
+                    <span className="font-medium">{shopTotal.toLocaleString()} đ</span>
+                  </div>
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-gray-600">Phí vận chuyển:</span>
+                    <span className="font-medium">{shopShippingFee}</span>
+                  </div>
+                  <div className="flex justify-between items-center text-lg">
+                    <span className="font-semibold">Tổng đơn hàng:</span>
+                    <span className="font-semibold text-red-600">{shopFinalTotal}</span>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
 
-          {/* Ghi chú và vận chuyển */}
+          {/* Ghi chú và vận chuyển tổng */}
           <Card className="mb-4 border-none">
             <div className="grid grid-cols-2 gap-4">
               <div>
@@ -498,18 +563,21 @@ const Checkout = () => {
               <div>
                 <p className="font-semibold text-base mb-2">Thông tin vận chuyển</p>
                 <p className="flex justify-between text-sm text-gray-600">
-                  Dự kiến nhận hàng: 
+                  Dự kiến nhận hàng:
                   <span className="font-semibold">
                     {isCalculatingShipping ? 'Đang tính toán...' : expectedDeliveryDate}
                   </span>
                 </p>
                 <p className="flex justify-between text-sm text-gray-600">
-                  Phí giao hàng: 
+                  Tổng phí giao hàng:
                   <span className="font-semibold">
                     {isCalculatingShipping ? 'Đang tính toán...' : `${shippingFee.toLocaleString()} VNĐ`}
                   </span>
                 </p>
-                <p className="flex justify-between font-semibold text-lg mt-2">Tổng tiền: <span className="font-semibold">{finalPrice.toLocaleString()} VNĐ</span></p>
+                <p className="flex justify-between font-semibold text-lg mt-2">
+                  Tổng thanh toán:
+                  <span className="font-semibold text-red-600">{finalPrice.toLocaleString()} VNĐ</span>
+                </p>
               </div>
             </div>
           </Card>
@@ -563,9 +631,9 @@ const Checkout = () => {
                 </div>
               </Radio>
             </div>
-          
-            </Radio.Group>
-         
+
+          </Radio.Group>
+
         </Card>
       </div>
 
@@ -597,7 +665,8 @@ const Checkout = () => {
           </p>
           <Button
             type="primary"
-            className="w-full mt-4 bg-red-500 text-lg border-none cursor pb-4 pt-4"
+            danger
+            className="w-full mt-4text-lg border-none cursor pb-4 pt-4"
             onClick={handleCheckout}
           >
             ĐẶT HÀNG

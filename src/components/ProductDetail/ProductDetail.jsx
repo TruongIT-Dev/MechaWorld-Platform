@@ -26,7 +26,7 @@ const GundamProductPage = () => {
     const [disableBuy, setDisableBuy] = useState(false);
     const [selectedImage, setSelectedImage] = useState(imageGundam[0]);
     const { cartItems, addToCart, loading } = useCart();
-    
+
 
 
     // Fetch chi tiết sản phẩm
@@ -109,20 +109,20 @@ const GundamProductPage = () => {
     // Handle Add To Cart
     const handleAddToCart = async (id) => {
         try {
-          if (!userId) {
-            message.error('Bạn cần phải Đăng nhập trước!');
-            navigate('/signIn');
-            return;
-          }
-          
-          await addToCart({ id }); // Sử dụng hàm addToCart từ context
-          message.success('Đã thêm vào giỏ hàng.');
-          
+            if (!userId) {
+                message.error('Bạn cần phải Đăng nhập trước!');
+                navigate('/member/login');
+                return;
+            }
+
+            await addToCart({ id }); // Sử dụng hàm addToCart từ context
+            setAdded(true);
+            
         } catch (error) {
-          message.error("Lỗi khi thêm vào giỏ hàng!");
-          console.error("Error:", error);
+            message.error("Lỗi khi thêm vào giỏ hàng!");
+            console.error("Error:", error);
         }
-      };
+    };
 
 
     // Handle Buy Instant
@@ -131,7 +131,7 @@ const GundamProductPage = () => {
             // Kiểm tra nếu chưa đăng nhập
             if (!userId) {
                 message.error('Bạn cần phải Đăng nhập trước!');
-                navigate('/signIn');
+                navigate('/member/login');
                 return; // Dừng function tại đây
             }
 

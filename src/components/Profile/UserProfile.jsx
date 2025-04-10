@@ -1,13 +1,14 @@
 import Cookies from 'js-cookie';
 import { Cropper } from 'react-cropper';
-import { useSelector } from 'react-redux';
-import { UploadOutlined } from '@ant-design/icons';
+import { useDispatch, useSelector } from 'react-redux';
+import { UploadOutlined, PhoneOutlined, LockOutlined } from '@ant-design/icons';
 import { useState, useEffect, useRef } from 'react';
 import { verifyToken } from '../../apis/Auth/APIAuth';
 import { Form, Input, Upload, Button, message, Modal, Row, Col } from 'antd';
 import { updateUserData, uploadAvatar, verifyOtp, verifyPhone } from '../../apis/User/APIUserProfile';
 
 import "cropperjs/dist/cropper.css";
+import { updateUser } from '../../features/auth/authSlice';
 
 
 const ProfilePage = () => {
@@ -23,7 +24,10 @@ const ProfilePage = () => {
   const [phoneModalVisible, setPhoneModalVisible] = useState(false);
   const [countdown, setCountdown] = useState(60);
   const [isCounting, setIsCounting] = useState(false);
-  const [newPhoneNumber, setNewPhoneNumber] = useState("");
+  const [newPhoneNumber, setNewPhoneNumber] = useState(user?.phone_number || "")
+
+  const [step, setStep] = useState(1); // Step 1: Nhập SĐT, Step 2: Nhập OTP
+
   useEffect(() => {
     // const userData = Cookies.get("user");
 
@@ -47,16 +51,12 @@ const ProfilePage = () => {
   }, []);
 
 
-  const onChange = (text) => {
-    console.log('onChange:', text);
-    setOtp(text);
-  };
+  const dispatch = useDispatch();
 
-
-  const onInput = (value) => {
-    console.log('onInput:', value);
-  };
-
+  // Cập nhật các State khi user có thay đổi
+  useEffect(() => {
+    setNewPhoneNumber(user?.phone_number || "");
+  }, [user]);
 
   const handleUpload = ({ file }) => {
     const reader = new FileReader();
@@ -150,6 +150,13 @@ const ProfilePage = () => {
         console.log(otpVisible);
         setOtpVisible(false);
         setPhoneModalVisible(false);
+        setStep(1);
+
+        // Cập nhật thông tin người dùng với số điện thoại mới
+        dispatch(updateUser({
+          ...user,  // giữ lại các thông tin hiện có
+          phone_number: newPhoneNumber  // cập nhật số điện thoại
+        }));
       } else {
         message.error("OTP không đúng! Vui lòng kiểm tra lại.");
       }
@@ -167,7 +174,9 @@ const ProfilePage = () => {
     try {
       const response = await verifyPhone(newPhoneNumber);
       if (response.status === 200) {
+        console.log("Gửi OTP thành công", response);
         message.success("OTP đã được gửi!");
+        setStep(2); // Chuyển qua bước nhập OTP
         setOtpVisible(true);
         setIsCounting(true);
         setCountdown(60);
@@ -177,7 +186,6 @@ const ProfilePage = () => {
       message.error("Không thể gửi OTP! Vui lòng thử lại.");
     }
   };
-
 
 
   const startCountdown = () => {
@@ -214,6 +222,17 @@ const ProfilePage = () => {
     return maskedDigits + visibleDigits; // Kết hợp chuỗi dấu * và 4 số cuối
   };
 
+  const prefixSelector = (
+    <div className="bg-gray-100 border-r border-gray-300 px-2 mr-2 flex items-center h-full">
+      <img
+        src="https://upload.wikimedia.org/wikipedia/commons/2/21/Flag_of_Vietnam.svg"
+        alt="Vietnam flag"
+        className="w-5 h-3 mr-1"
+      />
+      (+84)
+    </div>
+  );
+
   return (
     <div className="container w-full p-10">
       <h2 className="text-2xl font-semibold">Hồ Sơ Của Tôi</h2>
@@ -244,8 +263,8 @@ const ProfilePage = () => {
               {/* Số điện thoại */}
               <Form.Item label="Số điện thoại">
                 <div className="flex items-center">
-                  <Input value={maskPhoneNumber(user?.phone_number) || "Chưa đăng kí"} disabled className="bg-gray-100" />
-                  <Button type="link" className="ml-2 text-blue-500" onClick={() => setPhoneModalVisible(true)}>{user?.phone_number ? "Thay đổi" : "Đăng ký"}</Button>
+                  <Input value={newPhoneNumber || "Chưa đăng kí"} disabled className="bg-gray-100" />
+                  <Button type="link" className="ml-2 text-blue-500" onClick={() => setPhoneModalVisible(true)}>{newPhoneNumber ? "Thay đổi" : "Đăng ký"}</Button>
                 </div>
               </Form.Item>
 
@@ -257,7 +276,92 @@ const ProfilePage = () => {
               </Form.Item>
             </Form>
           </Col>
+
           <Modal
+            open={phoneModalVisible}
+            onCancel={() => {
+              setPhoneModalVisible(false);
+              setStep(1);
+            }}
+            footer={null}
+            width={450}
+            centered
+            title={
+              <div className="text-center font-semibold text-lg">
+                {step === 1 ? "Cập nhật số điện thoại" : "Xác Thực Mã OTP"}
+              </div>
+            }
+          >
+            <div className="text-center space-y-4">
+              {/* Nhập Số Điện Thoại */}
+              {step === 1 && (
+                <>
+                  <div className="flex flex-col items-center mb-4">
+                    <div className="bg-blue-100 p-3 rounded-full mb-2">
+                      <PhoneOutlined className="text-3xl text-blue-500" />
+                    </div>
+                    <p className="text-gray-600 mb-4">Vui lòng nhập số điện thoại để <br /> nhận mã kích hoạt OTP!</p>
+                  </div>
+
+                  <div className="mb-4">
+                    <Input
+                      addonBefore={prefixSelector}
+                      size="large"
+                      placeholder="Nhập số điện thoại"
+                      value={newPhoneNumber}
+                      onChange={(e) => setNewPhoneNumber(e.target.value)}
+                      className="mb-1"
+                    />
+                    {!/^[0-9]{10}$/.test(newPhoneNumber) && newPhoneNumber &&
+                      <div className="text-red-500 text-center text-sm mt-1">Số điện thoại không hợp lệ!</div>
+                    }
+                  </div>
+
+                  <Button
+                    type="primary"
+                    className="w-full bg-blue-500 hover:bg-blue-600 h-10"
+                    onClick={handlePhoneSubmit}
+                    disabled={!/^[0-9]{10}$/.test(newPhoneNumber)}
+                  >
+                    Gửi mã OTP
+                  </Button>
+                </>
+              )}
+
+              {/* Nhập OTP */}
+              {step === 2 && (
+                <>
+                  <LockOutlined className="text-4xl text-blue-500 mb-2" />
+                  <p className="text-gray-600 text-base">Nhập mã OTP đã gửi đến <strong>{newPhoneNumber}</strong></p>
+                  <Input.OTP
+                    size="large"
+                    placeholder="Nhập mã OTP"
+                    maxLength={6}
+                    value={otp}
+                    onChange={(value) => setOtp(value)}
+                  />
+                  <Button
+                    type="primary"
+                    className="w-full bg-blue-500"
+                    onClick={handleVerifyOtp}
+                  >
+                    Xác thực OTP
+                  </Button>
+                  <div className="text-gray-500 text-sm mt-2">
+                    {isCounting ? (
+                      `Gửi lại mã sau ${countdown}s`
+                    ) : (
+                      <Button type="link" onClick={handlePhoneSubmit}>
+                        Gửi lại OTP
+                      </Button>
+                    )}
+                  </div>
+                </>
+              )}
+            </div>
+          </Modal>
+
+          {/* <Modal
             open={phoneModalVisible}
             onCancel={() => setPhoneModalVisible(false)}
             footer={null}
@@ -275,7 +379,6 @@ const ProfilePage = () => {
               <>
                 <Form layout="vertical">
                   <Form.Item label="Nhập mã OTP">
-                    {/* <Input type="number" maxLength={6} value={otp} onChange={(e) => setOtp(e.target.value)} /> */}
                     <Input.OTP length={6} value={otp} onChange={onChange} onInput={onInput} />
                   </Form.Item>
                 </Form>
@@ -287,7 +390,9 @@ const ProfilePage = () => {
                 </div>
               </>
             )}
-          </Modal>
+          </Modal> */}
+
+
           <Col span={10} className="flex flex-col items-center">
             {/* Avatar Section */}
             <div className="flex flex-col items-center">
