@@ -241,7 +241,7 @@ function ShopOrderManagement() {
   }
 
   // Lọc đơn hàng theo trạng thái và tìm kiếm sản phẩm
-  // const filteredOrders = orders.filter(
+  // const filteredOrders = OrderData.filter(
   //   (order) =>
   //     order.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
   //     (statusFilter ? order.status === statusFilter : true)
@@ -326,16 +326,16 @@ function ShopOrderManagement() {
       {/* Thanh công cụ */}
       <Row className="mb-4 flex gap-4">
         {/* Tìm kiếm sản phẩm */}
-        <Input.Search
+        {/* <Input.Search
           placeholder="Tìm kiếm sản phẩm"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           allowClear
           className="w-1/3"
-        />
+        /> */}
 
         {/* Bộ lọc trạng thái */}
-        <select
+        {/* <select
           className="border px-3 py-2 rounded"
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
@@ -346,7 +346,7 @@ function ShopOrderManagement() {
               {status}
             </option>
           ))}
-        </select>
+        </select> */}
       </Row>
 
       {/* Bảng hiển thị đơn hàng */}
