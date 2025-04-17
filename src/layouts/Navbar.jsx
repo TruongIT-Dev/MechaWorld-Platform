@@ -26,6 +26,11 @@ const Menu = [
     name: "Trao đổi",
     link: "/exchange",
   },
+  {
+    id: 5,
+    name: "Bộ Sưu Tập",
+    link: "/collection",
+  },
 ];
 
 
@@ -52,7 +57,7 @@ const Navbar = () => {
           <div className="hidden md:block flex-1">
             <Input
               onSubmit={onSearch}
-              placeholder="Thử tìm kiếm Gundam bất kỳ..."
+              placeholder="Thử tìm kiếm một sản phẩm Gundam..."
               size="large"
               prefix={<SearchOutlined className="text-gray-500" />}
               className="rounded-full px-5 py-2 shadow-sm border border-gray-300 focus:border-blue-500 focus:ring-blue-500"

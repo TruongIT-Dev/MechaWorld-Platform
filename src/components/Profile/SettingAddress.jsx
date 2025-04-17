@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Form, Select, Input, Button, message, Modal, Checkbox } from 'antd';
 import axios from 'axios';
-import { postUserAddresses, getUserAddresses,updateAddress, deleteAddress } from '../../apis/User/APIUserProfile';
+import { postUserAddresses, getUserAddresses, updateAddress, deleteAddress } from '../../apis/User/APIUserProfile';
 import { useSelector } from 'react-redux';
 import { InfoCircleOutlined } from '@ant-design/icons';
 
@@ -24,6 +24,9 @@ const SettingAddress = () => {
 
   const user = useSelector((state) => state.auth.user);
   const ghn_api = 'https://dev-online-gateway.ghn.vn/shiip/public-api/master-data/';
+
+  console.log("addresses", addresses);
+
 
   const api = axios.create({
     baseURL: ghn_api,
@@ -59,58 +62,58 @@ const SettingAddress = () => {
       message.error("Lỗi khi cập nhật địa chỉ mặc định!");
       console.error(error);
     }
-  };  
+  };
   const handleDeleteAddress = async (address) => {
     setLoading(true);
     console.log("Địa chỉ:", address);
-    deleteAddress(user.id,address.id);
+    deleteAddress(user.id, address.id);
     fetchUserAddresses();
     setLoading(false);
   }
   // const handleEditAddress = async (address) => {
   //   console.log("📌 Đang chỉnh sửa địa chỉ:", address);
-  
+
   //   setIsEditing(true);
   //   setEditingAddress(address);
   //   setIsPrimary(address.is_primary);
-    
+
   //   // Gán dữ liệu cơ bản trước
   //   form.setFieldsValue({
   //     full_name: address.full_name,
   //     phone_number: address.phone_number,
   //     detail: address.detail,
   //   });
-  
+
   //   setIsModalVisible(true);
-  
+
   //   try {
   //     // 🟢 1. Lọc thành phố có tên trùng với `province_name`
   //     const filteredCities = cities.filter((city) => city.ProvinceName === address.province_name);
   //     console.log("✅ Thành phố tìm thấy:", filteredCities);
-  
+
   //     if (filteredCities.length > 0) {
   //       const selectedCityId = filteredCities[0].ProvinceID;
   //       setSelectedCity(selectedCityId);
   //       await fetchDistricts(selectedCityId); // 🟢 Load quận/huyện dựa vào thành phố
-  
+
   //       // 🟢 2. Đợi `districts` cập nhật xong mới tiếp tục
   //       setTimeout(async () => {
   //         console.log("📌 Danh sách Quận/Huyện sau khi fetch:", districts);
   //         console.log("Địa chỉ đang tìm kiếm: ",address.district_name);
   //         const district = districts.find((d) => d.DistrictName === address.district_name);
   //         console.log("✅ Quận/Huyện tìm thấy:", district);
-  
+
   //         if (district) {
   //           const selectedDistrictId = district.DistrictID;
   //           setSelectedDistrict(selectedDistrictId);
   //           await fetchWards(selectedDistrictId); // 🟢 Load danh sách phường/xã dựa vào quận/huyện
-            
+
   //           // 🟢 3. Đợi `wards` cập nhật xong mới tiếp tục
   //           setTimeout(() => {
   //             console.log("📌 Danh sách Phường/Xã sau khi fetch:", wards);
   //             const ward = wards.find((w) => w.WardName === address.ward_name);
   //             console.log("✅ Phường/Xã tìm thấy:", ward);
-              
+
   //             // Gán giá trị vào form
   //             form.setFieldsValue({
   //               city: selectedCityId,
@@ -129,10 +132,10 @@ const SettingAddress = () => {
   //     console.error("❌ Lỗi khi load dữ liệu địa chỉ:", error);
   //   }
   // };
-  
+
   const handleEditAddress = async (address) => {
     console.log("📌 Đang chỉnh sửa địa chỉ:", address);
-  
+
     setIsEditing(true);
     setEditingAddress(address);
     setIsPrimary(address.is_primary);
@@ -141,30 +144,30 @@ const SettingAddress = () => {
       phone_number: address.phone_number,
       detail: address.detail,
     });
-  
+
     setIsModalVisible(true);
-  
+
     try {
       const filteredCities = cities.filter((city) => city.ProvinceName === address.province_name);
       if (filteredCities.length > 0) {
         const selectedCityId = filteredCities[0].ProvinceID;
         setSelectedCity(selectedCityId);
-  
+
         const districtRes = await api.post(`district`, { province_id: selectedCityId });
         const districtsData = districtRes.data.data;
         setDistricts(districtsData);
-  
+
         const foundDistrict = districtsData.find((d) => d.DistrictName === address.district_name);
         if (foundDistrict) {
           const selectedDistrictId = foundDistrict.DistrictID;
           setSelectedDistrict(selectedDistrictId);
-  
+
           const wardRes = await api.post(`ward`, { district_id: selectedDistrictId });
           const wardsData = wardRes.data.data;
           setWards(wardsData);
-  
+
           const foundWard = wardsData.find((w) => w.WardName === address.ward_name);
-  
+
           form.setFieldsValue({
             city: selectedCityId,
             district: selectedDistrictId,
@@ -180,7 +183,7 @@ const SettingAddress = () => {
       console.error("❌ Lỗi khi load địa chỉ:", error);
     }
   };
-  
+
 
   const handleUpdateAddress = async (values) => {
     if (!editingAddress) return;
@@ -269,7 +272,7 @@ const SettingAddress = () => {
       message.error("Lỗi khi thêm địa chỉ!");
       console.error(error);
     }
-  };  
+  };
   const handleCancelModal = () => {
     setIsModalVisible(false);
     setIsEditing(false);
@@ -278,17 +281,17 @@ const SettingAddress = () => {
     setSelectedDistrict(null);
     form.resetFields();
   };
-  
 
-  const columns = [
-    { title: 'Tên tỉnh/thành', dataIndex: 'province_name', key: 'province_name' },
-    { title: 'Tên quận/huyện', dataIndex: 'district_name', key: 'district_name' },
-    { title: 'Tên phường/xã', dataIndex: 'ward_name', key: 'ward_name' },
-    { title: 'Địa chỉ', dataIndex: 'detail', key: 'detail' },
-    { title: 'Số điện thoại', dataIndex: 'phone_number', key: 'phone_number' },
-    { title: 'Nhận đồ?', dataIndex: 'is_pickup_address', key: 'is_pickup_address', render: (text) => (text ? "Có" : "Không") },
-    { title: 'Mặc định?', dataIndex: 'is_primary', key: 'is_primary', render: (text) => (text ? "Có" : "Không") },
-  ];
+
+  // const columns = [
+  //   { title: 'Tên tỉnh/thành', dataIndex: 'province_name', key: 'province_name' },
+  //   { title: 'Tên quận/huyện', dataIndex: 'district_name', key: 'district_name' },
+  //   { title: 'Tên phường/xã', dataIndex: 'ward_name', key: 'ward_name' },
+  //   { title: 'Địa chỉ', dataIndex: 'detail', key: 'detail' },
+  //   { title: 'Số điện thoại', dataIndex: 'phone_number', key: 'phone_number' },
+  //   { title: 'Nhận đồ?', dataIndex: 'is_pickup_address', key: 'is_pickup_address', render: (text) => (text ? "Có" : "Không") },
+  //   { title: 'Mặc định?', dataIndex: 'is_primary', key: 'is_primary', render: (text) => (text ? "Có" : "Không") },
+  // ];
 
   // const setDefaultAddress = (id) => {
   //   setAddresses(addresses.map((addr) => ({
@@ -311,8 +314,8 @@ const SettingAddress = () => {
           <div key={addr.id} className="border-b pb-4 mb-4">
             <div className="flex justify-between items-start">
               <div>
-                <p className="font-semibold text-base">{addr.full_name} <span className="text-gray-500">{addr.phone_number} - {addr.province_name}, {addr.district_name}</span></p>
-                <p className="text-gray-600">{addr.detail}</p>
+                <p className="font-semibold text-lg">{addr.full_name} <span className="text-gray-500">{addr.phone_number} - {addr.province_name}</span></p>
+                <p className="text-gray-600">{addr.detail}, {addr.ward_name}, {addr.district_name}</p>
               </div>
               <div className="space-x-2">
                 <Button type="link" onClick={() => handleEditAddress(addr)}>Cập nhật</Button>
@@ -335,75 +338,75 @@ const SettingAddress = () => {
       </div>
 
       <div>
-      <Modal
-        title={isEditing ? "Cập nhật địa chỉ" : "Thêm địa chỉ mới"}
-        open={isModalVisible}
-        onCancel={handleCancelModal}
-        footer={null}
-      >
-        <Form
-          form={form}
-          layout="vertical"
-          onFinish={isEditing ? handleUpdateAddress : onFinish}
+        <Modal
+          title={isEditing ? "Cập nhật địa chỉ" : "Thêm địa chỉ mới"}
+          open={isModalVisible}
+          onCancel={handleCancelModal}
+          footer={null}
         >
-          <Form.Item label="Thành phố" name="city" rules={[{ required: true }]}>
-            <Select onChange={handleCityChange} placeholder="Chọn thành phố">
-              {cities.map((city) => (
-                <Option key={city.ProvinceID} value={city.ProvinceID}>
-                  {city.ProvinceName}
-                </Option>
-              ))}
-            </Select>
-          </Form.Item>
+          <Form
+            form={form}
+            layout="vertical"
+            onFinish={isEditing ? handleUpdateAddress : onFinish}
+          >
+            <Form.Item label="Thành phố" name="city" rules={[{ required: true }]}>
+              <Select onChange={handleCityChange} placeholder="Chọn thành phố">
+                {cities.map((city) => (
+                  <Option key={city.ProvinceID} value={city.ProvinceID}>
+                    {city.ProvinceName}
+                  </Option>
+                ))}
+              </Select>
+            </Form.Item>
 
-          <Form.Item label="Quận/Huyện" name="district" rules={[{ required: true }]}>
-            <Select
-              onChange={handleDistrictChange}
-              placeholder="Chọn quận/huyện"
-              disabled={!selectedCity}
-            >
-              {districts.map((district) => (
-                <Option key={district.DistrictID} value={district.DistrictID}>
-                  {district.DistrictName}
-                </Option>
-              ))}
-            </Select>
-          </Form.Item>
+            <Form.Item label="Quận/Huyện" name="district" rules={[{ required: true }]}>
+              <Select
+                onChange={handleDistrictChange}
+                placeholder="Chọn quận/huyện"
+                disabled={!selectedCity}
+              >
+                {districts.map((district) => (
+                  <Option key={district.DistrictID} value={district.DistrictID}>
+                    {district.DistrictName}
+                  </Option>
+                ))}
+              </Select>
+            </Form.Item>
 
-          <Form.Item label="Phường/Xã" name="ward" rules={[{ required: true }]}>
-            <Select placeholder="Chọn phường/xã" disabled={!selectedDistrict}>
-              {wards.map((ward) => (
-                <Option key={ward.WardCode} value={ward.WardCode}>
-                  {ward.WardName}
-                </Option>
-              ))}
-            </Select>
-          </Form.Item>
+            <Form.Item label="Phường/Xã" name="ward" rules={[{ required: true }]}>
+              <Select placeholder="Chọn phường/xã" disabled={!selectedDistrict}>
+                {wards.map((ward) => (
+                  <Option key={ward.WardCode} value={ward.WardCode}>
+                    {ward.WardName}
+                  </Option>
+                ))}
+              </Select>
+            </Form.Item>
 
-          <Form.Item label="Địa chỉ cụ thể" name="detail" rules={[{ required: true }]}>
-            <Input />
-          </Form.Item>
+            <Form.Item label="Địa chỉ cụ thể" name="detail" rules={[{ required: true }]}>
+              <Input />
+            </Form.Item>
 
-          <Form.Item label="Số điện thoại" name="phone_number" rules={[{ required: true }]} tooltip={{
+            <Form.Item label="Số điện thoại" name="phone_number" rules={[{ required: true }]} tooltip={{
               title: 'Số điện thoại dùng để xác nhận bên vận chuyển khi giao hàng. Để trống sẽ mặc định lấy sđt của người dùng.',
-              icon: <InfoCircleOutlined/>,
+              icon: <InfoCircleOutlined />,
             }}>
-            <Input placeholder="Nhập số điện thoại" />
-          </Form.Item>
+              <Input placeholder="Nhập số điện thoại" />
+            </Form.Item>
 
-          <Form.Item>
-            <Checkbox checked={isPrimary} onChange={(e) => setIsPrimary(e.target.checked)}>
-              Đặt làm địa chỉ mặc định
-            </Checkbox>
-          </Form.Item>
+            <Form.Item>
+              <Checkbox checked={isPrimary} onChange={(e) => setIsPrimary(e.target.checked)}>
+                Đặt làm địa chỉ mặc định
+              </Checkbox>
+            </Form.Item>
 
-          <Form.Item>
-            <Button type="primary" htmlType="submit" className="bg-[#0056b3] hover:bg-[#4a90e2]">
-              {isEditing ? "Cập nhật địa chỉ" : "Lưu địa chỉ"}
-            </Button>
-          </Form.Item>
-        </Form>
-      </Modal>
+            <Form.Item>
+              <Button type="primary" htmlType="submit" className="bg-[#0056b3] hover:bg-[#4a90e2]">
+                {isEditing ? "Cập nhật địa chỉ" : "Lưu địa chỉ"}
+              </Button>
+            </Form.Item>
+          </Form>
+        </Modal>
 
         {/* <Table dataSource={addresses} columns={columns} rowKey="id" loading={loading} /> */}
       </div>

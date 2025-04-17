@@ -193,7 +193,7 @@ const FirstForm = ({ form, setIsPhoneVerified }) => {
 
                 {/* Input full name */}
                 <Form.Item
-                    label={<span className="font-semibold">Tên Shop của bạn</span>}
+                    label={<span className="font-semibold">Tên Cửa Hàng</span>}
                     name="full_name"
                     rules={[{ required: true, message: "Vui lòng nhập tên người bán!" }]}
                 >
@@ -204,6 +204,7 @@ const FirstForm = ({ form, setIsPhoneVerified }) => {
                 <Form.Item
                     label={<span className="font-semibold">Email</span>}
                     name="email"
+                    required
                 >
                     <Input disabled value={email} />
                 </Form.Item>
@@ -211,6 +212,7 @@ const FirstForm = ({ form, setIsPhoneVerified }) => {
                 {/* Display Phone Number */}
                 <Form.Item
                     label={<span className="font-semibold">Số điện thoại</span>}
+                    required
                 >
                     <div className="flex items-center">
                         {newPhoneNumber ? (

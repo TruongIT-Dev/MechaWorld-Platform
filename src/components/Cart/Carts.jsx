@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { Table, Button, Checkbox, Card, Divider, Tag, Empty, Spin } from 'antd';
-import { ShopOutlined, DeleteOutlined, ShoppingCartOutlined, RightOutlined } from '@ant-design/icons';
+import { ShopOutlined, DeleteOutlined, ShoppingCartOutlined, RightOutlined, ShoppingOutlined } from '@ant-design/icons';
 import { Link } from "react-router-dom";
 import { useCart } from '../../context/CartContext';
+
+import EmptyCart from "../../assets/image/empty-cart.png";
 
 const Carts = () => {
   const { cartItems, removeFromCart, loading } = useCart();
@@ -53,25 +55,35 @@ const Carts = () => {
 
   if (cartItems.length === 0) {
     return (
-      <div className="container mx-auto mt-36 flex justify-center items-center h-[300px] mb-14 px-4">
-        <Empty
-          image={Empty.PRESENTED_IMAGE_SIMPLE}
-          description={
-            <span className="text-gray-500 text-lg">
-              Giỏ hàng của bạn đang trống
-            </span>
-          }
-        >
-          <Link to="/">
-            <Button type="primary" className="bg-blue-500">
+      <div className="container mx-auto mt-36 flex flex-col justify-center items-center h-[500px] mb-14 px-4">
+        <div className="flex flex-col items-center">
+          {/* Empty Cart Image - Replace with your actual image path */}
+          <img
+            src={EmptyCart}
+            alt="Giỏ hàng trống"
+            className="w-64 h-64 mb-6 opacity-70"
+          />
+
+          {/* Empty Cart Text */}
+          <h2 className="text-xl font-medium text-gray-600 mb-2">Giỏ hàng trống</h2>
+          <p className="text-gray-500 mb-6 text-base">Bạn chưa có sản phẩm nào trong giỏ hàng</p>
+
+          {/* Continue Shopping Button */}
+          <Link to="/product">
+            <Button
+              type="primary"
+              size="large"
+              className="bg-blue-500 hover:bg-blue-600 flex items-center"
+              icon={<ShoppingOutlined />}
+            >
               Tiếp tục mua sắm
             </Button>
           </Link>
-        </Empty>
+        </div>
       </div>
     );
   }
-  console.log("Selected items to checkout:", cartItems.filter(item => selectedRowKeys.includes(item.cart_item_id)));
+  // console.log("Selected items to checkout:", cartItems.filter(item => selectedRowKeys.includes(item.cart_item_id)));
 
   return (
     <div className="container mx-auto mt-36 mb-20 px-4">

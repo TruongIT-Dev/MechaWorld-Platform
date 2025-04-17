@@ -47,6 +47,8 @@ export const RegisterShopLayout = React.lazy(() => import("../components/Registe
 
 // Shop route
 export const ShopDashboard = React.lazy(() => import("../components/Shop/ShopDashboard"));
+export const ShopInfo = React.lazy(() => import("../components/Shop/ShopInfo"));
+export const ShopAddress = React.lazy(() => import("../components/Shop/ShopAddress"));
 export const ShopProductManagement = React.lazy(() => import("../components/Shop/ShopProductManagement"));
 export const ShopPage= React.lazy(() => import("../components/Shop/ShopPage"));
 export const ShopTransaction = React.lazy(() => import("../components/Shop/ShopTransaction"));
@@ -65,6 +67,9 @@ export const ExchangeGundamManagement = React.lazy(() => import("../components/E
 // Aution route
 export const AutionList = React.lazy(() => import("../components/Aution/User/AutionList"));
 export const AutionDetail = React.lazy(() => import("../components/Aution/User/AutionDetail"));
+
+// Collection route
+export const Collection = React.lazy(() => import("../components/Collection/Collection"));
 
 export const AddProductToAution = React.lazy(() => import("../components/Aution/shop/AddProductToAution"));
 export const ListProductToAution = React.lazy(() => import("../components/Aution/shop/ListProductToAution"));

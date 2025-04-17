@@ -54,13 +54,17 @@ export default function SignIn() {
           path: "/",
         });
 
-        // Chuyển trang trước rồi hiện thông báo
-        navigate("/");
-
-        // Hiển thị thông báo thành công
+        // Hiển thị thông báo Đăng nhập Google thành công
         setTimeout(() => {
           showSuccessNotification();
         }, 100);
+
+        // Chuyển trang
+        setTimeout(() => {
+          navigate("/");
+        }, 2000)
+
+
       })
       .catch(error => {
         console.error("Lỗi đăng nhập:", error);
@@ -72,7 +76,7 @@ export default function SignIn() {
   const showSuccessNotification = () => {
     notification.success({
       message: 'Đăng nhập thành công!',
-      description: 'Chào mừng bạn quay lại!',
+      description: 'Chào mừng bạn đến MechaWorld! Đang chuyển trang...',
       duration: 2,
       placement: 'topRight',
       showProgress: true,

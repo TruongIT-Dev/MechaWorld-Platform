@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Button, Radio, Divider, message, Table, Modal, Form, Select, Input, Checkbox } from 'antd';
+import { Card, Button, Radio, Divider, message, Table, Modal, Form, Select, Input, Checkbox, Empty, Tabs } from 'antd';
 import { ShoppingCartOutlined, EnvironmentOutlined, ShopOutlined, MoneyCollectOutlined } from '@ant-design/icons';
 import { getUserAddresses, postUserAddresses, updateAddress } from '../../apis/User/APIUserProfile';
 import { CheckoutCart } from '../../apis/Cart/APICart';
@@ -355,299 +355,320 @@ const Checkout = () => {
           width={800}
           centered
         >
-          {/* Danh sách địa chỉ đã lưu */}
-          <div className="mb-6">
-            <h3 className="text-lg font-semibold mb-3 text-gray-700">Địa chỉ đã lưu</h3>
-            {addresses.length > 0 ? (
-              <div className="grid gap-3">
-                {addresses.map(address => (
-                  <div
-                    key={address.id}
-                    onClick={() => {
-                      setUserAddress(address);
-                      setIsAddressModalVisible(false);
-                    }}
-                    className={`transition-all duration-200 rounded-lg border cursor-pointer p-4 hover:shadow-md ${userAddress?.id === address.id
-                      ? 'border-blue-500 bg-blue-50'
-                      : 'border-gray-200 bg-white'
-                      }`}
-                  >
-                    <div className="flex justify-between items-start gap-4">
-                      <div>
-                        <p className="font-semibold text-gray-800">
-                          {address.full_name} ({address.phone_number})
-                        </p>
-                        <p className="text-gray-600 text-sm mt-1">
-                          {address.detail}, {address.ward_name}, {address.district_name}, {address.province_name}
-                        </p>
+          <Tabs defaultActiveKey="1">
+            <Tabs.TabPane tab="Địa chỉ đã lưu" key="1">
+              {addresses.length > 0 ? (
+                <div className="grid gap-3">
+                  {addresses.map(address => (
+                    <div
+                      key={address.id}
+                      onClick={() => {
+                        setUserAddress(address);
+                        setIsAddressModalVisible(false);
+                      }}
+                      className={`transition-all duration-200 rounded-lg border cursor-pointer p-4 hover:shadow-md ${userAddress?.id === address.id
+                        ? 'border-blue-500 bg-blue-50'
+                        : 'border-gray-200 bg-white'
+                        }`}
+                    >
+                      <div className="flex justify-between items-start gap-4">
+                        <div>
+                          <p className="font-semibold text-gray-800">
+                            {address.full_name} ({address.phone_number})
+                          </p>
+                          <p className="text-gray-600 text-sm mt-1">
+                            {address.detail}, {address.ward_name}, {address.district_name}, {address.province_name}
+                          </p>
+                        </div>
+                        {address.is_primary ? (
+                          <span className="px-2 py-0.5 text-xs font-medium text-white bg-red-500 rounded shadow">
+                            Mặc định
+                          </span>
+                        ) : (
+                          <Button
+                            size="small"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleSetPrimaryAddress(address);
+                            }}
+                            className="text-sm"
+                          >
+                            Đặt mặc định
+                          </Button>
+                        )}
                       </div>
-                      {address.is_primary ? (
-                        <span className="px-2 py-0.5 text-xs font-medium text-white bg-red-500 rounded shadow">
-                          Mặc định
-                        </span>
-                      ) : (
-                        <Button
-                          size="small"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleSetPrimaryAddress(address);
-                          }}
-                          className="text-sm"
-                        >
-                          Đặt mặc định
-                        </Button>
-                      )}
                     </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <p className="text-gray-500 italic">Bạn chưa có địa chỉ nào</p>
-            )}
-          </div>
+                  ))}
+                </div>
+              ) : (
+                <Empty
+                  description="Bạn chưa có địa chỉ nào"
+                  image={Empty.PRESENTED_IMAGE_SIMPLE}
+                  className="my-8"
+                />
+              )}
+            </Tabs.TabPane>
 
-          <Divider className="text-gray-400">Hoặc thêm địa chỉ mới</Divider>
-
-          {/* Form thêm địa chỉ mới */}
-          <Form
-            form={form}
-            layout="vertical"
-            onFinish={onFinishAddress}
-            className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4"
-          >
-            <Form.Item
-              label="Thành phố"
-              name="city"
-              rules={[{ required: true, message: 'Vui lòng chọn thành phố' }]}
-              className="col-span-1"
-            >
-              <Select onChange={handleCityChange} placeholder="Chọn thành phố">
-                {cities.map((city) => (
-                  <Option key={city.ProvinceID} value={city.ProvinceID}>
-                    {city.ProvinceName}
-                  </Option>
-                ))}
-              </Select>
-            </Form.Item>
-
-            <Form.Item
-              label="Quận/Huyện"
-              name="district"
-              rules={[{ required: true, message: 'Vui lòng chọn quận/huyện' }]}
-              className="col-span-1"
-            >
-              <Select
-                onChange={handleDistrictChange}
-                placeholder="Chọn quận/huyện"
-                disabled={!selectedCity}
+            <Tabs.TabPane tab="Thêm địa chỉ mới" key="2">
+              <Form
+                form={form}
+                layout="vertical"
+                onFinish={onFinishAddress}
+                className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4"
               >
-                {districts.map((district) => (
-                  <Option key={district.DistrictID} value={district.DistrictID}>
-                    {district.DistrictName}
-                  </Option>
-                ))}
-              </Select>
-            </Form.Item>
+                <Form.Item
+                  label="Thành phố"
+                  name="city"
+                  rules={[{ required: true, message: 'Vui lòng chọn thành phố' }]}
+                  className="col-span-1"
+                >
+                  <Select onChange={handleCityChange} placeholder="Chọn thành phố">
+                    {cities.map((city) => (
+                      <Option key={city.ProvinceID} value={city.ProvinceID}>
+                        {city.ProvinceName}
+                      </Option>
+                    ))}
+                  </Select>
+                </Form.Item>
 
-            <Form.Item
-              label="Phường/Xã"
-              name="ward"
-              rules={[{ required: true, message: 'Vui lòng chọn phường/xã' }]}
-              className="col-span-1"
-            >
-              <Select placeholder="Chọn phường/xã" disabled={!selectedDistrict}>
-                {wards.map((ward) => (
-                  <Option key={ward.WardCode} value={ward.WardCode}>
-                    {ward.WardName}
-                  </Option>
-                ))}
-              </Select>
-            </Form.Item>
+                <Form.Item
+                  label="Quận/Huyện"
+                  name="district"
+                  rules={[{ required: true, message: 'Vui lòng chọn quận/huyện' }]}
+                  className="col-span-1"
+                >
+                  <Select
+                    onChange={handleDistrictChange}
+                    placeholder="Chọn quận/huyện"
+                    disabled={!selectedCity}
+                  >
+                    {districts.map((district) => (
+                      <Option key={district.DistrictID} value={district.DistrictID}>
+                        {district.DistrictName}
+                      </Option>
+                    ))}
+                  </Select>
+                </Form.Item>
 
-            <Form.Item
-              label="Địa chỉ cụ thể"
-              name="detail"
-              rules={[{ required: true, message: 'Vui lòng nhập địa chỉ cụ thể' }]}
-              className="col-span-1"
-            >
-              <Input placeholder="Ví dụ: Số nhà, tên đường..." />
-            </Form.Item>
+                <Form.Item
+                  label="Phường/Xã"
+                  name="ward"
+                  rules={[{ required: true, message: 'Vui lòng chọn phường/xã' }]}
+                  className="col-span-1"
+                >
+                  <Select placeholder="Chọn phường/xã" disabled={!selectedDistrict}>
+                    {wards.map((ward) => (
+                      <Option key={ward.WardCode} value={ward.WardCode}>
+                        {ward.WardName}
+                      </Option>
+                    ))}
+                  </Select>
+                </Form.Item>
 
-            <Form.Item className="col-span-2 -mt-2">
-              <Checkbox
-                checked={isPrimary}
-                onChange={(e) => setIsPrimary(e.target.checked)}
-                className="text-sm"
-              >
-                Đặt làm địa chỉ mặc định
-              </Checkbox>
-            </Form.Item>
+                <Form.Item
+                  label="Địa chỉ cụ thể"
+                  name="detail"
+                  rules={[{ required: true, message: 'Vui lòng nhập địa chỉ cụ thể' }]}
+                  className="col-span-1"
+                >
+                  <Input placeholder="Ví dụ: Số nhà, tên đường..." />
+                </Form.Item>
 
-            <Form.Item className="col-span-2 text-right">
-              <Button type="primary" htmlType="submit" className="bg-blue-500">
-                Lưu địa chỉ
-              </Button>
-            </Form.Item>
-          </Form>
+                <Form.Item className="col-span-2 -mt-2">
+                  <Checkbox
+                    checked={isPrimary}
+                    onChange={(e) => setIsPrimary(e.target.checked)}
+                    className="text-sm"
+                  >
+                    Đặt làm địa chỉ mặc định
+                  </Checkbox>
+                </Form.Item>
+
+                <Form.Item className="col-span-2 text-right">
+                  <Button type="primary" htmlType="submit" className="bg-blue-500">
+                    Lưu địa chỉ
+                  </Button>
+                </Form.Item>
+              </Form>
+            </Tabs.TabPane>
+          </Tabs>
         </Modal>
-
 
         {/* Nội dung Thanh toán */}
         <Card className="mb-4">
-          {Object.entries(groupedCartItems).map(([shopName, items]) => {
-            // Tính tổng tiền sản phẩm của shop
-            const shopTotal = items.reduce((sum, item) => sum + item.gundam_price, 0);
-            // Giả định phí vận chuyển cho shop này
-            const shopShippingFee = isCalculatingShipping ? 'Đang tính...' : Math.round(shippingFee * (items.length / selectedItems.length)).toLocaleString() + ' đ';
-            // Tổng đơn shop
-            const shopFinalTotal = isCalculatingShipping ?
-              'Đang tính...' :
-              (shopTotal + Math.round(shippingFee * (items.length / selectedItems.length))).toLocaleString() + ' đ';
+          {Object.keys(groupedCartItems).length > 0 ? (
+            Object.entries(groupedCartItems).map(([shopName, items]) => {
+              // Tính tổng tiền sản phẩm của shop
+              const shopTotal = items.reduce((sum, item) => sum + item.gundam_price, 0);
+              // Giả định phí vận chuyển cho shop này
+              const shopShippingFee = isCalculatingShipping ? 'Đang tính...' : Math.round(shippingFee * (items.length / selectedItems.length)).toLocaleString() + ' đ';
+              // Tổng đơn shop
+              const shopFinalTotal = isCalculatingShipping ?
+                'Đang tính...' :
+                (shopTotal + Math.round(shippingFee * (items.length / selectedItems.length))).toLocaleString() + ' đ';
 
-            return (
-              <div key={shopName} className="mb-6 border-b pb-4">
-                {/* Tên Shop */}
-                <div className="flex items-center mt-5 mb-5">
-                  <ShopOutlined className="text-xl text-gray-500 mr-2" />
-                  <p className="font-semibold text-lg">{shopName}</p>
-                </div>
+              return (
+                <div key={shopName} className="mb-6 border-b pb-4">
+                  {/* Tên Shop */}
+                  <div className="flex items-center mt-5 mb-5">
+                    <ShopOutlined className="text-xl text-gray-500 mr-2" />
+                    <p className="font-semibold text-lg">{shopName}</p>
+                  </div>
 
-                {/* Items Shop đó */}
-                <Table dataSource={items} pagination={false} rowKey="cart_item_id">
-                  <Table.Column
-                    title="Sản phẩm"
-                    key="product"
-                    render={(text, record) => (
-                      <div className="flex items-center">
-                        <img src={record.gundam_image_url} alt={record.gundam_name} className="w-14 h-14 object-cover rounded border border-gray-300 mr-3" />
-                        <div>
-                          <p className="font-semibold text-sm">{record.gundam_name}</p>
-                          <p className="text-xs text-gray-500">{record.seller_name}</p>
+                  {/* Items Shop đó */}
+                  <Table dataSource={items} pagination={false} rowKey="cart_item_id">
+                    <Table.Column
+                      title="Sản phẩm"
+                      key="product"
+                      render={(text, record) => (
+                        <div className="flex items-center">
+                          <img src={record.gundam_image_url} alt={record.gundam_name} className="w-14 h-14 object-cover rounded border border-gray-300 mr-3" />
+                          <div>
+                            <p className="font-semibold text-sm">{record.gundam_name}</p>
+                            <p className="text-xs text-gray-500">{record.seller_name}</p>
+                          </div>
                         </div>
-                      </div>
-                    )}
-                    width="75%"
-                  />
-                  <Table.Column
-                    title="Thành tiền"
-                    dataIndex="gundam_price"
-                    key="gundam_price"
-                    render={(price) => `${price.toLocaleString()} đ`}
-                    align="right"
-                    width="25%"
-                  />
-                </Table>
+                      )}
+                      width="75%"
+                    />
+                    <Table.Column
+                      title="Thành tiền"
+                      dataIndex="gundam_price"
+                      key="gundam_price"
+                      render={(price) => `${price.toLocaleString()} đ`}
+                      align="right"
+                      width="25%"
+                    />
+                  </Table>
 
-                {/* Tạm tính cho đơn hàng của shop này */}
-                <div className="bg-gray-50 p-4 rounded mt-2">
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="text-gray-600">Tạm tính ({items.length} sản phẩm):</span>
-                    <span className="font-medium">{shopTotal.toLocaleString()} đ</span>
-                  </div>
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="text-gray-600">Phí vận chuyển:</span>
-                    <span className="font-medium">{shopShippingFee}</span>
-                  </div>
-                  <div className="flex justify-between items-center text-lg">
-                    <span className="font-semibold">Tổng đơn hàng:</span>
-                    <span className="font-semibold text-red-600">{shopFinalTotal}</span>
+                  {/* Tạm tính cho đơn hàng của shop này */}
+                  <div className="bg-gray-50 p-4 rounded mt-2">
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="text-gray-600">Tạm tính ({items.length} sản phẩm):</span>
+                      <span className="font-medium">{shopTotal.toLocaleString()} đ</span>
+                    </div>
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="text-gray-600">Phí vận chuyển:</span>
+                      <span className="font-medium">{shopShippingFee}</span>
+                    </div>
+                    <div className="flex justify-between items-center text-lg">
+                      <span className="font-semibold">Tổng đơn hàng:</span>
+                      <span className="font-semibold text-red-600">{shopFinalTotal}</span>
+                    </div>
                   </div>
                 </div>
-              </div>
-            );
-          })}
+              );
+            })
+          ) : (
+            <Empty
+              image={Empty.PRESENTED_IMAGE_SIMPLE}
+              description={
+                <div className="text-center">
+                  <p className="text-lg text-gray-500 mb-4">Không có sản phẩm nào để thanh toán</p>
+                  <Button type="primary" size="large" className="bg-blue-500" onClick={() => navigate('/shopping')}>
+                    Quay lại mua hàng
+                  </Button>
+                </div>
+              }
+              className="py-12"
+            />
+          )}
 
-          {/* Ghi chú và vận chuyển tổng */}
-          <Card className="mb-4 border-none">
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <p className="font-semibold text-base mb-2">Ghi chú</p>
-                <input
-                  type="text"
-                  placeholder="Nhập ghi chú..."
-                  className="w-full p-2 border rounded"
-                  value={note}
-                  onChange={(e) => setNote(e.target.value)}
-                />
-              </div>
-              <div>
-                <p className="font-semibold text-base mb-2">Thông tin vận chuyển</p>
-                <p className="flex justify-between text-sm text-gray-600">
-                  Dự kiến nhận hàng:
-                  <span className="font-semibold">
-                    {isCalculatingShipping ? 'Đang tính toán...' : expectedDeliveryDate}
-                  </span>
-                </p>
-                <p className="flex justify-between text-sm text-gray-600">
-                  Tổng phí giao hàng:
-                  <span className="font-semibold">
-                    {isCalculatingShipping ? 'Đang tính toán...' : `${shippingFee.toLocaleString()} VNĐ`}
-                  </span>
-                </p>
-                <p className="flex justify-between font-semibold text-lg mt-2">
-                  Tổng thanh toán:
-                  <span className="font-semibold text-red-600">{finalPrice.toLocaleString()} VNĐ</span>
-                </p>
-              </div>
-            </div>
-          </Card>
+          {Object.keys(groupedCartItems).length > 0 && (
+            <>
+              {/* Ghi chú và vận chuyển tổng */}
+              <Card className="mb-4 border-none">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="font-semibold text-base mb-2">Ghi chú</p>
+                    <input
+                      type="text"
+                      placeholder="Nhập ghi chú..."
+                      className="w-full p-2 border rounded"
+                      value={note}
+                      onChange={(e) => setNote(e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-base mb-2">Thông tin vận chuyển</p>
+                    <p className="flex justify-between text-sm text-gray-600">
+                      Dự kiến nhận hàng:
+                      <span className="font-semibold">
+                        {isCalculatingShipping ? 'Đang tính toán...' : expectedDeliveryDate}
+                      </span>
+                    </p>
+                    <p className="flex justify-between text-sm text-gray-600">
+                      Tổng phí giao hàng:
+                      <span className="font-semibold">
+                        {isCalculatingShipping ? 'Đang tính toán...' : `${shippingFee.toLocaleString()} VNĐ`}
+                      </span>
+                    </p>
+                    <p className="flex justify-between font-semibold text-lg mt-2">
+                      Tổng thanh toán:
+                      <span className="font-semibold text-red-600">{finalPrice.toLocaleString()} VNĐ</span>
+                    </p>
+                  </div>
+                </div>
+              </Card>
+            </>
+          )}
         </Card>
 
-        {/* Phương thức thanh toán */}
-        <Card
-          title={<div className="font-bold text-lg">Phương thức thanh toán</div>}
-          className="mb-4"
-        >
-          <Radio.Group
-            value={paymentMethod}
-            onChange={(e) => setPaymentMethod(e.target.value)}
-            className="w-full"
+        {/* Phương thức thanh toán - Chỉ hiển thị khi có sản phẩm */}
+        {Object.keys(groupedCartItems).length > 0 && (
+          <Card
+            title={<div className="font-bold text-lg">Phương thức thanh toán</div>}
+            className="mb-4"
           >
-            <div className="flex items-center justify-between">
-              <Radio value="wallet">
-                <div className="flex items-center justify-between w-full p-2 border border-transparent hover:border-gray-200 rounded-md">
-                  <div className="flex items-center">
-                    <img src={footerLogo} alt="wallet" className="max-w-[50px] mr-3" />
-                    <div>
-                      <p className="font-medium text-base">Thanh toán bằng ví ComZone</p>
-                      <p className="text-gray-500 text-xs mt-1">
+            <Radio.Group
+              value={paymentMethod}
+              onChange={(e) => setPaymentMethod(e.target.value)}
+              className="w-full"
+            >
+              <div className="flex items-center justify-between">
+                <Radio value="wallet">
+                  <div className="flex items-center justify-between w-full p-2 border border-transparent hover:border-gray-200 rounded-md">
+                    <div className="flex items-center">
+                      <img src={footerLogo} alt="wallet" className="max-w-[50px] mr-3" />
+                      <div>
+                        <p className="font-medium text-base">Thanh toán bằng ví ComZone</p>
+                        <p className="text-gray-500 text-xs mt-1">
                           Số dư: {userBalance.toLocaleString()} đ
                         </p>
-                      {paymentMethod === 'wallet' && userBalance<finalPrice && (
-                        <p className="text-red-500 text-xs mt-1">
-                          Số dư không đủ. <span className="text-blue-500 cursor-pointer">Nạp thêm</span>
-                        </p>
-                      ) }
+                        {paymentMethod === 'wallet' && userBalance < finalPrice && (
+                          <p className="text-red-500 text-xs mt-1">
+                            Số dư không đủ. <span className="text-blue-500 cursor-pointer">Nạp thêm</span>
+                          </p>
+                        )}
+                      </div>
                     </div>
+                    {paymentMethod === 'wallet' && (
+                      <div className="bg-blue-50 text-blue-600 px-2 py-1 rounded-md text-xs font-medium">
+                        Đã chọn
+                      </div>
+                    )}
                   </div>
-                  {paymentMethod === 'wallet' && (
-                    <div className="bg-blue-50 text-blue-600 px-2 py-1 rounded-md text-xs font-medium">
-                      Đã chọn
-                    </div>
-                  )}
-                </div>
-              </Radio>
+                </Radio>
 
-              <Radio value="cod">
-                <div className="flex items-center justify-between w-full p-2 border border-transparent hover:border-gray-200 rounded-md">
-                  <div className="flex items-center">
-                    <div className="flex items-center justify-center w-[40px] h-[40px] bg-gray-100 rounded-md mr-3">
-                      <MoneyCollectOutlined className="text-xl text-gray-500" />
+                <Radio value="cod">
+                  <div className="flex items-center justify-between w-full p-2 border border-transparent hover:border-gray-200 rounded-md">
+                    <div className="flex items-center">
+                      <div className="flex items-center justify-center w-[40px] h-[40px] bg-gray-100 rounded-md mr-3">
+                        <MoneyCollectOutlined className="text-xl text-gray-500" />
+                      </div>
+                      <p className="font-medium text-base">Thanh toán khi nhận hàng</p>
                     </div>
-                    <p className="font-medium text-base">Thanh toán khi nhận hàng</p>
+                    {paymentMethod === 'cod' && (
+                      <div className="bg-blue-50 text-blue-600 px-2 py-1 rounded-md text-xs font-medium">
+                        Đã chọn
+                      </div>
+                    )}
                   </div>
-                  {paymentMethod === 'cod' && (
-                    <div className="bg-blue-50 text-blue-600 px-2 py-1 rounded-md text-xs font-medium">
-                      Đã chọn
-                    </div>
-                  )}
-                </div>
-              </Radio>
-            </div>
-
-          </Radio.Group>
-
-        </Card>
+                </Radio>
+              </div>
+            </Radio.Group>
+          </Card>
+        )}
       </div>
 
       {/* Sidebar */}

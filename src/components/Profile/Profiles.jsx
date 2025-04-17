@@ -22,8 +22,8 @@ export default function Profile() {
       icon: <UserOutlined className="text-lg text-blue-500" />,
       label: "Tài khoản Của Tôi",
       children: [
-        { key: "/member/profile/user", label: <Link to="/member/profile/user">Hồ sơ</Link> },
-        { key: "/member/profile/address-setting", label: <Link to="/member/profile/address-setting">Địa chỉ</Link> },
+        { key: "/member/profile/account", label: <Link to="/member/profile/account">Hồ sơ</Link> },
+        { key: "/member/profile/address-setting", label: <Link to="/member/profile/address-setting">Địa chỉ nhận hàng</Link> },
       ],
     },
     {

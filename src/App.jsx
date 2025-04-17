@@ -43,27 +43,34 @@ import {
   ExchangeRequestForm,
   ExchangeDetailInformation,
   ExchangeGundamManagement,
+  Collection,
+  ShopInfo,
+  ShopAddress,
 
 } from "./routes/router";
 import Cookies from "js-cookie";
 import Spinner from "./components/Spinner";
 import { verifyToken } from "./apis/Auth/APIAuth";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { logout, updateUser } from "./features/auth/authSlice";
 import PageLoading from "./components/PageLoading";
 import RequestList from "./components/Exchange/RequestList";
 
 function App() {
-  const accessToken = useSelector((state) => state.auth.access_token);
-  const userId = useSelector((state) => state.auth.user);
-  console.log(accessToken, userId);
+
   const dispatch = useDispatch();
+
+  // const accessToken = useSelector((state) => state.auth.access_token);
+  // const userId = useSelector((state) => state.auth.user);
+
+  // console.log(accessToken, userId);
+
   useEffect(() => {
     const accessToken = Cookies.get("access_token");
     if (accessToken) {
       verifyToken(accessToken).then((userData) => {
         if (userData) {
-          console.log(userData)
+          // console.log(userData)
           dispatch(updateUser(userData.data));
         } else {
           dispatch(logout());
@@ -110,6 +117,10 @@ function App() {
             <Route path="/exchange/detail" element={<ExchangeDetail />} />
             <Route path="/exchange/detail/section" element={<ExchangeDetailInformation />} />
 
+
+            {/* Collection Route */}
+            <Route path="collection" element={<Collection />} />
+
             {/* Cart route */}
             <Route path="cart" element={<CartPage1 />} />
 
@@ -119,7 +130,7 @@ function App() {
 
             {/* Member Profile Route */}
             <Route path="member/profile" element={<ProfilePage />}>
-              <Route path="user" element={<UserProfile />} />
+              <Route path="account" element={<UserProfile />} />
               <Route path="tradehistory" element={<TradeHistory />} />
               <Route path="orderhistory" element={<OrderHistory />} />
               <Route path="wallet" element={<WalletPage />} />
@@ -128,10 +139,11 @@ function App() {
               <Route path="listProductAution" element={<ListProductToAution />} />
             </Route>
 
-
             {/* Shop Route */}
             <Route path="shop" element={<ShopPage />}>
               <Route path="dashboard" element={<ShopDashboard />} />
+              <Route path="info" element={<ShopInfo />} />
+              <Route path="address" element={<ShopAddress />} />
               <Route path="management" element={<ShopProductManagement />} />
               <Route path="transition" element={<ShopTransaction />} />
               <Route path="order-management" element={<ShopOrderManagement />} />

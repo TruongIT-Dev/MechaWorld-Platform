@@ -5,10 +5,11 @@ import {
   ShopOutlined,
   InboxOutlined,
   SolutionOutlined,
+  UserOutlined,
 } from '@ant-design/icons';
 import { useSelector } from 'react-redux';
 import { useEffect, useState } from 'react';
-import { Outlet, Link } from 'react-router-dom';
+import { Outlet, Link, useLocation } from 'react-router-dom';
 import { Menu, Layout, Card, Avatar, Tag } from 'antd';
 import { GetSellerData, GetSellerStatus } from "../../apis/Product/APIProduct";
 
@@ -21,33 +22,43 @@ const items = [
   {
     key: '1',
     icon: <PieChartOutlined />,
-    label: <Link to="/shop/dashboard">Dashboard</Link>,
+    label: <Link to="/shop/dashboard">Thống Kê</Link>,
   },
   {
-    key: '2',
-    icon: <InboxOutlined />,
-    label: <Link to="/shop/management">Quản lý sản phẩm</Link>,
-  },
-  {
-    key: '3',
-    icon: <ShoppingOutlined />,
-    label: <Link to="/shop/order-management">Quản lý đơn hàng</Link>,
+    key: "2",
+    icon: <ShopOutlined className="text-lg text-blue-500" />,
+    label: "Quản Lý Shop",
+    children: [
+      { key: "2", label: <Link to="/shop/info">Thông tin Shop</Link> },
+      { key: "3", label: <Link to="/shop/address">Địa chỉ lấy hàng</Link> },
+    ],
   },
   {
     key: '4',
-    icon: <BankOutlined className="text-lg text-red-500" />,
-    label: <Link to="/shop/auction-management">Quản lý đấu giá</Link>
+    icon: <InboxOutlined />,
+    label: <Link to="/shop/management">Quản Lý Sản Phẩm</Link>,
+  },
+  {
+    key: '5',
+    icon: <ShoppingOutlined />,
+    label: <Link to="/shop/order-management">Quản Lý Đơn Hàng</Link>,
   },
   {
     key: '6',
+    icon: <BankOutlined className="text-lg text-red-500" />,
+    label: <Link to="/shop/auction-management">Quản Lý Đấu Giá</Link>
+  },
+  {
+    key: '7',
     icon: <SolutionOutlined />,
-    label: <Link to="/shop/report-management">Quản lý đánh giá</Link>
+    label: <Link to="/shop/report-management">Quản Lý Đánh Giá</Link>
   },
 ];
 
 
 export default function ShopPage() {
 
+  const location = useLocation();
 
   const user = useSelector((state) => state.auth.user);
   const [sellerData, setSellerData] = useState([]);
@@ -105,7 +116,11 @@ export default function ShopPage() {
             </div>
           </Card>
 
-          <Menu mode="inline" defaultSelectedKeys={["1"]} defaultOpenKeys={["1"]} items={items} />
+          <Menu
+            mode="inline"
+            selectedKeys={[location.pathname]} // Highlight menu dựa trên đường dẫn hiện tại
+            defaultOpenKeys={["/shop/info"]} // Mở menu mặc định
+            items={items} />
         </Sider>
 
         <Layout className="flex-1 py-4 ml-6 mt-32">
