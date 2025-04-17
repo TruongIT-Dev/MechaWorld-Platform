@@ -202,7 +202,7 @@ const SettingAddress = () => {
     try {
       const response = await api.get(`province`);
       let data = response.data.data;
-      data = data.filter(province => province.ProvinceID !== 286);
+      data = data.filter(province => province.ProvinceID !== 286 && province.ProvinceID !== 290);
       setCities(data);
     } catch (error) {
       console.error('Lỗi khi fetch thành phố:', error);

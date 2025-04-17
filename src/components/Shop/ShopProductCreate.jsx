@@ -22,7 +22,60 @@ const ShopProductCreate = ({ setIsCreating }) => {
   // const [accessories, setAccessories] = useState([{ name: "", quantity: 1 }]);
   const [accessories, setAccessories] = useState([]);
   const [isUploading, setIsUploading] = useState(false);
-
+  const series =[
+    {id: "Mobile Suit Gundam", name: "Mobile Suit Gundam"},
+    {id: "Mobile Suit Zeta Gundam", name: "Mobile Suit Zeta Gundam"},
+    {id: "Mobile Suit Gundam ZZ", name: "Mobile Suit Gundam ZZ"},
+    {id: "Mobile Suit Victory Gundam", name: "Mobile Suit Victory Gundam"},
+    {id: "Mobile Fighter G Gundam", name: "Mobile Fighter G Gundam"},
+    {id: "Mobile Suit Gundam Wing", name: "Mobile Suit Gundam Wing"},
+    {id: "After War Gundam X", name: "After War Gundam X"},
+    {id: "Turn A Gundam", name: "Turn A Gundam"},
+    {id: "Mobile Suit Gundam SEED", name: "Mobile Suit Gundam SEED"},
+    {id: "Superior Defender Gundam Force", name: "Superior Defender Gundam Force"},
+    {id: "Mobile Suit Gundam SEED Destiny", name: "Mobile Suit Gundam SEED Destiny"},
+    {id: "Mobile Suit Gundam 00", name: "Mobile Suit Gundam 00"},
+    {id: "SD Gundam Sangokuden Brave Battle Warriors", name: "SD Gundam Sangokuden Brave Battle Warriors"},
+    {id: "Model Suit Gunpla Builders Beginning G", name: "Model Suit Gunpla Builders Beginning G"},
+    {id: "Mobile Suit Gundam AGE", name: "Mobile Suit Gundam AGE"},
+    {id: "Gundam Build Fighters", name: "Gundam Build Fighters"},
+    {id: "Mobile Suit Gundam-san", name: "Mobile Suit Gundam-san"},
+    {id: "Gundam Reconguista in G", name: "Gundam Reconguista in G"},
+    {id: "Gundam Build Fighters Try", name: "Gundam Build Fighters Try"},
+    {id: "Mobile Suit Gundam: Iron-Blooded Orphans", name: "Mobile Suit Gundam: Iron-Blooded Orphans"},
+    {id: "Gundam Build Divers", name: "Gundam Build Divers"},
+    {id: "SD Gundam World Sangoku Soketsuden", name: "SD Gundam World Sangoku Soketsuden"},
+    {id: "Gundam Build Divers Re:Rise", name: "Gundam Build Divers Re:Rise"},
+    {id: "SD Gundam World Heroes", name: "SD Gundam World Heroes"},
+    {id: "Mobile Suit Gundam: The Witch from Mercury", name: "Mobile Suit Gundam: The Witch from Mercury"},
+    {id: "Mobile Suit Gundam GQuuuuuuX", name: "Mobile Suit Gundam GQuuuuuuX"},
+    {id: "Mobile Suit Gundam (Compilation Movies)", name: "Mobile Suit Gundam (Compilation Movies)"},
+    {id: "Mobile Suit Gundam: Char's Counterattack", name: "Mobile Suit Gundam: Char's Counterattack"},
+    {id: "Mobile Suit SD Gundam (Movies)", name: "Mobile Suit SD Gundam (Movies)"},
+    {id: "Mobile Suit Gundam 0080: War in the Pocket", name: "Mobile Suit Gundam 0080: War in the Pocket"},
+    {id: "Mobile Suit SD Gundam (OVA)", name: "Mobile Suit SD Gundam (OVA)"},
+    {id: "Mobile Suit Gundam F91 (1991)", name: "Mobile Suit Gundam F91 (1991)"},
+    {id: "Mobile Suit Gundam 0083: Stardust Memory (OVA)", name: "Mobile Suit Gundam 0083: Stardust Memory (OVA"},
+    {id: "Mobile Suit Gundam 0083: Stardust Memory (Compilation Movie)", name: "Mobile Suit Gundam 0083: Stardust Memory (Compilation Movie)"},
+    {id: "Gundam Wing: Endless Waltz (OVA/Movie)", name: "Gundam Wing: Endless Waltz (OVA/Movie)"},
+    {id: "Turn A Gundam (Compilation Movies)", name: "Turn A Gundam (Compilation Movies)"},
+    {id: "Mobile Suit Zeta Gundam: A New Translation (Compilation Movies)", name: "Mobile Suit Zeta Gundam: A New Translation (Compilation Movies)"},
+    {id: "Mobile Suit Gundam 00 the Movie: A Wakening of the Trailblazer", name: "Mobile Suit Gundam 00 the Movie: A Wakening of the Trailblazer"},
+    {id: "SD Gundam Sangokuden Brave Battle Warriors (Movie)", name: "SD Gundam Sangokuden Brave Battle Warriors (Movie)"},
+    {id: "Mobile Suit Gundam Unicorn (OVA)", name: "Mobile Suit Gundam Unicorn (OVA)"},
+    {id: "Gundam Reconguista in G (Compilation Movies)", name: "Gundam Reconguista in G (Compilation Movies)"},
+    {id: "Mobile Suit Gundam Narrative", name: "Mobile Suit Gundam Narrative"},
+    {id: "Mobile Suit Gundam Hathaway", name: "Mobile Suit Gundam Hathaway"},
+    {id: "Mobile Suit Gundam: Cucuruz Doan's Island", name: "Mobile Suit Gundam: Cucuruz Doan's Island"},
+    {id: "Mobile Suit Gundam SEED Freedom", name: "Mobile Suit Gundam SEED Freedom"},
+    {id: "Mobile Suit Gundam AGE: Memory of Eden", name: "Mobile Suit Gundam AGE: Memory of Eden"},
+    {id: "Gundam Evolve (OVA)", name: "Gundam Evolve (OVA)"},
+    {id: "G-Saviour (Live-Action TV Movie)", name: "G-Saviour (Live-Action TV Movie)"},
+    {id: "Gundam Breaker Battlogue (ONA)", name: "Gundam Breaker Battlogue (ONA)"},
+    {id: "Mobile Suit Gundam: Silver Phantom (VR Movie)", name: "Mobile Suit Gundam: Silver Phantom (VR Movie)"},
+    {id: "Mobile Suit Gundam Iron-Blooded Orphans: Urðr-Hunt (ONA)", name: "Mobile Suit Gundam Iron-Blooded Orphans: Urðr-Hunt (ONA)"},
+    {id: "Gundam Build Metaverse (ONA)", name: "Gundam Build Metaverse (ONA)"},
+  ]
 
 
   // Danh sách phân khúc Gundam
@@ -136,6 +189,7 @@ const handleFinish = (values) => {
     console.log(values);
     formData.append("name", values.name);
     formData.append("grade_id", values.grade_id);
+    formData.append("series", values.series);
     formData.append("condition", values.condition);
     formData.append("manufacturer", values.manufacturer);
     formData.append("scale", values.scale);
@@ -209,6 +263,20 @@ const handleFinish = (values) => {
         >
           <Input placeholder="VD: MGEX 1/100 Strike Freedom Gundam" />
         </Form.Item>
+        <Form.Item
+          name="series"
+          label="Thuộc dòng phim hoặc series"
+          rules={[{ required: true, message: "Vui lòng nhập tên series!" }]}
+          className="col-span-12"
+        >
+          <Select placeholder="Chọn phim hoặc series">
+            {series.map((seri) => (
+              <Option key={seri.id} value={seri.id}>
+                {seri.name}
+              </Option>
+            ))}
+          </Select>
+        </Form.Item>
 
         <Form.Item
           name="grade_id"
@@ -271,6 +339,11 @@ const handleFinish = (values) => {
             <p className="text-sm"><strong>Lưu ý:</strong> Tình trạng sản phẩm: Hộp mới nguyên dạng, chưa bóc seal, linh kiện không bị hư hại, đủ phụ kiện đi kèm.</p>
           </div>
         )}
+        {condition === 'open box' && (
+          <div className="col-span-12 mb-4 p-3 bg-blue-50 text-blue-700 rounded-md border border-blue-200">
+            <p className="text-sm"><strong>Lưu ý:</strong> Tình trạng sản phẩm: mới mở seal ngoài và kiểm tra mảnh trong. Trong trường hợp mất vỏ nhưng chưa xé seal trong mảnh thì hãy để tình trạng sản phẩm là &quot;Đã qua sử dụng&quot;</p>
+          </div>
+        )}
 
         {(condition === 'open box' || condition === 'used') && (
           <Form.Item
@@ -279,7 +352,7 @@ const handleFinish = (values) => {
             rules={[{ required: true, message: 'Vui lòng nhập mô tả tình trạng sản phẩm' }]}
             className="col-span-12"
           >
-            <Input.TextArea rows={3} placeholder="Nhập mô tả chi tiết tình trạng sản phẩm..." />
+            <Input.TextArea rows={3} placeholder="Nhập mô tả chi tiết tình trạng sản phẩm (trầy xước, móp vỏ , ect ...)" />
           </Form.Item>
         )}
 

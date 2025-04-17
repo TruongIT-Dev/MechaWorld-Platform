@@ -7,6 +7,6 @@ export const GetListOrderHistory = () => {
 }
 
 // GET Shop Information by ID
-export const GetShopInfoById = (id) => {
-    return axios.get(`/sellers/${id}`)
+export const GetShopInfoById = () => {
+    return axios.get(`/sellers/profile`)
 }
