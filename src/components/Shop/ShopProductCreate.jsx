@@ -77,7 +77,19 @@ const ShopProductCreate = ({ setIsCreating }) => {
     {id: "Gundam Build Metaverse (ONA)", name: "Gundam Build Metaverse (ONA)"},
   ]
 
-
+  const version = [
+    {id: "Standard / Regular", name: "Standard / Regular", note : "Phiên bản cơ bản, phổ thông nhất được bán rộng rãi."},
+    {id: "Ver.Ka (Version Katoki)", name: "Ver.Ka (Version Katoki)", note : "Do Hajime Katoki thiết kế lại, nổi bật với chi tiết máy cao, decal nhiều, form dáng “ngầu” hơn bản gốc. Rất được ưa chuộng trong MG / PG."},
+    {id: "", name: "", note : "Phiên bản giới hạn, chỉ bán qua website Bandai hoặc sự kiện, giá cao và hiếm."},
+    {id: "Limited Version", name: "Limited Version", note : "Phiên bản đặc biệt, phát hành giới hạn tại sự kiện như Expo, WonderFest,... Có thể là màu lạ, metallic, clear,..."},
+    {id: "Clear Version / Translucent", name: "Clear Version / Translucent", note : "Phiên bản nhựa trong suốt (Clear) để thấy rõ chi tiết bên trong. Chủ yếu để trưng bày, ít phù hợp chơi/lắp nhiều."},
+    {id: "Metallic / Chrome Version", name: "Metallic / Chrome Version", note : "Sơn ánh kim hoặc mạ chrome sáng bóng, rất bắt mắt."},
+    {id: "Titanium Finish", name: "Titanium Finish", note : "Sơn titanium trắng mờ hoặc ánh kim cực kỳ cao cấp, thường dành cho các mẫu flagship."},
+    {id: "Rollout Color / Prototype Color", name: "Rollout Color / Prototype Color", note : "Màu sơn mô phỏng bản thử nghiệm đầu tiên của Gundam."},
+    {id: "Anniversary Edition", name: "Anniversary Edition", note : "Bản kỷ niệm theo năm"},
+    {id: "GFT / Gundam Front Tokyo Edition", name: "GFT / Gundam Front Tokyo Edition", note : "Phiên bản đặc biệt chỉ bán tại Gundam Front Tokyo (nay là Gundam Base Tokyo)."},
+    {id: "Ver.2.0 / Ver.3.0 / Ver.ka", name: "Ver.2.0 / Ver.3.0 / Ver.ka", note : "Các phiên bản cải tiến với công nghệ mới hơn, chi tiết và khớp tốt hơn bản cũ."},
+  ]
   // Danh sách phân khúc Gundam
   const scaleOptions = ["1/144", "1/100", "1/60", "1/48"];
 //   const conditionOptions = {
@@ -192,7 +204,10 @@ const handleFinish = (values) => {
     formData.append("series", values.series);
     formData.append("condition", values.condition);
     formData.append("manufacturer", values.manufacturer);
+    formData.append("parts_total", values.parts_total);
+    formData.append("material", values.material);
     formData.append("scale", values.scale);
+    formData.append("version", values.version);
     formData.append("weight", values.weight);
     formData.append("description", values.description);
     formData.append("price", values.price);
@@ -277,7 +292,22 @@ const handleFinish = (values) => {
             ))}
           </Select>
         </Form.Item>
-
+        
+        <Form.Item
+          name="version"
+          label="Phiên bản"
+          rules={[{ required: true, message: "Vui lòng chọn phiên bản sản phẩm!" }]}
+          className="col-span-6"
+        >
+          <Select placeholder="Chọn phiên bản sản phẩm">
+            {version.map((ver) => (
+              <Option key={ver.id} value={ver.id}>
+                {ver.name}
+                {/* {ver.note && <span className="text-gray-500 text-xs"> - {ver.note}</span>} */}
+              </Option>
+            ))}
+          </Select>
+        </Form.Item>
         <Form.Item
           name="grade_id"
           label="Phân khúc"
@@ -325,6 +355,28 @@ const handleFinish = (values) => {
           </Select>
         </Form.Item>
 
+        <Form.Item
+          name="parts_total"
+          label="Tổng số linh kiện"
+          rules={[{ required: true, message: "Vui lòng nhập tổng số linh kiện!" }]}
+          className="col-span-6"
+        >
+          <InputNumber
+            min={1}
+            style={{ width: "100%" }}
+            parser={(value) => value.replace(/[^0-9]/g, "")}
+            placeholder="VD: 200"
+          />
+        </Form.Item>
+
+        <Form.Item
+          name="material"
+          label="Chất liệu"
+          rules={[{ required: true, message: "Vui lòng thêm chất liệu của sản phẩm" }]}
+          className="col-span-6"
+        >
+          <Input placeholder="VD: PE, PVC, PV " />
+        </Form.Item>
         <Form.Item
           name="manufacturer"
           label="Thương hiệu"

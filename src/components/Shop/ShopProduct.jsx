@@ -134,9 +134,9 @@ function ShopProduct({
   const columns = [
     {
       title: "Hình Ảnh",
-      dataIndex: "image_urls",
+      dataIndex: "primary_image_url",
       render: (images) => (
-        <img src={images[0]} alt="Gundam" width={100} height={100} style={{ objectFit: "cover" }} />
+        <img src={images} alt="Gundam" width={100} height={100} style={{ objectFit: "cover" }} /> 
       ),
       width: 100,
     },
