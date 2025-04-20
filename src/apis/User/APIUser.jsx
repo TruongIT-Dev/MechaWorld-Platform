@@ -23,6 +23,11 @@ export const checkWallet = (id) => {
 }
 
 
+// GET Gundams of a user by ID
+export const GetGundamByID = (id, gundamName) => {
+    return axios.get(`/users/${id}/gundams?name=${gundamName}`)
+}
+
 // POST Create a new user address
 export const postUserAddresses = (id, addressData) => {
     return axios.post(`/users/${id}/addresses`, addressData)
