@@ -39,7 +39,7 @@ export const UserProfile = React.lazy(() => import("../components/Profile/UserPr
 export const OrderHistory = React.lazy(() => import("../components/Profile/OrderHistory"));
 export const TradeHistory = React.lazy(() => import("../components/Profile/TradeHistory"));
 export const SettingAddress = React.lazy(() => import("../components/Profile/SettingAddress"));
-
+export const GundamCollection = React.lazy(() => import("../components/Profile/GundamCollection"));
 
 // Register Shop route
 export const ShopRegister = React.lazy(() => import("../components/RegisterShop/RegisterShop"));
