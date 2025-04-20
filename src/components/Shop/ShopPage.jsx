@@ -11,7 +11,8 @@ import { useEffect, useState } from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import { Menu, Layout, Card, Avatar, Tag } from 'antd';
 
-import { GetSellerData, GetSellerStatus } from "../../apis/Sellers/APISeller";
+import {  GetSellerStatus } from "../../apis/Sellers/APISeller";
+import { GetShopInfoById } from "../../apis/Seller Profile/APISellerProfile";
 
 
 const { Sider, Content } = Layout;
@@ -74,7 +75,7 @@ export default function ShopPage() {
     });
 
 
-    GetSellerData(user.id).then((res) => {
+    GetShopInfoById(user.id).then((res) => {
       console.log("Seller Data: ", res.data);
       setSellerData(res.data);
     }).catch((error) => {
@@ -94,8 +95,8 @@ export default function ShopPage() {
               <div className="flex items-center gap-5">
                 <Avatar className='p-5 bg-blue-500' icon={<ShopOutlined />} size="large" />
                 <div>
-                  <p className="font-bold text-base">{sellerData.full_name}</p>
-                  <Tag color="blue" className="text-xs">{sellerPlan?.plan_name}</Tag>
+                  <p className="font-bold text-base">{sellerData.shop_name}</p>
+                  <Tag color="blue" className="text-xs">{sellerPlan?.subscription_name}</Tag>
                 </div>
               </div>
             </div>

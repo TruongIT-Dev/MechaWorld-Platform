@@ -6,7 +6,7 @@ import axios from '../../utils/axios-custome';
 
 // GET Seller Profile by ID
 export const GetShopInfoById = (id) => {
-    return axios.get(`/sellers/profile?user_id=${id}`)
+    return axios.get(`seller/profile?user_id=${id}`)
 }
 
 

@@ -98,7 +98,7 @@ export const verifyToken = (access_token) => {
 
 // POST Verify OPT by Phone Number
 export const verifyOtp = (id, phone, opt) => {
-    return axios.post('/otp/phone_number/verify', {
+    return axios.post('/otp/phone-number/verify', {
         user_id: id,
         phone_number: phone,
         otp_code: opt
@@ -109,7 +109,14 @@ export const verifyOtp = (id, phone, opt) => {
 
 // POST Send OTP to Phone Number
 export const verifyPhone = (phone) => {
-    return axios.post('/otp/phone_number/generate', {
+    return axios.post('/otp/phone-number/generate', {
         phone_number: phone
     })
+}
+// POST Create a new shop
+export const createShop = (shopName,userId) => {
+  return axios.post('/seller/profile', {
+    shop_name: shopName,
+    user_id: userId
+  });
 }

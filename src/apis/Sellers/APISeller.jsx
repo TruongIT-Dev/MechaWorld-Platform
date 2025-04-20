@@ -31,10 +31,7 @@ export const GetGundamByID = (id, gundamName) => {
 }
 
 
-// GET ....
-export const GetSellerData = (id) => {
-    return axios.get(`/sellers/${id}`);
-}
+
 
 
 // POST ...

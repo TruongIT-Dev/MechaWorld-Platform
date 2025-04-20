@@ -10,7 +10,7 @@ import SecondForm from "./SecondForm";
 import ThirdForm from "./ThirdForm";
 import FourthForm from "./FourthForm";
 
-import { verifyToken } from '../../apis/Authentication/APIAuth';
+import { verifyToken,createShop } from '../../apis/Authentication/APIAuth';
 import { BecomeSeller, updateUserData } from "../../apis/User/APIUser";
 
 const { Step } = Steps;
@@ -97,7 +97,8 @@ export default function RegisterShop() {
       if (current === 0) {
         // 🟢 Gọi API cập nhật Thông tin Shop
         await updateUserData(user?.id, values.full_name);
-
+        await createShop(values.full_name, user?.id);
+        console.log("Form 1 done");
       } else if (current === 1) {
         // 🟢 Gọi API cập nhật Cài đặt vận chuyển
         console.log("Form 2 done");
@@ -113,6 +114,10 @@ export default function RegisterShop() {
     } catch (err) {
       console.error("Validation Failed:", err);
       message.error("Vui lòng kiểm tra lại thông tin!");
+      if (err.response && err.response.status === 409) {
+        message.error("Thông tin Shop đã tồn tại!");
+        return;
+      }
     }
   };
 
