@@ -1,9 +1,11 @@
+import { useSelector } from 'react-redux';
 import { useState, useEffect } from 'react';
 import { Table, Button, Card, Modal, Input, message, Steps, QRCode, Tabs, Tooltip } from 'antd';
 import { ArrowUpOutlined, ArrowDownOutlined, LoadingOutlined, WalletOutlined, EyeInvisibleOutlined, EyeOutlined } from '@ant-design/icons';
-import { AddMoney, GetMoney } from '../../apis/Wallet/APIWallet'; // Giữ nguyên import hàm AddMoney
-import { checkWallet } from '../../apis/User/APIUserProfile';
-import { useSelector } from 'react-redux';
+
+import { checkWallet } from '../../apis/User/APIUser';
+import { AddMoney } from '../../apis/Wallet/APIWallet';
+
 const { Step } = Steps;
 const { TabPane } = Tabs;
 
@@ -113,7 +115,7 @@ const WalletPage = () => {
     try {
       // Refresh balance after successful payment
       const userId = localStorage.getItem('userId');
-      const response = await GetMoney(userId);
+      const response = await checkWallet(userId);
       if (response.data && response.data.balance !== undefined) {
         setBalance(response.data.balance);
       }
@@ -195,22 +197,6 @@ const WalletPage = () => {
                   <div>
                     <h2 className="text-lg font-medium text-gray-700 mb-1">Số dư ví</h2>
                     <div className="flex items-center space-x-2">
-                      {/* {balance ? (
-                        <LoadingOutlined />
-                      ) : (
-                        <>
-                          <span className="text-2xl font-semibold text-gray-900">
-                            {showBalance ? `₫ ${balance.toLocaleString()} VNĐ` : "••••••••"}
-                          </span>
-                          <Tooltip title={showBalance ? "Ẩn số dư" : "Hiện số dư"}>
-                            <Button
-                              icon={showBalance ? <EyeInvisibleOutlined /> : <EyeOutlined />}
-                              onClick={() => setShowBalance(!showBalance)}
-                              type="text"
-                            />
-                          </Tooltip>
-                        </>
-                      )} */}
                       <span className="text-2xl font-semibold text-gray-900">
                         {showBalance ? `₫ ${balance.toLocaleString()} VNĐ` : "••••••••"}
                       </span>

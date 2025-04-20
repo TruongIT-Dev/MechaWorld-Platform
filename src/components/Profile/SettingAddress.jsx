@@ -1,9 +1,10 @@
-import { useState, useEffect } from 'react';
-import { Form, Select, Input, Button, message, Modal, Checkbox } from 'antd';
 import axios from 'axios';
-import { postUserAddresses, getUserAddresses, updateAddress, deleteAddress } from '../../apis/User/APIUserProfile';
 import { useSelector } from 'react-redux';
+import { useState, useEffect } from 'react';
 import { InfoCircleOutlined } from '@ant-design/icons';
+import { Form, Select, Input, Button, message, Modal, Checkbox } from 'antd';
+
+import { postUserAddresses, getUserAddresses, updateAddress, deleteAddress } from '../../apis/User/APIUser';
 
 const { Option } = Select;
 

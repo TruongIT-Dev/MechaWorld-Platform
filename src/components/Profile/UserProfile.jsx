@@ -1,14 +1,15 @@
 import Cookies from 'js-cookie';
 import { Cropper } from 'react-cropper';
+import { useState, useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { UploadOutlined, PhoneOutlined, LockOutlined } from '@ant-design/icons';
-import { useState, useEffect, useRef } from 'react';
-import { verifyToken } from '../../apis/Auth/APIAuth';
 import { Form, Input, Upload, Button, message, Modal, Row, Col } from 'antd';
-import { updateUserData, uploadAvatar, verifyOtp, verifyPhone } from '../../apis/User/APIUserProfile';
+
+import { updateUser } from '../../features/auth/authSlice';
+import { updateUserData, uploadAvatar } from '../../apis/User/APIUser';
+import { verifyToken, verifyOtp, verifyPhone } from '../../apis/Authentication/APIAuth';
 
 import "cropperjs/dist/cropper.css";
-import { updateUser } from '../../features/auth/authSlice';
 
 
 const ProfilePage = () => {

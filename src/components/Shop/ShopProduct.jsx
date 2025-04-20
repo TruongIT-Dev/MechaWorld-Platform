@@ -1,12 +1,12 @@
-import { Table, Row, Button, Select, Input, Modal, Dropdown, Form, Tag, Col, Typography } from "antd";
-import { useEffect, useState } from "react";
-import { GetGundamByID, SellingGundam, RestoreGundam } from "../../apis/Product/APIProduct";
 import PropTypes from 'prop-types';
 import { useSelector } from "react-redux";
+import { useEffect, useState } from "react";
 import { MoreOutlined, PlusOutlined } from "@ant-design/icons";
 import { ExclamationCircleOutlined } from '@ant-design/icons';
+import { Table, Row, Button, Select, Input, Modal, Dropdown, Form, Tag, Col, Typography } from "antd";
 
-// const { Option } = Select;
+import { GetGundamByID, SellingGundam, RestoreGundam } from "../../apis/Sellers/APISeller";
+
 
 function ShopProduct({
   // isCreating,
@@ -120,7 +120,7 @@ function ShopProduct({
   }
 
   const searchGundam = (values) => {
-    console.log(values);
+    // console.log(values);
     GetGundamByID(user.id, values)
       .then((response) => {
         setGundamList(response.data);
@@ -317,12 +317,12 @@ function ShopProduct({
           <Row gutter={[16, 16]} className="mb-4 flex flex-wrap justify-center md:justify-between">
 
             {/* Search */}
-            <Col xs={24} sm={12} md={8}>
+            <Col xs={12} sm={8} md={8}>
               <Input.Search placeholder="Tìm kiếm sản phẩm" onSearch={searchGundam} className="w-full" />
             </Col>
 
             {/* Fitler Condition */}
-            <Col xs={12} sm={6} md={4}>
+            <Col xs={12} sm={4} md={4}>
               <Select
                 placeholder="Lọc tình trạng"
                 allowClear
@@ -336,7 +336,7 @@ function ShopProduct({
             </Col>
 
             {/* Filter Category */}
-            <Col xs={12} sm={6} md={4}>
+            <Col xs={12} sm={4} md={4}>
               <Select
                 placeholder="Lọc phân khúc"
                 allowClear
@@ -352,16 +352,16 @@ function ShopProduct({
             </Col>
 
             {/* Earase Filter Button */}
-            <Col xs={12} sm={6} md={4}>
+            <Col xs={12} sm={4} md={4}>
               <Button onClick={() => setFilteredData(gundamList)}>Xóa bộ lọc</Button>
             </Col>
 
             {/* Add More Button */}
-            <Col xs={12} sm={6} md={4}>
+            <Col xs={12} sm={4} md={4}>
               <Button
                 type="primary"
                 icon={<PlusOutlined />}
-                className="bg-[#0056b3] hover:bg-[#4a90e2] text-white w-full md:w-auto"
+                className="bg-blue-500 hover:bg-[#4a90e2] text-white w-full md:w-auto"
                 onClick={() => setIsCreating(true)}
               >
                 Thêm sản phẩm

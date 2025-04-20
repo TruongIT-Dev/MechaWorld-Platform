@@ -1,14 +1,19 @@
 import { Col, message, Row } from 'antd';
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { AddToCart, GetAllCartItem, GetGundamDetailBySlug } from '../../apis/ProductDetail/APIProductDetail';
-import { verifyToken } from '../../apis/Auth/APIAuth';
-import Cookies from 'js-cookie';
-import ReviewProduct from './Review';
-import SuggestProduct from './SuggestProduct';
-import ShopInfo from './ShopInfo';
-import ProductInfo from './ProductInfo';
+
+import { AddToCart, GetCart } from '../../apis/Cart/APICart';
+import { verifyToken } from '../../apis/Authentication/APIAuth';
+import { GetGundamDetailBySlug } from '../../apis/Gundams/APIGundam';
+
 import { useCart } from '../../context/CartContext';
+
+import Cookies from 'js-cookie';
+import ShopInfo from './ShopInfo';
+import ReviewProduct from './Review';
+import ProductInfo from './ProductInfo';
+import SuggestProduct from './SuggestProduct';
+
 
 const GundamProductPage = () => {
     const { slug } = useParams();
@@ -65,7 +70,7 @@ const GundamProductPage = () => {
     useEffect(() => {
         const fetchCartItems = async () => {
             try {
-                const response = await GetAllCartItem(); // Gọi API lấy giỏ hàng từ DB
+                const response = await GetCart(); // Gọi API lấy giỏ hàng từ DB
                 const cartItems = response?.data || [];  // Đảm bảo có dữ liệu
                 // console.log("cartItems", cartItems);
 
@@ -117,7 +122,7 @@ const GundamProductPage = () => {
 
             await addToCart({ id }); // Sử dụng hàm addToCart từ context
             setAdded(true);
-            
+
         } catch (error) {
             message.error("Lỗi khi thêm vào giỏ hàng!");
             console.error("Error:", error);

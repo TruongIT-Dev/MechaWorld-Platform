@@ -1,9 +1,10 @@
 import { useDispatch, } from "react-redux";
-import { NavLink, useNavigate } from "react-router-dom";
 import { GoogleLogin } from "@react-oauth/google";
+import { NavLink, useNavigate } from "react-router-dom";
 import { Form, Input, Button, Typography, notification } from "antd";
+
 import { login } from "../../features/auth/authSlice";
-import { loginEmail, loginGoogle } from "../../apis/Auth/APIAuth";
+import { loginEmail, loginGoogle } from "../../apis/Authentication/APIAuth";
 
 import Cookies from "js-cookie";
 import Footer from "../../layouts/Footer";

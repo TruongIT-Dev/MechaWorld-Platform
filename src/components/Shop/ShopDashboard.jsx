@@ -1,9 +1,10 @@
+import { groupBy } from '@antv/util';
+import { Pie, Column } from '@antv/g2plot';
 import  { useEffect, useRef, useState } from 'react';
 import { Card, Row, Col, Statistic, Button, message } from 'antd';
-import { Pie, Column } from '@antv/g2plot';
-import { groupBy } from '@antv/util';
-import { checkWallet } from '../../apis/User/APIUserProfile';
+
 import { useSelector } from 'react-redux';
+import { checkWallet } from '../../apis/User/APIUser';
 
 const shopData = [
   { city: 'Hcm', type: 'Card', value: 14500 },

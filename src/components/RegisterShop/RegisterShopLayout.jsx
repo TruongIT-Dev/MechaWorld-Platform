@@ -1,19 +1,24 @@
-import { NavLink } from "react-router-dom";
 import { FaStore } from "react-icons/fa";
-import RegisterShop from "./RegisterShop"; // Import form đăng ký shop
+import { NavLink } from "react-router-dom";
+
+import RegisterShop from "./RegisterShop";
 
 const RegisterShopLayout = () => {
     return (
         <div className="min-h-screen flex flex-col">
             {/* Header */}
             <header className="bg-white shadow-md py-4">
-                <div className="container mx-auto flex justify-between items-center px-6">
-                    <NavLink to="/" className="text-blue-400 hover:text-blue-600 font-bold text-3xl flex items-center">
+                <div className="container mx-auto flex gap-4 justify-between items-center px-6">
+                    <span className="text-blue-400 font-bold text-3xl flex items-center">
                         <FaStore className="text-4xl mr-2" /> MechaWorld
-                    </NavLink>
-                    <span className="text-lg uppercase font-semibold text-black">
+                    </span>
+                    <span className="text-xl uppercase font-semibold text-black">
                         Đăng Ký Trở Thành Nhà Bán Hàng
                     </span>
+
+                    <NavLink to="/" className="text-lg font-medium text-gray-400 hover:text-blue-500">
+                        Quay về Trang Chủ?
+                    </NavLink>
                 </div>
             </header>
 

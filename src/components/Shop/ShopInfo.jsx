@@ -1,5 +1,5 @@
-import { useSelector } from 'react-redux';
 import { useState } from 'react';
+import { useSelector } from 'react-redux';
 import { Form, Input, Button, Row, Col } from 'antd';
 
 const ShopInfo = () => {

@@ -1,12 +1,13 @@
-import { useEffect, useState } from "react";
-import { Form, Input, Button, Select, message, InputNumber } from "antd";
-// import { UploadOutlined } from "@ant-design/icons";
 import Cookies from "js-cookie";
 import PropTypes from "prop-types";
-import { PostGundam,GetGrades } from "../../apis/Product/APIProduct";
-import ImageUpload from "./ImageUpload";
+import { useEffect, useState } from "react";
+import { Form, Input, Button, Select, message, InputNumber } from "antd";
 import { InfoCircleOutlined, UploadOutlined, CloseOutlined, PlusOutlined } from '@ant-design/icons';
 
+import { GetGrades } from '../../apis/Gundams/APIGundam';
+import { PostGundam } from "../../apis/User/APIUser";
+
+import ImageUpload from "./ImageUpload";
 
 const { Option } = Select;
 

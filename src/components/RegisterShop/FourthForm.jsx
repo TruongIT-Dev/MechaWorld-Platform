@@ -1,5 +1,5 @@
-import { Card, Button, Typography, Steps } from "antd";
-import { CheckCircleOutlined, ShopOutlined, RocketOutlined, GiftOutlined } from "@ant-design/icons";
+import { Card, Typography } from "antd";
+import { CheckCircleOutlined, ShopOutlined } from "@ant-design/icons";
 
 const { Title, Text, Paragraph } = Typography;
 

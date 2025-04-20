@@ -1,4 +1,4 @@
-import { Table, Input, Select, Tag, Typography, Card, Space, Avatar } from "antd";
+import { Table, Input, Select, Tag, Typography, Space, Avatar } from "antd";
 import { InfoCircleOutlined } from "@ant-design/icons";
 import { useState } from "react";
 

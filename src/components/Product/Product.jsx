@@ -2,8 +2,8 @@ import { useEffect, useState } from 'react';
 import { HomeOutlined, UserOutlined } from '@ant-design/icons';
 import { Card, Col, Row, Button, Breadcrumb, Empty } from 'antd';
 
-import { GetGundamByGrade, GetGundams } from '../../apis/Product/APIProduct';
 import FilterSidebar from './ProductFilter';
+import { GetGundamByGrade, GetGundams } from '../../apis/Gundams/APIGundam';
 
 const Product = () => {
 

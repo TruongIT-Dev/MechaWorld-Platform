@@ -1,13 +1,14 @@
+import axios from 'axios';
 import { useEffect, useState } from 'react';
 import { Button, Form, Input, message, Modal, Select, Spin, Typography } from 'antd';
-import axios from 'axios';
-import { getUserAddresses, postUserAddresses, updateAddress } from '../../apis/User/APIUserProfile';
 
 import { PlusOutlined } from '@ant-design/icons';
 import { useSelector } from 'react-redux';
 
+import { getUserAddresses, postUserAddresses, updateAddress } from '../../apis/User/APIUser';
+
 const { Option } = Select;
-const { Title, Text, Paragraph } = Typography;
+const { Text, Paragraph } = Typography;
 
 const SecondForm = ({ user, setUser }) => {
     user = useSelector((state) => state.auth.user);

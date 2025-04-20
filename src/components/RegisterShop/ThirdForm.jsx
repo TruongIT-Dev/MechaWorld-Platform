@@ -1,5 +1,5 @@
-import { Form, Checkbox } from "antd";
 import { useEffect } from "react";
+import { Form, Checkbox } from "antd";
 
 const ThirdForm = ({ formData, setFormData, setCanProceed }) => {
 

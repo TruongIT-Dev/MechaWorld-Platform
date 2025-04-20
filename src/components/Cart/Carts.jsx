@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
-import { Table, Button, Checkbox, Card, Divider, Tag, Empty, Spin } from 'antd';
-import { ShopOutlined, DeleteOutlined, ShoppingCartOutlined, RightOutlined, ShoppingOutlined } from '@ant-design/icons';
+import { useState } from 'react';
 import { Link } from "react-router-dom";
 import { useCart } from '../../context/CartContext';
+import { Button, Checkbox, Card, Divider, Spin } from 'antd';
+import { ShopOutlined, DeleteOutlined, ShoppingCartOutlined, RightOutlined, ShoppingOutlined } from '@ant-design/icons';
 
 import EmptyCart from "../../assets/image/empty-cart.png";
 

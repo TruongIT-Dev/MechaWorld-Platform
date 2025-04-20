@@ -3,15 +3,15 @@ import { useSelector } from "react-redux";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Steps, Button, Form, message } from "antd";
-import { ShopOutlined ,TruckOutlined, ContainerOutlined, FileDoneOutlined } from "@ant-design/icons";
+import { ShopOutlined, TruckOutlined, ContainerOutlined, FileDoneOutlined } from "@ant-design/icons";
 
 import FirstForm from "./FirstForm";
 import SecondForm from "./SecondForm";
 import ThirdForm from "./ThirdForm";
 import FourthForm from "./FourthForm";
 
-import { verifyToken } from '../../apis/Auth/APIAuth';
-import { BecomeSeller, updateUserData } from "../../apis/User/APIUserProfile";
+import { verifyToken } from '../../apis/Authentication/APIAuth';
+import { BecomeSeller, updateUserData } from "../../apis/User/APIUser";
 
 const { Step } = Steps;
 

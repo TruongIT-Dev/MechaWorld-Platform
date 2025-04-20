@@ -5,14 +5,13 @@ import {
   ShopOutlined,
   InboxOutlined,
   SolutionOutlined,
-  UserOutlined,
 } from '@ant-design/icons';
 import { useSelector } from 'react-redux';
 import { useEffect, useState } from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import { Menu, Layout, Card, Avatar, Tag } from 'antd';
-import { GetSellerData, GetSellerStatus } from "../../apis/Product/APIProduct";
 
+import { GetSellerData, GetSellerStatus } from "../../apis/Sellers/APISeller";
 
 
 const { Sider, Content } = Layout;

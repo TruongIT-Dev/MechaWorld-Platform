@@ -1,18 +1,20 @@
-import React, { useState, useEffect } from 'react';
-import { Card, Button, Radio, Divider, message, Table, Modal, Form, Select, Input, Checkbox, Empty, Tabs } from 'antd';
-import { ShoppingCartOutlined, EnvironmentOutlined, ShopOutlined, MoneyCollectOutlined } from '@ant-design/icons';
-import { getUserAddresses, postUserAddresses, updateAddress } from '../../apis/User/APIUserProfile';
-import { CheckoutCart } from '../../apis/Cart/APICart';
-import { useCart } from '../../context/CartContext';
-import { useLocation, useNavigate } from 'react-router-dom';
-import Cookies from 'js-cookie';
-import axios from 'axios';
-import footerLogo from "../../assets/image/icon/iconwallet.png";
 import { useSelector } from 'react-redux';
-import { checkWallet } from '../../apis/User/APIUserProfile';
+import { useState, useEffect } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { EnvironmentOutlined, ShopOutlined, MoneyCollectOutlined } from '@ant-design/icons';
+import { Card, Button, Radio, Divider, message, Table, Modal, Form, Select, Input, Checkbox, Empty, Tabs } from 'antd';
 
-const { Column } = Table;
+import { useCart } from '../../context/CartContext';
+import { CheckoutCart } from '../../apis/Orders/APIOrder';
+import { checkWallet } from '../../apis/User/APIUser';
+import { getUserAddresses, postUserAddresses, updateAddress } from '../../apis/User/APIUser';
+
+import axios from 'axios';
+import Cookies from 'js-cookie';
+import footerLogo from "../../assets/image/icon/iconwallet.png";
+
 const { Option } = Select;
+
 
 const groupByShop = (items) => {
   return items.reduce((acc, item) => {
@@ -22,6 +24,7 @@ const groupByShop = (items) => {
     return acc;
   }, {});
 };
+
 
 const Checkout = () => {
 

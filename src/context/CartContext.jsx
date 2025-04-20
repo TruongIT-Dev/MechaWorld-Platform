@@ -1,5 +1,6 @@
-import React, { createContext, useState, useContext, useEffect } from 'react';
-import { GetCart, DeleteCart, AddToCart } from '../apis/Cart/APICart'; // Import API của bạn
+import { GetCart, DeleteCart, AddToCart } from '../apis/Cart/APICart';
+import { createContext, useState, useContext, useEffect } from 'react';
+
 import Cookies from 'js-cookie';
 
 // Tạo Context

@@ -1,4 +1,4 @@
-import { Table, Input, Select, Tag, Typography, Card, Space } from "antd";
+import { Table, Input, Select, Tag, Typography, Space } from "antd";
 import { useState } from "react";
 
 const { Title } = Typography;

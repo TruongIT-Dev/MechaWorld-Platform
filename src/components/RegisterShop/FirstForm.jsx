@@ -1,11 +1,11 @@
-import { Form, Input, Button, message, Modal } from "antd";
-import { useEffect, useState } from "react";
-import { PhoneOutlined, LockOutlined } from "@ant-design/icons";
 import Cookies from 'js-cookie';
-import { verifyToken } from '../../apis/Auth/APIAuth';
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { verifyOtp, verifyPhone } from "../../apis/User/APIUserProfile";
+import { Form, Input, Button, message, Modal } from "antd";
+import { PhoneOutlined, LockOutlined } from "@ant-design/icons";
+
 import { updateUser } from "../../features/auth/authSlice";
+import { verifyToken, verifyOtp, verifyPhone } from '../../apis/Authentication/APIAuth';
 
 const FirstForm = ({ form, setIsPhoneVerified }) => {
 
@@ -230,7 +230,7 @@ const FirstForm = ({ form, setIsPhoneVerified }) => {
                     </div>
                 </Form.Item>
 
-                
+
                 <Modal
                     open={modalVisible}
                     onCancel={() => {

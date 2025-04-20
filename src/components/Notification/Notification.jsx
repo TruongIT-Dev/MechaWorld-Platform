@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { BellOutlined } from "@ant-design/icons";
 import { Tooltip } from "antd";
+import { BellOutlined } from "@ant-design/icons";
 
 const Notification = () => {
     const [isNotifyOpen, setIsNotifyOpen] = useState(false);

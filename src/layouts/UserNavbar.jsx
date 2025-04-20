@@ -1,15 +1,15 @@
 import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { NavLink } from "react-router-dom";
-import { logout } from "../features/auth/authSlice";
 import { FaUser, FaSignOutAlt, FaClipboardList, FaStore } from "react-icons/fa";
 
 import Cookies from "js-cookie";
 import PropTypes from 'prop-types';
 
 import CartContext from "./CartContext";
-import Notification from "../components/Notification/Notification";
 import ChatBox from "../components/Chat/ChatBox";
+import { logout } from "../features/auth/authSlice";
+import Notification from "../components/Notification/Notification";
 
 const UserNavbar = ({ user }) => {
 

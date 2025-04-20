@@ -1,8 +1,9 @@
 import { Avatar, Button } from "antd";
-import { UserOutlined, MessageOutlined } from "@ant-design/icons";
 import { FaStore } from "react-icons/fa";
 import { useEffect, useState } from "react";
-import { GetShopInfoById } from "../../apis/ProductDetail/APIProductDetail";
+import { UserOutlined, MessageOutlined } from "@ant-design/icons";
+
+import { GetShopInfoById } from "../../apis/Seller Profile/APISellerProfile";
 
 const ShopInfo = ({ shopID }) => {
     const [shopInfo, setShopInfo] = useState(null);

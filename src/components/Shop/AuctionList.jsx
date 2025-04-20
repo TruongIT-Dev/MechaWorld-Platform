@@ -1,8 +1,8 @@
-import { Table, Tag, Image } from "antd";
 import moment from "moment";
+import { Table, Tag, Image } from "antd";
+import { NavLink } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { TiEyeOutline } from "react-icons/ti";
-import { NavLink } from "react-router-dom";
 
 const AuctionList = () => {
   const [auctionData, setAuctionData] = useState([]);

@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { Form, Input, Button, Typography, Steps, message, Modal } from "antd";
 import { NavLink } from "react-router-dom";
+import { sendOTPEmail, signupEmail, verifyEmail, checkEmail } from "../../apis/Authentication";
+
 import Footer from "../../layouts/Footer";
 import Logo from '../../assets/image/logo4.png';
-import { sendOTPEmail, signupEmail, verifyEmail,checkEmail } from "../../apis/Auth/APIAuth";
 
 export default function SignUp() {
     const [form] = Form.useForm();

@@ -48,11 +48,14 @@ import {
   ShopAddress,
 
 } from "./routes/router";
+
 import Cookies from "js-cookie";
-import Spinner from "./components/Spinner";
-import { verifyToken } from "./apis/Auth/APIAuth";
 import { useDispatch } from "react-redux";
+
+import { verifyToken } from "./apis/Authentication/APIAuth";
 import { logout, updateUser } from "./features/auth/authSlice";
+
+import Spinner from "./components/Spinner";
 import PageLoading from "./components/PageLoading";
 import RequestList from "./components/Exchange/RequestList";
 

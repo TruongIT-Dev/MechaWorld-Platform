@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
-import { Collapse, Input, Radio, Slider } from "antd";
-import { GetGrades } from "../../apis/Product/APIProduct";
+import { Collapse, Input, Radio} from "antd";
+
+import { GetGrades } from "../../apis/Gundams/APIGundam";
 
 const { Panel } = Collapse;
 
@@ -10,7 +11,6 @@ const FilterSidebar = ({ onFilterChange }) => {
     const [error, setError] = useState("");
 
     const [condition, setCondition] = useState("all");
-    const [priceRange, setPriceRange] = useState([100, 1000]);
 
     // ************ Fetch ALL Grades *******************
     useEffect(() => {
@@ -31,8 +31,8 @@ const FilterSidebar = ({ onFilterChange }) => {
 
     // **************** Khi giá trị thay đổi, gọi hàm `onFilterChange` ***********************
     useEffect(() => {
-        onFilterChange({ selectedGrade, condition, priceRange });
-    }, [selectedGrade, condition, priceRange]);
+        onFilterChange({ selectedGrade, condition });
+    }, [selectedGrade, condition]);
     // ***************************************************************************************
 
     return (
@@ -75,21 +75,6 @@ const FilterSidebar = ({ onFilterChange }) => {
                         <Radio value="builded">Mô hình đã lắp ráp</Radio>
                         <Radio value="used">Đã qua sử dụng</Radio>
                     </Radio.Group>
-                </Panel>
-
-                {/* Khoảng giá */}
-                <Panel className="font-bold" header="Khoảng giá" key="3">
-                    <Slider
-                        range
-                        min={100}
-                        max={1000}
-                        defaultValue={priceRange}
-                        onChange={(value) => setPriceRange(value)}
-                    />
-                    <div className="flex justify-between text-sm mt-2">
-                        <span>${priceRange[0]}</span>
-                        <span>${priceRange[1]}</span>
-                    </div>
                 </Panel>
             </Collapse>
         </div>

@@ -1,38 +1,35 @@
-import { Button, Layout, Modal } from 'antd';
-import { Outlet, useNavigate } from 'react-router-dom';
-import { ExclamationCircleOutlined } from "@ant-design/icons";
+import { Layout } from 'antd';
+import { Outlet } from 'react-router-dom';
 
 import Navbar from '../layouts/Navbar';
 import Footer from '../layouts/Footer';
 
-import { useSelector } from 'react-redux';
-import { useEffect, useState } from 'react';
 
 const { Content } = Layout;
 
 const UserLayout = () => {
 
-    const [isPhoneNumberExisted, setIsPhoneNumberExisted] = useState(false);
+    // const [isPhoneNumberExisted, setIsPhoneNumberExisted] = useState(false);
 
-    const userInfo = useSelector((state) => state.auth.user);
-    const navigate = useNavigate();
+    // const userInfo = useSelector((state) => state.auth.user);
+    // const navigate = useNavigate();
 
     // console.log("userInfo:", userInfo);
 
-    useEffect(() => {
-        if (userInfo && !userInfo?.phone_number) {
-            setIsPhoneNumberExisted(true);
-        }
-    }, [userInfo]);
+    // useEffect(() => {
+    //     if (userInfo && !userInfo?.phone_number) {
+    //         setIsPhoneNumberExisted(true);
+    //     }
+    // }, [userInfo]);
 
-    const handleCancel = () => {
-        setIsPhoneNumberExisted(false);
-    };
+    // const handleCancel = () => {
+    //     setIsPhoneNumberExisted(false);
+    // };
 
-    const handleGoVerify = () => {
-        setIsPhoneNumberExisted(false);
-        navigate("/member/profile/account");
-    };
+    // const handleGoVerify = () => {
+    //     setIsPhoneNumberExisted(false);
+    //     navigate("/member/profile/account");
+    // };
 
 
     return (
@@ -52,7 +49,7 @@ const UserLayout = () => {
             </Layout>
 
 
-            <Modal
+            {/* <Modal
                 title="YÊU CẦU XÁC THỰC SỐ ĐIỆN THOẠI!"
                 open={isPhoneNumberExisted}
                 closable={false}
@@ -75,7 +72,7 @@ const UserLayout = () => {
                         <p className='text-base font-medium'> Bạn cần phải có Số điện thoại để có thể giao dịch GUNDAM.</p>
                     </div>
                 </div>
-            </Modal>
+            </Modal> */}
         </div>
 
     )

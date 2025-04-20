@@ -1,9 +1,9 @@
+import { Tooltip } from 'antd';
 import { useState } from 'react';
 import { Link } from "react-router-dom";
 import { useCart } from '../context/CartContext';
-
 import { ShoppingCartOutlined } from '@ant-design/icons';
-import { Tooltip } from 'antd';
+
 
 const CartContext = () => {
     const { cartItems, removeFromCart, loading, error } = useCart();

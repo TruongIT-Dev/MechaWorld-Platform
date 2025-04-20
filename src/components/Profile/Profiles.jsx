@@ -5,8 +5,8 @@ import {
   WalletOutlined, EditOutlined
 } from '@ant-design/icons';
 import { Menu, Layout } from 'antd';
-import { Outlet, Link, useLocation } from 'react-router-dom';
 import { useSelector } from 'react-redux';
+import { Outlet, Link, useLocation } from 'react-router-dom';
 
 export default function Profile() {
 

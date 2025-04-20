@@ -1,9 +1,11 @@
+import { CiEdit } from "react-icons/ci";
 import { Table, Tag, Image } from "antd";
+import { NavLink } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { TiEyeOutline } from "react-icons/ti";
-import { NavLink } from "react-router-dom";
-import { CiEdit } from "react-icons/ci";
 import { MdOutlineDeleteOutline } from "react-icons/md";
+
+
 const AuctionRequests = () => {
   const [requestData, setRequestData] = useState([]);
 

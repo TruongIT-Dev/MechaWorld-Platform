@@ -42,6 +42,9 @@ axios.interceptors.response.use((response) => {
 });
 
 
+// ************ GET - POST - PUT - PATCH - DELETE **************
+
+// POST Create ZaloPay order
 export const AddMoney = async (amount, description, redirectUrl) => {
     try {
         // Kiểm tra các tham số đầu vào
@@ -75,6 +78,7 @@ export const AddMoney = async (amount, description, redirectUrl) => {
     }
 };
 
-export const GetMoney = async (id) => {
-    return axios.get(`users/${id}/wallet/`);
-}
+
+// export const GetMoney = async (id) => {
+//     return axios.get(`users/${id}/wallet/`);
+// }

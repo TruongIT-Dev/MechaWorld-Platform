@@ -1,8 +1,9 @@
-import { useEffect, useState } from "react";
-import { Table, Row, Input, Tag, Button, Dropdown, Modal, message, Upload, Space, Tooltip } from "antd";
-import { StopOutlined, EllipsisOutlined, UserOutlined, DollarOutlined, WalletOutlined, BankOutlined, MobileOutlined, CreditCardOutlined, ClockCircleOutlined, CheckCircleOutlined, GiftOutlined, CarOutlined, FileTextOutlined, CheckOutlined, CloseCircleOutlined, QuestionCircleOutlined, MessageOutlined, EyeOutlined } from "@ant-design/icons";
-import { getOrder, confirmOrder, packagingOrder } from "../../apis/Order/APIOrder";
 import { useSelector } from "react-redux";
+import { useEffect, useState } from "react";
+import { Table, Row, Tag, Button, Dropdown, Modal, message, Upload, Space, Tooltip } from "antd";
+import { StopOutlined, EllipsisOutlined, UserOutlined, DollarOutlined, WalletOutlined, BankOutlined, MobileOutlined, CreditCardOutlined, ClockCircleOutlined, CheckCircleOutlined, GiftOutlined, CarOutlined, FileTextOutlined, CheckOutlined, CloseCircleOutlined, QuestionCircleOutlined, MessageOutlined, EyeOutlined } from "@ant-design/icons";
+
+import { GetOrder, ConfirmOrder, PackagingOrder } from "../../apis/Sellers/APISeller";
 
 // Trạng thái đơn hàng với màu sắc tương ứng
 const orderStatusColors = {
@@ -214,7 +215,7 @@ function ShopOrderManagement() {
   const handleAction = async (record, actionKey) => {
     if (actionKey === "accept") {
       try {
-        const response = await confirmOrder(record.seller_id, record.id);
+        const response = await ConfirmOrder(record.seller_id, record.id);
         if (response.status === 200) {
           message.success("Đơn hàng đã được chấp nhận!");
           setOrders((prevOrders) =>
@@ -251,7 +252,7 @@ function ShopOrderManagement() {
     const fetchOrders = async () => {
       // Giả lập gọi API để lấy dữ liệu đơn hàng
 
-      const response = await getOrder(userId);
+      const response = await GetOrder(userId);
       console.log("Orders: ", response.data);
       setOrderData(response.data);
     };
@@ -268,7 +269,7 @@ function ShopOrderManagement() {
         formData.append("package_images", file.originFileObj);
       });
 
-      const response = await packagingOrder(sellerId, orderId, formData);
+      const response = await PackagingOrder(sellerId, orderId, formData);
 
       console.log("Packaging response: ", response.data);
       if (response.status === 200) {

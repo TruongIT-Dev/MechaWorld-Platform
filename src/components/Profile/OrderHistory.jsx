@@ -1,7 +1,9 @@
 import { useState, useEffect } from "react";
 import { Tabs, Input, Card, Button, Tag, Avatar, Spin, message } from "antd";
 import { SearchOutlined, ShopOutlined, MessageOutlined } from "@ant-design/icons";
-import { GetListOrderHistory, GetShopInfoById } from "../../apis/Get";
+
+import { GetListOrderHistory } from "../../apis/Orders/APIOrder";
+import { GetShopInfoById } from "../../apis/Seller Profile/APISellerProfile";
 
 const { Search } = Input;
 
