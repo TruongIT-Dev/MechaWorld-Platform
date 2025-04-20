@@ -5,23 +5,18 @@ import { MoreOutlined, PlusOutlined } from "@ant-design/icons";
 import { ExclamationCircleOutlined } from '@ant-design/icons';
 import { Table, Row, Button, Select, Input, Modal, Dropdown, Form, Tag, Col, Typography } from "antd";
 
-import { GetGundamByID, SellingGundam, RestoreGundam } from "../../apis/Sellers/APISeller";
-
+import { SellingGundam, RestoreGundam } from "../../apis/Sellers/APISeller";
+import { GetGundamByID } from '../../apis/User/APIUser';
 
 function ShopProduct({
   // isCreating,
   setIsCreating }) {
-  // const user = JSON.parse(Cookies.get("user"));
   const user = useSelector((state) => state.auth.user);
-  // console.log("checking user data",user);
   const [gundamList, setGundamList] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
   const [sellModalVisible, setSellModalVisible] = useState(false);
   // const [selectedProduct, setSelectedProduct] = useState(null);
   const [form] = Form.useForm();
-  // Bộ lọc giá tiền & phân khúc
-  // const [minPrice, setMinPrice] = useState(null);
-  // const [maxPrice, setMaxPrice] = useState(null);
   const [selectedCondition, setSelectedCondition] = useState(null);
   const [selectedGrade, setSelectedGrade] = useState(null);
   // const [openMenuId, setOpenMenuId] = useState(null);
@@ -48,13 +43,8 @@ function ShopProduct({
       });
   }, []);
   const handleSellProduct = (product) => {
-    // setSelectedProduct(product);
-    // const data = GetSellerStatus(user.id);
-    // console.log(data);
     // console.log("data đã lưu: ",product);
-    // const checkDate = GetSellerData(user.id);
-    // console.log("Data id: ", checkDate);
-    SellingGundam(user.id, product.id).catch(response => {
+    SellingGundam(user.id, product.gundam_id).catch(response => {
       console.log(response);
     })
     window.location.reload();
@@ -81,7 +71,7 @@ function ShopProduct({
 
       case "unsell":
         console.log("🚫 Hủy bán sản phẩm:", record);
-        RestoreGundam(user.id, record.id).catch(response => {
+        RestoreGundam(user.id, record.gundam_id).catch(response => {
           console.log(response);
         })
         window.location.reload();
@@ -282,9 +272,10 @@ function ShopProduct({
         const menuItems = [
           { key: "edit", label: "✏️ Chỉnh sửa sản phẩm", },
           { key: "preview", label: "👁️ Xem trước ", },
-          { key: "delete", label: "❌ xóa sản phẩm", },
         ];
-
+        if  (record.status === "in store") {
+          menuItems.push({ key: "delete", label: "❌ xóa sản phẩm" });
+        }
         if (record.status === "published") {
           menuItems.push({ key: "unsell", label: "🚫 Hủy bán sản phẩm" });
         }

@@ -25,10 +25,6 @@ export const GetSellerStatus = (id) => {
 }
 
 
-// GET ...
-export const GetGundamByID = (id, gundamName) => {
-    return axios.get(`/sellers/${id}/gundams?name=${gundamName}`)
-}
 
 
 

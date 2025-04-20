@@ -81,7 +81,7 @@ const ShopProductCreate = ({ setIsCreating }) => {
   const version = [
     {id: "Standard / Regular", name: "Standard / Regular", note : "Phiên bản cơ bản, phổ thông nhất được bán rộng rãi."},
     {id: "Ver.Ka (Version Katoki)", name: "Ver.Ka (Version Katoki)", note : "Do Hajime Katoki thiết kế lại, nổi bật với chi tiết máy cao, decal nhiều, form dáng “ngầu” hơn bản gốc. Rất được ưa chuộng trong MG / PG."},
-    {id: "", name: "", note : "Phiên bản giới hạn, chỉ bán qua website Bandai hoặc sự kiện, giá cao và hiếm."},
+    {id: "P-Bandai (Premium Bandai)", name: "P-Bandai (Premium Bandai)", note : "Phiên bản giới hạn, chỉ bán qua website Bandai hoặc sự kiện, giá cao và hiếm."},
     {id: "Limited Version", name: "Limited Version", note : "Phiên bản đặc biệt, phát hành giới hạn tại sự kiện như Expo, WonderFest,... Có thể là màu lạ, metallic, clear,..."},
     {id: "Clear Version / Translucent", name: "Clear Version / Translucent", note : "Phiên bản nhựa trong suốt (Clear) để thấy rõ chi tiết bên trong. Chủ yếu để trưng bày, ít phù hợp chơi/lắp nhiều."},
     {id: "Metallic / Chrome Version", name: "Metallic / Chrome Version", note : "Sơn ánh kim hoặc mạ chrome sáng bóng, rất bắt mắt."},
@@ -93,11 +93,6 @@ const ShopProductCreate = ({ setIsCreating }) => {
   ]
   // Danh sách phân khúc Gundam
   const scaleOptions = ["1/144", "1/100", "1/60", "1/48"];
-//   const conditionOptions = {
-//     new: "Hộp mới nguyên dạng, chưa bóc seal, linh kiện không bị hư hại, đủ phụ kiện đi kèm",
-//     "open box": "Đã mở hộp, có thể đã thiếu phụ kiện hoặc có vết trầy xước nhẹ",
-//     "used": "Sản phẩm đã qua sử dụng, có dấu hiệu hao mòn hoặc đã được lắp ráp",
-//   };
   useEffect(() => {
     GetGrades()
       .then((response) => {
@@ -209,6 +204,7 @@ const handleFinish = (values) => {
     formData.append("material", values.material);
     formData.append("scale", values.scale);
     formData.append("version", values.version);
+    formData.append("release_year", values.release_year || "");
     formData.append("weight", values.weight);
     formData.append("description", values.description);
     formData.append("price", values.price);
@@ -231,17 +227,11 @@ const handleFinish = (values) => {
         const accessoryData = JSON.stringify({ name: item.name, quantity: item.quantity });
         formData.append("accessory", accessoryData);
       });
-    // Thêm ảnh phụ (secondary_images[])
-    // images
-    //   .filter((img) => img.url !== primaryImage)
-    //   .forEach((img) => {
-    //     formData.append(`secondary_images`, img.file);
-    //   });
-    //   console.log(formData);
+
     PostGundam(user.id, formData)
     .then((response) => {
       hideLoading();
-      if (response.status === 200) {
+      if (response.status === 201) {
         message.success("Sản phẩm đã được đăng ký thành công!");
         form.resetFields();
         setPrimaryImage(null);
@@ -385,6 +375,13 @@ const handleFinish = (values) => {
           className="col-span-6"
         >
           <Input placeholder="VD: Bandai, Kotobukiya..." />
+        </Form.Item>
+        <Form.Item
+          name="release_year"
+          label="Năm phát hành"
+          className="col-span-6"
+        >
+          <InputNumber placeholder="VD: 2021, 2000..." />
         </Form.Item>
 
         {condition === 'new' && (
