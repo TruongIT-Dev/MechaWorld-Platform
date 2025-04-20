@@ -41,6 +41,11 @@ export default function Profile() {
       icon: <WalletOutlined className="text-lg text-green-500" />,
       label: <Link to="/member/profile/wallet">Số dư & Giao dịch</Link>,
     },
+    {
+      key: "/member/profile/collection",
+      icon: <WalletOutlined className="text-lg text-green-500" />,
+      label: <Link to="/member/profile/collection">Bộ sưu tầm</Link>,
+    },
   ];
 
   return (

@@ -29,6 +29,7 @@ import {
   AutionDetail,
   AddProductToAution,
   ListProductToAution,
+  GundamCollection,
   CensorProductToAution,
   ModeratorLayout,
   SignUp,
@@ -140,6 +141,7 @@ function App() {
               <Route path="address-setting" element={<SettingAddress />} />
               <Route path="addProductAution" element={<AddProductToAution />} />
               <Route path="listProductAution" element={<ListProductToAution />} />
+              <Route path="collection" element={<GundamCollection />} />
             </Route>
 
             {/* Shop Route */}
