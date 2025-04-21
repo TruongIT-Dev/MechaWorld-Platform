@@ -31,9 +31,15 @@ const ProductInfo = ({ info, assessories = [] }) => {
 
     // Product details for display
     const productDetails = [
-        { label: "Tỉ lệ", value: info?.scale },
         { label: "Phân khúc", value: info?.grade },
+        { label: "Tỉ lệ", value: info?.scale },
+        { label: "Vật liệu sản xuất", value: info?.material },
+        { label: "Tổng số mảnh", value: info?.parts_total + " mảnh" },
+        { label: "Seire Phim", value: info?.series },
+        { label: "Phiên bản", value: info?.version },
         { label: "Khối lượng", value: info?.weight ? `${info.weight} (gam)` : "" },
+        { label: "Nhà sản xuất", value: info?.manufacturer },
+        { label: "Năm sản xuất", value: info?.release_year },
         {
             label: "Phụ kiện đi kèm",
             value: assessories?.length > 0
@@ -58,7 +64,6 @@ const ProductInfo = ({ info, assessories = [] }) => {
             hasDetails: assessories?.length > 0,
             isDropdown: assessories?.length > 0
         },
-        { label: "Nhà sản xuất", value: info?.manufacturer }
     ];
 
     return (
@@ -120,16 +125,12 @@ const ProductInfo = ({ info, assessories = [] }) => {
                                                             <td style={{
                                                                 padding: '4px 16px',
                                                                 textAlign: 'left',
-                                                                // borderTop: idx === 0 ? '1px solid #f0f0f0' : 'none',
-                                                                // borderBottom: idx === assessories.length - 1 ? 'none' : '1px dashed #f0f0f0'
                                                             }}>
                                                                 <Text className="text-gray-400">+ {item.name}</Text>
                                                             </td>
                                                             <td style={{
                                                                 padding: '4px 0',
                                                                 textAlign: 'right',
-                                                                // borderTop: idx === 0 ? '1px solid #f0f0f0' : 'none',
-                                                                // borderBottom: idx === assessories.length - 1 ? 'none' : '1px dashed #f0f0f0'
                                                             }}>
                                                                 <Text className="text-gray-400">x {item.quantity}</Text>
                                                             </td>
