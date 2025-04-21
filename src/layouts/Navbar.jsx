@@ -30,7 +30,7 @@ const Menu = [
   {
     id: 5,
     name: "Bộ Sưu Tập",
-    link: "/collection",
+    link: "/collection/list",
   },
 ];
 

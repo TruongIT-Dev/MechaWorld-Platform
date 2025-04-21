@@ -59,7 +59,7 @@ const CartContext = () => {
                 <div className="mt-4 border-t pt-4 flex flex-col gap-3 sticky bottom-0 bg-white py-4">
                     <div className="flex justify-between items-center">
                         <span className="font-semibold">Tổng:</span>
-                        <span className="font-semibold text-red-500">{calculateTotal()}vnd</span>
+                        <span className="font-semibold text-red-500">{calculateTotal()}đ</span>
                     </div>
                     <Link to='/cart' className="bg-gray-200 text-center py-3 rounded-lg hover:bg-gray-300">Xem Chi Tiết Giỏ Hàng</Link>
                     <Link to='/checkout' className="bg-black text-white text-center py-3 rounded-lg hover:bg-gray-800">Thanh Toán</Link>
