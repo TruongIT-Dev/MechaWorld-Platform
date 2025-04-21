@@ -191,7 +191,9 @@ function ListCollection({}) {
     <div className="px-[50px]"> {/* Di chuyển margin ra container cha */}
         <h2 className="text-[36px] font-bold text-gray-800 mb-12">Bộ Sưu Tập</h2>
         <Row gutter={[24, 24]} justify="start">
-            {filteredData.map((item) => (
+            {filteredData
+            .filter(item => ["published", "in store"].includes(item.status))
+            .map((item) => (
             <Col 
                 xs={24} 
                 sm={12} 
@@ -239,50 +241,57 @@ function ListCollection({}) {
 
     {/* Hàng đang bán */}
     {userRole === 'seller' && (
-            <div>
-            <h2 className="ml-[50px] text-[36px] mt-10 font-bold text-gray-800 mb-12">Hàng đang bán</h2>
-            <Row gutter={[24, 24]}>
-            {filteredData
-            .filter(item => item.status === "published")
-            .map((item) => (
-                <Col xs={24} sm={12} md={8} lg={6} key={item.gundam_id} className='ml-[50px]'>
-                <Card
-                    hoverable
-                    cover={
-                    <div className="h-64 bg-gray-200 flex items-center justify-center overflow-hidden">
-                        <img 
-                        alt={item.name} 
-                        src={item.primary_image_url} 
-                        className="object-cover w-full h-full"
-                        />
-                    </div>
-                    }
-                    actions={[
-                    <HeartOutlined key="wishlist" className="text-red-500" />,
-                    <ShoppingCartOutlined key="cart" />,
-                    ]}
-                    className="h-full flex flex-col" // Thêm class này
-                    bodyStyle={{ flex: 1 }} // Thêm style này
-                >
-                    <Card.Meta
-                    title={<span className="font-bold">{item.name}</span>}
-                    description={
-                        <>
-                        <span className="text-gray-600">{item.grade}</span>
-                        <div className="mt-2 text-lg font-semibold text-blue-600">
-                            {item.price?.toLocaleString()} đ
-                        </div>
-                        <div className="mt-2 min-h-[80px]"> {/* Thêm min-height cho phần nút */}
-                            {renderStatusButton(item)}
-                        </div>
-                        </>
+        <div className="px-[50px]"> {/* Di chuyển margin ra container cha */}
+          <h2 className="text-[36px] font-bold text-gray-800 mb-12">Hàng đang bán</h2>
+          <Row gutter={[24, 24]} justify="start">
+              {filteredData
+              .filter(item => ["published"].includes(item.status))
+              .map((item) => (
+              <Col 
+                  xs={24} 
+                  sm={12} 
+                  md={8} 
+                  lg={6} 
+                  key={item.gundam_id}
+                  className="flex justify-center" // Thêm flex để căn giữa
+              >
+                  <Card
+                  hoverable
+                  cover={
+                      <div className="h-64 bg-gray-200 flex items-center justify-center overflow-hidden">
+                      <img 
+                          alt={item.name} 
+                          src={item.primary_image_url} 
+                          className="object-cover w-full h-full"
+                      />
+                      </div>
+                  }
+                  actions={[
+                      <HeartOutlined key="wishlist" className="text-red-500" />,
+                      <ShoppingCartOutlined key="cart" />,
+                  ]}
+                  className="h-full w-full max-w-[300px] flex flex-col" // Thêm max-width và w-full
+                  bodyStyle={{ flex: 1 }}
+                  >
+                  <Card.Meta
+                      title={<span className="font-bold">{item.name}</span>}
+                      description={
+                          <>
+                          <span className="text-gray-600">{item.grade}</span>
+                          <div className="mt-2 text-lg font-semibold text-blue-600">
+                              {item.price?.toLocaleString()} đ
+                          </div>
+                          <div className="mt-2 min-h-[80px]"> {/* Thêm min-height cho phần nút */}
+                              {renderStatusButton(item)}
+                          </div>
+                          </>
                     }
                     />
-                </Card>
-                </Col>
-            ))}
-            </Row>
-        </div>
+                  </Card>
+              </Col>
+              ))}
+          </Row>
+      </div>
     )}
 
     </div>
