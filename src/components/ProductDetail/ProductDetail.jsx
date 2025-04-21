@@ -21,7 +21,6 @@ const GundamProductPage = () => {
 
     const [detailGundam, setDetailGundam] = useState([]);
     const [accessories, setAccessories] = useState([]);
-
     const [idGundam, setIdGundam] = useState(null);
     const [loadingAdded, setLoadingAdded] = useState(false);
     const [added, setAdded] = useState(false);
@@ -54,9 +53,11 @@ const GundamProductPage = () => {
                 }
                 setDetailGundam(gundamData);
                 setAccessories(assessoriesData);
-                setIdGundam(gundamData?.id || null);
+                setIdGundam(gundamData?.gundam_id || null);
                 setShopId(gundamData?.owner_id || []);
-                setImageGundam(gundamData?.image_urls || []);
+                const updatedImages = [gundamData?.primary_image_url || "", ...(gundamData?.secondary_image_urls || [])];
+                setImageGundam(updatedImages);
+
             } catch (error) {
                 console.log("Fail to fetch detail gundam: No data detected!");
             }

@@ -27,7 +27,7 @@ const Product = () => {
                     // console.log("Trigger Filter Gundam:", response);
                 } else {
                     response = await GetGundams();
-                    // console.log("Trigger List All Gundam:", response);
+                    console.log("Trigger List All Gundam:", response);
                 }
 
                 let filteredData = response?.data || [];
@@ -141,7 +141,7 @@ const Product = () => {
                                                                 <img
                                                                     className="w-[400px] h-[150px] object-cover cursor-pointer transform transition-transform duration-500 hover:scale-110"
                                                                     alt="example"
-                                                                    src={gundam?.image_urls?.[0] || "https://via.placeholder.com/150"}
+                                                                    src={gundam?.primary_image_url || "https://via.placeholder.com/150"}
                                                                 />
                                                             </div>
                                                         }

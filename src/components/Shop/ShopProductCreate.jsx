@@ -105,73 +105,7 @@ const ShopProductCreate = ({ setIsCreating }) => {
   const handlePriceChange = (value) => {
     setPrice(value);
   };
-  // Xử lý khi người dùng chọn ảnh
-//   const handleImageUpload = ({ file }) => {
-//     if (images.length >= 5) {
-//       message.error("Chỉ được chọn tối đa 5 ảnh!");
-//       return;
-//     }
 
-//     const reader = new FileReader();
-//     reader.onload = (e) => {
-//       const newImage = { url: e.target.result, file };
-//       setImages([...images, newImage]);
-
-//       // Nếu chưa có ảnh chính, đặt ảnh đầu tiên làm ảnh chính
-//       if (!primaryImage) setPrimaryImage(e.target.result);
-//     };
-//     reader.readAsDataURL(file);
-//   };
-
-  // Xóa ảnh khỏi danh sách
-//   const handleRemoveImage = (index) => {
-//     const newImages = images.filter((_, i) => i !== index);
-//     setImages(newImages);
-
-//     // Nếu ảnh chính bị xóa, chọn ảnh đầu tiên còn lại làm ảnh chính
-//     // if (images[index].url === primaryImage && newImages.length > 0) {
-//     //   setPrimaryImage(newImages[0].url);
-//     // } else if (newImages.length === 0) {
-//     //   setPrimaryImage(null);
-//     // }
-//   };
-
-  // Xử lý giá trị tiền tệ (12,000 VNĐ)
-//   const formatPrice = (value) => {
-//     return value.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-//   };
-
-// const handleFinish = (values) => {
-//     console.log("Dữ liệu nhập:", values); // Kiểm tra dữ liệu đã nhập trước khi gửi API
-  
-//     const productData = {
-//       ...values,
-//       user_id: user.id,
-//       condition_description: conditionOptions[values.condition] || values.condition_description,
-//       primary_image: images.find((img) => img.url === primaryImage)?.file || null,
-//       secondary_images: images.filter((img) => img.url !== primaryImage).map((img) => img.file),
-//     };
-  
-//     console.log("Dữ liệu gửi API:", productData); // Kiểm tra dữ liệu gửi API
-  
-//     if (!productData.primary_image) {
-//       message.error("Vui lòng chọn ít nhất 1 ảnh làm ảnh chính!");
-//       return;
-//     }
-  
-//     PostGundam(user.id, productData)
-//       .then(() => {
-//         message.success("Sản phẩm đã được đăng ký thành công!");
-//         form.resetFields();
-//         setImages([]);
-//         setPrimaryImage(null);
-//         setIsCreating(false);
-//       })
-//       .catch((err) => {
-//         message.error("Lỗi đăng ký sản phẩm: " + err.message);
-//         console.log(err);
-//       });
-//   };
 //  Xử lý thêm dòng nhập phụ kiện
 const handleAddAccessory = () => {
     setAccessories([...accessories, { name: "", quantity: 1 }]);
@@ -247,13 +181,6 @@ const handleFinish = (values) => {
         setIsUploading(false); // Tắt trạng thái loading
     });
   };
-//   const handlePrimaryImageUpload = ({ file }) => {
-//     const reader = new FileReader();
-//     reader.onload = (e) => {
-//       setPrimaryImage({ url: e.target.result, file }); // Lưu ảnh bìa
-//     };
-//     reader.readAsDataURL(file);
-//   };
   
 
   return (
