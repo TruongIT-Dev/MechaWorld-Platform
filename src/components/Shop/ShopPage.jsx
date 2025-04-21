@@ -68,7 +68,7 @@ export default function ShopPage() {
   useEffect(() => {
 
     GetSellerStatus(user.id).then((res) => {
-      console.log("Seller Status Data: ", res.data);
+      // console.log("Seller Status Data: ", res.data);
       setSellerPlan(res.data);
     }).catch((error) => {
       console.error("Error fetching seller status: ", error);
@@ -76,7 +76,7 @@ export default function ShopPage() {
 
 
     GetShopInfoById(user.id).then((res) => {
-      console.log("Seller Data: ", res.data);
+      // console.log("Seller Data: ", res.data);
       setSellerData(res.data);
     }).catch((error) => {
       console.error("Error fetching seller data: ", error);

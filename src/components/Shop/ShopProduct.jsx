@@ -15,7 +15,7 @@ function ShopProduct({
   const [gundamList, setGundamList] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
   const [sellModalVisible, setSellModalVisible] = useState(false);
-  // const [selectedProduct, setSelectedProduct] = useState(null);
+  const [selectedProduct, setSelectedProduct] = useState(null);
   const [form] = Form.useForm();
   const [selectedCondition, setSelectedCondition] = useState(null);
   const [selectedGrade, setSelectedGrade] = useState(null);
@@ -36,7 +36,8 @@ function ShopProduct({
       .then((response) => {
         setGundamList(response.data);
         setFilteredData(response.data);
-        console.log("Dử liệu lọc: ", filteredData);
+        // console.log("Dử liệu lọc: ", filteredData);
+        console.log("Dử liệu gundam: ", gundamList);
       })
       .catch((error) => {
         console.error("Lỗi khi lấy danh sách sản phẩm:", error);
@@ -171,17 +172,19 @@ function ShopProduct({
 
         const showConfirmModal = () => {
           setConfirmSell(true);
+          setSelectedProduct(value);
         };
 
         const handleConfirmSellProduct = async () => {
           setIsConfirmedSell(true);
           try {
-            await handleSellProduct(value);
+            await handleSellProduct(selectedProduct);
             setConfirmSell(false);
           } catch (error) {
             console.error("Lỗi khi đăng bán sản phẩm:", error);
           } finally {
             setIsConfirmedSell(false);
+            setSelectedProduct(null);
           }
         };
 
