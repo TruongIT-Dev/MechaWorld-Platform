@@ -15,7 +15,7 @@ const UserNavbar = ({ user }) => {
 
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     let timeoutId = null;
-
+    console.log(user);
     // const navigate = useNavigate();
     const dispatch = useDispatch();
 

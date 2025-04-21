@@ -39,8 +39,8 @@ const OrderHistory = () => {
       const rawOrders = response.data;
 
       // Lấy danh sách seller_id duy nhất
-      const sellerIds = [...new Set(rawOrders.map(o => o.seller_id))];
-      console.log(sellerIds);
+      const sellerIds = [...new Set(rawOrders.map(o => o.order.seller_id))];
+      // console.log(sellerIds);
       // Gọi song song API lấy thông tin shop
       const sellerInfoMap = {};
       await Promise.all(sellerIds.map(async (id) => {
@@ -52,26 +52,28 @@ const OrderHistory = () => {
 
       // Gom đơn theo shop
       const grouped = rawOrders.reduce((acc, order) => {
-        const sellerId = order.seller_id;
+        console.log(sellerInfoMap);
+        console.log('dta', order)
+        const sellerId = sellerIds;
         if (!acc[sellerId]) {
-          const shopInfo = sellerInfoMap[sellerId];
+          const shopInfo = sellerInfoMap[sellerId[0]];
           acc[sellerId] = {
-            shopName: shopInfo.full_name,
+            shopName: shopInfo.shop_name,
             shopIcon: shopInfo.avatar_url,
-            status: convertStatus(order.status),
-            statusColor: getStatusColor(order.status),
+            status: convertStatus(order.order.status),
+            statusColor: getStatusColor(order.order.status),
             orders: [],
-            totalPrice: formatCurrency(order.total_amount),
+            totalPrice: formatCurrency(order.order.total_amount),
           };
         }
 
         acc[sellerId].orders.push({
           id: order.id,
-          productName: `Đơn hàng #${order.code}`,
-          image: "https://source.unsplash.com/100x100/?product",
+          productName: `Đơn hàng #${order.order.code}`,
+          image: order.order_items[0].image_url || "https://source.unsplash.com/100x100/?product",
           // image: "https://source.unsplash.com/100x100/?package",
           quantity: 1,
-          price: formatCurrency(order.total_amount),
+          price: formatCurrency(order.order.total_amount),
         });
 
         return acc;
