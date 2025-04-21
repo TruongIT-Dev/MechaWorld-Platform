@@ -6,7 +6,7 @@ import { ShoppingCartOutlined, HeartOutlined, MoreOutlined, PlusOutlined, Exclam
 import { SellingGundam, RestoreGundam } from "../../apis/Sellers/APISeller";
 import { GetGundamByID } from '../../apis/User/APIUser';
 
-const Collection = ({ setIsCreating }) => {
+const GundamCollection = ({ setIsCreating }) => {
   const user = useSelector((state) => state.auth.user);
   const [gundamList, setGundamList] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
@@ -329,8 +329,8 @@ const Collection = ({ setIsCreating }) => {
   );
 };
 
-Collection.propTypes = {
+GundamCollection.propTypes = {
   setIsCreating: PropTypes.func.isRequired,
 };
 
-export default Collection;
+export default GundamCollection;
