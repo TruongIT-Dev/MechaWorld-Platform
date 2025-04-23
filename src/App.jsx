@@ -3,7 +3,6 @@ import { Suspense, useEffect } from "react";
 // import router
 import {
   HomePage,
-  ErrorPage,
   ProductPage,
   SignIn,
   ProfilePage,
@@ -46,6 +45,7 @@ import {
   Collection,
   ShopInfo,
   ShopAddress,
+  PageNotFound,
 
 } from "./routes/router";
 
@@ -156,8 +156,8 @@ function App() {
 
 
             {/* Error route */}
-            <Route path="error" element={<ErrorPage />} />
-            <Route path="*" element={<ErrorPage />} />
+            <Route path="error" element={<PageNotFound />} />
+            <Route path="*" element={<PageNotFound />} />
           </Route>
 
           {/* Những Route khác */}

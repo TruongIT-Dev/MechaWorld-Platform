@@ -89,6 +89,6 @@ export const ModExchanges = React.lazy(() => import("../components/Moderator/Mod
 
 
 // 404 page route
-export const ErrorPage = React.lazy(() => import("../components/Error"));
+export const PageNotFound = React.lazy(() => import("../components/Errors/PageNotFound"));
 
 

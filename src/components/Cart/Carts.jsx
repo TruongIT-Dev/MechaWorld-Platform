@@ -1,18 +1,26 @@
 import { useState } from 'react';
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useCart } from '../../context/CartContext';
 import { Button, Checkbox, Card, Divider, Spin } from 'antd';
 import { ShopOutlined, DeleteOutlined, ShoppingCartOutlined, RightOutlined, ShoppingOutlined } from '@ant-design/icons';
 
 import EmptyCart from "../../assets/image/empty-cart.png";
+import { useSelector } from 'react-redux';
+import { ShowErrorModal } from '../Errors/ErrorModal';
 
 const Carts = () => {
   const { cartItems, removeFromCart, loading } = useCart();
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const [selectAll, setSelectAll] = useState(false);
 
+
+  const user = useSelector((state) => state.auth.user);
+  const navigate = useNavigate();
+
+
   // Nhóm sản phẩm theo seller_name
   const groupedCartItems = groupCartItemsBySeller(cartItems);
+
 
   // Xử lý chọn tất cả
   const handleSelectAll = (e) => {
@@ -21,12 +29,14 @@ const Carts = () => {
     setSelectedRowKeys(checked ? cartItems.map(item => item.cart_item_id) : []);
   };
 
+
   // Tính tổng tiền
   const totalPrice = () => {
     return cartItems
       .filter(item => selectedRowKeys.includes(item.cart_item_id))
       .reduce((sum, item) => sum + item.gundam_price, 0);
   };
+
 
   // Xử lý chọn một mục
   const handleSelectItem = (cartItemId) => {
@@ -38,11 +48,28 @@ const Carts = () => {
     setSelectAll(newSelectedRowKeys.length === cartItems.length);
   };
 
+
   // Xử lý xóa sản phẩm
   const handleRemoveItem = (cartItemId) => {
     removeFromCart(cartItemId);
+
     // Cập nhật selectedRowKeys sau khi xóa
     setSelectedRowKeys(selectedRowKeys.filter(key => key !== cartItemId));
+  };
+
+
+  //Check xem User đã Đăng ký Số điện thoại trước khi chuyển trang 
+  const handleCheckout = () => {
+    if (!user?.phone_number) {
+      ShowErrorModal(400, 'phone_number required');
+      return;
+    }
+
+    const selectedItems = cartItems.filter(item =>
+      selectedRowKeys.includes(item.cart_item_id)
+    );
+
+    navigate('/checkout', { state: { selectedItems } });
   };
 
   if (loading) {
@@ -83,7 +110,6 @@ const Carts = () => {
       </div>
     );
   }
-  // console.log("Selected items to checkout:", cartItems.filter(item => selectedRowKeys.includes(item.cart_item_id)));
 
   return (
     <div className="container mx-auto mt-36 mb-20 px-4">
@@ -174,24 +200,16 @@ const Carts = () => {
               <span className="text-xl font-bold text-red-500">{totalPrice().toLocaleString()} VNĐ</span>
             </div>
 
-            <Link
-              to={{
-                pathname: "/checkout",
-                state: {
-                  selectedItems: cartItems.filter(item => selectedRowKeys.includes(item.cart_item_id))
-                }
-              }}
+            <Button
+              type="primary"
+              size="large"
+              icon={<RightOutlined />}
+              className="bg-red-500 border-none flex items-center"
+              disabled={selectedRowKeys.length === 0}
+              onClick={handleCheckout}
             >
-              <Button
-                type="primary"
-                size="large"
-                icon={<RightOutlined />}
-                className="bg-red-500 border-none flex items-center"
-                disabled={selectedRowKeys.length === 0}
-              >
-                Mua Hàng
-              </Button>
-            </Link>
+              Mua Hàng
+            </Button>
           </div>
         </div>
       </div>

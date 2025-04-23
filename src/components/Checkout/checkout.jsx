@@ -12,6 +12,7 @@ import { getUserAddresses, postUserAddresses, updateAddress } from '../../apis/U
 import axios from 'axios';
 import Cookies from 'js-cookie';
 import footerLogo from "../../assets/image/icon/iconwallet.png";
+import { ShowErrorModal } from '../Errors/ErrorModal';
 
 const { Option } = Select;
 
@@ -35,7 +36,7 @@ const Checkout = () => {
   const { cartItems } = useCart();
   const [userAddress, setUserAddress] = useState(null);
   const [paymentMethod, setPaymentMethod] = useState('wallet');
-  const [showPaymentOptions, setShowPaymentOptions] = useState(false);
+  // const [showPaymentOptions, setShowPaymentOptions] = useState(false);
   const [loading, setLoading] = useState(true);
   const [note, setNote] = useState('');
   const [isAddressModalVisible, setIsAddressModalVisible] = useState(false);
@@ -93,7 +94,7 @@ const Checkout = () => {
           headers: {
             'Content-Type': 'application/json',
             'token': import.meta.env.VITE_GHN_TOKEN_API,
-            'shop_id': import.meta.env.VITE_GHN_SHOP_ID // 
+            'shop_id': import.meta.env.VITE_GHN_SHOP_ID
           }
         }
       );
@@ -120,17 +121,22 @@ const Checkout = () => {
       );
 
       const leadTimeData = leadTimeResponse.data.data;
+      // console.log("leadTimeData", leadTimeData);
+
       const deliveryDate = new Date();
       deliveryDate.setDate(deliveryDate.getDate() + leadTimeData.leadtime);
+
       setRawExpectedDeliveryDate(deliveryDate); // Lưu đối tượng Date gốc
       setExpectedDeliveryDate(formatDeliveryDate(deliveryDate)); // Lưu chuỗi đã định dạng
 
     } catch (error) {
       console.error('Lỗi khi tính phí vận chuyển:', error);
       message.error('Không thể tính phí vận chuyển. Vui lòng thử lại sau.');
+
       const fallbackDate = new Date();
       fallbackDate.setDate(fallbackDate.getDate() + 3);
-      setRawExpectedDeliveryDate(deliveryDate); // Lưu đối tượng Date gốc
+
+      setRawExpectedDeliveryDate(fallbackDate); // Lưu đối tượng Date gốc
       setExpectedDeliveryDate(formatDeliveryDate(fallbackDate));
     } finally {
       setIsCalculatingShipping(false);
@@ -258,7 +264,7 @@ const Checkout = () => {
       if (isPrimary) {
         setUserAddress(newAddress);
       }
-      message.success("Thêm địa chỉ thành công!");
+      message.success("THÊM ĐỊA CHỈ THÀNH CÔNG!");
       setIsAddressModalVisible(false);
       form.resetFields();
     } catch (error) {
@@ -316,7 +322,13 @@ const Checkout = () => {
       console.log("Order response:", res.data);
     } catch (error) {
       console.error("Checkout error:", error);
-      message.error("Đặt hàng thất bại!");
+
+      // ✅ Lấy status và message từ response BE
+      const status = error?.response?.status;
+      const errorKey = error?.response?.data?.error || 'unknown';
+
+      // ✅ Gọi Modal hiển thị lỗi
+      ShowErrorModal(status, errorKey);
     }
   };
 
@@ -676,39 +688,41 @@ const Checkout = () => {
 
       {/* Sidebar */}
       <div className="col-span-1">
-        <Card>
-          <div className="flex justify-between items-center">
-            <p className="text-xl font-bold">ĐƠN HÀNG</p>
-            <a href="/cart" className="text-blue-500 text-sm">Quay lại giỏ hàng</a>
-          </div>
-          <p className="text-gray-500 mt-2">{selectedItems.length} sản phẩm</p>
-          <Divider />
-          <div className="flex justify-between text-lg mt-2">
-            <p className="text-gray-600">Tổng tiền hàng:</p>
-            <p className="font-semibold">{totalPrice.toLocaleString()} đ</p>
-          </div>
-          <div className="flex justify-between text-lg mt-2">
-            <p className="text-gray-600">Tổng tiền giao hàng:</p>
-            <p className="font-semibold">{shippingFee.toLocaleString()} đ</p>
-          </div>
-          <Divider />
-          <div className="flex justify-between text-lg font-bold">
-            <p className="text-black">Tổng tiền thanh toán:</p>
-            <p className="text-red-500">{finalPrice.toLocaleString()} đ</p>
-          </div>
-          <p className="text-sm text-gray-500 mt-2">
-            Nhấn <span className="font-semibold">"Đặt hàng"</span> đồng nghĩa với việc bạn đã đồng ý với
-            <a href="#" className="text-blue-500"> Điều khoản của MechWorld</a>
-          </p>
-          <Button
-            type="primary"
-            danger
-            className="w-full mt-4text-lg border-none cursor pb-4 pt-4"
-            onClick={handleCheckout}
-          >
-            ĐẶT HÀNG
-          </Button>
-        </Card>
+        <div className='sticky top-20'>
+          <Card className=''>
+            <div className="flex justify-between items-center">
+              <p className="text-xl font-bold">ĐƠN HÀNG</p>
+              <a href="/cart" className="text-blue-500 text-sm">Quay lại giỏ hàng</a>
+            </div>
+            <p className="text-gray-500 mt-2">{selectedItems.length} sản phẩm</p>
+            <Divider />
+            <div className="flex justify-between text-lg mt-2">
+              <p className="text-gray-600">Tổng tiền hàng:</p>
+              <p className="font-semibold">{totalPrice.toLocaleString()} đ</p>
+            </div>
+            <div className="flex justify-between text-lg mt-2">
+              <p className="text-gray-600">Tổng tiền giao hàng:</p>
+              <p className="font-semibold">{shippingFee.toLocaleString()} đ</p>
+            </div>
+            <Divider />
+            <div className="flex justify-between text-lg font-bold">
+              <p className="text-black">Tổng tiền thanh toán:</p>
+              <p className="text-red-500">{finalPrice.toLocaleString()} đ</p>
+            </div>
+            <p className="text-sm text-gray-500 mt-2">
+              Nhấn <span className="font-semibold">Thanh toán</span> đồng nghĩa với việc bạn đã đồng ý với
+              <a href="#" className="text-blue-500"> Điều khoản của MechWorld</a>
+            </p>
+            <Button
+              type="primary"
+              danger
+              className="w-full mt-4 text-lg border-none cursor pb-4 pt-4"
+              onClick={handleCheckout}
+            >
+              THANH TOÁN
+            </Button>
+          </Card>
+        </div>
       </div>
     </div>
   );

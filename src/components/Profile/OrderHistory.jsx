@@ -40,7 +40,9 @@ const OrderHistory = () => {
 
       // Lấy danh sách seller_id duy nhất
       const sellerIds = [...new Set(rawOrders.map(o => o.seller_id))];
-      console.log(sellerIds);
+      
+      // console.log(sellerIds);
+
       // Gọi song song API lấy thông tin shop
       const sellerInfoMap = {};
       await Promise.all(sellerIds.map(async (id) => {
