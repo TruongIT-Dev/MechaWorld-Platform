@@ -273,23 +273,6 @@ const ShopProductCreate = ({ setIsCreating }) => {
         </Form.Item>
 
         <Form.Item
-          name="condition"
-          label="Tình trạng sản phẩm"
-          rules={[{ required: true }]}
-          tooltip={{
-            title: 'Mô tả tình trạng sản phẩm trong tường hợp có va trạng hoặc trầy xước thì tình trạng sẽ là - "Đã mở hộp"',
-            icon: <InfoCircleOutlined />,
-          }}
-          className="col-span-6"
-        >
-          <Select value={condition} onChange={setCondition}>
-            <Option value="new">Hàng mới</Option>
-            <Option value="open box">Đã mở hộp</Option>
-            <Option value="used">Đã qua sử dụng</Option>
-          </Select>
-        </Form.Item>
-
-        <Form.Item
           name="parts_total"
           label="Tổng số linh kiện"
           rules={[{ required: true, message: "Vui lòng nhập tổng số linh kiện!" }]}
@@ -319,6 +302,24 @@ const ShopProductCreate = ({ setIsCreating }) => {
         >
           <Input placeholder="VD: Bandai, Kotobukiya..." />
         </Form.Item>
+
+        <Form.Item
+          name="condition"
+          label="Tình trạng sản phẩm"
+          rules={[{ required: true }]}
+          tooltip={{
+            title: 'Mô tả tình trạng sản phẩm trong tường hợp có va trạng hoặc trầy xước thì tình trạng sẽ là - "Đã mở hộp"',
+            icon: <InfoCircleOutlined />,
+          }}
+          className="col-span-6"
+        >
+          <Select value={condition} onChange={setCondition}>
+            <Option value="new">Hàng mới</Option>
+            <Option value="open box">Đã mở hộp</Option>
+            <Option value="used">Đã qua sử dụng</Option>
+          </Select>
+        </Form.Item>
+
         <Form.Item
           name="release_year"
           label="Năm phát hành"

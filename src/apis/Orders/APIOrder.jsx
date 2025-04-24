@@ -45,6 +45,16 @@ export const ReceivedOrder = (orderId) => {
 }
 
 
+// PATCH USER PAKAGING AN ORDER
+export const PackagingOrder = (sellerId, orderId, packagingData) => {
+  return axios.patch(`/orders/${orderId}/package`, packagingData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+}
+
+
 // PATCH Cancel Order By Buyer
 
 

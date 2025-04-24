@@ -3,7 +3,8 @@ import { useEffect, useState } from "react";
 import { Table, Row, Tag, Button, Dropdown, Modal, message, Upload, Space, Tooltip, Input, Select } from "antd";
 import { StopOutlined, EllipsisOutlined, UserOutlined, DollarOutlined, WalletOutlined, BankOutlined, MobileOutlined, CreditCardOutlined, ClockCircleOutlined, CheckCircleOutlined, GiftOutlined, CarOutlined, FileTextOutlined, CheckOutlined, CloseCircleOutlined, QuestionCircleOutlined, MessageOutlined, EyeOutlined } from "@ant-design/icons";
 
-import { GetOrder, ConfirmOrder, PackagingOrder } from "../../apis/Sellers/APISeller";
+import { GetOrder, ConfirmOrder } from "../../apis/Sellers/APISeller";
+import { PackagingOrder } from '../../apis/Orders/APIOrder';
 
 // Trạng thái đơn hàng với màu sắc tương ứng
 const orderStatusColors = {

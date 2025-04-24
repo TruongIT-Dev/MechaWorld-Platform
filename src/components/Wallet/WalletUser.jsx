@@ -1,6 +1,6 @@
 import { useSelector } from 'react-redux';
 import { useState, useEffect } from 'react';
-import { Table, Button, Card, Modal, Input, message, Steps, QRCode, Tabs, Tooltip } from 'antd';
+import { Table, Button, Card, Modal, Input, message, Steps, QRCode, Tabs, Tooltip, InputNumber } from 'antd';
 import { ArrowUpOutlined, ArrowDownOutlined, LoadingOutlined, WalletOutlined, EyeInvisibleOutlined, EyeOutlined } from '@ant-design/icons';
 
 import { checkWallet } from '../../apis/User/APIUser';
@@ -46,7 +46,7 @@ const WalletPage = () => {
     try {
       const response = await AddMoney(
         amount,
-        "Nạp tiền vào ví ZabPay",
+        "Nạp tiền vào ví ZaloPay",
         `${window.location.origin}/wallet`
       );
 
@@ -183,7 +183,7 @@ const WalletPage = () => {
     <>
       <div className="container mx-auto p-10">
         <h2 className="text-2xl font-semibold">
-          <WalletOutlined className="mr-2" /> Ví Điện Tử
+          <WalletOutlined className="mr-2 mb-6" /> Ví Điện Tử
         </h2>
 
         <Tabs defaultActiveKey="1" type="card">
@@ -256,7 +256,7 @@ const WalletPage = () => {
         title={
           <div className="flex items-center">
             <ArrowDownOutlined className="text-green-500 mr-2" />
-            <span>Nạp tiền vào ví ZabPay</span>
+            <span>NẠP TIỀN VÀO VÍ ĐIỆN TỬ</span>
           </div>
         }
         open={isDepositModalVisible}
@@ -280,29 +280,36 @@ const WalletPage = () => {
         width={600}
         closable={!isProcessing}
         maskClosable={!isProcessing}
+        footer={currentStep === 2 ? null : undefined}
       >
         <div className="mt-4">
           <Steps current={currentStep}>
-            <Step title="Nhập số tiền" />
-            <Step title="Xử lý" icon={isProcessing && currentStep === 1 ? <LoadingOutlined /> : null} />
+            <Step title="Số tiền cần nạp" />
+            <Step title="Đang tạo giao dịch" icon={isProcessing && currentStep === 1 ? <LoadingOutlined /> : null} />
             <Step title="Thanh toán" />
           </Steps>
 
           {currentStep === 0 && (
             <div className="mt-6">
+
               <label className="block text-gray-700 mb-2">Số tiền cần nạp (VNĐ)</label>
-              <Input
-                type="number"
-                placeholder="Nhập số tiền"
+
+              <InputNumber
+                placeholder="Nhập số tiền..."
                 value={depositAmount || ''}
-                onChange={(e) => setDepositAmount(Number(e.target.value))}
-                className="w-full p-2 border rounded"
-                min="10000"
-                step="10000"
+                onChange={(value) => setDepositAmount(value)}
+                className="w-full py-2"
+                min={10000}
+                step={10000}
+                formatter={(value) =>
+                  `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                }
+                parser={(value) => value.replace(/[^0-9]/g, "")}
                 addonAfter="VNĐ"
                 size="large"
               />
-              <p className="text-gray-500 mt-2">Số tiền tối thiểu: 10,000 VNĐ</p>
+
+              <p className="text-red-500 mt-2">Lưu ý: Số tiền cần phải nạp tối thiểu: 10,000 VNĐ</p>
 
               <div className="flex gap-2 mt-4">
                 {[50000, 100000, 200000, 500000].map(amount => (
@@ -328,7 +335,7 @@ const WalletPage = () => {
           {currentStep === 2 && paymentData && (
             <div className="mt-6">
               <div className="bg-green-50 border border-green-200 rounded p-4 mb-4">
-                <p className="text-green-800 font-medium">Vui lòng thanh toán qua ZabPay</p>
+                <p className="text-green-800 font-medium">Vui lòng thanh toán qua ZaloPay</p>
                 <p className="text-gray-600 mt-2">Số tiền: {paymentData.amount.toLocaleString()} VNĐ</p>
                 <p className="text-gray-500 text-sm mt-1">Mã giao dịch: {paymentData.orderId}</p>
               </div>
@@ -340,19 +347,19 @@ const WalletPage = () => {
                   className="mb-4"
                   color="#1890ff"
                 />
-                <p className="text-sm text-gray-500 mb-4">Quét mã QR bằng ứng dụng ZabPay</p>
+                <p className="text-sm text-gray-500 mb-4">Quét mã QR bằng ứng dụng ZaloPay</p>
 
                 <Button
                   type="primary"
                   className="bg-blue-500 border-none hover:bg-blue-600 mb-4"
                   onClick={() => window.open(paymentData.orderUrl, '_blank')}
                 >
-                  Mở ZabPay để thanh toán
+                  Mở ZaloPay để thanh toán
                 </Button>
 
-                <p className="text-sm text-gray-500">
+                {/* <p className="text-sm text-gray-500">
                   Sau khi thanh toán xong, vui lòng nhấn "Tôi đã thanh toán" để hoàn tất
-                </p>
+                </p> */}
               </div>
             </div>
           )}
