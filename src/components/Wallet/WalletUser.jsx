@@ -114,7 +114,7 @@ const WalletPage = () => {
   const handlePaymentComplete = async () => {
     try {
       // Refresh balance after successful payment
-      const userId = localStorage.getItem('userId');
+      // const userId = localStorage.getItem('userId');
       const response = await checkWallet(userId);
       if (response.data && response.data.balance !== undefined) {
         setBalance(response.data.balance);

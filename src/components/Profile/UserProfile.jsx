@@ -245,8 +245,8 @@ const ProfilePage = () => {
       return "Chưa đăng kí";
     }
     const visibleDigits = phoneNumber.slice(-4); // Lấy 4 số cuối
-    const maskedDigits = "*".repeat(phoneNumber.length - 4); // Tạo chuỗi dấu *
-    return maskedDigits + visibleDigits; // Kết hợp chuỗi dấu * và 4 số cuối
+    const maskedDigits = "*".repeat(phoneNumber.length - 4); 
+    return maskedDigits + visibleDigits; 
   };
 
   const prefixSelector = (
@@ -388,36 +388,7 @@ const ProfilePage = () => {
             </div>
           </Modal>
 
-          {/* <Modal
-            open={phoneModalVisible}
-            onCancel={() => setPhoneModalVisible(false)}
-            footer={null}
-            title={otpVisible ? "Xác thực OTP" : "Nhập số điện thoại"} >
-            {!otpVisible ? (
-              <div className='flex justify-between items-center '>
-                <Form layout="vertical">
-                  <Form.Item >
-                    <Input type="number" value={newPhoneNumber} onChange={(e) => setNewPhoneNumber(e.target.value)} className='items-center w-64' />
-                  </Form.Item>
-                </Form>
-                <Button type="primary" onClick={handlePhoneSubmit} className='bg-blue-600 hover:bg-blue-300 mt-10'>Xác thực</Button>
-              </div>
-            ) : (
-              <>
-                <Form layout="vertical">
-                  <Form.Item label="Nhập mã OTP">
-                    <Input.OTP length={6} value={otp} onChange={onChange} onInput={onInput} />
-                  </Form.Item>
-                </Form>
-                <div className="flex justify-between">
-                  <Button type="link" disabled={isCounting} onClick={handlePhoneSubmit}>
-                    {isCounting ? `Gửi lại sau ${countdown}s` : "Gửi lại OTP"}
-                  </Button>
-                  <Button type="primary" onClick={handleVerifyOtp} className='bg-blue-500 hover:bg-blue-300'>Xác thực</Button>
-                </div>
-              </>
-            )}
-          </Modal> */}
+
 
 
           <Col span={10} className="flex flex-col items-center">
