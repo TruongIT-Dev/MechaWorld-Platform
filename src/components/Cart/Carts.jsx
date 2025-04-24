@@ -60,10 +60,10 @@ const Carts = () => {
 
   //Check xem User đã Đăng ký Số điện thoại trước khi chuyển trang 
   const handleCheckout = () => {
-    if (!user?.phone_number) {
-      ShowErrorModal(400, 'phone_number required');
-      return;
-    }
+    // if (!user?.phone_number) {
+    //   ShowErrorModal(400, 'phone_number required');
+    //   return;
+    // }
 
     const selectedItems = cartItems.filter(item =>
       selectedRowKeys.includes(item.cart_item_id)

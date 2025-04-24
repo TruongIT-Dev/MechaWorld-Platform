@@ -1,7 +1,7 @@
 import { useSelector } from 'react-redux';
 import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { EnvironmentOutlined, ShopOutlined, MoneyCollectOutlined } from '@ant-design/icons';
+import { EnvironmentOutlined, ShopOutlined, MoneyCollectOutlined, InfoCircleOutlined } from '@ant-design/icons';
 import { Card, Button, Radio, Divider, message, Table, Modal, Form, Select, Input, Checkbox, Empty, Tabs } from 'antd';
 
 import { useCart } from '../../context/CartContext';
@@ -429,7 +429,7 @@ const Checkout = () => {
                 form={form}
                 layout="vertical"
                 onFinish={onFinishAddress}
-                className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4"
+                // className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4"
               >
                 <Form.Item
                   label="Thành phố"
@@ -478,6 +478,13 @@ const Checkout = () => {
                       </Option>
                     ))}
                   </Select>
+                </Form.Item>
+
+                <Form.Item label="Số điện thoại" name="phone_number" rules={[{ required: true }]} tooltip={{
+                  title: 'Số điện thoại dùng để xác nhận bên vận chuyển khi giao hàng. Để trống sẽ mặc định lấy sđt của người dùng.',
+                  icon: <InfoCircleOutlined />,
+                }}>
+                  <Input placeholder="Nhập số điện thoại" />
                 </Form.Item>
 
                 <Form.Item

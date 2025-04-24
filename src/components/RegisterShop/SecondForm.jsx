@@ -10,7 +10,7 @@ import { getUserAddresses, postUserAddresses, updateAddress } from '../../apis/U
 const { Option } = Select;
 const { Text, Paragraph } = Typography;
 
-const SecondForm = ({ user, setUser }) => {
+const SecondForm = ({ user, setUser, setHasAddress }) => {
     user = useSelector((state) => state.auth.user);
     const [form] = Form.useForm();
     const [loading, setLoading] = useState(false);
@@ -37,6 +37,19 @@ const SecondForm = ({ user, setUser }) => {
             'token': import.meta.env.VITE_GHN_TOKEN_API
         }
     });
+
+
+    // Truyền Ngược lại RegisterShop Check xem user đã thêm địa chỉ chưa.
+    // Thêm useEffect để cập nhật trạng thái có địa chỉ hay không
+    useEffect(() => {
+        if (addresses && addresses.length > 0) {
+            setHasAddress(true);
+        } else {
+            setHasAddress(false);
+        }
+    }, [addresses, setHasAddress]);
+
+    
 
     // Fetch user addresses on component mount
     useEffect(() => {
