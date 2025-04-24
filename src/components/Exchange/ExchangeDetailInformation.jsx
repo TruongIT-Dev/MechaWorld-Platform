@@ -98,11 +98,12 @@ const ExchangeDetailInformation = () => {
           updatedAt: "2025-04-06T21:55:26.000Z",
           deletedAt: null,
           requestUser: {
-            id: "650e177d-d28e-490a-96d4-35c58952d083",
-            name: "Marvel Mage",
-            email: "marvelmage@gmail.com",
-            avatar: "https://avatarfiles.alphacoders.com/322/thumb-1920-322192.jpg",
+            id: "6575e8bb-bafb-4e40-98a0-01435adb3d4f",
+            full_name: "Huy FTB",
+            email: "thehuygaming@gmail.com",
+            avatar_url: "https://lh3.googleusercontent.com/a/ACg8ocLqAdPb9eHUuCKlFV7iyCRTWqPeMOoBV1f-Oa0x8Y_0-YZoqBXi=s96-c",
             balance: 519000,
+            phone_number: "0961841902",
           },
           post: {
             id: "c6c0a499-e64a-4ae0-bd24-41f18650364c",
@@ -112,28 +113,29 @@ const ExchangeDetailInformation = () => {
             ],
             status: "UNAVAILABLE",
             user: {
-              id: "2306d221-9967-4562-98c1-4665a16711aa",
-              name: "Minh",
-              avatar: "https://firebasestorage.googleapis.com/v0/b/comzone-69b8f.appspot.com/o/images%2F1734533441556?alt=media&token=546d2f49-373e-4683-a680-1cd015a5b98d",
-              email: "minh@gmail.com",
+              id: "a9d4c545-15eb-4d51-b091-49414e6ee84a",
+              full_name: "Hypermoon",
+              avatar_url: "https://lh3.googleusercontent.com/a/ACg8ocICorMWOnDNyalaiOHP3J3lMtdvphY_2zNjYzrQplyNB2gcgNI3=s96-c",
+              email: "manhhuyftb@gmail.com",
               balance: 578000,
+              phone_number: "0961841906",
             }
           },
           depositAmount: 100000, // Số tiền cọc
-          compensationAmount: 0, // Số tiền bù trừ
-          status: "DEALING", // Trạng thái giao dịch
+          compensationAmount: 60000, // Số tiền bù trừ
+          status: "DEALING", // Trạng thái giao dịch 
           compensateUser: {
-            id: "650e177d-d28e-490a-96d4-35c58952d083",
-            name: "Marvel Mage",
-            email: "marvelmage@gmail.com",
-            avatar: "https://avatarfiles.alphacoders.com/322/thumb-1920-322192.jpg",
+            id: "6575e8bb-bafb-4e40-98a0-01435adb3d4f",
+            full_name: "Huy FTB",
+            email: "thehuygaming@gmail.com",
+            avatar: "https://lh3.googleusercontent.com/a/ACg8ocLqAdPb9eHUuCKlFV7iyCRTWqPeMOoBV1f-Oa0x8Y_0-YZoqBXi=s96-c",
           },
         },
         isRequestUser: true, // Xác định người dùng hiện tại là requestUser
         requestUserList: [
           {
             id: 1,
-            name: "Marvel Mage",
+            full_name: "Huy FTB",
             gundams: [
               {
                 id: 201,
@@ -157,7 +159,7 @@ const ExchangeDetailInformation = () => {
         postUserList: [
           {
             id: 2,
-            name: "Minh",
+            name: "Hypermoon",
             gundams: [
               {
                 id: 204,
@@ -179,8 +181,8 @@ const ExchangeDetailInformation = () => {
           },         
         ],
         initialStage: {
-          firstUser:3, // Bước hiện tại của người dùng đầu tiên
-          secondUser: 1, // Bước hiện tại của người dùng thứ hai
+          firstUser:1, 
+          secondUser: 1, 
         },
 
       };
@@ -188,7 +190,6 @@ const ExchangeDetailInformation = () => {
       setExchangeData(fakeExchangeData);
 
       // Thiết lập tiến trình ban đầu dựa trên dữ liệu nhận được
-
       setFirstCurrentStage(fakeExchangeData.initialStage.firstUser);
       setSecondCurrentStage(fakeExchangeData.initialStage.secondUser);
     } catch (error) {
@@ -218,6 +219,12 @@ const ExchangeDetailInformation = () => {
       setIsLoading(false);
     };
     fetchData();
+
+    const fetchAddress = async () => {
+      const response = await getUserAddresses(currentUser.id).then((res) => res.data);
+      setAddress(response);
+    }
+    fetchAddress();
     // console.log("checking selectedAddress data", selectedAddress);
   }, []);
 
@@ -268,7 +275,10 @@ const ExchangeDetailInformation = () => {
 
           {/* Bên phải */}
           <div className="basis-1/3 min-w-fit ">
-            <ProgressSection firstCurrentStage={firstCurrentStage} />
+            <ProgressSection 
+            firstCurrentStage={firstCurrentStage} 
+            exchangeData={exchangeData}
+            />
           </div>
         </>
       ) : (

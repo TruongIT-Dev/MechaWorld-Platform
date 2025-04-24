@@ -1,7 +1,7 @@
 // RequestList.jsx
 import { Card, List, Avatar, Typography, Modal, Button, Image, Carousel } from 'antd';
 import { UserOutlined, ClockCircleOutlined, PictureOutlined } from '@ant-design/icons';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import Logo from '../../assets/image/Logo2.png';
 import Logo2 from '../../assets/image/Logo.png';
@@ -11,7 +11,10 @@ import GundamPic from '../../assets/image/gun9.jpg';
 import GundamPic2 from '../../assets/image/gun10.jpg';
 import GundamPic3 from '../../assets/image/gun2.jpg';
 import ModalOfferExchange from './ModalOfferExchange';
+import { getAllExchangePost } from '../../apis/Exchange/APIExchange';
+import moment from "moment/min/moment-with-locales";
 
+moment.locale("vi");
 
 const { Link, Text, Paragraph } = Typography;
 
@@ -91,17 +94,17 @@ export default function ExchangeList() {
     
     // Modal List Poster Gundam Avaiable
     const [isModalOpen, setIsModalOpen] = useState(false);
-
+    const [requestData, setRequestData] = useState();
     // Moda Offer Exchange Request
     const [isOfferModalOpen, setIsOfferModalOpen] = useState(false);
+    const [listRequest,setListRequest] = useState([]);
 
-
-    const requestData = {
-        id: 'req123',
-        title: 'Tìm kiếm Gundam Strike Freedom để trao đổi',
-        user: 'GundamCollector'
-    };
-
+    // const requestData = {
+    //     id: 'req123',
+    //     title: 'Tìm kiếm Gundam Strike Freedom để trao đổi',
+    //     user: 'GundamCollector'
+    // };
+    const [selectedGundamList, setSelectedGundamList] = useState([]);
     const gundamList = [
         {
             id: 1,
@@ -152,9 +155,24 @@ export default function ExchangeList() {
     const [expandedContent, setExpandedContent] = useState(false);
 
     const handleOpenModal = (request) => {
-        setSelectedRequest(request);
+         console.log(request);
+        setSelectedRequest(request.exchange_post_items);
         setIsModalOpen(true);
+       
     };
+    const handleOfferModal = (request) => {
+         // console.log(request);
+        setSelectedRequest(request.exchange_post_items);
+        setRequestData(request.poster)
+        setIsOfferModalOpen(true);
+       
+    };
+    useEffect(() => {
+            getAllExchangePost().then((res) => {
+                setListRequest(res.data);
+            })
+           
+    },[])
 
     return (
         <>
@@ -164,7 +182,7 @@ export default function ExchangeList() {
                 {/* List các Yêu cầu Trao đổi */}
                 <List
                     itemLayout="vertical"
-                    dataSource={fakeRequests}
+                    dataSource={listRequest}
                     renderItem={(item) => (
                         <Card className="mb-3" >
                             <List.Item className="flex items-center">
@@ -173,25 +191,19 @@ export default function ExchangeList() {
                                     <div className="flex flex-col items-start">
                                         <div className='flex items-center justify-between w-full'>
                                             <div className='flex items-center gap-3'>
-                                                <Avatar size={48} src={item.userAvatar} icon={!item.userAvatar && <UserOutlined />} />
+                                                <Avatar size={48} src={item.poster.avatar_url} icon={!item.poster.avatar_url && <UserOutlined />} />
                                                 <div className="">
                                                     <Link href={item.userProfile} className="mr-4 text-sm">
-                                                        {item.user}
+                                                        {item.poster.full_name}
                                                     </Link>
                                                     <Text type="secondary" className="flex items-center text-xs">
-                                                        <ClockCircleOutlined className="mr-1" /> {new Date(item.time).toLocaleDateString('vi-VN', {
-                                                            year: 'numeric',
-                                                            month: 'long',
-                                                            day: 'numeric',
-                                                            hour: '2-digit',
-                                                            minute: '2-digit'
-                                                        })}
+                                                        <ClockCircleOutlined className="mr-1" /> {moment(item.exchange_post.created_at).format("LLL")}
                                                     </Text>
                                                 </div>
                                             </div>
                                             <div className='space-x-2'>
-                                                <Button onClick={() => handleOpenModal()} ghost type='primary' className='bg-blue-400'>Gundam Trao Đổi</Button>
-                                                <Button onClick={() => setIsOfferModalOpen(true)} type='primary' className='bg-blue-500 px-4'>Đề xuất trao đổi</Button>
+                                                <Button onClick={() => handleOpenModal(item)} ghost type='primary' className='bg-blue-400'>Gundam Trao Đổi</Button>
+                                                <Button onClick={() => handleOfferModal(item)} type='primary' className='bg-blue-500 px-4'>Đề xuất trao đổi</Button>
                                             </div>
                                         </div>
                                     </div>
@@ -201,14 +213,14 @@ export default function ExchangeList() {
                                         {/* List ảnh Gundam đăng Trao đổi - Chỉ hiển thị ảnh đại diện */}
                                         <div className="relative mr-4">
                                             <Avatar
-                                                src={item.mainImage}
+                                                src={item.exchange_post.post_image_urls[0]}
                                                 size={150}
                                                 shape="square"
                                                 className="rounded-md"
                                             />
-                                            {item.images && item.images.length > 1 && (
+                                            {item.exchange_post.post_image_urls && item.exchange_post.post_image_urls.length > 1 && (
                                                 <div className="absolute bottom-0 right-0 bg-black bg-opacity-70 text-white text-xs px-1 py-0.5 rounded-bl-md rounded-tr-md flex items-center">
-                                                    <PictureOutlined className="mr-1" /> +{item.images.length - 1}
+                                                    <PictureOutlined className="mr-1" /> +{item.exchange_post.post_image_urls.length - 1}
                                                 </div>
                                             )}
                                         </div>
@@ -219,7 +231,7 @@ export default function ExchangeList() {
                                                 ellipsis={!expandedContent ? { rows: 4 } : false}
                                                 className="text-base text-gray-600"
                                             >
-                                                {item.content}
+                                                {item.exchange_post.content}
                                             </Paragraph>
                                             <Text
                                                 type="secondary"
@@ -242,6 +254,7 @@ export default function ExchangeList() {
                 isOpen={isOfferModalOpen}
                 onClose={() => setIsOfferModalOpen(false)}
                 requestData={requestData}
+                gundamList={selectedRequest}
             />
 
             {/* Modal để hiển thị các gundam mà Người đăng sẵn sàng Trao đổi */}
@@ -254,21 +267,21 @@ export default function ExchangeList() {
             >
                 <List
                     itemLayout="horizontal"
-                    dataSource={gundamList}
+                    dataSource={selectedRequest}
                     className="mt-4 max-h-96 overflow-auto"
                     renderItem={(item) => (
                         <List.Item className="items-start">
                             <List.Item.Meta
-                                avatar={<Image src={item.cover} width={120} height={150} />}
+                                avatar={<Image src={item.primary_image_url} width={120} height={150} />}
                                 title={<Text strong className='text-base'>{item.title}</Text>}
                                 description={
                                     <>
-                                        <div>Phân khúc: {item.author}</div>
+                                        <div>Phân khúc: {item.grade}</div>
                                         <div>
                                             Tình trạng: <Text strong>{item.condition}</Text>
                                         </div>
                                         <div>
-                                            Phiên bản: Vàng óng ánh
+                                            Phiên bản: <Text strong>{item.version}</Text>
                                         </div>
                                     </>
                                 }
@@ -282,7 +295,7 @@ export default function ExchangeList() {
                                 prevArrow={<button className="text-black bg-black rounded-full p-2">←</button>}
                                 nextArrow={<button className="text-white bg-black rounded-full p-2">→</button>}
                             >
-                                {(item.previews || []).map((imgUrl, idx) => (
+                                {(item.secondary_image_urls || []).map((imgUrl, idx) => (
                                     <div key={idx} className="px-1">
                                         <Image
                                             src={imgUrl}

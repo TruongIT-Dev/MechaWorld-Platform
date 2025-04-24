@@ -59,7 +59,10 @@ const ExchangeInformation = ({
         footer={null}
       >
         <h2>Lưu ý:</h2>
-        <p> Nếu dừng trao đổi, bạn sẽ không thể tiếp tục thảo luận hay trò truyện với <Avatar src={secondUser.avatar}/> {secondUser.name} về cuộc trao đổi này.</p>
+        <div className='flex '>
+          <p> Nếu dừng trao đổi, bạn sẽ không thể tiếp tục thảo luận hay trò truyện với <Avatar src={secondUser.avatar_url}/><p className='font-bold'>{secondUser.full_name}</p>về cuộc trao đổi này.</p>
+        </div>
+       
         <p className='text-red-500 mt-2'> *Hành động này không thể hoàn tác.</p>
         <br />
         <div className="flex justify-end gap-2 mt-4">

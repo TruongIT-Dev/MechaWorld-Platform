@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Input, Button, Upload, Form, Tooltip, Steps, Card, Row, Col, Checkbox, Typography, message, Divider } from "antd";
 import {
     PlusOutlined,
@@ -9,6 +9,8 @@ import {
     ArrowLeftOutlined,
     ArrowRightOutlined
 } from "@ant-design/icons";
+import { GetGundamByID } from "../../apis/User/APIUser";
+import { createExchangePost } from "../../apis/Exchange/APIExchange";
 
 const { Title, Text } = Typography;
 const { Step } = Steps;
@@ -25,13 +27,14 @@ const userGundams = [
     { id: 8, name: "Gundam Dynames", series: "Gundam 00", image: "/gundam8.png", condition: "Mới 88%" }
 ];
 
-export default function PostModal({ onClose, onSuccess }) {
+export default function PostModal({ onClose, onSuccess,currentUser }) {
     const [form] = Form.useForm();
     const [currentStep, setCurrentStep] = useState(0);
     const [fileList, setFileList] = useState([]);
     const [selectedGundams, setSelectedGundams] = useState([]);
     const [isSubmitting, setIsSubmitting] = useState(false);
-
+    const [gundamList,setGundamList] = useState([]);
+    const [postContent, setPostContent] = useState("");
     // Handle image upload
     const handleUpload = ({ fileList }) => {
         if (fileList.length > 5) {
@@ -72,7 +75,7 @@ export default function PostModal({ onClose, onSuccess }) {
     };
 
     // Final submission
-    const handleSubmit = async () => {
+    const handleSubmit = async (values) => {
         if (selectedGundams.length === 0) {
             message.error('Vui lòng chọn ít nhất một Gundam để trao đổi!');
             return;
@@ -87,12 +90,25 @@ export default function PostModal({ onClose, onSuccess }) {
             // Get form values
             const formValues = form.getFieldsValue();
             const postData = {
-                content: formValues.content,
+                content: postContent,
                 images: fileList.map(file => file.originFileObj),
                 selectedGundams: selectedGundams.map(id => userGundams.find(g => g.id === id))
             };
 
             console.log("Post data:", postData);
+
+            const formData = new FormData();
+            formData.append("content", postData.content);            
+            fileList.forEach((file) => {
+                formData.append("post_images", file.originFileObj);
+            })
+            postData.selectedGundams.forEach((gundam) => {
+                formData.append("post_item_id", gundam.id);
+              });
+              
+            createExchangePost(formData).then((res) => {
+                console.log("checking", res.data);
+            })
 
             // Call the success callback from parent component
             if (onSuccess) {
@@ -107,7 +123,12 @@ export default function PostModal({ onClose, onSuccess }) {
 
         }, 1500);
     };
-
+    useEffect(() => {
+        GetGundamByID(currentUser.id,"").then((res) => {
+            setGundamList(res.data);
+        });
+        console.log(gundamList);
+    },[])
     // Step content
     const steps = [
         {
@@ -115,16 +136,17 @@ export default function PostModal({ onClose, onSuccess }) {
             content: (
                 <div className="pt-2">
                     <Form.Item
-                        name="content"
-                        label="Nội dung bài viết"
-                        rules={[{ required: true, message: "Vui lòng nhập nội dung!" }]}
-                    >
-                        <Input.TextArea
-                            placeholder="Mô tả chi tiết về Gundam bạn mong muốn trao đổi..."
-                            rows={4}
-                            className="shadow-sm text-lg"
-                        />
-                    </Form.Item>
+                    name="content"
+                    label="Nội dung bài viết"
+                    rules={[{ required: true, message: "Vui lòng nhập nội dung!" }]}
+                >
+                    <Input.TextArea
+                    placeholder="Mô tả chi tiết về Gundam bạn mong muốn trao đổi..."
+                    rows={4}
+                    className="shadow-sm text-lg"
+                    onChange={(e) => setPostContent(e.target.value)}
+                    />
+                </Form.Item>
 
                     <Divider orientation="left">
                         <span className="flex items-center">
@@ -175,26 +197,26 @@ export default function PostModal({ onClose, onSuccess }) {
                     </div>
 
                     <Row gutter={[16, 16]} className="max-h-80 overflow-y-auto">
-                        {userGundams.map(gundam => (
-                            <Col xs={24} sm={12} lg={8} key={gundam.id}>
+                        {gundamList.map(gundam => (
+                            <Col xs={24} sm={12} lg={8} key={gundam.gundam_id}>
                                 <Card
                                     hoverable
-                                    className={selectedGundams.includes(gundam.id) ? 'border-2 border-blue-500' : ''}
+                                    className={selectedGundams.includes(gundam.gundam_id) ? 'border-2 border-blue-500 ' : ''}
                                     cover={
                                         <div className="relative h-36 bg-gray-100 flex items-center justify-center">
                                             <img
                                                 alt={gundam.name}
-                                                src={gundam.image}
+                                                src={gundam.primary_image_url}
                                                 className="max-h-full object-contain p-2"
                                             />
-                                            {selectedGundams.includes(gundam.id) && (
+                                            {selectedGundams.includes(gundam.gundam_id) && (
                                                 <div className="absolute top-2 right-2">
                                                     <CheckCircleOutlined className="text-blue-500 text-2xl" />
                                                 </div>
                                             )}
                                         </div>
                                     }
-                                    onClick={() => toggleGundamSelection(gundam.id)}
+                                    onClick={() => toggleGundamSelection(gundam.gundam_id)}
                                     size="small"
                                 >
                                     <Card.Meta
@@ -208,8 +230,8 @@ export default function PostModal({ onClose, onSuccess }) {
                                     />
                                     <div className="mt-2">
                                         <Checkbox
-                                            checked={selectedGundams.includes(gundam.id)}
-                                            onChange={() => toggleGundamSelection(gundam.id)}
+                                            checked={selectedGundams.includes(gundam.gundam_id)}
+                                            onChange={() => toggleGundamSelection(gundam.gundam_id)}
                                         >
                                             Chọn
                                         </Checkbox>
@@ -244,7 +266,7 @@ export default function PostModal({ onClose, onSuccess }) {
                 </Steps>
             </div>
 
-            <Form form={form} layout="vertical">
+            <Form form={form} layout="vertical" onFinish={handleSubmit}>
                 {steps[currentStep].content}
 
                 <div className="flex justify-between mt-6">
@@ -272,7 +294,7 @@ export default function PostModal({ onClose, onSuccess }) {
                             <Button
                                 className="bg-blue-500"
                                 type="primary"
-                                onClick={handleSubmit}
+                                htmlType="submit"
                                 loading={isSubmitting}
                                 disabled={selectedGundams.length === 0}
                             >

@@ -1,3 +1,9 @@
+import { useEffect, useState } from "react";
+import PropTypes from "prop-types";
+import { Button, message, Modal } from "antd";
+import { deleteAddress, postUserAddresses, updateAddress } from "../../../apis/User/APIUser";
+import { useSelector } from "react-redux";
+
 
 const SubmitDeliveryInfo = ({
   selectedAddress,
@@ -6,19 +12,56 @@ const SubmitDeliveryInfo = ({
   setAddresses,
   fetchUserAddress,
 }) => {
+  const  user = useSelector((state) => state.auth.user);
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [isAdding, setIsAdding] = useState(false);
+  const [loading, setLoading] = useState(false);
   const PhoneSplitter =(x) =>{
     return (
       x.substring(0, 4) + " " + x.substring(4, 7) + " " + x.substring(7, x.length)
     );
-}
+  }
+  useEffect(() => {
+    const fetchAddress = async () => {
+      const response = await fetchUserAddress();
+      if (response) {
+        setAddresses(response);
+      }
+    };
+    fetchAddress();
+    console.log("address chọn: ",selectedAddress);
+    console.log("address lưu: ",addresses);
+  }
+  , [fetchUserAddress, setAddresses]);
+  const handleDeleteAddress = async (address) => {
+      setLoading(true);
+      console.log("Địa chỉ:", address);
+      deleteAddress(user.id, address.id);
+      fetchUserAddress();
+      setLoading(false);
+  }
+  const setPrimaryAddress = async (addressID) => {
+    try {
 
+      await updateAddress(user.id, addressID, { is_primary: true });
+      message.success("Đã cập nhật địa chỉ mặc định!");
+      fetchUserAddress();
+    } catch (error) {
+      message.error("Lỗi khi cập nhật địa chỉ mặc định!");
+      console.error(error);
+    }
+  };
+  const handleAdding =() =>  {
+    setIsAdding(!isAdding);
+    console.log(isAdding);
+  }
 return (
   <div>
       <h2 className="font-bold">THÔNG TIN NHẬN HÀNG</h2>
 
-      <h2 className="font-light text-slate-500">
+      <Button type="primary" onClick={() => setIsModalVisible(true)} style={{ marginBottom: 16 }} className='bg-blue-500 mt-2 p-4 text-white hover:bg-blue-600 transition-colors'>
           {selectedAddress ? "Thay đổi" : "Thêm địa chỉ giao hàng"}
-      </h2>
+      </Button>
       <div className="flex flex-col w-full mt-3">
       {selectedAddress ? (
         <>
@@ -76,6 +119,8 @@ return (
               />
             </svg>
             <div className="flex flex-row gap-1">
+              <h2 className="font-bold"> {selectedAddress?.province_name}, {selectedAddress?.district_name}, {selectedAddress?.ward_name}</h2>
+              <h3>-</h3>
               <h3 className="font-light">{selectedAddress?.detail}</h3>
             </div>
           </div>
@@ -85,8 +130,94 @@ return (
           Vui lòng thêm địa chỉ giao hàng
         </p>
       )}
+      <Modal
+        title="Chọn địa chỉ giao hàng"
+        open={isModalVisible}
+        footer={null}
+        onCancel={() => setIsModalVisible(false)}
+        width={800}
+        className="modal-address">
+          {isAdding ? (
+            <div>
+              
+            </div>
+          ) : (
+            <div className="flex flex-col gap-2 mt-3">
+
+            {addresses.map((addr) => (
+              <div key={addr.id} className="border-b pb-4 mb-4">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <p className="font-semibold text-lg">{addr.full_name} <span className="text-gray-500">{addr.phone_number} - {addr.province_name}</span></p>
+                    <p className="text-gray-600">{addr.detail}, {addr.ward_name}, {addr.district_name}</p>
+                  </div>
+                  <div className="space-x-2">
+                    {!addr.is_primary && <Button type="link" danger onClick={() => handleDeleteAddress(addr)}> Xóa</Button>}
+                  </div>
+                </div>
+  
+                <div className="mt-2 flex items-center space-x-2">
+                  {addr.is_primary ? (
+                    <span className="px-2 py-1 text-xs font-semibold text-white bg-red-500 rounded">Mặc định</span>
+                  ) : (
+                    // <Button size="small" onClick={() => setDefaultAddress(addr.id)}>
+                    <Button size="small" onClick={() => setPrimaryAddress(addr.id)}>
+                      Thiết lập mặc định
+                    </Button>
+                  )}
+                </div>
+              </div>
+            ))}
+            
+            
+          </div>
+          )}
+        <div className="flex justify-end mt-4">
+                <Button type="primary" onClick={() => handleAdding()} className="bg-blue-500 hover:bg-blue-600 transition-colors mr-5">
+                  Thêm địa chỉ mới
+                </Button>
+  
+                <Button type="primary" onClick={() => setIsModalVisible(false)} className="bg-red-600 hover:bg-red-400">
+                  Đóng
+                </Button>
+            </div>
+      </Modal>
     </div>
   </div>
 )}
 
 export default SubmitDeliveryInfo
+
+SubmitDeliveryInfo.propTypes = {
+  selectedAddress: PropTypes.shape({
+    id: PropTypes.number.isRequired,
+    full_name: PropTypes.string.isRequired,
+    phone_number: PropTypes.string.isRequired,
+    detail: PropTypes.string.isRequired,
+    province_name: PropTypes.string.isRequired,
+    district_name: PropTypes.string.isRequired,
+    ward_name: PropTypes.string.isRequired,
+    is_primary: PropTypes.bool.isRequired,
+    is_pickup_address: PropTypes.bool.isRequired,
+    ghn_district_id: PropTypes.number.isRequired,
+    ghn_ward_code: PropTypes.string.isRequired,
+  }),
+  setSelectedAddress: PropTypes.func.isRequired,
+  addresses: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.number.isRequired,
+      full_name: PropTypes.string.isRequired,
+      phone_number: PropTypes.string.isRequired,
+      detail: PropTypes.string.isRequired,
+      province_name: PropTypes.string.isRequired,
+      district_name: PropTypes.string.isRequired,
+      ward_name: PropTypes.string.isRequired,
+      is_primary: PropTypes.bool.isRequired,
+      is_pickup_address: PropTypes.bool.isRequired,
+      ghn_district_id: PropTypes.number.isRequired,
+      ghn_ward_code: PropTypes.string.isRequired,
+    })
+  ).isRequired,
+  setAddresses: PropTypes.func.isRequired,
+  fetchUserAddress: PropTypes.func.isRequired,
+};

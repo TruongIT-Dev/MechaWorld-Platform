@@ -1,15 +1,26 @@
-import  { useState } from 'react';
-import { ArrowLeftRight, Check, ChevronDown, ChevronUp, FileText, Truck, CreditCard } from 'lucide-react';
+import  { useEffect, useState } from 'react';
+import { ArrowLeftRight, Check, ChevronDown, FileText, Truck, CreditCard } from 'lucide-react';
+import { useSelector } from 'react-redux';
+import PropTypes from "prop-types";
 
-
-const ProgressSection = () => {
+const ProgressSection = (
+  { 
+    exchangeData,
+    firstCurrentStage
+  }
+) => {
   const [currentUser, setCurrentUser] = useState('left'); 
-    const [currentStepLeft, setCurrentStepLeft] = useState(2); 
-    const [currentStepRight, setCurrentStepRight] = useState(1); 
+    const user = useSelector((state) => state.auth.user);
+    // console.log(exchangeData);
+    const [firstUser, setFirstUser] = useState();
+    const [secondUser, setSecondUser] = useState();
+    // Bước hiện tại cho cả hai bên
+    const [currentStepLeft, setCurrentStepLeft] = useState(); 
+    const [currentStepRight, setCurrentStepRight] = useState(); 
     // Định nghĩa các bước cho cả hai bên
     const leftSteps = [
-      { name: "Xác nhận truyện", icon: <Check size={20} /> },
-      { name: "Chọn mức tiền", icon: <FileText size={20} /> },
+      { name: "Xác nhận Gundam", icon: <Check size={20} /> },
+      { name: "Xác nhận mức tiền", icon: <FileText size={20} /> },
       { name: "Thông tin giao hàng", icon: <FileText size={20} /> },
       { name: "Thanh toán", icon: <CreditCard size={20} /> },
       { name: "Xác nhận giao hàng", icon: <Truck size={20} /> },
@@ -17,7 +28,7 @@ const ProgressSection = () => {
     ];
   
     const rightSteps = [
-      { name: "Xác nhận truyện", icon: <Check size={20} /> },
+      { name: "Xác nhận Gundam", icon: <Check size={20} /> },
       { name: "Xác nhận mức tiền", icon: <FileText size={20} /> },
       { name: "Thông tin giao hàng", icon: <FileText size={20} /> },
       { name: "Thanh toán", icon: <CreditCard size={20} /> },
@@ -31,14 +42,14 @@ const ProgressSection = () => {
     };
   
     // For demo purposes - progress steps
-    const incrementStep = (side) => {
-      if (side === 'left') {
-        setCurrentStepLeft(prev => Math.min(prev + 1, leftSteps.length - 1));
-      } else {
-        setCurrentStepRight(prev => Math.min(prev + 1, rightSteps.length - 1));
-      }
-    };
-  
+    // const incrementStep = (side) => {
+    //   if (side === 'left') {
+    //     setCurrentStepLeft(prev => Math.min(prev + 1, leftSteps.length - 1));
+    //   } else {
+    //     setCurrentStepRight(prev => Math.min(prev + 1, rightSteps.length - 1));
+    //   }
+    // };
+    
     // Render step with proper state
     const renderStep = (step, index, currentStep, side) => {
       const isCompleted = index < currentStep;
@@ -46,7 +57,7 @@ const ProgressSection = () => {
       const isInactive = side !== currentUser;
       
       return (
-        <div className="flex flex-col items-center mb-4" key={`${side}-${index}`}>
+        <div className="flex flex-col items-center mb-2" key={`${side}-${index}`}>
           {/* Step icon */}
           <div 
             className={`w-8 h-8 rounded-full flex items-center justify-center mb-1
@@ -75,16 +86,32 @@ const ProgressSection = () => {
           
           {/* Special connector for last step */}
           {index === (side === 'left' ? leftSteps.length - 1 : rightSteps.length - 1) && index !== 0 && (
-            <div className={`w-8 h-8 mt-2 ${side === 'left' ? 'transform rotate-45' : 'transform -rotate-45'}`}>
+            <div className={`w-8 h-8 mt-1 ${side === 'left' ? 'transform rotate-45' : 'transform -rotate-45'}`}>
               <ChevronDown size={20} className={`${isCompleted ? 'text-green-500' : 'text-gray-300'}`} />
             </div>
           )}
         </div>
       );
     };
-  
+    useEffect(() => {
+      if (user) {
+        if (user.id === exchangeData?.exchange?.requestUser?.id) {
+          setFirstUser(exchangeData?.exchange?.requestUser);
+          setSecondUser(exchangeData?.exchange?.post?.user);
+          console.log('first user: ',firstUser);
+          console.log('second user: ',secondUser);
+        } else {
+          setFirstUser(exchangeData?.exchange?.post?.user);
+          setSecondUser(exchangeData?.exchange?.requestUser);
+          console.log('first user: ',firstUser);
+          console.log('second user: ',secondUser);
+        }
+        setCurrentStepLeft(exchangeData?.initialStage?.firstUser);
+        setCurrentStepRight(exchangeData?.initialStage?.secondUser);
+      }
+    }, [exchangeData, user]);
     // User avatar component
-    const UserAvatar = ({ side, image, name }) => (
+    const UserAvatar = ({ image, name }) => (
       <div className="flex flex-col items-center mb-6">
         <div className="w-16 h-16 rounded-full overflow-hidden mb-2 border-2 border-gray-200">
           <img 
@@ -106,8 +133,8 @@ const ProgressSection = () => {
           <div className="flex flex-col items-center mr-4">
             <UserAvatar 
               side="left"
-              image="/api/placeholder/100/100" 
-              name="Bạn" 
+              image={firstUser?.avatar_url || "/api/placeholder/100/100"}
+              name={firstUser?.full_name || "Bạn"}
             />
             
             {leftSteps.slice(0, leftSteps.length - 1).map((step, index) => 
@@ -129,8 +156,8 @@ const ProgressSection = () => {
           <div className="flex flex-col items-center ml-4">
             <UserAvatar 
               side="right"
-              image="/api/placeholder/100/100" 
-              name="Minh" 
+              image={secondUser?.avatar_url || "/api/placeholder/100/100"}
+              name={secondUser?.full_name || "Minh"}
             />
             
             {rightSteps.slice(0, rightSteps.length - 1).map((step, index) => 
@@ -173,3 +200,16 @@ const ProgressSection = () => {
 }
 
 export default ProgressSection
+
+ProgressSection.propTypes = {
+  exchangeData: PropTypes.shape({
+      exchange: PropTypes.shape({
+        id: PropTypes.number.isRequired,
+        depositAmount: PropTypes.number.isRequired,
+      }).isRequired,
+      initialStage: PropTypes.shape({
+        firstUser: PropTypes.number.isRequired,
+        secondUser: PropTypes.number.isRequired,
+      }).isRequired,
+    }).isRequired,
+};

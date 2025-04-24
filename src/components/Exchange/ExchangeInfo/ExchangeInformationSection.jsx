@@ -187,21 +187,15 @@ const ExchangeInformationSection = ({
           />
         );
       case 1:
-        return exchangeData.isRequestUser ? (
-          <SubmitAmounts
-            exchangeId={exchangeData.exchange.id}
-            self={firstUser}
-            theOther={secondUser}
-            fetchExchangeDetails={() => {}} // thay bằng hàm fetch nếu có
-            setIsLoading={setIsLoading}
-          />
-        ) : (
+        return (
+        
           <DealsInformation
             exchangeDetails={exchangeData}
             self={firstUser}
             theOther={secondUser}
           />
-        );
+        )
+       
       case 2:
         return (
           <SubmitDeliveryInfo
@@ -297,7 +291,7 @@ ExchangeInformationSection.propTypes = {
   setSecondCurrentStage: PropTypes.func.isRequired,
   firstAddress: PropTypes.string.isRequired,
   secondAddress: PropTypes.string.isRequired,
-  address: PropTypes.object.isRequired,
+  address: PropTypes.array.isRequired,
   setAddress: PropTypes.func.isRequired,
   selectedAddress: PropTypes.object,
   setSelectedAddress: PropTypes.func.isRequired,

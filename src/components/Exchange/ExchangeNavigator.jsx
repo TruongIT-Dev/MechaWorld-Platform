@@ -1,8 +1,10 @@
 import { Avatar, Button, Layout, message, Modal } from 'antd';
 import { UserOutlined, MenuOutlined } from '@ant-design/icons';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import PostModal from './PostModal';
+import { getUser } from '../../apis/User/APIUser';
+import { useSelector } from 'react-redux';
 
 const { Content } = Layout;
 
@@ -13,8 +15,9 @@ const navItems = [
 ];
 
 export default function ExchangeNavigator() {
-
+    const currentUser = useSelector((state) => state.auth.user )
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [userData, setUserData] = useState();
 
     // Open modal
     const openModal = () => {
@@ -35,10 +38,18 @@ export default function ExchangeNavigator() {
         message.success("Đăng bài trao đổi Gundam thành công!");
     };
 
+    useEffect (() => {
+        getUser(currentUser.id).then((response) => {
+            setUserData(response.data);
+            console.log('check user:', userData);
+        });
+    },[])
+
+    
     return (
         <Content className="bg-white p-4 shadow rounded-lg flex flex-col items-center">
-            <Avatar size={64} icon={<UserOutlined />} />
-            <h2 className="mt-2 text-lg font-semibold">Nguyễn Trường</h2>
+            <Avatar size={64} src={currentUser.avatar_url} />
+            <h2 className="mt-2 text-lg font-semibold">{currentUser.full_name}</h2>
 
             <Button
                 className="mt-3 w-full bg-blue-500"
@@ -82,6 +93,7 @@ export default function ExchangeNavigator() {
                 destroyOnClose
             >
                 <PostModal
+                    currentUser={currentUser}
                     onClose={closeModal}
                     onSuccess={handlePostSuccess}
                 />
