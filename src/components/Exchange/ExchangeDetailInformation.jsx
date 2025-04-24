@@ -5,7 +5,7 @@ import ExchangeInformation from "./ExchangeInformation";
 import ExchangeLoader from "./ExchangeLoader";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import { getUserAddresses } from "../../apis/User/APIUserProfile";
+import { getUserAddresses } from "../../apis/User/APIUser";
 
 const ExchangeDetailInformation = () => {
   // This component is responsible for displaying the exchange detail information, including the exchange information section, action buttons, and progress section.

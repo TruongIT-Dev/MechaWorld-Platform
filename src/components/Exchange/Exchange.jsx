@@ -1,7 +1,8 @@
 // Exchange.tsx
 import { Layout, Row, Col } from 'antd';
-import UserProfile from './UserProfile';
 import { Outlet } from 'react-router-dom';
+
+import ExchangeNavigator from './ExchangeNavigator';
 
 export default function Exchange() {
     return (
@@ -11,7 +12,7 @@ export default function Exchange() {
                     {/* Sidebar trái */}
                     <Col xs={24} md={6}>
                         <div className="sticky top-16">
-                            <UserProfile />
+                            <ExchangeNavigator />
                         </div>
                     </Col>
 

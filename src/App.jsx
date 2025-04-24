@@ -14,7 +14,6 @@ import {
   ShopDashboard, ShopPage,
   ShopProductManagement,
   ShopTransaction, ExchangePage,
-  ExchangeDetail,
   CartPage1,
   Checkout,
   WalletPage,
@@ -39,13 +38,14 @@ import {
   ModGundams,
   ModUsers,
   ModExchanges,
-  ExchangeRequestForm,
   ExchangeDetailInformation,
   ExchangeGundamManagement,
   Collection,
   ShopInfo,
   ShopAddress,
   PageNotFound,
+  ExchangeList,
+  ExchangeManage,
 
 } from "./routes/router";
 
@@ -57,7 +57,6 @@ import { logout, updateUser } from "./features/auth/authSlice";
 
 import Spinner from "./components/Spinner";
 import PageLoading from "./components/PageLoading";
-import RequestList from "./components/Exchange/RequestList";
 
 function App() {
 
@@ -104,20 +103,15 @@ function App() {
             <Route path="admin/aution" element={<CensorProductToAution />} />
 
 
-            {/* Exchange Route */}
+            {/* Exchange Main Route */}
             <Route path="/exchange" element={<ExchangePage />}>
-              <Route path="list" element={<RequestList />} />
-              {/* <Route path="manage" element={<ManageRequests />} /> */}
+              <Route path="list" element={<ExchangeList />} />
               <Route path="manage-gundam" element={<ExchangeGundamManagement />} />
-              {/* <Route path="history" element={<ExchangeHistory />} /> */}
-
-              {/* Default khi không có gì khớp */}
-              <Route index element={<RequestList />} />
+              <Route index element={<ExchangeList />} />
             </Route>
 
             {/* Exchange Route */}
-            <Route path="exchange/request" element={<ExchangeRequestForm />} />
-            <Route path="/exchange/detail" element={<ExchangeDetail />} />
+            <Route path="/exchange/manage" element={<ExchangeManage />} />
             <Route path="/exchange/detail/section" element={<ExchangeDetailInformation />} />
 
 

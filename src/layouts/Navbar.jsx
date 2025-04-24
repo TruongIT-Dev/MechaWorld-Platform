@@ -25,7 +25,7 @@ const Menu = [
   {
     id: 4,
     name: "Trao đổi",
-    link: "/exchange",
+    link: "/exchange/list",
   },
   {
     id: 5,

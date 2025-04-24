@@ -1,8 +1,7 @@
 // RequestList.jsx
-import { Card, List, Avatar, Typography, Modal } from 'antd';
+import { Card, List, Avatar, Typography, Modal, Button, Image, Carousel } from 'antd';
 import { UserOutlined, ClockCircleOutlined, PictureOutlined } from '@ant-design/icons';
 import { useState } from 'react';
-import RequestDetail from './RequestDetail';
 
 import Logo from '../../assets/image/Logo2.png';
 import Logo2 from '../../assets/image/Logo.png';
@@ -11,6 +10,7 @@ import Logo3 from '../../assets/image/Logo4.png';
 import GundamPic from '../../assets/image/gun9.jpg';
 import GundamPic2 from '../../assets/image/gun10.jpg';
 import GundamPic3 from '../../assets/image/gun2.jpg';
+import ModalOfferExchange from './ModalOfferExchange';
 
 
 const { Link, Text, Paragraph } = Typography;
@@ -85,17 +85,75 @@ const fakeRequests = [
     },
 ];
 
-export default function RequestList() {
+
+export default function ExchangeList() {
     const [selectedRequest, setSelectedRequest] = useState(null);
+    
+    // Modal List Poster Gundam Avaiable
     const [isModalOpen, setIsModalOpen] = useState(false);
+
+    // Moda Offer Exchange Request
+    const [isOfferModalOpen, setIsOfferModalOpen] = useState(false);
+
+
+    const requestData = {
+        id: 'req123',
+        title: 'Tìm kiếm Gundam Strike Freedom để trao đổi',
+        user: 'GundamCollector'
+    };
+
+    const gundamList = [
+        {
+            id: 1,
+            title: 'Gundam EG LAH',
+            author: '1/144',
+            condition: 'Trung bình khá',
+            cover: GundamPic,
+            previews: [
+                GundamPic2,
+                GundamPic3,
+                GundamPic
+            ]
+        },
+        {
+            id: 2,
+            title: 'Doraemon Nihongo',
+            author: 'Fujiko F. Fujio',
+            condition: 'Trung bình khá',
+            cover: 'https://i.imgur.com/bvhm26T.jpg',
+            preview: 'https://i.imgur.com/Y3n0N6Z.jpg'
+        },
+        {
+            id: 3,
+            title: 'Gundam EG LAH',
+            author: '1/144',
+            condition: 'Trung bình khá',
+            cover: GundamPic,
+            previews: [
+                GundamPic2,
+                GundamPic3,
+                GundamPic
+            ]
+        },
+        {
+            id: 4,
+            title: 'Gundam EG LAH',
+            author: '1/144',
+            condition: 'Trung bình khá',
+            cover: GundamPic,
+            previews: [
+                GundamPic2,
+                GundamPic3,
+                GundamPic
+            ]
+        },
+    ];
+
+    const [expandedContent, setExpandedContent] = useState(false);
 
     const handleOpenModal = (request) => {
         setSelectedRequest(request);
         setIsModalOpen(true);
-    };
-
-    const handleCloseModal = () => {
-        setIsModalOpen(false);
     };
 
     return (
@@ -108,40 +166,43 @@ export default function RequestList() {
                     itemLayout="vertical"
                     dataSource={fakeRequests}
                     renderItem={(item) => (
-                        <Card
-                            onClick={() => handleOpenModal(item)}
-                            className="mb-3 cursor-pointer hover:shadow-md transition-all"
-                        >
+                        <Card className="mb-3" >
                             <List.Item className="flex items-center">
                                 <div className="content-wrapp space-y-2">
                                     {/* Icon user - username - Time posted */}
                                     <div className="flex flex-col items-start">
-                                        <div className='flex items-center gap-3'>
-                                            <Avatar size={48} src={item.userAvatar} icon={!item.userAvatar && <UserOutlined />} />
-                                            <div className="">
-                                                <Link href={item.userProfile} className="mr-4 text-sm">
-                                                    {item.user}
-                                                </Link>
-                                                <Text type="secondary" className="flex items-center text-xs">
-                                                    <ClockCircleOutlined className="mr-1" /> {new Date(item.time).toLocaleDateString('vi-VN', {
-                                                        year: 'numeric',
-                                                        month: 'long',
-                                                        day: 'numeric',
-                                                        hour: '2-digit',
-                                                        minute: '2-digit'
-                                                    })}
-                                                </Text>
+                                        <div className='flex items-center justify-between w-full'>
+                                            <div className='flex items-center gap-3'>
+                                                <Avatar size={48} src={item.userAvatar} icon={!item.userAvatar && <UserOutlined />} />
+                                                <div className="">
+                                                    <Link href={item.userProfile} className="mr-4 text-sm">
+                                                        {item.user}
+                                                    </Link>
+                                                    <Text type="secondary" className="flex items-center text-xs">
+                                                        <ClockCircleOutlined className="mr-1" /> {new Date(item.time).toLocaleDateString('vi-VN', {
+                                                            year: 'numeric',
+                                                            month: 'long',
+                                                            day: 'numeric',
+                                                            hour: '2-digit',
+                                                            minute: '2-digit'
+                                                        })}
+                                                    </Text>
+                                                </div>
+                                            </div>
+                                            <div className='space-x-2'>
+                                                <Button onClick={() => handleOpenModal()} ghost type='primary' className='bg-blue-400'>Gundam Trao Đổi</Button>
+                                                <Button onClick={() => setIsOfferModalOpen(true)} type='primary' className='bg-blue-500 px-4'>Đề xuất trao đổi</Button>
                                             </div>
                                         </div>
                                     </div>
 
                                     {/* Nội dung bài Post */}
-                                    <div className='content-post flex'>
+                                    <div className='content-post flex items-center'>
                                         {/* List ảnh Gundam đăng Trao đổi - Chỉ hiển thị ảnh đại diện */}
                                         <div className="relative mr-4">
                                             <Avatar
                                                 src={item.mainImage}
-                                                size={80}
+                                                size={150}
                                                 shape="square"
                                                 className="rounded-md"
                                             />
@@ -154,13 +215,19 @@ export default function RequestList() {
 
                                         {/* Nội dung chính của bài post */}
                                         <div className="flex-1">
-                                            <h3 className="text-base font-semibold m-0">{item.title}</h3>
-                                            <Text type="secondary" className="block text-xs mb-1">
-                                                {item.category}
-                                            </Text>
-                                            <Paragraph ellipsis={{ rows: 2 }} className="text-sm text-gray-600">
+                                            <Paragraph
+                                                ellipsis={!expandedContent ? { rows: 4 } : false}
+                                                className="text-base text-gray-600"
+                                            >
                                                 {item.content}
                                             </Paragraph>
+                                            <Text
+                                                type="secondary"
+                                                className="text-blue-500 cursor-pointer text-sm"
+                                                onClick={() => setExpandedContent(!expandedContent)}
+                                            >
+                                                {expandedContent ? 'Ẩn bớt' : 'Xem thêm'}
+                                            </Text>
                                         </div>
                                     </div>
                                 </div>
@@ -170,16 +237,73 @@ export default function RequestList() {
                 />
             </div>
 
-            {/* Modal để hiển thị chi tiết */}
+            {/* Modal Gửi Yêu cầu Đề Xuất Trao Đổi */}
+            <ModalOfferExchange
+                isOpen={isOfferModalOpen}
+                onClose={() => setIsOfferModalOpen(false)}
+                requestData={requestData}
+            />
+
+            {/* Modal để hiển thị các gundam mà Người đăng sẵn sàng Trao đổi */}
             <Modal
+                title="DANH SÁCH GUNDAM CÓ SẴN ĐỂ TRAO ĐỔI"
                 open={isModalOpen}
-                onCancel={handleCloseModal}
+                onCancel={() => setIsModalOpen(false)}
                 footer={null}
                 width={800}
-                className='mt-0'
-                title={<span className="text-lg font-bold">Chi tiết trao đổi</span>}
             >
-                <RequestDetail selectedRequest={selectedRequest} />
+                <List
+                    itemLayout="horizontal"
+                    dataSource={gundamList}
+                    className="mt-4 max-h-96 overflow-auto"
+                    renderItem={(item) => (
+                        <List.Item className="items-start">
+                            <List.Item.Meta
+                                avatar={<Image src={item.cover} width={120} height={150} />}
+                                title={<Text strong className='text-base'>{item.title}</Text>}
+                                description={
+                                    <>
+                                        <div>Phân khúc: {item.author}</div>
+                                        <div>
+                                            Tình trạng: <Text strong>{item.condition}</Text>
+                                        </div>
+                                        <div>
+                                            Phiên bản: Vàng óng ánh
+                                        </div>
+                                    </>
+                                }
+                            />
+                            <Carousel
+                                dots={false}
+                                arrows
+                                slidesToShow={2}
+                                slidesToScroll={1}
+                                className="w-[320px]"
+                                prevArrow={<button className="text-black bg-black rounded-full p-2">←</button>}
+                                nextArrow={<button className="text-white bg-black rounded-full p-2">→</button>}
+                            >
+                                {(item.previews || []).map((imgUrl, idx) => (
+                                    <div key={idx} className="px-1">
+                                        <Image
+                                            src={imgUrl}
+                                            width={120}
+                                            height={170}
+                                            className="object-cover rounded-md"
+                                            preview={true}
+                                        />
+                                    </div>
+                                ))}
+                            </Carousel>
+
+                        </List.Item>
+                    )}
+                />
+
+                <div className="flex justify-end mt-4">
+                    <Button type="primary" onClick={() => setIsModalOpen(false)}>
+                        Đóng
+                    </Button>
+                </div>
             </Modal>
         </>
     );

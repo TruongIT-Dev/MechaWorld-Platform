@@ -1,4 +1,4 @@
-import { Avatar, Button, Layout, Modal } from 'antd';
+import { Avatar, Button, Layout, message, Modal } from 'antd';
 import { UserOutlined, MenuOutlined } from '@ant-design/icons';
 import { useState } from 'react';
 import { NavLink } from 'react-router-dom';
@@ -7,15 +7,33 @@ import PostModal from './PostModal';
 const { Content } = Layout;
 
 const navItems = [
-    { label: 'Trang chủ', path: '/exchange/list' },
-    { label: 'Bài viết của tôi', path: '/exchange/my-posts' },
-    { label: 'Quản lý trao đổi', path: '/exchange/manage' },
-    { label: 'Quản lý Gundam Trao đổi', path: '/exchange/manage-gundam' },
-    { label: 'Lịch sử trao đổi', path: '/exchange/history' },
+    { label: 'Các bài viết trao đổi', path: '/exchange/list' },
+    { label: 'Quản lý bài viết của bạn', path: '/exchange/history' },
+    { label: 'Các cuộc trao đổi của bạn', path: '/exchange/manage' },
 ];
 
-export default function UserProfile() {
+export default function ExchangeNavigator() {
+
     const [isModalOpen, setIsModalOpen] = useState(false);
+
+    // Open modal
+    const openModal = () => {
+        setIsModalOpen(true);
+    };
+
+    // Close modal
+    const closeModal = () => {
+        setIsModalOpen(false);
+    };
+
+    // Handle successful post submission
+    const handlePostSuccess = (postData) => {
+        console.log("Post created successfully:", postData);
+        closeModal();
+
+        // Show success message
+        message.success("Đăng bài trao đổi Gundam thành công!");
+    };
 
     return (
         <Content className="bg-white p-4 shadow rounded-lg flex flex-col items-center">
@@ -24,7 +42,7 @@ export default function UserProfile() {
 
             <Button
                 className="mt-3 w-full bg-blue-500"
-                onClick={() => setIsModalOpen(true)}
+                onClick={openModal}
                 type="primary"
             >
                 + Đăng bài viết
@@ -51,14 +69,22 @@ export default function UserProfile() {
             <Button icon={<MenuOutlined />} className="mt-4 w-full md:hidden">
                 Menu
             </Button>
-
             <Modal
-                title="Đăng bài viết Trao đổi Gundam"
+                title={
+                    <div className="flex items-center text-blue-800">
+                        <span><span className="text-red-600">GUNDAM</span> EXCHANGE</span>
+                    </div>
+                }
                 open={isModalOpen}
-                onCancel={() => setIsModalOpen(false)}
+                onCancel={closeModal}
+                width={700}
                 footer={null}
+                destroyOnClose
             >
-                <PostModal />
+                <PostModal
+                    onClose={closeModal}
+                    onSuccess={handlePostSuccess}
+                />
             </Modal>
         </Content>
     );
