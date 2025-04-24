@@ -292,7 +292,7 @@ export default function ModalOfferExchange({ isOpen, onClose, requestData,gundam
                                 </p>
 
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6 max-h-96 overflow-y-auto">
-                                    {gundamList.map((gundam) => (
+                                    {gundamList?.map((gundam) => (
                                         <Card
                                             key={gundam.gundam_id}
                                             hoverable
@@ -328,7 +328,7 @@ export default function ModalOfferExchange({ isOpen, onClose, requestData,gundam
                                         </Card>
                                     ))}
 
-                                    {gundamList.length === 0 && (
+                                    {gundamList?.length === 0 && (
                                         <div className="col-span-2 text-center py-8 bg-gray-100 rounded-lg">
                                             <p className="text-gray-500">Bạn chưa có Gundam nào để trao đổi</p>
                                         </div>

@@ -181,8 +181,8 @@ const ExchangeDetailInformation = () => {
           },         
         ],
         initialStage: {
-          firstUser:1, 
-          secondUser: 1, 
+          firstUser:5, 
+          secondUser: 5, 
         },
 
       };
