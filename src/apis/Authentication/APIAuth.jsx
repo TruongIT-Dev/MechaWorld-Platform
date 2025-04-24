@@ -97,11 +97,11 @@ export const verifyToken = (access_token) => {
 
 
 // POST Verify OPT by Phone Number
-export const verifyOtp = (id, phone, opt) => {
+export const verifyOtp = (id, phone, otp) => {
     return axios.post('/otp/phone-number/verify', {
         user_id: id,
         phone_number: phone,
-        otp_code: opt
+        otp_code: otp
     }
     );
 }

@@ -47,6 +47,8 @@ const GundamProductPage = () => {
                     "used": "Đã qua sử dụng"
                 };
                 let gundamData = detailGundam?.data || {};
+                console.log("gundamData", gundamData);
+
                 let assessoriesData = detailGundam?.data?.accessories;
                 if (gundamData.condition) {
                     gundamData.condition = conditionMapping[gundamData.condition] || gundamData.condition;
