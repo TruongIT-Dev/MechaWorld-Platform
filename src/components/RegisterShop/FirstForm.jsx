@@ -6,15 +6,16 @@ import { PhoneOutlined, LockOutlined } from "@ant-design/icons";
 
 import { updateUser } from "../../features/auth/authSlice";
 import { verifyToken, verifyOtp, verifyPhone, createShop } from '../../apis/Authentication/APIAuth';
+import { GetShopInfoById, UpdateShopName } from '../../apis/Seller Profile/APISellerProfile';
 
 const FirstForm = ({ form, setIsPhoneVerified }) => {
 
-    // const [user, setUser] = useState(useSelector((state) => state.auth.user));
     const user = useSelector((state) => state.auth.user);
 
     const [email, setEmail] = useState(user?.email || "");
-    const [fullName, setFullName] = useState(user?.full_name || "");
-    const [newPhoneNumber, setNewPhoneNumber] = useState(user?.phone_number || "")
+    const [shopName, setShopName] = useState("");
+    const [newPhoneNumber, setNewPhoneNumber] = useState(user?.phone_number || "");
+    const [shopExists, setShopExists] = useState(false); // Trạng thái để biết shop đã tồn tại hay chưa
 
     const [phoneNumber, setPhoneNumber] = useState("");
     const [modalVisible, setModalVisible] = useState(false);
@@ -33,7 +34,6 @@ const FirstForm = ({ form, setIsPhoneVerified }) => {
     // Cập nhật các State khi user có thay đổi
     useEffect(() => {
         setEmail(user?.email || "");
-        setFullName(user?.full_name || "");
         setNewPhoneNumber(user?.phone_number || "");
     }, [user]);
 
@@ -45,9 +45,9 @@ const FirstForm = ({ form, setIsPhoneVerified }) => {
             try {
                 verifyToken(access_token).then(response => {
                     console.log("Data user", response.data);
-                    // setUser(response.data);
+
                     setEmail(response.data.email);
-                    setFullName(response.data.full_name);
+                    // setFullName(response.data.full_name);
                     setNewPhoneNumber(response.data.phone_number);
 
                     // Kiểm tra số điện thoại và cập nhật trạng thái xác thực
@@ -65,16 +65,59 @@ const FirstForm = ({ form, setIsPhoneVerified }) => {
     // Hàm xử lý Thay đổi tên Shop
     useEffect(() => {
         if (user) {
-            form.setFieldsValue({ full_name: user?.full_name });
+            // form.setFieldsValue({ full_name: user?.shop_name });
             form.setFieldsValue({ email: user?.email });
         }
     }, [user, form]);
 
 
+    // Hàm Kiểm tra ID user xem đã là Shop chưa, nếu chưa thì TextBox để trống. và Gọi hàm Create Shop Name
+    // Fetch Shop Info
 
+    // Kiểm tra xem user đã có Shop chưa
+    const shopID = user?.id;
+
+    useEffect(() => {
+        if (!shopID) return;
+
+        const fetchShopInfo = async () => {
+            try {
+                const response = await GetShopInfoById(shopID);
+                console.log("Shop:", response);
+                if (response?.data?.shop_name) {
+                    setShopName(response.data.shop_name);
+                    setShopExists(true); // Đánh dấu đã có shop
+                    form.setFieldsValue({ shop_name: response.data.shop_name }); // Đặt giá trị vào form
+                }
+            } catch (error) {
+                console.log("Shop chưa tồn tại:", error);
+                setShopExists(false); // Đánh dấu chưa có shop
+                form.setFieldsValue({ shop_name: "" }); // Đặt giá trị trống vào form
+            }
+        };
+
+        fetchShopInfo();
+    }, [shopID, form]);
+
+    // Hàm xử lý khi tên shop thay đổi
     const handleNameChange = (e) => {
-        setFullName(e.target.value);
+        setShopName(e.target.value);
+        form.setFieldsValue({ shop_name: e.target.value }); // Cập nhật giá trị vào form
     };
+
+    // Nếu shop đã tồn tại và người dùng thay đổi tên, thì cập nhật tên shop
+    useEffect(() => {
+        // Lưu thông tin tên shop ban đầu để so sánh khi có thay đổi
+        const originalShopName = form.getFieldValue('shop_name');
+
+        return () => {
+            // Trong cleanup function, kiểm tra xem tên shop có thay đổi không
+            if (shopExists && originalShopName !== form.getFieldValue('shop_name')) {
+                // Nếu có thay đổi, sẽ được xử lý trong component cha khi người dùng nhấn "Tiếp theo"
+                console.log("Tên shop đã thay đổi, sẽ được cập nhật khi tiếp tục");
+            }
+        };
+    }, [shopExists, form]);
 
 
     // Gửi OTP
@@ -165,8 +208,6 @@ const FirstForm = ({ form, setIsPhoneVerified }) => {
         }
     };
 
-
-
     const prefixSelector = (
         <div className="bg-gray-100 border-r border-gray-300 px-2 mr-2 flex items-center h-full">
             <img
@@ -188,16 +229,20 @@ const FirstForm = ({ form, setIsPhoneVerified }) => {
                         Vui lòng cung cấp đầy đủ thông tin cửa hàng của bạn.
                         Những thông tin này sẽ giúp khách hàng dễ dàng nhận diện và tìm kiếm SHOP của bạn trên nền tảng.
                     </p>
-                    <p className="text-red-500 mt-2 italic text-sm">Lưu ý: Tài khoản người dùng và tài khoản Shop sẽ có cùng sử dụng một tên duy nhất.</p>
+                    {/* <p className="text-red-500 mt-2 italic text-sm">Lưu ý: Tài khoản người dùng và tài khoản Shop sẽ có cùng sử dụng một tên duy nhất.</p> */}
                 </div>
 
-                {/* Input full name */}
+                {/* Input shop name */}
                 <Form.Item
-                    label={<span className="font-semibold">Tên Cửa Hàng</span>}
-                    name="full_name"
-                    rules={[{ required: true, message: "Vui lòng nhập tên người bán!" }]}
+                    label="Tên cửa hàng"
+                    name="shop_name"
+                    rules={[{ required: true, message: "Vui lòng nhập tên Shop sử dụng!" }]}
                 >
-                    <Input value={fullName} onChange={handleNameChange} />
+                    <Input
+                        value={shopName}
+                        onChange={handleNameChange}
+                        placeholder={shopExists ? "Cập nhật tên Shop" : "Nhập tên Shop mới"}
+                    />
                 </Form.Item>
 
                 {/* Disply email */}

@@ -46,6 +46,10 @@ const SettingAddress = () => {
     try {
       setLoading(true);
       const response = await getUserAddresses(user.id);
+
+      console.log("user address", response);
+
+
       setAddresses(response.data);
     } catch (error) {
       console.error('Lỗi khi lấy danh sách địa chỉ:', error);
@@ -53,17 +57,32 @@ const SettingAddress = () => {
       setLoading(false);
     }
   };
+
   const setPrimaryAddress = async (addressID) => {
     try {
 
       await updateAddress(user.id, addressID, { is_primary: true });
-      message.success("Đã cập nhật địa chỉ mặc định!");
+      message.success("Đã cập nhật địa chỉ giao hàng!");
       fetchUserAddresses();
     } catch (error) {
-      message.error("Lỗi khi cập nhật địa chỉ mặc định!");
+      message.error("Lỗi khi cập nhật địa chỉ giao hàng!");
       console.error(error);
     }
   };
+
+  const setPickupAddress = async (addressID) => {
+    try {
+
+      await updateAddress(user.id, addressID, { is_pickup_address: true });
+      message.success("Đã cập nhật địa chỉ lấy hàng!");
+      fetchUserAddresses();
+    } catch (error) {
+      message.error("Lỗi khi cập nhật địa chỉ lấy hàng!");
+      console.error(error);
+    }
+  };
+
+
   const handleDeleteAddress = async (address) => {
     setLoading(true);
     console.log("Địa chỉ:", address);
@@ -71,6 +90,8 @@ const SettingAddress = () => {
     fetchUserAddresses();
     setLoading(false);
   }
+
+
   // const handleEditAddress = async (address) => {
   //   console.log("📌 Đang chỉnh sửa địa chỉ:", address);
 
@@ -326,11 +347,18 @@ const SettingAddress = () => {
 
             <div className="mt-2 flex items-center space-x-2">
               {addr.is_primary ? (
-                <span className="px-2 py-1 text-xs font-semibold text-white bg-red-500 rounded">Mặc định</span>
+                <span className="px-2 py-1 text-xs font-semibold text-white bg-red-500 rounded">Địa chỉ giao hàng</span>
               ) : (
-                // <Button size="small" onClick={() => setDefaultAddress(addr.id)}>
                 <Button size="small" onClick={() => setPrimaryAddress(addr.id)}>
-                  Thiết lập mặc định
+                  Thiết lập địa chỉ giao hàng
+                </Button>
+              )}
+              {addr.is_pickup_address ? (
+                <span className="px-2 py-1 text-xs font-semibold text-white bg-blue-500 rounded">Địa chỉ lấy hàng</span>
+              ) : (
+
+                  <Button size="small" onClick={() => setPickupAddress(addr.id)}>
+                  Thiết lập địa chỉ lấy hàng
                 </Button>
               )}
             </div>

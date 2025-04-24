@@ -113,6 +113,8 @@ export const verifyPhone = (phone) => {
         phone_number: phone
     })
 }
+
+
 // POST Create a new shop
 export const createShop = (shopName,userId) => {
   return axios.post('/seller/profile', {

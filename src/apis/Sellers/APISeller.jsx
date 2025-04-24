@@ -65,14 +65,6 @@ export const ConfirmOrder = (sellerId, orderId) => {
 }
 
 
-// PATCH SELLER PAKAGING AN ORDER
-export const PackagingOrder = (sellerId, orderId, packagingData) => {
-    return axios.patch(`/sellers/${sellerId}/orders/${orderId}/package`, packagingData, {
-        headers: {
-            "Content-Type": "multipart/form-data",
-        },
-    });
-}
 
 
 // PATCH SELLER CANCEL AN ORDER

@@ -10,8 +10,9 @@ import SecondForm from "./SecondForm";
 import ThirdForm from "./ThirdForm";
 import FourthForm from "./FourthForm";
 
-import { verifyToken,createShop } from '../../apis/Authentication/APIAuth';
-import { BecomeSeller, updateUserData } from "../../apis/User/APIUser";
+import { verifyToken, createShop } from '../../apis/Authentication/APIAuth';
+import { BecomeSeller } from "../../apis/User/APIUser";
+import { GetShopInfoById, UpdateShopName } from '../../apis/Seller Profile/APISellerProfile';
 
 const { Step } = Steps;
 
@@ -33,6 +34,9 @@ export default function RegisterShop() {
   const [isPhoneVerified, setIsPhoneVerified] = useState(false);
   const [canProceed, setCanProceed] = useState(true);
 
+  // Thêm state kiểm tra trạng thái địa chỉ
+  const [hasAddress, setHasAddress] = useState(false);
+
   // console.log("formData", formData);
 
   const steps = [
@@ -49,6 +53,7 @@ export default function RegisterShop() {
       icon: <TruckOutlined />,
       content: <SecondForm
         user={user}
+        setHasAddress={setHasAddress}
       />,
     },
     {
@@ -90,14 +95,32 @@ export default function RegisterShop() {
 
   // Hàm btn Next - Prev
   const next = async () => {
-
     try {
       const values = await form.validateFields();
 
       if (current === 0) {
-        // 🟢 Gọi API cập nhật Thông tin Shop
-        await updateUserData(user?.id, values.full_name);
-        await createShop(values.full_name, user?.id);
+        // Xử lý tạo/cập nhật shop
+        let shopExists = false;
+
+        // Kiểm tra shop tồn tại
+        try {
+          const shopResponse = await GetShopInfoById(user?.id);
+          shopExists = !!shopResponse?.data;
+        } catch (error) {
+          shopExists = false;
+        }
+
+        // Dựa vào kết quả kiểm tra để quyết định hành động
+        if (shopExists) {
+          // Cập nhật shop nếu tồn tại
+          await UpdateShopName(values.shop_name, user?.id);
+          console.log("Shop name updated");
+        } else {
+          // Tạo mới nếu chưa tồn tại
+          await createShop(values.shop_name, user?.id);
+          console.log("New shop created");
+        }
+
         console.log("Form 1 done");
       } else if (current === 1) {
         // 🟢 Gọi API cập nhật Cài đặt vận chuyển
@@ -169,9 +192,17 @@ export default function RegisterShop() {
         </div>
 
         <div className="flex justify-end mt-6">
-          {current > 0 && <Button onClick={prev}>Quay lại</Button>}
+          {current > 0 && current < steps.length - 1 && <Button onClick={prev}>Quay lại</Button>}
           {current < steps.length - 1 ? (
-            <Button type="primary" disabled={!canProceed || !isPhoneVerified} onClick={next} className="bg-blue-500 mx-4 hover:bg-blue-600">
+            <Button
+              type="primary"
+              disabled={
+                (current === 0 && (!canProceed || !isPhoneVerified)) ||
+                (current === 1 && !hasAddress)
+              }
+              onClick={next}
+              className="bg-blue-500 mx-4 hover:bg-blue-600"
+            >
               Tiếp theo
             </Button>
           ) : (
