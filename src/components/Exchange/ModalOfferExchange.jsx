@@ -57,7 +57,7 @@ export default function ModalOfferExchange({ isOpen, onClose, requestData }) {
 
     const handleTabChange = (key) => {
         // Validate form trước khi chuyển sang tab khác
-        if (key === '2' && activeTab === '1') {
+        if (key === '3' && activeTab === '1') {
             form.validateFields(['compensationType', 'compensationAmount'])
                 .then(() => {
                     setActiveTab(key);
@@ -85,7 +85,7 @@ export default function ModalOfferExchange({ isOpen, onClose, requestData }) {
     const handleSubmit = () => {
         if (!selectedGundam) {
             message.error('Vui lòng chọn một Gundam để trao đổi');
-            setActiveTab('2');
+            setActiveTab('3');
             return;
         }
 
@@ -158,7 +158,7 @@ export default function ModalOfferExchange({ isOpen, onClose, requestData }) {
                 activeKey={activeTab}
                 onChange={handleTabChange}
                 items={[
-                    
+
                     // Tab 1: THÔNG TIN BÙ TRỪ TIỀN
                     {
                         key: '1',
@@ -274,19 +274,19 @@ export default function ModalOfferExchange({ isOpen, onClose, requestData }) {
                         ),
                     },
 
-                    // Tab 2: CHỌN GUNDAM ĐỂ TRAO ĐỔI
+                    // Tab 2: CHỌN GUNDAM CỦA MÌNH ĐỂ TRAO ĐỔI
                     {
                         key: '2',
                         label: (
                             <span className="flex items-center gap-1">
                                 <SwapOutlined />
-                                CHỌN GUNDAM TRAO ĐỔI
+                                GUNDAM TRAO ĐỔI CỦA BẠN
                             </span>
                         ),
                         children: (
                             <div className="pt-2">
-                                <p className="mb-4 text-gray-600">
-                                    Chọn một trong những Gundam của bạn để trao đổi:
+                                <p className="mb-4 text-red-500">
+                                    *Lưu ý: Chọn một trong những Gundam đang có trong kho của bạn để trao đổi.
                                 </p>
 
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6 max-h-96 overflow-y-auto">
@@ -329,6 +329,82 @@ export default function ModalOfferExchange({ isOpen, onClose, requestData }) {
                                     {myGundams.length === 0 && (
                                         <div className="col-span-2 text-center py-8 bg-gray-100 rounded-lg">
                                             <p className="text-gray-500">Bạn chưa có Gundam nào để trao đổi</p>
+                                        </div>
+                                    )}
+                                </div>
+
+                                <div className="flex justify-between">
+                                    <Button onClick={() => handleTabChange('1')}>
+                                        Quay lại
+                                    </Button>
+                                    <Button
+                                        className='bg-blue-500'
+                                        type="primary"
+                                        onClick={() => handleTabChange('3')}
+                                        loading={isSubmitting}
+                                        disabled={!selectedGundam}
+                                    >  Bước tiếp theo...
+                                    </Button>
+                                </div>
+                            </div>
+                        ),
+                    },
+
+                    // Tab 3: CHỌN GUNDAM CỦA NGƯỜI ĐĂNG ĐỂ TRAO ĐỔI
+                    {
+                        key: '3',
+                        label: (
+                            <span className="flex items-center gap-1">
+                                <SwapOutlined />
+                                GUNDAM TRAO ĐỔI CỦA ...
+                            </span>
+                        ),
+                        children: (
+                            <div className="pt-2">
+                                <p className="mb-4 text-red-500">
+                                    *Lưu ý: Chọn một trong những Gundam của [...] để trao đổi.
+                                </p>
+
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6 max-h-96 overflow-y-auto">
+                                    {myGundams.map((gundam) => (
+                                        <Card
+                                            key={gundam.id}
+                                            hoverable
+                                            className={`border-2 transition-all ${selectedGundam === gundam.id ? 'border-blue-500 shadow-md' : 'border-gray-200'}`}
+                                            cover={
+                                                <div className="relative">
+                                                    <img
+                                                        alt={gundam.name}
+                                                        src={gundam.image}
+                                                        className="h-48 w-full object-cover"
+                                                    />
+                                                    <Tag
+                                                        color={gundam.condition === 'New' ? 'gold' : 'purple'}
+                                                        className="absolute top-2 right-2"
+                                                    >
+                                                        {gundam.condition}
+                                                    </Tag>
+                                                </div>
+                                            }
+                                            onClick={() => handleGundamSelect(gundam.id)}
+                                        >
+                                            <div className="flex justify-between items-center">
+                                                <div>
+                                                    <p className="font-semibold mb-1">{gundam.name}</p>
+                                                    <Tag color="blue">{gundam.scale}</Tag>
+                                                </div>
+                                                <Checkbox
+                                                    checked={selectedGundam === gundam.id}
+                                                    onChange={() => handleGundamSelect(gundam.id)}
+                                                    className="scale-125"
+                                                />
+                                            </div>
+                                        </Card>
+                                    ))}
+
+                                    {myGundams.length === 0 && (
+                                        <div className="col-span-2 text-center py-8 bg-gray-100 rounded-lg">
+                                            <p className="text-gray-500">[...] chưa thêm Gundam nào để trao đổi</p>
                                         </div>
                                     )}
                                 </div>
