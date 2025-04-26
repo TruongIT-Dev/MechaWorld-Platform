@@ -9,33 +9,9 @@ import { loginEmail, loginGoogle } from "../../apis/Authentication/APIAuth";
 import Cookies from "js-cookie";
 import Footer from "../../layouts/Footer";
 import Logo from '../../assets/image/logo4.png';
+import { ShowErrorNotification } from "../Errors/ShowErrorNotification";
 
 export default function SignIn() {
-
-  // eslint-disable-next-line no-unused-vars
-  // const CLIENT_ID = import.meta.env.VITE_CLIENT_ID_SECRET;
-  // const [showAlert, setShowAlert] = useState(false);
-  // const [alertMess, setAlertMess] = useState('');
-  // const [alertType, setAlertType] = useState("error");
-
-  // useEffect(() => {
-  //   // /* global google */
-  //   google.accounts.id.initialize({
-  //     client_id: import.meta.env.VITE_CLIENT_ID_SECRET, 
-  //     callback: handleCredentialResponse
-  //   });
-  //   google.accounts.id.renderButton(
-  //     document.getElementById("buttonDiv"),
-  //     { theme: "outline", size: "large" }  
-  //   );
-  //   google.accounts.id.prompt(); 
-
-  //   // /* Load Google API */
-  //   window.google.accounts.id.initialize({
-  //     client_id: import.meta.env.VITE_CLIENT_ID_SECRET,
-  //     callback: handleCredentialResponse
-  //   });
-  // }, []);
 
   const [form] = Form.useForm();
   const { Title, Text } = Typography;
@@ -69,27 +45,16 @@ export default function SignIn() {
       })
       .catch(error => {
         console.error("Lỗi đăng nhập:", error);
-        showFailedNotification();
+        ShowErrorNotification(404, error);
       });
   }
 
   // Hàm Thông báo Đăng nhập Thành công
   const showSuccessNotification = () => {
     notification.success({
-      message: 'Đăng nhập thành công!',
-      description: 'Chào mừng bạn đến MechaWorld! Đang chuyển trang...',
-      duration: 2,
-      placement: 'topRight',
-      showProgress: true,
-    });
-  };
-
-  // Hàm Thông báo Đăng nhập Thất bại
-  const showFailedNotification = () => {
-    notification.error({
-      message: 'Đăng nhập thất bại!',
-      description: 'Có lỗi xảy ra!',
-      duration: 2,
+      message: 'ĐĂNG NHẬP THÀNH CÔNG!',
+      description: 'Chào mừng bạn đến MechaWorld. Đang chuyển trang...',
+      duration: 1,
       placement: 'topRight',
       showProgress: true,
     });
@@ -110,17 +75,18 @@ export default function SignIn() {
       dispatch(login(response.data));
 
       // Điều hướng trước rồi hiển thị thông báo
-      navigate("/");
+      showSuccessNotification();
 
       setTimeout(() => {
-        showSuccessNotification();
-      }, 200);
+        navigate("/");
+      }, 1000);
+
     } catch (error) {
       console.error("Lỗi đăng nhập:", error);
 
       // Hiển thị thông báo thất bại
       setTimeout(() => {
-        showFailedNotification();
+        ShowErrorNotification(404, error.response.data.error || 404, error.response.data);
       }, 200);
     }
   };
@@ -145,8 +111,8 @@ export default function SignIn() {
         </div>
 
         {/* Link trợ giúp */}
-        <a href="/" className="text-blue-400">
-          Quay về Trang chủ ?
+        <a href="/" className="text-blue-500 hover:text-blue-300">
+          QUAY VỀ TRANG CHỦ?
         </a>
       </header>
 
@@ -183,7 +149,10 @@ export default function SignIn() {
                   <Form.Item
                     name="email"
                     label="E-mail"
-                    rules={[{ required: true, message: "Vui lòng nhập email!" }]}
+                    rules={[
+                      { required: true, message: "Vui lòng nhập email!" },
+                      { type: "email", message: "Email chưa đúng định dạng!" }
+                    ]}
                   >
                     <Input size="large" />
                   </Form.Item>

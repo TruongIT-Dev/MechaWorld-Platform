@@ -11,7 +11,9 @@ export const GetListOrderHistory = () => {
 
 
 // GET Purchased Order Detail
-
+export const GetOrderDetail = (id) => {
+  return axios.get(`/orders/${id}`)
+}
 
 
 // POST Create New Order

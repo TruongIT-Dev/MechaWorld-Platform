@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
-import { Tabs, Input, Card, Button, Tag, Avatar, Spin, message, Image } from "antd";
+import { Tabs, Input, Card, Button, Tag, Avatar, Spin, message, Image, Empty, notification } from "antd";
 import { SearchOutlined, ShopOutlined, MessageOutlined } from "@ant-design/icons";
 
-import { GetListOrderHistory } from "../../apis/Orders/APIOrder";
+import { GetListOrderHistory, GetOrderDetail } from "../../apis/Orders/APIOrder";
 import { GetShopInfoById } from "../../apis/Seller Profile/APISellerProfile";
+import OrderHistoryDetail from "./OrderHistoryDetail";
 
 const { Search } = Input;
 
@@ -12,6 +13,10 @@ const OrderHistory = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(false);
   const [searchText, setSearchText] = useState("");
+
+  // Thêm state cho modal trong component OrderHistory
+  const [detailModalVisible, setDetailModalVisible] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState(null);
 
   useEffect(() => {
     fetchOrders();
@@ -90,7 +95,7 @@ const OrderHistory = () => {
 
   const convertStatus = (status) => {
     const map = {
-      pending: "Chờ xử lý",
+      pending: "Chờ xác nhận",
       packaging: "Đang đóng gói",
       delivering: "Đang giao hàng",
       delivered: "Đã giao",
@@ -128,7 +133,7 @@ const OrderHistory = () => {
 
   const tabItems = [
     { key: "all", label: "Tất cả" },
-    { key: "pending", label: "Chờ xử lý" },
+    { key: "pending", label: "Chờ xác nhận" },
     { key: "packaging", label: "Đang đóng gói" },
     { key: "delivering", label: "Đang giao hàng" },
     { key: "delivered", label: "Đã giao thành công" },
@@ -150,9 +155,28 @@ const OrderHistory = () => {
       );
     });
 
+
+  // Hàm mở modal chi tiết đơn hàng
+  const showOrderDetail = async (id) => {
+    try {
+      // Fetch chi tiết đơn hàng từ API
+      const response = await GetOrderDetail(id);
+      console.log(response);
+
+      setSelectedOrder(response.data);
+      setDetailModalVisible(true);
+    } catch (error) {
+      console.error('Error fetching order details:', error);
+      notification.error({
+        message: 'Không thể tải thông tin đơn hàng',
+        description: 'Đã xảy ra lỗi khi tải chi tiết đơn hàng.'
+      });
+    }
+  };
+
   return (
     <div className="max-w-5xl mx-auto p-6">
-      <Tabs activeKey={activeTab} onChange={setActiveTab} className="mb-4">
+      <Tabs activeKey={activeTab} onChange={setActiveTab}>
         {tabItems.map((tab) => (
           <Tabs.TabPane tab={<span className="text-lg font-medium">{tab.label}</span>} key={tab.key} />
         ))}
@@ -174,7 +198,7 @@ const OrderHistory = () => {
         </div>
       ) : filteredOrders.length === 0 ? (
         <div className="text-center py-10">
-          <p className="text-gray-500">Không có đơn hàng nào</p>
+          <Empty description="Chưa có đơn mua cho mục này" />
         </div>
       ) : (
         filteredOrders.map((order) => (
@@ -204,7 +228,6 @@ const OrderHistory = () => {
                   <div className="flex-1">
                     <p className="font-semibold">{item.name}</p>
                     <p className="text-gray-500">{item.grade} {item.scale}</p>
-                    {/* <p className="text-gray-500">x{item.quantity}</p> */}
                   </div>
                   <p className="text-red-500 font-semibold">{formatCurrency(item.price * item.quantity)}</p>
                 </div>
@@ -213,7 +236,7 @@ const OrderHistory = () => {
 
             <div className="mt-3 text-gray-500 text-sm">
               <p>Mã đơn hàng: {order.code} | Ngày đặt: {order.createdAt}</p>
-              <p>Phương thức thanh toán: {order.paymentMethod}</p>
+              {/* <p>Phương thức thanh toán: {order.paymentMethod}</p> */}
             </div>
 
             <div className="flex justify-between items-center mt-3">
@@ -221,8 +244,21 @@ const OrderHistory = () => {
                 <p className="text-gray-500">Phí vận chuyển: {formatCurrency(order.deliveryFee)}</p>
                 <p className="text-lg font-semibold text-red-500">Thành tiền: {order.formattedTotal}</p>
               </div>
-              <Button type="primary" className="bg-blue-500">Xem chi tiết</Button>
+              <Button
+                type="primary"
+                className="bg-blue-500"
+                onClick={() => showOrderDetail(order.id)}
+              >
+                Xem chi tiết
+              </Button>
             </div>
+
+            {/* Thêm Modal chi tiết đơn hàng */}
+            <OrderHistoryDetail
+              visible={detailModalVisible}
+              onClose={() => setDetailModalVisible(false)}
+              orderData={selectedOrder}
+            />
           </Card>
         ))
       )}

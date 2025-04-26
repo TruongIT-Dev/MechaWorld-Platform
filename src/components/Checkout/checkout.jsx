@@ -2,17 +2,18 @@ import { useSelector } from 'react-redux';
 import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { EnvironmentOutlined, ShopOutlined, MoneyCollectOutlined, InfoCircleOutlined } from '@ant-design/icons';
-import { Card, Button, Radio, Divider, message, Table, Modal, Form, Select, Input, Checkbox, Empty, Tabs } from 'antd';
+import { Card, Button, Radio, Divider, message, Table, Modal, Form, Select, Input, Checkbox, Empty, Tabs, notification } from 'antd';
 
 import { useCart } from '../../context/CartContext';
-import { CheckoutCart } from '../../apis/Orders/APIOrder';
 import { checkWallet } from '../../apis/User/APIUser';
+import { CheckoutCart } from '../../apis/Orders/APIOrder';
+import { ShowErrorNotification } from "../Errors/ShowErrorNotification";
 import { getUserAddresses, postUserAddresses, updateAddress } from '../../apis/User/APIUser';
 
 import axios from 'axios';
 import Cookies from 'js-cookie';
 import footerLogo from "../../assets/image/icon/iconwallet.png";
-import { ShowErrorModal } from '../Errors/ErrorModal';
+
 
 const { Option } = Select;
 
@@ -45,7 +46,7 @@ const Checkout = () => {
   const [wards, setWards] = useState([]);
   const [selectedCity, setSelectedCity] = useState(null);
   const [selectedDistrict, setSelectedDistrict] = useState(null);
-  const [isPrimary, setIsPrimary] = useState(false);
+  const [isPrimary, setIsPrimary] = useState(true);
   const [addresses, setAddresses] = useState([]);
   const [form] = Form.useForm();
   const [shippingFee, setShippingFee] = useState(0);
@@ -264,7 +265,7 @@ const Checkout = () => {
       if (isPrimary) {
         setUserAddress(newAddress);
       }
-      message.success("THÊM ĐỊA CHỈ THÀNH CÔNG!");
+      message.success("Thêm địa chỉ thành công!");
       setIsAddressModalVisible(false);
       form.resetFields();
     } catch (error) {
@@ -292,7 +293,10 @@ const Checkout = () => {
 
   const handleCheckout = async () => {
     if (!userAddress) {
-      message.error("Vui lòng chọn địa chỉ giao hàng.");
+      notification.error({
+        message: "THÔNG BÁO LỖI!",
+        description: "Bạn chưa có địa chỉ nhận hàng."
+      });
       return;
     }
 
@@ -315,11 +319,11 @@ const Checkout = () => {
     };
 
     try {
-      const res = await CheckoutCart(orderPayload);
+      await CheckoutCart(orderPayload);
       message.success("Đặt hàng thành công!");
       navigate('/member/profile/orderHistory');
 
-      console.log("Order response:", res.data);
+      // console.log("Order response:", res.data);
     } catch (error) {
       console.error("Checkout error:", error);
 
@@ -328,7 +332,7 @@ const Checkout = () => {
       const errorKey = error?.response?.data?.error || 'unknown';
 
       // ✅ Gọi Modal hiển thị lỗi
-      ShowErrorModal(status, errorKey);
+      ShowErrorNotification(status, errorKey);
     }
   };
 
@@ -351,23 +355,23 @@ const Checkout = () => {
                 </div>
                 <p className="text-lg">{userAddress.detail}, {userAddress.ward_name}, {userAddress.district_name}, {userAddress.province_name}</p>
               </div>
-            ) : <p className="text-lg">Chưa có địa chỉ nhận hàng</p>}
+            ) : <p className="text-base text-gray-400">Chưa có địa chỉ nhận hàng</p>}
             <Button
               type="link"
-              className="ml-auto text-blue-500 text-lg"
+              className="ml-auto text-blue-500 text-base"
               onClick={() => setIsAddressModalVisible(true)}
             >
-              Thay Đổi
+              Cập nhật
             </Button>
           </div>
         </Card>
 
         <Modal
-          title={<h2 className="text-xl font-bold text-blue-600">Chọn địa chỉ giao hàng</h2>}
+          title={<h2 className="text-xl font-bold text-blue-600">ĐỊA CHỈ GIAO HÀNG</h2>}
           open={isAddressModalVisible}
           onCancel={() => setIsAddressModalVisible(false)}
           footer={null}
-          width={800}
+          width={500}
           centered
         >
           <Tabs defaultActiveKey="1">
@@ -396,7 +400,7 @@ const Checkout = () => {
                           </p>
                         </div>
                         {address.is_primary ? (
-                          <span className="px-2 py-0.5 text-xs font-medium text-white bg-red-500 rounded shadow">
+                          <span className="px-2 py-0.5 w-20 text-xs font-medium text-white bg-red-500 rounded shadow">
                             Mặc định
                           </span>
                         ) : (
@@ -429,7 +433,7 @@ const Checkout = () => {
                 form={form}
                 layout="vertical"
                 onFinish={onFinishAddress}
-                // className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4"
+              // className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4"
               >
                 <Form.Item
                   label="Thành phố"
@@ -480,13 +484,6 @@ const Checkout = () => {
                   </Select>
                 </Form.Item>
 
-                <Form.Item label="Số điện thoại" name="phone_number" rules={[{ required: true }]} tooltip={{
-                  title: 'Số điện thoại dùng để xác nhận bên vận chuyển khi giao hàng. Để trống sẽ mặc định lấy sđt của người dùng.',
-                  icon: <InfoCircleOutlined />,
-                }}>
-                  <Input placeholder="Nhập số điện thoại" />
-                </Form.Item>
-
                 <Form.Item
                   label="Địa chỉ cụ thể"
                   name="detail"
@@ -494,6 +491,13 @@ const Checkout = () => {
                   className="col-span-1"
                 >
                   <Input placeholder="Ví dụ: Số nhà, tên đường..." />
+                </Form.Item>
+
+                <Form.Item label="Số điện thoại" name="phone_number" rules={[{ required: true }]} tooltip={{
+                  title: 'Số điện thoại dùng để xác nhận bên vận chuyển khi giao hàng. Để trống sẽ mặc định lấy sđt của người dùng.',
+                  icon: <InfoCircleOutlined />,
+                }}>
+                  <Input placeholder="Nhập số điện thoại" />
                 </Form.Item>
 
                 <Form.Item className="col-span-2 -mt-2">

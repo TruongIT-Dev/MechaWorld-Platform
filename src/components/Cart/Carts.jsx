@@ -6,7 +6,7 @@ import { ShopOutlined, DeleteOutlined, ShoppingCartOutlined, RightOutlined, Shop
 
 import EmptyCart from "../../assets/image/empty-cart.png";
 import { useSelector } from 'react-redux';
-import { ShowErrorModal } from '../Errors/ErrorModal';
+// import { ShowErrorModal } from '../Errors/ErrorModal';
 
 const Carts = () => {
   const { cartItems, removeFromCart, loading } = useCart();
@@ -58,13 +58,7 @@ const Carts = () => {
   };
 
 
-  //Check xem User đã Đăng ký Số điện thoại trước khi chuyển trang 
   const handleCheckout = () => {
-    // if (!user?.phone_number) {
-    //   ShowErrorModal(400, 'phone_number required');
-    //   return;
-    // }
-
     const selectedItems = cartItems.filter(item =>
       selectedRowKeys.includes(item.cart_item_id)
     );
@@ -82,7 +76,7 @@ const Carts = () => {
 
   if (cartItems.length === 0) {
     return (
-      <div className="container mx-auto mt-36 flex flex-col justify-center items-center h-[500px] mb-14 px-4">
+      <div className="container max-w-7xl mx-auto mt-36 flex flex-col justify-center items-center h-[500px] mb-14 px-4">
         <div className="flex flex-col items-center">
           {/* Empty Cart Image - Replace with your actual image path */}
           <img
@@ -112,7 +106,7 @@ const Carts = () => {
   }
 
   return (
-    <div className="container mx-auto mt-36 mb-20 px-4">
+    <div className="container max-w-5xl mx-auto mt-36 mb-20 px-4">
       <div className='w-full'>
         <div className="flex items-center justify-center mb-6">
           <div className='w-fit flex items-center bg-white shadow-lg rounded-full p-5'>
@@ -201,10 +195,11 @@ const Carts = () => {
             </div>
 
             <Button
+              danger
               type="primary"
               size="large"
               icon={<RightOutlined />}
-              className="bg-red-500 border-none flex items-center"
+              className="border-none flex items-center"
               disabled={selectedRowKeys.length === 0}
               onClick={handleCheckout}
             >

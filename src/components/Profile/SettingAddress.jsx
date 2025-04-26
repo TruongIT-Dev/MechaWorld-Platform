@@ -2,7 +2,7 @@ import axios from 'axios';
 import { useSelector } from 'react-redux';
 import { useState, useEffect } from 'react';
 import { InfoCircleOutlined } from '@ant-design/icons';
-import { Form, Select, Input, Button, message, Modal, Checkbox } from 'antd';
+import { Form, Select, Input, Button, message, Modal, Checkbox, Empty } from 'antd';
 
 import { postUserAddresses, getUserAddresses, updateAddress, deleteAddress } from '../../apis/User/APIUser';
 
@@ -91,72 +91,9 @@ const SettingAddress = () => {
     setLoading(false);
   }
 
-
-  // const handleEditAddress = async (address) => {
-  //   console.log("📌 Đang chỉnh sửa địa chỉ:", address);
-
-  //   setIsEditing(true);
-  //   setEditingAddress(address);
-  //   setIsPrimary(address.is_primary);
-
-  //   // Gán dữ liệu cơ bản trước
-  //   form.setFieldsValue({
-  //     full_name: address.full_name,
-  //     phone_number: address.phone_number,
-  //     detail: address.detail,
-  //   });
-
-  //   setIsModalVisible(true);
-
-  //   try {
-  //     // 🟢 1. Lọc thành phố có tên trùng với `province_name`
-  //     const filteredCities = cities.filter((city) => city.ProvinceName === address.province_name);
-  //     console.log("✅ Thành phố tìm thấy:", filteredCities);
-
-  //     if (filteredCities.length > 0) {
-  //       const selectedCityId = filteredCities[0].ProvinceID;
-  //       setSelectedCity(selectedCityId);
-  //       await fetchDistricts(selectedCityId); // 🟢 Load quận/huyện dựa vào thành phố
-
-  //       // 🟢 2. Đợi `districts` cập nhật xong mới tiếp tục
-  //       setTimeout(async () => {
-  //         console.log("📌 Danh sách Quận/Huyện sau khi fetch:", districts);
-  //         console.log("Địa chỉ đang tìm kiếm: ",address.district_name);
-  //         const district = districts.find((d) => d.DistrictName === address.district_name);
-  //         console.log("✅ Quận/Huyện tìm thấy:", district);
-
-  //         if (district) {
-  //           const selectedDistrictId = district.DistrictID;
-  //           setSelectedDistrict(selectedDistrictId);
-  //           await fetchWards(selectedDistrictId); // 🟢 Load danh sách phường/xã dựa vào quận/huyện
-
-  //           // 🟢 3. Đợi `wards` cập nhật xong mới tiếp tục
-  //           setTimeout(() => {
-  //             console.log("📌 Danh sách Phường/Xã sau khi fetch:", wards);
-  //             const ward = wards.find((w) => w.WardName === address.ward_name);
-  //             console.log("✅ Phường/Xã tìm thấy:", ward);
-
-  //             // Gán giá trị vào form
-  //             form.setFieldsValue({
-  //               city: selectedCityId,
-  //               district: district ? selectedDistrictId : undefined,
-  //               ward: ward ? ward.WardCode : undefined,
-  //             });
-  //           }, 200);
-  //         } else {
-  //           console.warn("⚠️ Không tìm thấy Quận/Huyện phù hợp");
-  //         }
-  //       }, 200);
-  //     } else {
-  //       console.warn("⚠️ Không tìm thấy Thành phố phù hợp");
-  //     }
-  //   } catch (error) {
-  //     console.error("❌ Lỗi khi load dữ liệu địa chỉ:", error);
-  //   }
-  // };
-
   const handleEditAddress = async (address) => {
-    console.log("📌 Đang chỉnh sửa địa chỉ:", address);
+
+    // console.log("📌 Đang chỉnh sửa địa chỉ:", address);
 
     setIsEditing(true);
     setEditingAddress(address);
@@ -305,23 +242,6 @@ const SettingAddress = () => {
   };
 
 
-  // const columns = [
-  //   { title: 'Tên tỉnh/thành', dataIndex: 'province_name', key: 'province_name' },
-  //   { title: 'Tên quận/huyện', dataIndex: 'district_name', key: 'district_name' },
-  //   { title: 'Tên phường/xã', dataIndex: 'ward_name', key: 'ward_name' },
-  //   { title: 'Địa chỉ', dataIndex: 'detail', key: 'detail' },
-  //   { title: 'Số điện thoại', dataIndex: 'phone_number', key: 'phone_number' },
-  //   { title: 'Nhận đồ?', dataIndex: 'is_pickup_address', key: 'is_pickup_address', render: (text) => (text ? "Có" : "Không") },
-  //   { title: 'Mặc định?', dataIndex: 'is_primary', key: 'is_primary', render: (text) => (text ? "Có" : "Không") },
-  // ];
-
-  // const setDefaultAddress = (id) => {
-  //   setAddresses(addresses.map((addr) => ({
-  //     ...addr,
-  //     isDefault: addr.id === id,
-  //   })));
-  // };
-
   return (
     <>
       <div className="container p-10">
@@ -332,38 +252,50 @@ const SettingAddress = () => {
           </Button>
         </div>
 
-        {addresses.map((addr) => (
-          <div key={addr.id} className="border-b pb-4 mb-4">
-            <div className="flex justify-between items-start">
-              <div>
-                <p className="font-semibold text-lg">{addr.full_name} <span className="text-gray-500">{addr.phone_number} - {addr.province_name}</span></p>
-                <p className="text-gray-600">{addr.detail}, {addr.ward_name}, {addr.district_name}</p>
+        {addresses.length < 1 ? (
+          <Empty description="Chưa có địa chỉ nào cả" />
+        ) : (
+          addresses.map((addr) => (
+            <div key={addr.id} className="border-b pb-4 mb-4">
+              <div className="flex justify-between items-start">
+                <div>
+                  <p className="font-semibold text-lg">
+                    {addr.full_name} <span className="text-gray-500">{addr.phone_number} - {addr.province_name}</span>
+                  </p>
+                  <p className="text-gray-600">{addr.detail}, {addr.ward_name}, {addr.district_name}</p>
+                </div>
+                <div className="space-x-2">
+                  <Button type="link" onClick={() => handleEditAddress(addr)}>Cập nhật</Button>
+                  {!addr.is_primary && (
+                    <Button type="link" danger onClick={() => handleDeleteAddress(addr)}>Xóa</Button>
+                  )}
+                </div>
               </div>
-              <div className="space-x-2">
-                <Button type="link" onClick={() => handleEditAddress(addr)}>Cập nhật</Button>
-                {!addr.is_primary && <Button type="link" danger onClick={() => handleDeleteAddress(addr)}> Xóa</Button>}
-              </div>
-            </div>
 
-            <div className="mt-2 flex items-center space-x-2">
-              {addr.is_primary ? (
-                <span className="px-2 py-1 text-xs font-semibold text-white bg-red-500 rounded">Địa chỉ giao hàng</span>
-              ) : (
-                <Button size="small" onClick={() => setPrimaryAddress(addr.id)}>
-                  Thiết lập địa chỉ giao hàng
-                </Button>
-              )}
-              {addr.is_pickup_address ? (
-                <span className="px-2 py-1 text-xs font-semibold text-white bg-blue-500 rounded">Địa chỉ lấy hàng</span>
-              ) : (
-
+              <div className="mt-2 flex items-center space-x-2">
+                {addr.is_primary ? (
+                  <span className="px-2 py-1 text-xs font-semibold text-white bg-red-500 rounded">
+                    Địa chỉ giao hàng
+                  </span>
+                ) : (
+                  <Button size="small" onClick={() => setPrimaryAddress(addr.id)}>
+                    Thiết lập địa chỉ giao hàng
+                  </Button>
+                )}
+                {addr.is_pickup_address ? (
+                  <span className="px-2 py-1 text-xs font-semibold text-white bg-blue-500 rounded">
+                    Địa chỉ lấy hàng
+                  </span>
+                ) : (
                   <Button size="small" onClick={() => setPickupAddress(addr.id)}>
-                  Thiết lập địa chỉ lấy hàng
-                </Button>
-              )}
+                    Thiết lập địa chỉ lấy hàng
+                  </Button>
+                )}
+              </div>
             </div>
-          </div>
-        ))}
+          ))
+        )}
+
       </div>
 
       <div>

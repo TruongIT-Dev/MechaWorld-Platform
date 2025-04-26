@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Form, Input, Button, Typography, Steps, message, Modal } from "antd";
 import { NavLink } from "react-router-dom";
-import { sendOTPEmail, signupEmail, verifyEmail, checkEmail } from "../../apis/Authentication";
+import { sendOTPEmail, signupEmail, verifyEmail, checkEmail } from "../../apis/Authentication/APIAuth";
 
 import Footer from "../../layouts/Footer";
 import Logo from '../../assets/image/logo4.png';
@@ -23,7 +23,7 @@ export default function SignUp() {
         setLoading(true);
         try {
             // Kiểm tra xem email đã được nhập hay chưa
-            const emailCheck = await checkEmail(email);        
+            const emailCheck = await checkEmail(email);
             // API call để gửi OTP
             console.log("emailCheck", emailCheck);
             if (emailCheck?.data?.exists === true) {
@@ -306,8 +306,8 @@ export default function SignUp() {
                 </div>
 
                 {/* Link trợ giúp */}
-                <a href="/" className="text-blue-400">
-                    Quay về Trang chủ ?
+                <a href="/" className="text-blue-500 hover:text-blue-300">
+                    QUAY VỀ TRANG CHỦ?
                 </a>
             </header>
 
@@ -354,7 +354,7 @@ export default function SignUp() {
 
             {/* Modal thông báo đăng ký thành công */}
             <Modal
-                title="Đăng ký thành công"
+                title="ĐĂNG KÝ TÀI KHOẢN THÀNH CÔNG"
                 open={modalVisible}
                 width={600}
                 footer={[
@@ -364,13 +364,13 @@ export default function SignUp() {
                         onClick={() => window.location.href = '/member/login'}
                         className="bg-blue-500"
                     >
-                        Đăng nhập ngay
+                        Đăng nhập ngay!
                     </Button>
                 ]}
-                onCancel={() => setModalVisible(false)}
+                onCancel={() => window.location.href = '/member/login'}
             >
-                <p>Chúc mừng! Bạn đã đăng ký tài khoản thành công với email: <strong>{verifiedEmail}</strong></p>
-                <p>Hãy đăng nhập để bắt đầu trải nghiệm MechaWorld!</p>
+                <p className="text-base">Chúc mừng! Bạn đã đăng ký tài khoản thành công với email: <strong>{verifiedEmail}</strong></p>
+                <p className="text-base">Hãy đăng nhập để bắt đầu trải nghiệm MechaWorld!</p>
             </Modal>
 
             {/* FOOTER */}
