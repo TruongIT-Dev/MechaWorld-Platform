@@ -1,4 +1,4 @@
-import { Modal } from 'antd';
+import { notification } from 'antd';
 import { ExclamationCircleOutlined } from '@ant-design/icons';
 import React from 'react';
 
@@ -12,6 +12,10 @@ const errorMessages = {
     402: {
         'payment failed': 'Thanh toán không thành công. Vui lòng kiểm tra lại thông tin.',
     },
+    404: {
+        'email not found': 'Email hoặc Mật khẩu chưa chính xác. Vui lòng thử lại.',
+        '404 page not found':'Email hoặc Mật khẩu chưa chính xác. Vui lòng thử lại.',
+    },
     422: {
         'insufficient balance': 'Số dư ví không đủ!<br/>Vui lòng nạp thêm để thanh toán.'
     },
@@ -23,9 +27,11 @@ const errorMessages = {
 
 const getErrorMessage = (status, errorKey) => {
     const statusErrors = errorMessages[status];
+    const errorStr = typeof errorKey === 'string' ? errorKey.toLowerCase() : '';
+
     if (statusErrors) {
         for (const key in statusErrors) {
-            if (errorKey?.toLowerCase().includes(key.toLowerCase())) {
+            if (errorStr.includes(key.toLowerCase())) {
                 return statusErrors[key];
             }
         }
@@ -34,21 +40,18 @@ const getErrorMessage = (status, errorKey) => {
     return errorMessages.default;
 };
 
-// 🧩 Gọi hàm này khi có lỗi từ API để hiển thị modal
-export const ShowErrorModal = (status, errorKey) => {
-    Modal.error({
-        footer: null,
-        closable: true,
-        title: <div className="text-center text-xl font-semibold text-red-600">Thông báo lỗi</div>,
-        icon: null,
-        content: (
-            <div className="text-center py-4">
-                <ExclamationCircleOutlined className="text-5xl text-red-500 mb-4" />
-                <div
-                    className="text-lg text-gray-700"
-                    dangerouslySetInnerHTML={{ __html: getErrorMessage(status, errorKey) }}
-                />
-            </div>
+// 🧩 Gọi hàm này khi có lỗi từ API để hiển thị notification
+export const ShowErrorNotification = (status, errorKey) => {
+    notification.error({
+        message: 'THÔNG BÁO LỖI!',
+        description: (
+            <div
+                className="text-gray-700"
+                dangerouslySetInnerHTML={{ __html: getErrorMessage(status, errorKey) }}
+            />
         ),
+        icon: <ExclamationCircleOutlined style={{ color: '#ff4d4f' }} />,
+        placement: 'topRight',
+        duration: 5,
     });
 };

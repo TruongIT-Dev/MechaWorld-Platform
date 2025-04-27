@@ -35,7 +35,7 @@ const ProductInfo = ({ info, assessories = [] }) => {
         { label: "Tỉ lệ", value: info?.scale },
         { label: "Vật liệu sản xuất", value: info?.material },
         { label: "Tổng số mảnh", value: info?.parts_total + " mảnh" },
-        { label: "Seire Phim", value: info?.series },
+        { label: "Dòng phim", value: info?.series },
         { label: "Phiên bản", value: info?.version },
         { label: "Khối lượng", value: info?.weight ? `${info.weight} (gam)` : "" },
         { label: "Nhà sản xuất", value: info?.manufacturer },

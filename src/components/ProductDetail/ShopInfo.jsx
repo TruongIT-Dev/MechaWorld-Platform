@@ -6,6 +6,7 @@ import { UserOutlined, MessageOutlined } from "@ant-design/icons";
 import { GetShopInfoById } from "../../apis/Seller Profile/APISellerProfile";
 
 const ShopInfo = ({ shopID }) => {
+    
     const [shopInfo, setShopInfo] = useState(null);
 
 
@@ -15,7 +16,7 @@ const ShopInfo = ({ shopID }) => {
 
         const fetchShopInfo = async () => {
             try {
-                // console.log("Fetching shop info for ID:", shopID);
+                console.log("Fetching shop info for ID:", shopID);
                 const response = await GetShopInfoById(shopID);
                 setShopInfo(response?.data || null);
             } catch (error) {
@@ -37,7 +38,9 @@ const ShopInfo = ({ shopID }) => {
                     className="border border-gray-300"
                 />
                 <div>
-                    <p className="text-sm font-semibold text-gray-800">{shopInfo?.full_name || "Shop name"}</p>
+                    <p className="text-sm font-semibold text-gray-800 truncate whitespace-nowrap overflow-hidden max-w-[120px]">
+                        {shopInfo?.shop_name || "Shop name"}
+                    </p>
                     <p className="text-xs text-gray-500">Đánh giá: ⭐20 like</p>
                 </div>
             </div>

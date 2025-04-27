@@ -46,6 +46,7 @@ import {
   PageNotFound,
   ExchangeList,
   ExchangeManage,
+  ExchangeMyPost,
 
 } from "./routes/router";
 
@@ -112,6 +113,7 @@ function App() {
 
             {/* Exchange Route */}
             <Route path="/exchange/manage" element={<ExchangeManage />} />
+            <Route path="/exchange/my-post" element={<ExchangeMyPost />} />
             <Route path="/exchange/detail/section" element={<ExchangeDetailInformation />} />
 
 
