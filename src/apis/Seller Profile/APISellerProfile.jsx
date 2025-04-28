@@ -10,7 +10,14 @@ export const GetShopInfoById = (id) => {
 }
 
 
+
 // POST Create seller profile (ShopName)
 
 
 // PATCH Update seller profile (ShopName)
+export const UpdateShopName = (shop_name, id) => {
+    return axios.patch(`seller/profile`, {
+        shop_name: shop_name,
+        user_id: id,
+    })
+}

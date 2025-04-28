@@ -3,7 +3,6 @@ import { Suspense, useEffect } from "react";
 // import router
 import {
   HomePage,
-  ErrorPage,
   ProductPage,
   SignIn,
   ProfilePage,
@@ -15,7 +14,6 @@ import {
   ShopDashboard, ShopPage,
   ShopProductManagement,
   ShopTransaction, ExchangePage,
-  ExchangeDetail,
   CartPage1,
   Checkout,
   WalletPage,
@@ -40,7 +38,6 @@ import {
   ModGundams,
   ModUsers,
   ModExchanges,
-  ExchangeRequestForm,
   ExchangeDetailInformation,
   ExchangeGundamManagement,
   Collection,
@@ -48,6 +45,10 @@ import {
   ListCollection,
   ShopInfo,
   ShopAddress,
+  PageNotFound,
+  ExchangeList,
+  ExchangeManage,
+  ExchangeMyPost,
 
 } from "./routes/router";
 
@@ -59,7 +60,6 @@ import { logout, updateUser } from "./features/auth/authSlice";
 
 import Spinner from "./components/Spinner";
 import PageLoading from "./components/PageLoading";
-import RequestList from "./components/Exchange/RequestList";
 
 function App() {
 
@@ -106,20 +106,16 @@ function App() {
             <Route path="admin/aution" element={<CensorProductToAution />} />
 
 
-            {/* Exchange Route */}
+            {/* Exchange Main Route */}
             <Route path="/exchange" element={<ExchangePage />}>
-              <Route path="list" element={<RequestList />} />
-              {/* <Route path="manage" element={<ManageRequests />} /> */}
+              <Route path="list" element={<ExchangeList />} />
               <Route path="manage-gundam" element={<ExchangeGundamManagement />} />
-              {/* <Route path="history" element={<ExchangeHistory />} /> */}
-
-              {/* Default khi không có gì khớp */}
-              <Route index element={<RequestList />} />
+              <Route index element={<ExchangeList />} />
             </Route>
 
             {/* Exchange Route */}
-            <Route path="exchange/request" element={<ExchangeRequestForm />} />
-            <Route path="/exchange/detail" element={<ExchangeDetail />} />
+            <Route path="/exchange/manage" element={<ExchangeManage />} />
+            <Route path="/exchange/my-post" element={<ExchangeMyPost />} />
             <Route path="/exchange/detail/section" element={<ExchangeDetailInformation />} />
 
 
@@ -161,8 +157,8 @@ function App() {
 
 
             {/* Error route */}
-            <Route path="error" element={<ErrorPage />} />
-            <Route path="*" element={<ErrorPage />} />
+            <Route path="error" element={<PageNotFound />} />
+            <Route path="*" element={<PageNotFound />} />
           </Route>
 
           {/* Những Route khác */}

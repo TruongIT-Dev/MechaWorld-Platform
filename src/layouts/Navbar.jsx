@@ -25,7 +25,7 @@ const Menu = [
   {
     id: 4,
     name: "Trao đổi",
-    link: "/exchange",
+    link: "/exchange/list",
   },
   {
     id: 5,
@@ -83,8 +83,8 @@ const Navbar = () => {
                   `inline-block text-lg px-4 py-2 uppercase 
                 transition-all duration-300 ease-in-out 
                 ${isActive
-                    ? 'text-blue-500 font-bold'
-                    : 'hover:text-blue-500 hover:font-bold text-gray-700'
+                    ? 'text-blue-500 font-medium'
+                    : 'hover:text-blue-500 text-gray-700'
                   }`
                 }
               >

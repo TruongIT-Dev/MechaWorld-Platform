@@ -30,13 +30,14 @@ const ProfilePage = () => {
   const [step, setStep] = useState(1); // Step 1: Nhập SĐT, Step 2: Nhập OTP
 
   useEffect(() => {
+
     // const userData = Cookies.get("user");
 
     const Access_token = Cookies.get('access_token');
     if (Access_token) {
       try {
         verifyToken(Access_token).then(response => {
-          console.log(response.data);
+          // console.log(response.data);
           setUser(response.data);
           setAvatar(response.data.avatar_url);
           setFullName(response.data.full_name);
@@ -60,11 +61,16 @@ const ProfilePage = () => {
   }, [user]);
 
   const handleUpload = ({ file }) => {
+
     const reader = new FileReader();
+
     reader.onload = (e) => {
+
       const img = new Image();
       img.src = e.target.result;
-      console.log("img file data: ", file);
+
+      // console.log("img file data: ", file);
+
       img.onload = async () => {
         if (img.width > 400 || img.height > 400) {
           setCropVisible(true);
@@ -85,21 +91,29 @@ const ProfilePage = () => {
 
 
   const handleCrop = async () => {
+
     if (cropper) {
+
       const croppedCanvas = cropper.getCroppedCanvas();
+
       if (!croppedCanvas) return;
 
       croppedCanvas.toBlob(async (blob) => {
+
         const file = new File([blob], "avatar.jpg", { type: "image/jpeg" });
         const response = await uploadAvatar(user.id, file);
+
         if (response.status === 200) {
           message.success("Đổi ảnh thành công!");
         } else {
           message.error("Vui lòng kiểm tra lại ảnh!");
         }
+
         const newAvatarURL = URL.createObjectURL(blob);
         setAvatar(newAvatarURL);
-        console.log("load thành công đến đây")
+
+        // console.log("load thành công đến đây")
+
         localStorage.setItem("user_avatar", newAvatarURL);
 
         setCropVisible(false);
@@ -146,9 +160,12 @@ const ProfilePage = () => {
   const handleVerifyOtp = async () => {
     try {
       const response = await verifyOtp(user.id, newPhoneNumber, otp);
+      console.log("response", response);
+
+
       if (response.status === 200) {
         message.success("Xác thực thành công!");
-        console.log(otpVisible);
+        // console.log(otpVisible);
         setOtpVisible(false);
         setPhoneModalVisible(false);
         setStep(1);
@@ -158,13 +175,13 @@ const ProfilePage = () => {
           ...user,  // giữ lại các thông tin hiện có
           phone_number: newPhoneNumber  // cập nhật số điện thoại
         }));
-        setUser({
-          ...user,
-          phone_number: newPhoneNumber
-        });
-      } else {
+
+      }
+
+      if (response.status === 400) {
         message.error("OTP không đúng! Vui lòng kiểm tra lại.");
       }
+
     } catch (error) {
       message.error("Lỗi khi xác thực OTP.");
     }
@@ -207,9 +224,12 @@ const ProfilePage = () => {
 
 
   const onFinish = (values) => {
-    console.log('Success:', values);
+
+    // console.log('Success:', values);
     updateUserData(user.id, fullName).then(response => {
-      console.log(response);
+
+      // console.log(response);
+
       if (response.status == 200) {
         message.success('Cập nhật thông tin thành công!');
       }
@@ -218,6 +238,8 @@ const ProfilePage = () => {
     })
 
   };
+
+
   const maskPhoneNumber = (phoneNumber) => {
     if (!phoneNumber) {
       return "Chưa đăng kí";
@@ -268,7 +290,7 @@ const ProfilePage = () => {
               {/* Số điện thoại */}
               <Form.Item label="Số điện thoại">
                 <div className="flex items-center">
-                  <Input value={maskPhoneNumber(user?.phone_number) || "Chưa đăng kí"} disabled className="bg-gray-100" />
+                  <Input value={newPhoneNumber || "Chưa đăng kí"} disabled className="bg-gray-100" />
                   <Button type="link" className="ml-2 text-blue-500" onClick={() => setPhoneModalVisible(true)}>{newPhoneNumber ? "Thay đổi" : "Đăng ký"}</Button>
                 </div>
               </Form.Item>

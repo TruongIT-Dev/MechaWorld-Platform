@@ -10,7 +10,6 @@ import { useCart } from '../../context/CartContext';
 
 import Cookies from 'js-cookie';
 import ShopInfo from './ShopInfo';
-import ReviewProduct from './Review';
 import ProductInfo from './ProductInfo';
 import SuggestProduct from './SuggestProduct';
 
@@ -47,6 +46,8 @@ const GundamProductPage = () => {
                     "used": "Đã qua sử dụng"
                 };
                 let gundamData = detailGundam?.data || {};
+                // console.log("gundamData", gundamData);  
+
                 let assessoriesData = detailGundam?.data?.accessories;
                 if (gundamData.condition) {
                     gundamData.condition = conditionMapping[gundamData.condition] || gundamData.condition;
@@ -94,7 +95,6 @@ const GundamProductPage = () => {
                 verifyToken(Access_token).then(response => {
                     // console.log(response?.data);
                     setUserId(response?.data?.id);
-
                 })
             } catch (error) {
                 console.error("Lỗi từ API:", error);
@@ -228,8 +228,18 @@ const GundamProductPage = () => {
 
                                     {/* Gundam Info */}
                                     <div className="space-y-2 text-sm">
-                                        <p className='text-green-600 font-semibold'><span className="font-semibold text-black">Tình trạng:</span> {detailGundam.condition}</p>
+                                        <p className="text-green-600 font-semibold">
+                                            <span className="font-semibold text-black">Tình trạng:</span> {detailGundam.condition}
+                                        </p>
                                     </div>
+
+                                    {detailGundam.condition_description && (
+                                        <div className="space-y-2 text-sm">
+                                            <p className="text-green-600 font-semibold">
+                                                <span className="font-semibold text-black">Mô tả tình trạng:</span> {detailGundam.condition_description}
+                                            </p>
+                                        </div>
+                                    )}
 
                                     {/* Buy Button */}
                                     {!disableBuy && (
@@ -265,9 +275,6 @@ const GundamProductPage = () => {
                         </Col>
                     </Row>
                 </div>
-
-                {/* Comment and Rating Section */}
-                <ReviewProduct />
 
                 {/* Suggested Products */}
                 <SuggestProduct />

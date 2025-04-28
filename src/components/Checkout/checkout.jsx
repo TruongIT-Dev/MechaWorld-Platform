@@ -1,17 +1,19 @@
 import { useSelector } from 'react-redux';
 import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { EnvironmentOutlined, ShopOutlined, MoneyCollectOutlined } from '@ant-design/icons';
-import { Card, Button, Radio, Divider, message, Table, Modal, Form, Select, Input, Checkbox, Empty, Tabs } from 'antd';
+import { EnvironmentOutlined, ShopOutlined, MoneyCollectOutlined, InfoCircleOutlined } from '@ant-design/icons';
+import { Card, Button, Radio, Divider, message, Table, Modal, Form, Select, Input, Checkbox, Empty, Tabs, notification } from 'antd';
 
 import { useCart } from '../../context/CartContext';
-import { CheckoutCart } from '../../apis/Orders/APIOrder';
 import { checkWallet } from '../../apis/User/APIUser';
+import { CheckoutCart } from '../../apis/Orders/APIOrder';
+import { ShowErrorNotification } from "../Errors/ShowErrorNotification";
 import { getUserAddresses, postUserAddresses, updateAddress } from '../../apis/User/APIUser';
 
 import axios from 'axios';
 import Cookies from 'js-cookie';
 import footerLogo from "../../assets/image/icon/iconwallet.png";
+
 
 const { Option } = Select;
 
@@ -35,7 +37,7 @@ const Checkout = () => {
   const { cartItems } = useCart();
   const [userAddress, setUserAddress] = useState(null);
   const [paymentMethod, setPaymentMethod] = useState('wallet');
-  const [showPaymentOptions, setShowPaymentOptions] = useState(false);
+  // const [showPaymentOptions, setShowPaymentOptions] = useState(false);
   const [loading, setLoading] = useState(true);
   const [note, setNote] = useState('');
   const [isAddressModalVisible, setIsAddressModalVisible] = useState(false);
@@ -44,7 +46,7 @@ const Checkout = () => {
   const [wards, setWards] = useState([]);
   const [selectedCity, setSelectedCity] = useState(null);
   const [selectedDistrict, setSelectedDistrict] = useState(null);
-  const [isPrimary, setIsPrimary] = useState(false);
+  const [isPrimary, setIsPrimary] = useState(true);
   const [addresses, setAddresses] = useState([]);
   const [form] = Form.useForm();
   const [shippingFee, setShippingFee] = useState(0);
@@ -93,7 +95,7 @@ const Checkout = () => {
           headers: {
             'Content-Type': 'application/json',
             'token': import.meta.env.VITE_GHN_TOKEN_API,
-            'shop_id': import.meta.env.VITE_GHN_SHOP_ID // 
+            'shop_id': import.meta.env.VITE_GHN_SHOP_ID
           }
         }
       );
@@ -120,17 +122,22 @@ const Checkout = () => {
       );
 
       const leadTimeData = leadTimeResponse.data.data;
+      // console.log("leadTimeData", leadTimeData);
+
       const deliveryDate = new Date();
       deliveryDate.setDate(deliveryDate.getDate() + leadTimeData.leadtime);
+
       setRawExpectedDeliveryDate(deliveryDate); // Lưu đối tượng Date gốc
       setExpectedDeliveryDate(formatDeliveryDate(deliveryDate)); // Lưu chuỗi đã định dạng
 
     } catch (error) {
       console.error('Lỗi khi tính phí vận chuyển:', error);
       message.error('Không thể tính phí vận chuyển. Vui lòng thử lại sau.');
+
       const fallbackDate = new Date();
       fallbackDate.setDate(fallbackDate.getDate() + 3);
-      setRawExpectedDeliveryDate(deliveryDate); // Lưu đối tượng Date gốc
+
+      setRawExpectedDeliveryDate(fallbackDate); // Lưu đối tượng Date gốc
       setExpectedDeliveryDate(formatDeliveryDate(fallbackDate));
     } finally {
       setIsCalculatingShipping(false);
@@ -286,7 +293,10 @@ const Checkout = () => {
 
   const handleCheckout = async () => {
     if (!userAddress) {
-      message.error("Vui lòng chọn địa chỉ giao hàng.");
+      notification.error({
+        message: "THÔNG BÁO LỖI!",
+        description: "Bạn chưa có địa chỉ nhận hàng."
+      });
       return;
     }
 
@@ -309,14 +319,20 @@ const Checkout = () => {
     };
 
     try {
-      const res = await CheckoutCart(orderPayload);
+      await CheckoutCart(orderPayload);
       message.success("Đặt hàng thành công!");
       navigate('/member/profile/orderHistory');
 
-      console.log("Order response:", res.data);
+      // console.log("Order response:", res.data);
     } catch (error) {
       console.error("Checkout error:", error);
-      message.error("Đặt hàng thất bại!");
+
+      // ✅ Lấy status và message từ response BE
+      const status = error?.response?.status;
+      const errorKey = error?.response?.data?.error || 'unknown';
+
+      // ✅ Gọi Modal hiển thị lỗi
+      ShowErrorNotification(status, errorKey);
     }
   };
 
@@ -339,23 +355,23 @@ const Checkout = () => {
                 </div>
                 <p className="text-lg">{userAddress.detail}, {userAddress.ward_name}, {userAddress.district_name}, {userAddress.province_name}</p>
               </div>
-            ) : <p className="text-lg">Chưa có địa chỉ nhận hàng</p>}
+            ) : <p className="text-base text-gray-400">Chưa có địa chỉ nhận hàng</p>}
             <Button
               type="link"
-              className="ml-auto text-blue-500 text-lg"
+              className="ml-auto text-blue-500 text-base"
               onClick={() => setIsAddressModalVisible(true)}
             >
-              Thay Đổi
+              Cập nhật
             </Button>
           </div>
         </Card>
 
         <Modal
-          title={<h2 className="text-xl font-bold text-blue-600">Chọn địa chỉ giao hàng</h2>}
+          title={<h2 className="text-xl font-bold text-blue-600">ĐỊA CHỈ GIAO HÀNG</h2>}
           open={isAddressModalVisible}
           onCancel={() => setIsAddressModalVisible(false)}
           footer={null}
-          width={800}
+          width={500}
           centered
         >
           <Tabs defaultActiveKey="1">
@@ -384,7 +400,7 @@ const Checkout = () => {
                           </p>
                         </div>
                         {address.is_primary ? (
-                          <span className="px-2 py-0.5 text-xs font-medium text-white bg-red-500 rounded shadow">
+                          <span className="px-2 py-0.5 w-20 text-xs font-medium text-white bg-red-500 rounded shadow">
                             Mặc định
                           </span>
                         ) : (
@@ -417,7 +433,7 @@ const Checkout = () => {
                 form={form}
                 layout="vertical"
                 onFinish={onFinishAddress}
-                className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4"
+              // className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4"
               >
                 <Form.Item
                   label="Thành phố"
@@ -475,6 +491,13 @@ const Checkout = () => {
                   className="col-span-1"
                 >
                   <Input placeholder="Ví dụ: Số nhà, tên đường..." />
+                </Form.Item>
+
+                <Form.Item label="Số điện thoại" name="phone_number" rules={[{ required: true }]} tooltip={{
+                  title: 'Số điện thoại dùng để xác nhận bên vận chuyển khi giao hàng. Để trống sẽ mặc định lấy sđt của người dùng.',
+                  icon: <InfoCircleOutlined />,
+                }}>
+                  <Input placeholder="Nhập số điện thoại" />
                 </Form.Item>
 
                 <Form.Item className="col-span-2 -mt-2">
@@ -676,39 +699,41 @@ const Checkout = () => {
 
       {/* Sidebar */}
       <div className="col-span-1">
-        <Card>
-          <div className="flex justify-between items-center">
-            <p className="text-xl font-bold">ĐƠN HÀNG</p>
-            <a href="/cart" className="text-blue-500 text-sm">Quay lại giỏ hàng</a>
-          </div>
-          <p className="text-gray-500 mt-2">{selectedItems.length} sản phẩm</p>
-          <Divider />
-          <div className="flex justify-between text-lg mt-2">
-            <p className="text-gray-600">Tổng tiền hàng:</p>
-            <p className="font-semibold">{totalPrice.toLocaleString()} đ</p>
-          </div>
-          <div className="flex justify-between text-lg mt-2">
-            <p className="text-gray-600">Tổng tiền giao hàng:</p>
-            <p className="font-semibold">{shippingFee.toLocaleString()} đ</p>
-          </div>
-          <Divider />
-          <div className="flex justify-between text-lg font-bold">
-            <p className="text-black">Tổng tiền thanh toán:</p>
-            <p className="text-red-500">{finalPrice.toLocaleString()} đ</p>
-          </div>
-          <p className="text-sm text-gray-500 mt-2">
-            Nhấn <span className="font-semibold">"Đặt hàng"</span> đồng nghĩa với việc bạn đã đồng ý với
-            <a href="#" className="text-blue-500"> Điều khoản của MechWorld</a>
-          </p>
-          <Button
-            type="primary"
-            danger
-            className="w-full mt-4text-lg border-none cursor pb-4 pt-4"
-            onClick={handleCheckout}
-          >
-            ĐẶT HÀNG
-          </Button>
-        </Card>
+        <div className='sticky top-20'>
+          <Card className=''>
+            <div className="flex justify-between items-center">
+              <p className="text-xl font-bold">ĐƠN HÀNG</p>
+              <a href="/cart" className="text-blue-500 text-sm">Quay lại giỏ hàng</a>
+            </div>
+            <p className="text-gray-500 mt-2">{selectedItems.length} sản phẩm</p>
+            <Divider />
+            <div className="flex justify-between text-lg mt-2">
+              <p className="text-gray-600">Tổng tiền hàng:</p>
+              <p className="font-semibold">{totalPrice.toLocaleString()} đ</p>
+            </div>
+            <div className="flex justify-between text-lg mt-2">
+              <p className="text-gray-600">Tổng tiền giao hàng:</p>
+              <p className="font-semibold">{shippingFee.toLocaleString()} đ</p>
+            </div>
+            <Divider />
+            <div className="flex justify-between text-lg font-bold">
+              <p className="text-black">Tổng tiền thanh toán:</p>
+              <p className="text-red-500">{finalPrice.toLocaleString()} đ</p>
+            </div>
+            <p className="text-sm text-gray-500 mt-2">
+              Nhấn <span className="font-semibold">Thanh toán</span> đồng nghĩa với việc bạn đã đồng ý với
+              <a href="#" className="text-blue-500"> Điều khoản của MechWorld</a>
+            </p>
+            <Button
+              type="primary"
+              danger
+              className="w-full mt-4 text-lg border-none cursor pb-4 pt-4"
+              onClick={handleCheckout}
+            >
+              THANH TOÁN
+            </Button>
+          </Card>
+        </div>
       </div>
     </div>
   );

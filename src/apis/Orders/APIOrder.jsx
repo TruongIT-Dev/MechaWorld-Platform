@@ -11,7 +11,9 @@ export const GetListOrderHistory = () => {
 
 
 // GET Purchased Order Detail
-
+export const GetOrderDetail = (id) => {
+  return axios.get(`/orders/${id}`)
+}
 
 
 // POST Create New Order
@@ -41,6 +43,16 @@ export const ReceivedOrder = (orderId) => {
       "Content-Type": "application/json",
     },
     withCredentials: true,
+  });
+}
+
+
+// PATCH USER PAKAGING AN ORDER
+export const PackagingOrder = (sellerId, orderId, packagingData) => {
+  return axios.patch(`/orders/${orderId}/package`, packagingData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
   });
 }
 

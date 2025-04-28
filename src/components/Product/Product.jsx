@@ -116,7 +116,6 @@ const Product = () => {
 
                                 {/* Top Filter */}
                                 <div className="flex justify-between items-start">
-                                    {/* <h1 className="text-lg font-semibold">THỂ LOẠI: <span className='font-normal'>HG</span></h1> */}
                                     <div className="flex items-center space-x-2">
                                         <span className="font-medium">Sắp xếp:</span>
                                         <Button className="border rounded-md">Mới nhất</Button>
@@ -135,7 +134,7 @@ const Product = () => {
                                                     <Card
                                                         onClick={() => handleClickedDetailGundam(gundam.slug)}
                                                         bordered={false}
-                                                        className="max-w-fit max-h-fit cursor-pointer mb-2 shadow-2xl p-2 rounded-lg transform transition-transform duration-300 hover:scale-105 hover:shadow-[0_10px_20px_rgba(0,0,0,0.3)]"
+                                                        className="max-w-fit max-h-fit cursor-pointer mb-2 shadow-2xl p-2 rounded-lg transform transition-transform duration-300 hover:shadow-[0_10px_20px_rgba(0,0,0,0.3)]"
                                                         cover={
                                                             <div className="h-auto w-full overflow-hidden">
                                                                 <img
