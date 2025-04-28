@@ -23,7 +23,8 @@ const filterOptions = [
 export default function ExchangeNavigator() {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [activeFilter, setActiveFilter] = useState('all');
-
+    const currentUser = useSelector((state) => state.auth.user )
+    const [userData, setUserData] = useState();
     // Open modal
     const openModal = () => {
         setIsModalOpen(true);

@@ -13,6 +13,8 @@ import GundamPic3 from '../../assets/image/gun2.jpg';
 import ModalOfferExchange from './ModalOfferExchange';
 import { getAllExchangePost } from '../../apis/Exchange/APIExchange';
 import moment from "moment/min/moment-with-locales";
+import { useSelector } from 'react-redux';
+import { GetGundamByID } from '../../apis/User/APIUser';
 
 moment.locale("vi");
 
@@ -98,59 +100,10 @@ export default function ExchangeList() {
     // Moda Offer Exchange Request
     const [isOfferModalOpen, setIsOfferModalOpen] = useState(false);
     const [listRequest,setListRequest] = useState([]);
+    const user = useSelector((state) => state.auth.user);
+    const [requestPost, setRequestPost] = useState(null);
+    const [yourGundamList, setYourGundamList] = useState([]);
 
-    // const requestData = {
-    //     id: 'req123',
-    //     title: 'Tìm kiếm Gundam Strike Freedom để trao đổi',
-    //     user: 'GundamCollector'
-    // };
-    const [selectedGundamList, setSelectedGundamList] = useState([]);
-    const gundamList = [
-        {
-            id: 1,
-            title: 'Gundam EG LAH',
-            author: '1/144',
-            condition: 'Trung bình khá',
-            cover: GundamPic,
-            previews: [
-                GundamPic2,
-                GundamPic3,
-                GundamPic
-            ]
-        },
-        {
-            id: 2,
-            title: 'Doraemon Nihongo',
-            author: 'Fujiko F. Fujio',
-            condition: 'Trung bình khá',
-            cover: 'https://i.imgur.com/bvhm26T.jpg',
-            preview: 'https://i.imgur.com/Y3n0N6Z.jpg'
-        },
-        {
-            id: 3,
-            title: 'Gundam EG LAH',
-            author: '1/144',
-            condition: 'Trung bình khá',
-            cover: GundamPic,
-            previews: [
-                GundamPic2,
-                GundamPic3,
-                GundamPic
-            ]
-        },
-        {
-            id: 4,
-            title: 'Gundam EG LAH',
-            author: '1/144',
-            condition: 'Trung bình khá',
-            cover: GundamPic,
-            previews: [
-                GundamPic2,
-                GundamPic3,
-                GundamPic
-            ]
-        },
-    ];
 
     const [expandedContent, setExpandedContent] = useState(false);
 
@@ -163,7 +116,8 @@ export default function ExchangeList() {
     const handleOfferModal = (request) => {
          // console.log(request);
         setSelectedRequest(request.exchange_post_items);
-        setRequestData(request.poster)
+        setRequestData(request.poster);
+        setRequestPost(request.exchange_post);
         setIsOfferModalOpen(true);
        
     };
@@ -171,6 +125,10 @@ export default function ExchangeList() {
             getAllExchangePost().then((res) => {
                 setListRequest(res.data);
             })
+            GetGundamByID(user.id,"").then((res) => {
+                setYourGundamList(res.data);
+            })
+            
            
     },[])
 
@@ -255,6 +213,8 @@ export default function ExchangeList() {
                 onClose={() => setIsOfferModalOpen(false)}
                 requestData={requestData}
                 gundamList={selectedRequest}
+                yourGundamList={yourGundamList}
+                requestPost={requestPost}
             />
 
             {/* Modal để hiển thị các gundam mà Người đăng sẵn sàng Trao đổi */}
@@ -276,6 +236,8 @@ export default function ExchangeList() {
                                 title={<Text strong className='text-base'>{item.title}</Text>}
                                 description={
                                     <>
+                                        <div>Tên Gundam: <Text strong>{item.name}</Text>
+                                        </div>
                                         <div>Phân khúc: {item.grade}</div>
                                         <div>
                                             Tình trạng: <Text strong>{item.condition}</Text>

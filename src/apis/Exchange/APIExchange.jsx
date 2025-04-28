@@ -18,10 +18,10 @@ export const createExchangePost = (postData) => {
 export const createExchangeOffer = (offerData) => {
     return axios.post('/users/me/exchange-offers',{
         compensation_amount: offerData.compensationAmount,
-        exchange_post_id: offerData.compensationType,
-        offerer_gundam_id: offerData.gundamId,
-        payer_id: offerData.id,
-        poster_gundam_id: 0,
+        exchange_post_id:offerData.postID,
+        offerer_gundam_id: offerData.offerer_gundam_id,
+        payer_id: offerData.compensationID,
+        poster_gundam_id: offerData.poster_gundam_id,
         note: offerData.note
     })
 }

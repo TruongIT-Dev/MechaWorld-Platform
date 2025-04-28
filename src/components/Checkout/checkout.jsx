@@ -202,7 +202,7 @@ const Checkout = () => {
     try {
       const response = await api.get(`province`);
       let data = response.data.data;
-      data = data.filter(province => province.ProvinceID !== 286 && province.ProvinceID !== 290);
+      data = data.filter(province => province.ProvinceID !== 286 && province.ProvinceID !== 290 && province.ProvinceID !== 298 && province.ProvinceID !== 2002);
       setCities(data);
     } catch (error) {
       console.error('Lỗi khi fetch thành phố:', error);
