@@ -13,8 +13,7 @@ export default function ExchangeManage() {
     return (
         <div className="max-w-7xl mx-auto mt-36 px-4 py-6">
             <Card
-                className="shadow-md"
-                bodyStyle={{ padding: "12px 20px" }}
+                className="shadow-md px-3 py-5"
             >
                 <Tabs
                     centered
