@@ -53,8 +53,8 @@ export default function SignIn() {
   const showSuccessNotification = () => {
     notification.success({
       message: 'ĐĂNG NHẬP THÀNH CÔNG!',
-      description: 'Chào mừng bạn đến MechaWorld. Đang chuyển trang...',
-      duration: 1,
+      description: 'Đang chuyển trang...',
+      duration: 2,
       placement: 'topRight',
       showProgress: true,
     });

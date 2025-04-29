@@ -362,7 +362,7 @@ const SettingAddress = () => {
             </Form.Item>
 
             <Form.Item>
-              <Button type="primary" htmlType="submit" className="bg-[#0056b3] hover:bg-[#4a90e2]">
+              <Button type="primary" htmlType="submit" className="bg-blue-500">
                 {isEditing ? "Cập nhật địa chỉ" : "Lưu địa chỉ"}
               </Button>
             </Form.Item>

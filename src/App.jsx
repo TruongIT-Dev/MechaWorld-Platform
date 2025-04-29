@@ -41,7 +41,6 @@ import {
   ExchangeDetailInformation,
   ExchangeGundamManagement,
   Collection,
-  ShopInfo,
   ShopAddress,
   PageNotFound,
   ExchangeList,
@@ -89,6 +88,7 @@ function App() {
       <PageLoading /> {/* Hiệu ứng loading khi chuyển trang */}
       <Suspense fallback={<Spinner />}> {/* Loading khi tải component */}
         <Routes>
+          {/* Route màn hình role Member & Shop */}
           <Route path="/" element={<UserLayout />} >
             <Route index element={<HomePage />} />
 
@@ -111,7 +111,7 @@ function App() {
               <Route index element={<ExchangeList />} />
             </Route>
 
-            {/* Exchange Route */}
+            {/* Exchange side Route */}
             <Route path="/exchange/manage" element={<ExchangeManage />} />
             <Route path="/exchange/my-post" element={<ExchangeMyPost />} />
             <Route path="/exchange/detail/section" element={<ExchangeDetailInformation />} />
@@ -123,9 +123,9 @@ function App() {
             {/* Cart route */}
             <Route path="cart" element={<CartPage1 />} />
 
-
             {/* Checkout route */}
             <Route path="checkout" element={<Checkout />} />
+
 
             {/* Member Profile Route */}
             <Route path="member/profile" element={<ProfilePage />}>
@@ -138,10 +138,10 @@ function App() {
               <Route path="listProductAution" element={<ListProductToAution />} />
             </Route>
 
+
             {/* Shop Route */}
             <Route path="shop" element={<ShopPage />}>
               <Route path="dashboard" element={<ShopDashboard />} />
-              <Route path="info" element={<ShopInfo />} />
               <Route path="address" element={<ShopAddress />} />
               <Route path="management" element={<ShopProductManagement />} />
               <Route path="transition" element={<ShopTransaction />} />
@@ -150,13 +150,10 @@ function App() {
               <Route path="report-management" element={<ShopReportManagement />} />
             </Route>
 
-
             {/* Error route */}
             <Route path="error" element={<PageNotFound />} />
             <Route path="*" element={<PageNotFound />} />
           </Route>
-
-          {/* Những Route khác */}
 
           {/* Login & Signup */}
           <Route path="member">
@@ -164,6 +161,13 @@ function App() {
             <Route path="signup" element={<SignUp />} />
           </Route>
 
+          {/* Layout Đăng ký Shop */}
+          <Route path="registe-shop" element={<RegisterShopLayout />}>
+            <Route index element={<ShopRegister />} />
+          </Route>
+
+
+          {/* Những Route cho màn hình Moderator & Admin khác */}
           {/* Moderator Route */}
           <Route path="moderator" element={<ModeratorLayout />} >
             <Route index element={<ModUsers />} />
@@ -179,12 +183,8 @@ function App() {
 
           {/* Admin Route */}
 
-          {/* Layout Đăng ký Shop */}
-          <Route path="registe-shop" element={<RegisterShopLayout />}>
-            <Route index element={<ShopRegister />} />
-          </Route>
-        </Routes>
 
+        </Routes>
       </Suspense>
     </>
   );
