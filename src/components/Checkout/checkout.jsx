@@ -694,7 +694,64 @@ const Checkout = () => {
               </div>
             </Radio.Group>
           </Card>
+<<<<<<< Updated upstream
         )}
+=======
+        </Card>
+
+        {/* Phương thức thanh toán */}
+        <Card
+          title={<div className="font-bold text-lg">Phương thức thanh toán</div>}
+          className="mb-4"
+        >
+          <Radio.Group
+            value={paymentMethod}
+            onChange={(e) => setPaymentMethod(e.target.value)}
+            className="w-full"
+          >
+            <div className="flex items-center justify-between">
+              <Radio value="wallet">
+                <div className="flex items-center justify-between w-full p-2 border border-transparent hover:border-gray-200 rounded-md">
+                  <div className="flex items-center">
+                    <img src={footerLogo} alt="wallet" className="max-w-[50px] mr-3" />
+                    <div>
+                      <p className="font-medium text-base">Thanh toán bằng ví ComZone</p>
+                      {/* {paymentMethod === 'wallet' && (
+                        <p className="text-red-500 text-xs mt-1">
+                          Số dư không đủ. <span className="text-blue-500 cursor-pointer">Nạp thêm</span>
+                        </p>
+                      )} */}
+                    </div>
+                  </div>
+                  {paymentMethod === 'wallet' && (
+                    <div className="bg-blue-50 text-blue-600 px-2 py-1 rounded-md text-xs font-medium">
+                      Đã chọn
+                    </div>
+                  )}
+                </div>
+              </Radio>
+
+              <Radio value="cod">
+                <div className="flex items-center justify-between w-full p-2 border border-transparent hover:border-gray-200 rounded-md">
+                  <div className="flex items-center">
+                    <div className="flex items-center justify-center w-[40px] h-[40px] bg-gray-100 rounded-md mr-3">
+                      <MoneyCollectOutlined className="text-xl text-gray-500" />
+                    </div>
+                    <p className="font-medium text-base">Thanh toán khi nhận hàng</p>
+                  </div>
+                  {paymentMethod === 'cod' && (
+                    <div className="bg-blue-50 text-blue-600 px-2 py-1 rounded-md text-xs font-medium">
+                      Đã chọn
+                    </div>
+                  )}
+                </div>
+              </Radio>
+            </div>
+
+          </Radio.Group>
+
+        </Card>
+>>>>>>> Stashed changes
       </div>
 
       {/* Sidebar */}
