@@ -41,7 +41,6 @@ import {
   ExchangeDetailInformation,
   ExchangeGundamManagement,
   Collection,
-  ShopInfo,
   ShopAddress,
   PageNotFound,
   ExchangeList,
@@ -127,7 +126,7 @@ function App() {
             {/* Checkout route */}
             <Route path="checkout" element={<Checkout />} />
 
-            
+
             {/* Member Profile Route */}
             <Route path="member/profile" element={<ProfilePage />}>
               <Route path="account" element={<UserProfile />} />
@@ -139,11 +138,10 @@ function App() {
               <Route path="listProductAution" element={<ListProductToAution />} />
             </Route>
 
-            
+
             {/* Shop Route */}
             <Route path="shop" element={<ShopPage />}>
               <Route path="dashboard" element={<ShopDashboard />} />
-              <Route path="info" element={<ShopInfo />} />
               <Route path="address" element={<ShopAddress />} />
               <Route path="management" element={<ShopProductManagement />} />
               <Route path="transition" element={<ShopTransaction />} />
@@ -167,7 +165,7 @@ function App() {
           <Route path="registe-shop" element={<RegisterShopLayout />}>
             <Route index element={<ShopRegister />} />
           </Route>
-          
+
 
           {/* Những Route cho màn hình Moderator & Admin khác */}
           {/* Moderator Route */}
@@ -185,7 +183,7 @@ function App() {
 
           {/* Admin Route */}
 
-          
+
         </Routes>
       </Suspense>
     </>

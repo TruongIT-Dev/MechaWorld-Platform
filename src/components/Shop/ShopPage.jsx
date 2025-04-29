@@ -11,7 +11,7 @@ import { useEffect, useState } from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import { Menu, Layout, Card, Avatar, Tag } from 'antd';
 
-import {  GetSellerStatus } from "../../apis/Sellers/APISeller";
+import { GetSellerStatus } from "../../apis/Sellers/APISeller";
 import { GetShopInfoById } from "../../apis/Seller Profile/APISellerProfile";
 
 
@@ -20,16 +20,11 @@ const { Sider, Content } = Layout;
 
 const items = [
   {
-    key: '1',
-    icon: <PieChartOutlined />,
-    label: <Link to="/shop/dashboard">Thống Kê</Link>,
-  },
-  {
-    key: "2",
+    key: "1",
     icon: <ShopOutlined className="text-lg text-blue-500" />,
     label: "Quản Lý Shop",
     children: [
-      { key: "2", label: <Link to="/shop/info">Thông tin Shop</Link> },
+      { key: "2", label: <Link to="/shop/dashboard">Thông tin Shop</Link> },
       { key: "3", label: <Link to="/shop/address">Địa chỉ lấy hàng</Link> },
     ],
   },
@@ -47,11 +42,6 @@ const items = [
     key: '6',
     icon: <BankOutlined className="text-lg text-red-500" />,
     label: <Link to="/shop/auction-management">Quản Lý Đấu Giá</Link>
-  },
-  {
-    key: '7',
-    icon: <SolutionOutlined />,
-    label: <Link to="/shop/report-management">Quản Lý Đánh Giá</Link>
   },
 ];
 
