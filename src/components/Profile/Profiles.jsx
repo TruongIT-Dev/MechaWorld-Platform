@@ -23,7 +23,7 @@ export default function Profile() {
       label: "Tài khoản Của Tôi",
       children: [
         { key: "/member/profile/account", label: <Link to="/member/profile/account">Hồ sơ</Link> },
-        { key: "/member/profile/address-setting", label: <Link to="/member/profile/address-setting">Địa chỉ nhận hàng</Link> },
+        { key: "/member/profile/address-setting", label: <Link to="/member/profile/address-setting">Địa chỉ</Link> },
       ],
     },
     {
