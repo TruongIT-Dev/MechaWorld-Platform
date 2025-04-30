@@ -93,11 +93,11 @@ export default function PlaceDeposit({
               width={24}
               height={24}
             >
-              <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+              <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
               <g
                 id="SVGRepo_tracerCarrier"
-                stroke-linecap="round"
-                stroke-linejoin="round"
+                strokeLinecap="round"
+                strokeLinejoin="round"
               ></g>
               <g id="SVGRepo_iconCarrier">
                 {" "}
@@ -114,7 +114,7 @@ export default function PlaceDeposit({
           </div>
           <div className="mt-2 flex flex-col gap-2 font-light">
             <p>
-              Tên người gửi: <span className="font-medium">{secondUser.name}</span>
+              Tên người gửi: <span className="font-medium">{secondUser.full_name}</span>
             </p>
             <h2>
               Địa chỉ: <span className="font-medium">{secondAddress}</span>
@@ -132,7 +132,7 @@ export default function PlaceDeposit({
               height={24}
               width={24}
             >
-              <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+              <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
               <g
                 id="SVGRepo_tracerCarrier"
                 strokeLinecap="round"
@@ -151,7 +151,7 @@ export default function PlaceDeposit({
           </div>
           <div className="mt-2 flex flex-col gap-2 font-light">
             <p>
-              Tên người nhận: <span className="font-medium">{firstUser.name}</span>
+              Tên người nhận: <span className="font-medium">{firstUser.full_name}</span>
             </p>
             <h2>
               Địa chỉ: <span className="font-medium">{firstAddress}</span>
@@ -250,19 +250,19 @@ PlaceDeposit.propTypes = {
       depositAmount: PropTypes.number.isRequired,
       compensationAmount: PropTypes.number,
       compensateUser: PropTypes.shape({
-        id: PropTypes.number.isRequired,
+        id: PropTypes.string.isRequired,
       }),
     }).isRequired,
   }).isRequired,
   firstAddress: PropTypes.string.isRequired,
   secondAddress: PropTypes.string.isRequired,
   firstUser: PropTypes.shape({
-    id: PropTypes.number.isRequired,
-    name: PropTypes.string.isRequired,
+    id: PropTypes.string.isRequired,
+    full_name: PropTypes.string.isRequired,
   }).isRequired,
   secondUser: PropTypes.shape({
-    id: PropTypes.number.isRequired,
-    name: PropTypes.string.isRequired,
+    id: PropTypes.string.isRequired,
+    full_name: PropTypes.string.isRequired,
   }).isRequired,
   fetchExchangeDetails: PropTypes.func.isRequired,
   setIsLoading: PropTypes.func.isRequired,

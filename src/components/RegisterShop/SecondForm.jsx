@@ -82,7 +82,7 @@ const SecondForm = ({ user, setUser, setHasAddress }) => {
             const response = await api.get('province');
             let data = response.data.data;
             // Filter out province with ID 286 (if needed)
-            data = data.filter(province => province.ProvinceID !== 286 && province.ProvinceID !== 290);
+            data = data.filter(province => province.ProvinceID !== 286 && province.ProvinceID !== 290 && province.ProvinceID !== 298 && province.ProvinceID !== 2002);
             setCities(data);
         } catch (error) {
             console.error('Lỗi khi fetch thành phố:', error);

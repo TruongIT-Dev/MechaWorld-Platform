@@ -175,6 +175,11 @@ const ProfilePage = () => {
           ...user,  // giữ lại các thông tin hiện có
           phone_number: newPhoneNumber  // cập nhật số điện thoại
         }));
+        setUser({
+          ...user,
+          phone_number: newPhoneNumber
+        });
+      } else {
 
       }
 
@@ -290,7 +295,7 @@ const ProfilePage = () => {
               {/* Số điện thoại */}
               <Form.Item label="Số điện thoại">
                 <div className="flex items-center">
-                  <Input value={newPhoneNumber || "Chưa đăng kí"} disabled className="bg-gray-100" />
+                  <Input value={maskPhoneNumber(user?.phone_number) || "Chưa đăng kí"} disabled className="bg-gray-100" />
                   <Button type="link" className="ml-2 text-blue-500" onClick={() => setPhoneModalVisible(true)}>{newPhoneNumber ? "Thay đổi" : "Đăng ký"}</Button>
                 </div>
               </Form.Item>

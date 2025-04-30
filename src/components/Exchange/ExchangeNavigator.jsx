@@ -3,6 +3,8 @@ import { UserOutlined, MenuOutlined, FilterOutlined } from '@ant-design/icons';
 import { useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import PostModal from './PostModal';
+import { getUser } from '../../apis/User/APIUser';
+import { useSelector } from 'react-redux';
 
 const { Content } = Layout;
 
@@ -21,7 +23,8 @@ const filterOptions = [
 export default function ExchangeNavigator() {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [activeFilter, setActiveFilter] = useState('all');
-
+    const currentUser = useSelector((state) => state.auth.user )
+    const [userData, setUserData] = useState();
     // Open modal
     const openModal = () => {
         setIsModalOpen(true);
@@ -122,6 +125,7 @@ export default function ExchangeNavigator() {
                 destroyOnClose
             >
                 <PostModal
+                    currentUser={currentUser}
                     onClose={closeModal}
                     onSuccess={handlePostSuccess}
                 />

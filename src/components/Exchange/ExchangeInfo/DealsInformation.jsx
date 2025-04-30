@@ -3,7 +3,7 @@ import { Avatar } from 'antd';
 
 
 const DealsInformation = ({ exchangeDetails,self,theOther }) => {
-    if (!exchangeDetails?.exchange?.dealAmount) {
+    if (!exchangeDetails?.exchange?.depositAmount) {
         return (
             <div className="p-4 bg-yellow-100 border border-yellow-300 text-yellow-800 rounded">
                 <p>Hiện tại chưa có thông tin về số tiền giao dịch. Vui lòng cập nhật để tiếp tục.</p>
@@ -29,7 +29,7 @@ const DealsInformation = ({ exchangeDetails,self,theOther }) => {
             <p className="self-stretch text-center font-semibold bg-gray-800 text-white px-4 py-4 rounded-sm">
             MỨC TIỀN ĐỀ NGHỊ CỦA{" "}
             <span className="font-light italic">
-                <Avatar src={exchangeDetails.exchange.requestUser.avatar} />{" "}
+                <Avatar src={exchangeDetails.exchange.requestUser.avatar_url} />{" "}
                 {exchangeDetails.exchange.requestUser.name}
             </span>
             </p>
@@ -61,16 +61,16 @@ const DealsInformation = ({ exchangeDetails,self,theOther }) => {
                 }`}
             >
                 {exchangeDetails.exchange.compensateUser?.id === self.id ? (
-                <p className="font-light">
+                <p className="font-semibold">
                     Bạn sẽ phải bù cho{" "}
                     <span className="font-semibold">
-                    <Avatar src={theOther.avatar} /> {theOther.name}
+                    <Avatar src={theOther.avatar_url} /> {theOther.name}
                     </span>
                 </p>
                 ) : (
                 <p className="font-light">
                     <span className="font-semibold">
-                    <Avatar src={theOther.avatar} /> {theOther.name}
+                    <Avatar src={self.avatar_url} /> {theOther.name}
                     </span>{" "}
                     sẽ bù tiền cho bạn
                 </p>
@@ -171,24 +171,24 @@ DealsInformation.propTypes = {
             compensateUser: PropTypes.shape({
                 id: PropTypes.string.isRequired,
                 name: PropTypes.string.isRequired,
-                avatar: PropTypes.string,
+                avatar_url: PropTypes.string,
             }),
             requestUser: PropTypes.shape({
                 id: PropTypes.string.isRequired,
                 name: PropTypes.string.isRequired,
-                avatar: PropTypes.string,
+                avatar_url: PropTypes.string,
             }).isRequired,
         }),
     }),
     self: PropTypes.shape({
         id: PropTypes.string.isRequired,
         name: PropTypes.string.isRequired,
-        avatar: PropTypes.string,
+        avatar_url: PropTypes.string,
     }).isRequired,
     theOther: PropTypes.shape({
         id: PropTypes.string.isRequired,
         name: PropTypes.string.isRequired,
-        avatar: PropTypes.string,
+        avatar_url: PropTypes.string,
     }).isRequired,
 };
 
