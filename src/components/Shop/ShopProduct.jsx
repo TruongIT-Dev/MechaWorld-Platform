@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { useEffect, useState } from "react";
 import { MoreOutlined, PlusOutlined } from "@ant-design/icons";
 import { ExclamationCircleOutlined } from '@ant-design/icons';
@@ -7,10 +7,13 @@ import { Table, Row, Button, Select, Input, Modal, Dropdown, Form, Tag, Col, Typ
 
 import { SellingGundam, RestoreGundam } from "../../apis/Sellers/APISeller";
 import { GetGundamByID } from '../../apis/User/APIUser';
+import { GetSellerStatus } from "../../apis/Sellers/APISeller";
+import { incrementListingsUsed, decrementListingsUsed, updateSellerPlan } from '../../features/user/userSlice';
 
 function ShopProduct({
   // isCreating,
   setIsCreating }) {
+  const dispatch = useDispatch();
   const user = useSelector((state) => state.auth.user);
   const [gundamList, setGundamList] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
@@ -19,44 +22,111 @@ function ShopProduct({
   const [form] = Form.useForm();
   const [selectedCondition, setSelectedCondition] = useState(null);
   const [selectedGrade, setSelectedGrade] = useState(null);
-  // const [openMenuId, setOpenMenuId] = useState(null);
-  // const toggleMenu = (id) => {
-  //   setOpenMenuId(openMenuId === id ? null : id);
-  // };
-
+  const [loading, setLoading] = useState(false);
 
   // Modal Xác nhận Đăng bán Sản phẩm
   const [confirmSell, setConfirmSell] = useState(false);
   const [isConfirmedSell, setIsConfirmedSell] = useState(false);
 
+  // Hàm để cập nhật seller status từ API
+  const updateSellerStatus = async () => {
+    try {
+      const res = await GetSellerStatus(user.id);
+      dispatch(updateSellerPlan(res.data));
+      return res.data;
+    } catch (err) {
+      console.error("Error updating seller status", err);
+      return null;
+    }
+  };
 
+  const fetchGundamList = async (searchTerm = "") => {
+    try {
+      const response = await GetGundamByID(user.id, searchTerm);
+      setGundamList(response.data);
+      setFilteredData(response.data);
+      console.log("Dử liệu gundam: ", response.data);
+      return response.data;
+    } catch (error) {
+      console.error("Lỗi khi lấy danh sách sản phẩm:", error);
+      return [];
+    }
+  };
 
   useEffect(() => {
-    GetGundamByID(user.id, "")
-      .then((response) => {
-        setGundamList(response.data);
-        setFilteredData(response.data);
-        // console.log("Dử liệu lọc: ", filteredData);
-        console.log("Dử liệu gundam: ", gundamList);
-      })
-      .catch((error) => {
-        console.error("Lỗi khi lấy danh sách sản phẩm:", error);
-      });
+    fetchGundamList();
   }, []);
-  const handleSellProduct = (product) => {
-    // console.log("data đã lưu: ",product);
-    SellingGundam(user.id, product.gundam_id).catch(response => {
-      console.log(response);
-    })
-    window.location.reload();
+
+  const handleSellProduct = async (product) => {
+    setLoading(true);
+    try {
+      // Gọi API đăng bán
+      await SellingGundam(user.id, product.gundam_id);
+
+      // Cập nhật trạng thái sản phẩm trong danh sách local
+      const updatedList = gundamList.map(item => {
+        if (item.gundam_id === product.gundam_id) {
+          return { ...item, status: "published" };
+        }
+        return item;
+      });
+
+      setGundamList(updatedList);
+      applyFilters(updatedList); // Áp dụng lại bộ lọc với danh sách mới
+
+      // Cập nhật bộ đếm số lượng sản phẩm đăng bán trong Redux
+      dispatch(incrementListingsUsed());
+
+      // Hoặc có thể cập nhật toàn bộ thông tin seller từ API (đảm bảo chính xác)
+      await updateSellerStatus();
+
+      return true;
+    } catch (error) {
+      console.error("Lỗi khi đăng bán sản phẩm:", error);
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRestoreProduct = async (product) => {
+    setLoading(true);
+    try {
+      // Gọi API hủy đăng bán
+      await RestoreGundam(user.id, product.gundam_id);
+
+      // Cập nhật trạng thái sản phẩm trong danh sách local
+      const updatedList = gundamList.map(item => {
+        if (item.gundam_id === product.gundam_id) {
+          return { ...item, status: "in store" };
+        }
+        return item;
+      });
+
+      setGundamList(updatedList);
+      applyFilters(updatedList); // Áp dụng lại bộ lọc với danh sách mới
+
+      // Cập nhật bộ đếm số lượng sản phẩm đăng bán trong Redux
+      dispatch(decrementListingsUsed());
+
+      // Hoặc có thể cập nhật toàn bộ thông tin seller từ API (đảm bảo chính xác)
+      await updateSellerStatus();
+
+      return true;
+    } catch (error) {
+      console.error("Lỗi khi hủy bán sản phẩm:", error);
+      return false;
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleAuctionProduct = (product) => {
-    // setSelectedProduct(product);
-    console.log("data đã lưu: ", product);
+    setSelectedProduct(product);
     setSellModalVisible(true);
   };
-  const handleMenuClick = (key, record) => {
+
+  const handleMenuClick = async (key, record) => {
     switch (key) {
       case "edit":
         console.log("📝 Chỉnh sửa sản phẩm:", record);
@@ -72,10 +142,7 @@ function ShopProduct({
 
       case "unsell":
         console.log("🚫 Hủy bán sản phẩm:", record);
-        RestoreGundam(user.id, record.gundam_id).catch(response => {
-          console.log(response);
-        })
-        window.location.reload();
+        await handleRestoreProduct(record);
         break;
 
       default:
@@ -83,51 +150,50 @@ function ShopProduct({
     }
   };
 
-  // Lọc dữ liệu khi có thay đổi
-  useEffect(() => {
-    let filtered = gundamList;
-
-    // Lọc theo giá
-    // if (minPrice !== null) {
-    //   filtered = filtered.filter((item) => item.price >= minPrice);
-    // }
-    // if (maxPrice !== null) {
-    //   filtered = filtered.filter((item) => item.price <= maxPrice);
-    // }
+  // Hàm áp dụng bộ lọc vào danh sách sản phẩm
+  const applyFilters = (dataList) => {
+    let filtered = dataList;
 
     // Lọc theo tình trạng
     if (selectedCondition) {
       filtered = filtered.filter((item) => item.condition === selectedCondition);
     }
+
     // Lọc theo phân khúc (grade)
     if (selectedGrade) {
       filtered = filtered.filter((item) => item.grade === selectedGrade);
     }
+
     setFilteredData(filtered);
+  };
+
+  // Lọc dữ liệu khi có thay đổi bộ lọc
+  useEffect(() => {
+    applyFilters(gundamList);
   }, [selectedCondition, selectedGrade, gundamList]);
 
   const handleFinish = (values) => {
     console.log("data input", values);
+    // Xử lý gửi yêu cầu đấu giá và đóng modal
+    setSellModalVisible(false);
   }
 
   const searchGundam = (values) => {
-    // console.log(values);
-    GetGundamByID(user.id, values)
-      .then((response) => {
-        setGundamList(response.data);
-        setFilteredData(response.data);
-        console.log("search complete");
-      })
-      .catch((error) => {
-        console.error("Lỗi khi lấy danh sách sản phẩm:", error);
-      });
+    fetchGundamList(values);
   }
+
+  const resetFilters = () => {
+    setSelectedCondition(null);
+    setSelectedGrade(null);
+    setFilteredData(gundamList);
+  }
+
   const columns = [
     {
       title: "Hình Ảnh",
       dataIndex: "primary_image_url",
       render: (images) => (
-        <img src={images} alt="Gundam" width={100} height={100} style={{ objectFit: "cover" }} /> 
+        <img src={images} alt="Gundam" width={100} height={100} style={{ objectFit: "cover" }} />
       ),
       width: 100,
     },
@@ -159,7 +225,6 @@ function ShopProduct({
           "used": "Đã qua sử dụng",
         };
         return conditionMap[condition] || condition;
-
       },
     },
     {
@@ -178,10 +243,10 @@ function ShopProduct({
         const handleConfirmSellProduct = async () => {
           setIsConfirmedSell(true);
           try {
-            await handleSellProduct(selectedProduct);
-            setConfirmSell(false);
-          } catch (error) {
-            console.error("Lỗi khi đăng bán sản phẩm:", error);
+            const success = await handleSellProduct(selectedProduct);
+            if (success) {
+              setConfirmSell(false);
+            }
           } finally {
             setIsConfirmedSell(false);
             setSelectedProduct(null);
@@ -201,6 +266,7 @@ function ShopProduct({
                   type="primary"
                   className="bg-green-600 hover:bg-green-500 w-28"
                   onClick={showConfirmModal}
+                  loading={loading && selectedProduct?.gundam_id === value.gundam_id}
                 >
                   Đăng bán
                 </Button>
@@ -276,7 +342,7 @@ function ShopProduct({
           { key: "edit", label: "✏️ Chỉnh sửa sản phẩm", },
           { key: "preview", label: "👁️ Xem trước ", },
         ];
-        if  (record.status === "in store") {
+        if (record.status === "in store") {
           menuItems.push({ key: "delete", label: "❌ xóa sản phẩm" });
         }
         if (record.status === "published") {
@@ -291,7 +357,7 @@ function ShopProduct({
                 onClick: ({ key }) => handleMenuClick(key, record),
               }}
             >
-              <Button icon={<MoreOutlined />} />
+              <Button icon={<MoreOutlined />} loading={loading && selectedProduct?.gundam_id === record.gundam_id} />
             </Dropdown>
           </div>
         );
@@ -301,7 +367,6 @@ function ShopProduct({
 
   return (
     <div className="space-y-4">
-
       {/* Tiêu đề */}
       <h2 className="text-2xl font-bold uppercase">Quản lý sản phẩm</h2>
 
@@ -309,19 +374,19 @@ function ShopProduct({
         <div className="filters">
           {/* Search & Filter Section */}
           <Row gutter={[16, 16]} className="mb-4 flex flex-wrap justify-center md:justify-between">
-
             {/* Search */}
             <Col xs={12} sm={8} md={8}>
               <Input.Search placeholder="Tìm kiếm sản phẩm" onSearch={searchGundam} className="w-full" />
             </Col>
 
-            {/* Fitler Condition */}
+            {/* Filter Condition */}
             <Col xs={12} sm={4} md={4}>
               <Select
                 placeholder="Lọc tình trạng"
                 allowClear
                 className="w-full"
                 onChange={setSelectedCondition}
+                value={selectedCondition}
               >
                 <Select.Option value="new">Hàng mới</Select.Option>
                 <Select.Option value="open box">Đã mở hộp</Select.Option>
@@ -336,6 +401,7 @@ function ShopProduct({
                 allowClear
                 className="w-full"
                 onChange={setSelectedGrade}
+                value={selectedGrade}
               >
                 {[...new Set(gundamList.map((item) => item.grade))].map((grade) => (
                   <Select.Option key={grade} value={grade}>
@@ -347,7 +413,7 @@ function ShopProduct({
 
             {/* Earase Filter Button */}
             <Col xs={12} sm={4} md={4}>
-              <Button onClick={() => setFilteredData(gundamList)}>Xóa bộ lọc</Button>
+              <Button onClick={resetFilters}>Xóa bộ lọc</Button>
             </Col>
 
             {/* Add More Button */}
@@ -370,6 +436,8 @@ function ShopProduct({
           dataSource={filteredData}
           pagination={{ defaultPageSize: 10 }}
           scroll={{ y: 55 * 10 }}
+          loading={loading}
+          rowKey="gundam_id"
         />
 
         {/* Auction Modal */}
@@ -405,11 +473,11 @@ function ShopProduct({
       </div>
     </div>
   );
-
-
 }
+
 ShopProduct.propTypes = {
   // isCreating: PropTypes.bool,
   setIsCreating: PropTypes.func.isRequired,
 };
+
 export default ShopProduct;

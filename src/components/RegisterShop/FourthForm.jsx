@@ -32,15 +32,11 @@ const SuccessfulRegistration = ({ next }) => {
                         <div className="space-y-2">
                             <div className="flex items-center">
                                 <CheckCircleOutlined className="mr-2 text-green-500" />
-                                <Text>10 lượt đăng bán sản phẩm</Text>
+                                <Text>5 lượt đăng bán sản phẩm</Text>
                             </div>
                             <div className="flex items-center">
                                 <CheckCircleOutlined className="mr-2 text-green-500" />
-                                <Text>5 lượt mở đấu giá</Text>
-                            </div>
-                            <div className="flex items-center">
-                                <CheckCircleOutlined className="mr-2 text-green-500" />
-                                <Text>Hỗ trợ cơ bản</Text>
+                                <Text>1 lượt mở đấu giá</Text>
                             </div>
                         </div>
                     </div>

@@ -1,44 +1,70 @@
 import { useEffect } from "react";
-import { Form, Checkbox } from "antd";
+import { Card, Typography, Form, Checkbox } from "antd";
+
+const { Title, Paragraph } = Typography;
 
 const ThirdForm = ({ formData, setFormData, setCanProceed }) => {
-
     useEffect(() => {
         setCanProceed(formData?.agreedToTerms || false);
     }, [formData?.agreedToTerms, setCanProceed]);
 
     return (
-        <div className="bg-white rounded-lg">
-            <h2 className="text-xl font-bold mb-2">Điều khoản sử dụng dành cho Người Bán</h2>
-            <p className="text-gray-600 mb-4">Vui lòng đọc kỹ các điều khoản trước khi tiếp tục.</p>
+        <>
+            <Card
+                title={<span className="font-bold">NHỮNG QUY ĐỊNH KHI TRỞ THÀNH NHÀ BÁN HÀNG TẠI MECHAWORLD</span>}
+                bordered={false}
+                className="shadow rounded-xl"
+            >
+                <Typography className="space-y-4 overflow-y-auto pr-2">
+                    <div>
+                        <Title level={4}>1. Điều kiện trở thành Người Bán</Title>
+                        <Paragraph>
+                            <ul className="list-disc pl-5">
+                                <li>Cung cấp thông tin chính xác về danh tính và cửa hàng.</li>
+                                <li>Chịu trách nhiệm về sản phẩm đăng bán, bao gồm nguồn gốc và chất lượng.</li>
+                            </ul>
+                        </Paragraph>
+                    </div>
 
-            <div className="border p-4 h-52 overflow-y-auto bg-gray-100 text-sm rounded-md">
-                <p><strong>1. Điều kiện trở thành Người Bán</strong></p>
-                <p>- Cung cấp thông tin chính xác về danh tính và cửa hàng.</p>
-                <p>- Chịu trách nhiệm về các sản phẩm đăng bán, bao gồm nguồn gốc và chất lượng.</p>
+                    <div>
+                        <Title level={4}>2. Quy định về sản phẩm</Title>
+                        <Paragraph>
+                            <ul className="list-disc pl-5">
+                                <li>Chỉ được đăng bán sản phẩm liên quan đến Gundam, hàng hóa phải rõ nguồn gốc, không vi phạm pháp luật hoặc bản quyền.</li>
+                                <li>Phải sử dụng hình ảnh thật của sản phẩm và mô tả đúng thực tế, không gây hiểu lầm cho người mua.</li>
+                            </ul>
+                        </Paragraph>
+                    </div>
 
-                <p className="mt-2"><strong>2. Quy định về sản phẩm</strong></p>
-                <p>- Sản phẩm phải tuân thủ pháp luật Việt Nam, không vi phạm bản quyền.</p>
-                <p>- Không được đăng bán sản phẩm cấm hoặc vi phạm đạo đức.</p>
+                    <div>
+                        <Title level={4}>3. Chính sách giao hàng và đổi trả</Title>
+                        <Paragraph>
+                            <ul className="list-disc pl-5">
+                                <li>Giao hàng đúng mô tả, đúng thời gian và hỗ trợ xử lý khiếu nại nếu có.</li>
+                            </ul>
+                        </Paragraph>
+                    </div>
 
-                <p className="mt-2"><strong>3. Chính sách giao hàng và đổi trả</strong></p>
-                <p>- Cung cấp thông tin giao hàng chính xác để tránh khiếu nại.</p>
-                <p>- Nếu có khiếu nại từ khách hàng, bạn có trách nhiệm xử lý theo quy định.</p>
+                    <div>
+                        <Title level={4}>4. Xử lý vi phạm</Title>
+                        <Paragraph>
+                            <ul className="list-disc pl-5">
+                                <li>Nền tảng có quyền khóa shop tạm thời hoặc vĩnh viễn nếu vi phạm.</li>
+                            </ul>
+                        </Paragraph>
+                    </div>
+                </Typography>
 
-                <p className="mt-2"><strong>4. Xử lý vi phạm</strong></p>
-                <p>- Nền tảng có quyền tạm ngưng hoặc chấm dứt tài khoản nếu vi phạm điều khoản.</p>
-                <p>- Vi phạm nghiêm trọng có thể dẫn đến các biện pháp pháp lý.</p>
-            </div>
-
+            </Card>
             <Form.Item className="mt-4">
                 <Checkbox
                     checked={formData?.agreedToTerms}
                     onChange={(e) => setFormData({ ...formData, agreedToTerms: e.target.checked })}
                 >
-                    Tôi đồng ý với các điều khoản trên
+                    Tôi xác nhận đã đọc và đồng ý với các điều khoản trên
                 </Checkbox>
             </Form.Item>
-        </div>
+        </>
     );
 };
 

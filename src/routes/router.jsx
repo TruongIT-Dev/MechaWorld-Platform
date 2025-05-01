@@ -46,7 +46,7 @@ export const ShopRegister = React.lazy(() => import("../components/RegisterShop/
 export const RegisterShopLayout = React.lazy(() => import("../components/RegisterShop/RegisterShopLayout"));
 
 // Shop route
-export const ShopDashboard = React.lazy(() => import("../components/Shop/ShopDashboard"));
+export const ShopDashboard = React.lazy(() => import("../components/Shop/Dashboard/ShopDashboard"));
 export const ShopAddress = React.lazy(() => import("../components/Shop/ShopAddress"));
 export const ShopProductManagement = React.lazy(() => import("../components/Shop/ShopProductManagement"));
 export const ShopPage = React.lazy(() => import("../components/Shop/ShopPage"));

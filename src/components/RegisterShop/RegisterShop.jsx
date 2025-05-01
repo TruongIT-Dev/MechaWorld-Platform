@@ -152,11 +152,11 @@ export default function RegisterShop() {
       const values = await form.validateFields();
       console.log("Gửi dữ liệu:", values);
 
-      message.success("Đăng ký thành công! Chuyển về trang chủ...");
+      message.success("Đang chuyển tới Shop của bạn...");
       setTimeout(() => {
         navigate("/shop/dashboard");
         window.location.reload();
-      }, 2000);
+      }, 1000);
 
     } catch (err) {
       console.error("Validation Failed:", err);
@@ -165,12 +165,12 @@ export default function RegisterShop() {
   };
 
   return (
-    <div className="container mx-auto p-6 bg-white">
+    <div className="container my-14 mx-auto bg-white">
       <Steps
         current={current}
         // onChange={setCurrent}
         // progressDot
-        className="max-w-5xl mx-auto mb-6"
+        className="max-w-5xl mx-auto"
       >
         {steps.map((step, index) => (
           <Step key={index} title={step.title} icon={step.icon} />
@@ -187,21 +187,22 @@ export default function RegisterShop() {
           span: 12,
         }}
         initialValues={formData}>
-        <div className="p-4 my-10 mx-auto max-w-5xl">
+        <div className="p-5 mx-auto max-w-5xl">
           {steps[current].content}
         </div>
 
-        <div className="flex justify-end mt-6">
-          {current > 0 && current < steps.length - 1 && <Button onClick={prev}>Quay lại</Button>}
+        <div className="flex justify-end gap-4">
+          {current > 0 && current < steps.length - 2 && <Button onClick={prev}>Quay lại</Button>}
           {current < steps.length - 1 ? (
             <Button
               type="primary"
               disabled={
                 (current === 0 && (!canProceed || !isPhoneVerified)) ||
-                (current === 1 && !hasAddress)
+                (current === 1 && !hasAddress) ||
+                (current === 2 && !canProceed)
               }
               onClick={next}
-              className="bg-blue-500 mx-4 hover:bg-blue-600"
+              className="bg-blue-500 mr-20"
             >
               Tiếp theo
             </Button>

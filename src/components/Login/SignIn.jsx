@@ -32,9 +32,7 @@ export default function SignIn() {
         });
 
         // Hiển thị thông báo Đăng nhập Google thành công
-        setTimeout(() => {
-          showSuccessNotification();
-        }, 100);
+        showSuccessNotification();
 
         // Chuyển trang
         setTimeout(() => {
