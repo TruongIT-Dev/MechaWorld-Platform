@@ -14,6 +14,34 @@ import { GetGundamByID, getUser } from '../../apis/User/APIUser';
 
 import { useCart } from '../../context/CartContext';
 import { Outlet, Link, useLocation } from 'react-router-dom';
+const { Title } = Typography;
+// Thêm component GundamFilters
+const GundamFilters = ({ gradeList, activeFilter, filterByGrade }) => {
+  return (
+    <div className="flex flex-wrap justify-center items-center gap-2 my-6">
+      <Button
+        type={activeFilter === 'All' ? 'primary' : 'default'}
+        className={activeFilter === 'All' ? 'bg-blue-500' : ''}
+        onClick={() => filterByGrade('All')}
+      >
+        Tất cả
+      </Button>
+
+      {gradeList.map(grade => (
+        <Button
+          key={grade}
+          type={activeFilter === grade ? 'primary' : 'default'}
+          className={activeFilter === grade ? 'bg-blue-500' : ''}
+          onClick={() => filterByGrade(grade)}
+        >
+          {grade}
+        </Button>
+      ))}
+    </div>
+  );
+};
+
+const gradeList = ['Entry Grade', 'High Grade', 'Master Grade', 'Real Grade', 'Perfect Grade', 'Super Deformed'];
 
 function ListCollection({}) {
     const { Sider, Content } = Layout;
@@ -26,11 +54,11 @@ function ListCollection({}) {
     const [confirmSell, setConfirmSell] = useState(false);
     const [isConfirmedSell, setIsConfirmedSell] = useState(false);
     const [form] = Form.useForm();
-    const [userRole, setUserRole] = useState(null); // Thêm state để lưu role
+    const [userRole, setUserRole] = useState(null);
+    const [activeGradeFilter, setActiveGradeFilter] = useState('All'); // Thêm state cho filter active
     const { cartItems, addToCart, loading } = useCart();
   
     const items = [
-      
       {
         key: "/member/profile/auction-history",
         icon: <BankOutlined className="text-lg text-red-500" />,
@@ -44,10 +72,9 @@ function ListCollection({}) {
     ];
   
     useEffect(() => {
-      // Lấy thông tin người dùng để kiểm tra role
       getUser(user.id)
         .then((response) => {
-          setUserRole(response.data.role); // Lưu role vào state
+          setUserRole(response.data.role);
           console.log(response.data.role);
         })
         .catch((error) => {
@@ -59,6 +86,7 @@ function ListCollection({}) {
           setGundamList(response.data);
           setFilteredData(response.data);
           console.log(user.id);
+          console.log('Danh sách sản phẩm:', response.data);
         })
         .catch((error) => {
           console.error("Lỗi khi lấy danh sách sản phẩm:", error);
@@ -68,29 +96,35 @@ function ListCollection({}) {
     // Lọc dữ liệu
     useEffect(() => {
       let filtered = gundamList;
+      
+      // Lọc theo condition
       if (selectedCondition) {
         filtered = filtered.filter((item) => item.condition === selectedCondition);
       }
-      if (selectedGrade) {
+      
+      // Lọc theo grade
+      if (selectedGrade && selectedGrade !== 'All') {
         filtered = filtered.filter((item) => item.grade === selectedGrade);
       }
+      
       setFilteredData(filtered);
     }, [selectedCondition, selectedGrade, gundamList]);
   
-    const handleAddToCart = async (id) => {
-      try {
-          if (!userId) {
-              message.error('Bạn cần phải Đăng nhập trước!');
-              navigate('/member/login');
-              return;
-          }
+    // Hàm xử lý filter theo grade
+    const filterByGrade = (grade) => {
+      setActiveGradeFilter(grade);
+      setSelectedGrade(grade === 'All' ? null : grade);
+    };
   
-          await addToCart({ id }); // Sử dụng hàm addToCart từ context
-          setAdded(true);
-  
-      } catch (error) {
-          message.error("Lỗi khi thêm vào giỏ hàng!");
-          console.error("Error:", error);
+    const getGradeColor = (grade) => {
+      switch (grade) {
+          case 'Entry Grade': return 'cyan';
+          case 'High Grade': return 'green';
+          case 'Real Grade': return 'purple';
+          case 'Master Grade': return 'blue';
+          case 'Perfect Grade': return 'gold';
+          case 'Super Deformed': return 'magenta';
+          default: return 'default';
       }
   };
   
@@ -103,10 +137,6 @@ function ListCollection({}) {
     const handleAuctionProduct = (product) => {
       setSellModalVisible(true);
     };
-  
-  
-  
-  
   
     const renderStatusButton = (product) => {
       const { status } = product;
@@ -182,14 +212,20 @@ function ListCollection({}) {
         <Tag color="default">Không rõ</Tag>
       );
     };
+    
   return (
-    <div className="container mx-auto px-4 py-8  bg-gray-50 min-h-screen">
-
-
-
-    {/* Featured Products */}
-    <div className="px-[50px]"> {/* Di chuyển margin ra container cha */}
-        <h2 className="text-[36px] font-bold text-gray-800 mb-12">Bộ Sưu Tập</h2>
+    <div className="container mx-auto px-4 py-8 bg-gray-50 min-h-screen">
+      {/* Featured Products */}
+      <div className="px-[10px]">
+        <h2 className="text-[36px] text-center font-bold text-gray-800 ">Bộ Sưu Tập</h2>
+        
+        {/* Thêm component GundamFilters vào đây */}
+        <GundamFilters 
+          gradeList={gradeList} 
+          activeFilter={activeGradeFilter} 
+          filterByGrade={filterByGrade} 
+        />
+        
         <Row gutter={[24, 24]} justify="start">
             {filteredData
             .filter(item => ["published", "in store"].includes(item.status))
@@ -200,9 +236,10 @@ function ListCollection({}) {
                 md={8} 
                 lg={6} 
                 key={item.gundam_id}
-                className="flex justify-center" // Thêm flex để căn giữa
+                className="flex justify-center "
             >
                 <Card
+                
                 hoverable
                 cover={
                     <div className="h-64 bg-gray-200 flex items-center justify-center overflow-hidden">
@@ -217,90 +254,33 @@ function ListCollection({}) {
                     <HeartOutlined key="wishlist" className="text-red-500" />,
                     <ShoppingCartOutlined key="cart" />,
                 ]}
-                className="h-full w-full max-w-[300px] flex flex-col" // Thêm max-width và w-full
+                
                 bodyStyle={{ flex: 1 }}
                 >
-                <Card.Meta
-                    title={<span className="font-bold">{item.name}</span>}
-                    description={
-                    <>
-                        <span className="text-gray-600">{item.grade}</span>
-                        <div className="mt-2 text-lg font-semibold text-blue-600">
-                        {item.price?.toLocaleString()} đ
-                        </div>
-                    </>
-                    }
-                />
+                <div className="px-1">
+                    <div className="flex justify-between items-start mb-2">
+                        <Title level={5} className="m-0 text-gray-800 truncate" style={{ maxWidth: '80%' }}>
+                            {item.name}
+                        </Title>
+                        <Tag color={getGradeColor(item.grade)}>{item.scale}</Tag>
+                    </div>
+                    <div className="flex justify-between text-gray-600 text-sm mt-1">
+                        <span>{item.series}</span>
+                        
+                    </div>
+                </div>
                 </Card>
-            </Col>
+            </Col>  
             ))}
         </Row>
-    </div>
-
-
-
-    {/* Hàng đang bán */}
-    {userRole === 'seller' && (
-        <div className="px-[50px]"> {/* Di chuyển margin ra container cha */}
-          <h2 className="text-[36px] font-bold text-gray-800 mb-12">Hàng đang bán</h2>
-          <Row gutter={[24, 24]} justify="start">
-              {filteredData
-              .filter(item => ["published"].includes(item.status))
-              .map((item) => (
-              <Col 
-                  xs={24} 
-                  sm={12} 
-                  md={8} 
-                  lg={6} 
-                  key={item.gundam_id}
-                  className="flex justify-center" // Thêm flex để căn giữa
-              >
-                  <Card
-                  hoverable
-                  cover={
-                      <div className="h-64 bg-gray-200 flex items-center justify-center overflow-hidden">
-                      <img 
-                          alt={item.name} 
-                          src={item.primary_image_url} 
-                          className="object-cover w-full h-full"
-                      />
-                      </div>
-                  }
-                  actions={[
-                      <HeartOutlined key="wishlist" className="text-red-500" />,
-                      <ShoppingCartOutlined key="cart" />,
-                  ]}
-                  className="h-full w-full max-w-[300px] flex flex-col" // Thêm max-width và w-full
-                  bodyStyle={{ flex: 1 }}
-                  >
-                  <Card.Meta
-                      title={<span className="font-bold">{item.name}</span>}
-                      description={
-                          <>
-                          <span className="text-gray-600">{item.grade}</span>
-                          <div className="mt-2 text-lg font-semibold text-blue-600">
-                              {item.price?.toLocaleString()} đ
-                          </div>
-                          <div className="mt-2 min-h-[80px]"> {/* Thêm min-height cho phần nút */}
-                              {renderStatusButton(item)}
-                          </div>
-                          </>
-                    }
-                    />
-                  </Card>
-              </Col>
-              ))}
-          </Row>
       </div>
-    )}
+
 
     </div>
   );
-
-
 }
+
 ListCollection.propTypes = {
-  // isCreating: PropTypes.bool,
   setIsCreating: PropTypes.func.isRequired,
 };
 export default ListCollection;
