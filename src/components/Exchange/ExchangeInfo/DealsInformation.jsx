@@ -2,8 +2,8 @@ import PropTypes from 'prop-types';
 import { Avatar } from 'antd';
 
 
-const DealsInformation = ({ exchangeDetails,self,theOther }) => {
-    if (!exchangeDetails?.exchange?.depositAmount) {
+const DealsInformation = ({ exchangeDetails }) => {
+    if (!exchangeDetails?.compensation_amount) {
         return (
             <div className="p-4 bg-yellow-100 border border-yellow-300 text-yellow-800 rounded">
                 <p>Hiện tại chưa có thông tin về số tiền giao dịch. Vui lòng cập nhật để tiếp tục.</p>
@@ -11,7 +11,6 @@ const DealsInformation = ({ exchangeDetails,self,theOther }) => {
         );
     }
 
-    const { depositAmount, compensationAmount, compensateUser } = exchangeDetails.exchange;
 
     // Hàm format số tiền
     const formatCurrency = (value) => {
@@ -19,22 +18,30 @@ const DealsInformation = ({ exchangeDetails,self,theOther }) => {
         return Number(value).toLocaleString('vi-VN') + ' đ';
     };
 
-    const isUserPayingOffset = compensateUser ;
     if (
-        exchangeDetails.exchange.depositAmount &&
-        exchangeDetails.exchange.depositAmount > 0
+        exchangeDetails.compensation_amount &&
+        exchangeDetails.compensation_amount > 0
       )
         return (
             <div className="w-1/3 flex flex-col items-stretch justify-start mx-auto pb-16">
             <p className="self-stretch text-center font-semibold bg-gray-800 text-white px-4 py-4 rounded-sm">
             MỨC TIỀN ĐỀ NGHỊ CỦA{" "}
-            <span className="font-light italic">
-                <Avatar src={exchangeDetails.exchange.requestUser.avatar_url} />{" "}
-                {exchangeDetails.exchange.requestUser.name}
-            </span>
+            
+            {exchangeDetails.payer_id === exchangeDetails.current_user.id ? (
+              <span className="font-light italic">
+                <Avatar src={exchangeDetails.current_user.avatar_url} />{" "}
+                {exchangeDetails.current_user.full_name}
+              </span>
+            ) : (
+              <span className="font-light italic">
+                <Avatar src={exchangeDetails.partner.avatar_url} />{" "}
+                {exchangeDetails.partner.full_name}
+              </span>
+            )}
+                
             </p>
 
-            <div className="basis-full flex items-center justify-between gap-4 border border-gray-300 px-4 py-1">
+            {/* <div className="basis-full flex items-center justify-between gap-4 border border-gray-300 px-4 py-1">
             <div className="flex items-center gap-2">
                 <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -48,29 +55,29 @@ const DealsInformation = ({ exchangeDetails,self,theOther }) => {
                 <p>Số tiền cọc: </p>
             </div>
             <span className="font-semibold">
-                {formatCurrency(exchangeDetails.exchange.depositAmount || 0)} đ
+                {formatCurrency(exchangeDetails.depositAmount || 0)} đ
             </span>
-            </div>
+            </div> */}
 
-            {exchangeDetails.exchange.compensationAmount > 0 ? (
+            {exchangeDetails.compensation_amount > 0 ? (
             <div
                 className={`basis-full border-x border-gray-300 px-4 py-2 text-center text-white ${
-                exchangeDetails.exchange.compensateUser?.id === self.id
+                  exchangeDetails.payer_id === exchangeDetails.current_user.id 
                     ? "bg-red-900"
                     : "bg-green-900"
                 }`}
             >
-                {exchangeDetails.exchange.compensateUser?.id === self.id ? (
+                {exchangeDetails.payer_id === exchangeDetails.current_user.id ? (
                 <p className="font-semibold">
                     Bạn sẽ phải bù cho{" "}
                     <span className="font-semibold">
-                    <Avatar src={theOther.avatar_url} /> {theOther.name}
+                    <Avatar src={exchangeDetails.partner.avatar_url} /> {exchangeDetails.partner.full_name}
                     </span>
                 </p>
                 ) : (
                 <p className="font-light">
                     <span className="font-semibold">
-                    <Avatar src={self.avatar_url} /> {theOther.name}
+                    <Avatar src={exchangeDetails.partner.avatar_url} /> {exchangeDetails.partner.full_name}
                     </span>{" "}
                     sẽ bù tiền cho bạn
                 </p>
@@ -82,7 +89,7 @@ const DealsInformation = ({ exchangeDetails,self,theOther }) => {
             </div>
             )}
 
-            {exchangeDetails.exchange.compensationAmount > 0 && (
+            {exchangeDetails.compensation_amount > 0 && (
             <div className="basis-full flex items-center justify-between gap-4 border border-gray-300 px-4 py-1">
                 <div className="flex items-center gap-2">
                 <svg
@@ -98,7 +105,7 @@ const DealsInformation = ({ exchangeDetails,self,theOther }) => {
                 </div>
                 <span className="font-semibold">
                 {formatCurrency(
-                    exchangeDetails.exchange.compensationAmount || 0
+                    exchangeDetails.compensation_amount || 0
                 )}{" "}
                 đ
                 </span>
@@ -163,33 +170,20 @@ const DealsInformation = ({ exchangeDetails,self,theOther }) => {
 
 DealsInformation.propTypes = {
     exchangeDetails: PropTypes.shape({
-        exchange: PropTypes.shape({
-            dealAmount: PropTypes.number,
-            depositAmount: PropTypes.number,
-            compensationAmount: PropTypes.number,
-            offsetPayer: PropTypes.string,
-            compensateUser: PropTypes.shape({
+            compensation_amount: PropTypes.number,
+            payer_id: PropTypes.string,
+            current_user: PropTypes.shape({
                 id: PropTypes.string.isRequired,
-                name: PropTypes.string.isRequired,
+                full_name: PropTypes.string.isRequired,
                 avatar_url: PropTypes.string,
             }),
-            requestUser: PropTypes.shape({
+            partner: PropTypes.shape({
                 id: PropTypes.string.isRequired,
-                name: PropTypes.string.isRequired,
+                full_name: PropTypes.string.isRequired,
                 avatar_url: PropTypes.string,
-            }).isRequired,
         }),
     }),
-    self: PropTypes.shape({
-        id: PropTypes.string.isRequired,
-        name: PropTypes.string.isRequired,
-        avatar_url: PropTypes.string,
-    }).isRequired,
-    theOther: PropTypes.shape({
-        id: PropTypes.string.isRequired,
-        name: PropTypes.string.isRequired,
-        avatar_url: PropTypes.string,
-    }).isRequired,
+
 };
 
 export default DealsInformation;

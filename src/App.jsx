@@ -114,7 +114,7 @@ function App() {
             {/* Exchange Route */}
             <Route path="/exchange/manage" element={<ExchangeManage />} />
             <Route path="/exchange/my-post" element={<ExchangeMyPost />} />
-            <Route path="/exchange/detail/section" element={<ExchangeDetailInformation />} />
+            <Route path="/exchange/detail/:id" element={<ExchangeDetailInformation />} />
 
 
             {/* Collection Route */}

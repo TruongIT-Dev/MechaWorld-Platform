@@ -107,13 +107,16 @@ export default function ModalOfferExchange({ isOpen, onClose, requestData,gundam
                         postID: requestPost?.id
                         
                     };
+                    // if (offerData.compensationAmount == 0 ) {
+                    //     const fixOfferData = {
+                    //         ...offerData,
+                    //         compensationAmount: null
+                    //     }
+                    //     createExchangeOffer(fixOfferData)
+                    // }
                     console.log('Submitting exchange offer:', offerData);
                     createExchangeOffer(offerData).then((res) => {
-                        // if (res.status === 201) {
-                            
-                        // } else {
-                        //     message.error('Lỗi khi tạo offer')
-                        // }
+
                         
                     })
                     

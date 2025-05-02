@@ -1,5 +1,5 @@
-import { Avatar, Button, Card, Space, Table, Tag, Typography } from "antd";
-import { useState } from "react";
+import { Avatar, Button, Space, Table, Tag, Typography } from "antd";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import {
     UserOutlined,
@@ -8,6 +8,11 @@ import {
     CloseCircleOutlined,
     ClockCircleOutlined,
 } from "@ant-design/icons";
+import { getAllExchangeOffer, getAllExchangeParticipating } from "../../../apis/Exchange/APIExchange";
+import moment from "moment/min/moment-with-locales";
+
+moment.locale("vi");
+const { Text } = Typography;
 
 // Mock data with more entries
 const generateData = (count) => {
@@ -56,115 +61,128 @@ const mockData = generateData(12);
 
 export default function ExchangeManageList() {
     const [activeFilter, setActiveFilter] = useState("all");
-    const [filteredData, setFilteredData] = useState(mockData);
 
+    const [offerData, setOfferData] = useState([]);
+    const [exchangeData, setExchangeData] = useState([]);
+    const [filteredData, setFilteredData] = useState(exchangeData);
     // Filter functionality
     const filterData = (filter) => {
         setActiveFilter(filter);
         if (filter === "all") {
-            setFilteredData(mockData);
+            setFilteredData(exchangeData);
         } else {
             const statusMap = {
-                "pending": "Đang chờ xác nhận",
-                "confirmed": "Đã xác nhận",
-                "success": "Thành công",
-                "rejected": "Bị từ chối"
+                "pending": "Đang trao đổi",
+                "failed": "Trao đổi thất bại",
+                "canceled": "Bị hủy",
+                "completed": "Thành công",
+                "ongoing": "Đang chờ xác nhận",
+                "packaging": "Đang đóng gói",
+                "delivering": "Đang vận chuyển",
+                "delivered": "Đã được giao",
             };
 
-            setFilteredData(mockData.filter(item => item.status.text === statusMap[filter]));
+            setFilteredData(exchangeData.filter(item => {item.status === statusMap[filter]}));
         }
     };
 
     const filterOptions = [
         { label: "Tất cả", value: "all" },
-        { label: "Đề xuất đã gửi đi", value: "pending" },
-        { label: "Đang trao đổi", value: "ongoing" },
-        { label: "Thành công", value: "success" },
-        { label: "Bị từ chối", value: "rejected" }
+        { label: "Đang trao đổi", value: "pending" },
+        { label: "Đang đóng gói", value: "packaging" },
+        { label: "Đang vận chuyển", value: "delivering" },
+        { label: "Đã được giao", value: "delivered" },
+        { label: "Thành công", value: "completed" },
+        { label: "Bị hủy", value: "canceled" },
+        { label: "Trao đổi thất bại", value: "failed" }
     ];
 
 
     const columns = [
-            {
-                title: "STT",
-                dataIndex: "key",
-                key: "key",
-                width: 60,
-                align: "center",
-            },
+            // {
+            //     title: "STT",
+            //     dataIndex: "key",
+            //     key: "key",
+            //     width: 60,
+            //     align: "center",
+            // },
             {
                 title: "Người trao đổi",
-                dataIndex: "user",
-                key: "user",
+                dataIndex: "partner",
+                key: "partner",
                 width: 160,
                 render: (user) => (
                     <Space>
                         <Avatar
-                            src={`/avatar-${user.toLowerCase()}.png`}
+                            src={user.avatar_url}
                             icon={<UserOutlined />}
                             className="border-2 border-blue-500"
                         />
-                        <span className="font-medium">{user}</span>
+                        <span className="font-medium">{user.full_name}</span>
                     </Space>
                 ),
             },
             {
-                title: "Gundam bạn muốn nhận",
-                dataIndex: "otherComic",
-                key: "otherComic",
+                title: "Tiền bù trừ",
+                dataIndex: "compensation_amount",
+                key: "compensation_amount",
                 width: 220,
-                render: (model) => (
+                render: (offer) => (
                     <Space direction="vertical" size={0}>
-                        <Typography.Text strong>{model.title}</Typography.Text>
-                        <Typography.Text type="secondary">{model.subtitle}</Typography.Text>
+                        <Text>
+                            {offer === null ? (
+                            <Text type="success">
+                                Không có bù trừ
+                            </Text>
+                            ) : (
+                                <Text type="success">
+                                    {offer.toLocaleString()}đ
+                                </Text>
+                            )}
+                        </Text>
                     </Space>
                 )
-            },
-            {
-                title: "Gundam bạn trao đổi",
-                dataIndex: "yourComic",
-                key: "yourComic",
-                width: 220,
-                render: (src) => (
-                    <div className="flex justify-center">
-                        <Card
-                            hoverable
-                            bodyStyle={{ padding: 0 }}
-                            style={{ width: 80, height: 80 }}
-                            cover={
-                                <img
-                                    alt="Gundam model"
-                                    src={src}
-                                    className="object-cover h-20 w-20"
-                                />
-                            }
-                        />
-                    </div>
-                ),
-            },
-            {
-                title: "Thời gian",
-                dataIndex: "time",
-                key: "time",
-                width: 160,
             },
             {
                 title: "Trạng thái",
                 dataIndex: "status",
                 key: "status",
-                width: 180,
-                render: (status) => (
-                    <Tag icon={status.icon} color={status.color}>
-                        {status.text}
-                    </Tag>
+                width: 220,
+                render: (src) => (
+                    <Space direction="vertical" size={0}>
+                        <Typography.Text strong>{src}</Typography.Text>
+                    </Space>
                 ),
             },
+            {
+                title: "Thời gian",
+                dataIndex: "created_at",
+                key: "time",
+                width: 160,
+                render: (src) => (
+                    <Space direction="vertical" size={0}>
+                        {moment(src.created_at).format('LL')
+                        }
+                    </Space>
+                ),
+            },
+            // {
+            //     title: "Trạng thái",
+            //     dataIndex: "status",
+            //     key: "status",
+            //     width: 180,
+            //     render: (status) => (
+            //         <Tag icon={status.icon} color={status.color}>
+            //             {status.text}
+            //         </Tag>
+            //     ),
+            // },
             {
                 title: "Hành động",
                 key: "action",
                 width: 100,
-                render: () => (
-                    <Link to="/exchange/detail/section">
+                render: (src) => (
+                    <Link to={`/exchange/detail/${src.id}`}>
                         <Button className="bg-blue-500" type="primary" size="middle">
                             Xem chi tiết
                         </Button>
@@ -172,6 +190,18 @@ export default function ExchangeManageList() {
                 ),
             },
         ];
+
+        useEffect(() => {
+                getAllExchangeOffer().then((res) => {
+                    setOfferData(res.data);
+                    console.log(res.data);
+                })
+                getAllExchangeParticipating().then((res) => {
+                    setExchangeData(res.data);
+                    console.log(res.data);
+                })
+        },[])
+
 
     return (
         <>
@@ -193,6 +223,7 @@ export default function ExchangeManageList() {
 
             <Table
                 columns={columns}
+                // dataSource={filteredData}
                 dataSource={filteredData}
                 pagination={{
                     pageSize: 3,

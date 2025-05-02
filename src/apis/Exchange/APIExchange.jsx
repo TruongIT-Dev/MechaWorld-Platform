@@ -17,7 +17,7 @@ export const createExchangePost = (postData) => {
 }
 export const createExchangeOffer = (offerData) => {
     return axios.post('/users/me/exchange-offers',{
-        compensation_amount: offerData.compensationAmount,
+        compensation_amount: offerData.compensationAmount === 0 ? null : offerData.compensationAmount,
         exchange_post_id:offerData.postID,
         offerer_gundam_id: offerData.offerer_gundam_id,
         payer_id: offerData.compensationID,
@@ -32,15 +32,22 @@ export const updateExchangeOffer = (offerID,offerData) => {
             compensation_amount: offerData.compensationAmount,
             note: offerData.note,
             payer_id: offerData.id,
-            require_compensation: true
+            require_compensation: offerData.requireCompensation
         })
 }
 
 export const getAllUserExchangePost = (status) => {
-    return  axios.get(`/users/me/exchange-posts?status=${status || 'open'}`)
+    if(status === 'open' || status === 'closed') {
+        return  axios.get(`/users/me/exchange-posts?status=${status || 'open'}`)
+    } else {
+        return axios.get(`/users/me/exchange-posts`)
+    }
 }
 export const getAllExchangePost = () => {
     return  axios.get(`/exchange-posts`)
+}
+export const getAllExchangeOffer = () => {
+    return  axios.get(`/users/me/exchange-offers`)
 }
 export const deleteExchangePost = (id) => {
     return  axios.delete(`/users/me/exchange-posts/${id}`)
@@ -48,6 +55,23 @@ export const deleteExchangePost = (id) => {
 export const requestNegotiation = (postId, offerId, note) => {
     return axios.patch(`/users/me/exchange-posts/${postId}/offers/${offerId}/negotiate`,{ note:note})
 }
-export const updateOffer = () => {
-    return axios.patch(`/user`)
+
+export const acceptOffer = (postID,offerID) => {
+    return axios.patch(`/users/me/exchange-posts/${postID}/offers/${offerID}/accept`)
+}
+
+export const getAllExchangeParticipating = () => {
+    return axios.get(`/exchanges`)
+}
+export const getExchangeDetail = (id) => {
+    return axios.get(`/exchanges/${id}`)
+}
+export const cancelExchange =(exchangeID) => {
+    return axios.patch(`/exchanges/${exchangeID}/cancel`)
+}
+export const addressExchange = (exchangeID,firstID, secondID) => {
+    return axios.put(`/exchanges/${exchangeID}/delivery-addresses`,{
+        from_address_id: firstID, //địa chỉ gửi
+        to_address_id:  secondID,   // địa chỉ nhận
+    })
 }

@@ -1,4 +1,4 @@
-import { Drawer, Button, Card, Badge, List, Space, Avatar, Tag, Divider, Typography, Modal, Form, Input, InputNumber } from "antd";
+import { Drawer, Button, Card, Badge, List, Space, Avatar, Tag, Divider, Typography, Modal, Form, Input, InputNumber, message } from "antd";
 import {
     ClockCircleOutlined,
     CheckCircleOutlined,
@@ -8,6 +8,8 @@ import {
     DollarOutlined
 } from "@ant-design/icons";
 import { useState } from "react";
+import { useSelector } from "react-redux";
+import { acceptOffer } from "../../../apis/Exchange/APIExchange";
 
 const { Text } = Typography;
 
@@ -16,8 +18,9 @@ export default function OffersDrawer({ visible, post, offers, onClose, onViewOff
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [form] = Form.useForm();
     const [compensationType, setCompensationType] = useState('none');
+    const user =useSelector((state) => state.auth.user);
 
-    if (!post) return null;
+    if (!offers) return null;
 
     const offerStatusMap = {
         pending: { text: "Đang chờ xác nhận", color: "orange", icon: <ClockCircleOutlined /> },
@@ -36,6 +39,19 @@ export default function OffersDrawer({ visible, post, offers, onClose, onViewOff
             form.setFieldsValue({ compensationAmount: 0 });
         }
     };
+    const handleAcceptExchange = (offer) => {
+        console.log(offer);
+        acceptOffer(offer.post_id,offer.id).then((res) => {
+            if(res.status == 200) {
+               console.log(res.data);
+                message.success('Chấp nhận offer')
+
+            }
+        }).catch((error) =>{
+            message.error(error);
+        })
+    }
+
 
     const handleModalSubmit = (values) => {
         console.log(values);
@@ -85,7 +101,7 @@ export default function OffersDrawer({ visible, post, offers, onClose, onViewOff
                     </Space>
                 </Divider>
 
-                {offers.length > 0 ? (
+                {offers?.length > 0 ? (
                     <List
                         dataSource={offers}
                         renderItem={(offer) => (
@@ -111,33 +127,46 @@ export default function OffersDrawer({ visible, post, offers, onClose, onViewOff
                                         >
                                             Chi tiết
                                         </Button>
+                                        <Button
+                                            key={offer.id}
+                                            type="primary"
+                                            className="bg-blue-500"
+                                            block
+                                            onClick={() => handleAcceptExchange(offer)}
+                                        >
+                                            Chấp nhận
+                                        </Button>
                                     </div>
                                 ]}
                             >
                                 <List.Item.Meta
-                                    avatar={<Avatar src={offer.avatar}>{offer.user[0]}</Avatar>}
+                                    avatar={<Avatar src={offer.offerer.avatar_url}>{offer.offerer.avatar_url}</Avatar>}
                                     title={
                                         <Space>
-                                            <Text strong>{offer.user}</Text>
-                                            <Tag
+                                            <Text strong>{offer.offerer.full_name}</Text>
+                                            {/* <Tag
                                                 icon={offerStatusMap[offer.status].icon}
                                                 color={offerStatusMap[offer.status].color}
                                             >
                                                 {offerStatusMap[offer.status].text}
-                                            </Tag>
+                                            </Tag> */}
                                         </Space>
                                     }
                                     description={
                                         <Space direction="vertical" size={0}>
-                                            <Text>{offer.offerModel.title} - {offer.offerModel.subtitle}</Text>
+                                            <Text>{offer.offerer_exchange_items[0].name} - {offer.offerer_exchange_items[0].series}</Text>
                                             <Text>
-                                                {offer.paymentDirection === "you" ? (
+                                                {offer.payer_id === null ? (
+                                                    <Text type="success">
+                                                        Không có bù trừ
+                                                    </Text>
+                                                ) : offer.payer_id === user.id ? (
                                                     <Text type="danger">
-                                                        <ArrowDownOutlined /> Bạn bù {offer.paymentAmount.toLocaleString()}đ
+                                                        <ArrowDownOutlined /> Bạn bù {offer.compensation_amount.toLocaleString()}đ
                                                     </Text>
                                                 ) : (
                                                     <Text type="success">
-                                                        <ArrowUpOutlined /> Họ bù {offer.paymentAmount.toLocaleString()}đ
+                                                        <ArrowUpOutlined /> Họ bù {offer.compensation_amount.toLocaleString()}đ
                                                     </Text>
                                                 )}
                                             </Text>
@@ -190,63 +219,14 @@ export default function OffersDrawer({ visible, post, offers, onClose, onViewOff
                         note: ''
                     }}
                 >
-                    <Form.Item label="Bạn muốn ai là người Bù Trừ tiền?">
-                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-                            <Button
-                                type={compensationType === 'none' ? 'primary' : 'default'}
-                                className={compensationType === 'none' ? 'bg-blue-500' : ''}
-                                onClick={() => handleSelectCompensation('none')}
-                            >
-                                Không ai bù trừ tiền
-                            </Button>
-                            <Button
-                                type={compensationType === 'receiver' ? 'primary' : 'default'}
-                                className={compensationType === 'receiver' ? 'bg-blue-500' : ''}
-                                onClick={() => handleSelectCompensation('receiver')}
-                            >
-                                Toàn sẽ bù tiền
-                            </Button>
-                            <Button
-                                type={compensationType === 'sender' ? 'primary' : 'default'}
-                                className={compensationType === 'sender' ? 'bg-blue-500' : ''}
-                                onClick={() => handleSelectCompensation('sender')}
-                            >
-                                Bạn sẽ bù tiền
-                            </Button>
-                        </div>
-                        <Form.Item name="compensationType" hidden>
-                            <Input />
-                        </Form.Item>
-                    </Form.Item>
+                    
 
-                    <Form.Item
-                        name="compensationAmount"
-                        label="Số tiền bù trừ (VND)"
-                        rules={
-                            compensationType !== 'none'
-                                ? [
-                                    { required: true, message: 'Vui lòng nhập số tiền bù trừ' },
-                                    { type: 'number', min: 1000, message: 'Số tiền bù trừ phải từ 1,000 VND trở lên' }
-                                ]
-                                : []
-                        }
-                    >
-                        <InputNumber
-                            className="w-full"
-                            placeholder="Nhập số tiền bù trừ"
-                            min={1000}
-                            step={10000}
-                            formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
-                            parser={(value) => value.replace(/\$\s?|(,*)/g, '')}
-                            addonBefore={<DollarOutlined />}
-                            disabled={compensationType === 'none'}
-                        />
-                    </Form.Item>
+                   
 
                     <Form.Item name="note" label="Ghi chú (không bắt buộc)">
                         <Input.TextArea
                             rows={4}
-                            placeholder="Nhập ghi chú về đề nghị trao đổi của bạn (nếu có)..."
+                            placeholder="Nhập ghi chú về đề nghị trao đổi của bạn để chình sửa đề xuất..."
                             maxLength={500}
                             showCount
                         />

@@ -5,8 +5,9 @@ import PropTypes from "prop-types";
 
 const ProgressSection = (
   { 
-    exchangeData,
-    firstCurrentStage
+    firstCurrentStage,
+    secondCurrentStage,
+    exchangeDetail
   }
 ) => {
   const [currentUser, setCurrentUser] = useState('left'); 
@@ -15,22 +16,19 @@ const ProgressSection = (
     const [firstUser, setFirstUser] = useState();
     const [secondUser, setSecondUser] = useState();
     // Bước hiện tại cho cả hai bên
-    const [currentStepLeft, setCurrentStepLeft] = useState(); 
-    const [currentStepRight, setCurrentStepRight] = useState(); 
-    // Định nghĩa các bước cho cả hai bên
+    const [currentStepLeft, setCurrentStepLeft] = useState(firstCurrentStage); 
+    const [currentStepRight, setCurrentStepRight] = useState(secondCurrentStage); 
     const leftSteps = [
-      { name: "Xác nhận Gundam", icon: <Check size={20} /> },
-      { name: "Xác nhận mức tiền", icon: <FileText size={20} /> },
       { name: "Thông tin giao hàng", icon: <FileText size={20} /> },
+      { name: "Xác nhận giao dịch", icon: <FileText size={20} /> },
       { name: "Thanh toán", icon: <CreditCard size={20} /> },
       { name: "Xác nhận giao hàng", icon: <Truck size={20} /> },
       { name: "Hoàn tất trao đổi", icon: <Check size={20} /> }
     ];
   
     const rightSteps = [
-      { name: "Xác nhận Gundam", icon: <Check size={20} /> },
-      { name: "Xác nhận mức tiền", icon: <FileText size={20} /> },
       { name: "Thông tin giao hàng", icon: <FileText size={20} /> },
+      { name: "Xác nhận giao dịch", icon: <FileText size={20} /> },
       { name: "Thanh toán", icon: <CreditCard size={20} /> },
       { name: "Xác nhận giao hàng", icon: <Truck size={20} /> },
       { name: "Hoàn tất trao đổi", icon: <Check size={20} /> }
@@ -41,15 +39,7 @@ const ProgressSection = (
       setCurrentUser(currentUser === 'left' ? 'right' : 'left');
     };
   
-    // For demo purposes - progress steps
-    // const incrementStep = (side) => {
-    //   if (side === 'left') {
-    //     setCurrentStepLeft(prev => Math.min(prev + 1, leftSteps.length - 1));
-    //   } else {
-    //     setCurrentStepRight(prev => Math.min(prev + 1, rightSteps.length - 1));
-    //   }
-    // };
-    
+
     // Render step with proper state
     const renderStep = (step, index, currentStep, side) => {
       const isCompleted = index < currentStep;
@@ -95,21 +85,15 @@ const ProgressSection = (
     };
     useEffect(() => {
       if (user) {
-        if (user.id === exchangeData?.exchange?.requestUser?.id) {
-          setFirstUser(exchangeData?.exchange?.requestUser);
-          setSecondUser(exchangeData?.exchange?.post?.user);
-          console.log('first user: ',firstUser);
-          console.log('second user: ',secondUser);
-        } else {
-          setFirstUser(exchangeData?.exchange?.post?.user);
-          setSecondUser(exchangeData?.exchange?.requestUser);
-          console.log('first user: ',firstUser);
-          console.log('second user: ',secondUser);
-        }
-        setCurrentStepLeft(exchangeData?.initialStage?.firstUser);
-        setCurrentStepRight(exchangeData?.initialStage?.secondUser);
+        setFirstUser(exchangeDetail.current_user);
+        setSecondUser(exchangeDetail.partner);
+        
       }
-    }, [exchangeData, user]);
+      console.log("check step", firstCurrentStage);
+      console.log("check step2", secondCurrentStage);
+      setCurrentStepLeft(firstCurrentStage);
+      setCurrentStepRight(secondCurrentStage);
+    }, [firstCurrentStage, secondCurrentStage]);
     // User avatar component
     const UserAvatar = ({ image, name }) => (
       <div className="flex flex-col items-center mb-6">
@@ -212,4 +196,7 @@ ProgressSection.propTypes = {
         secondUser: PropTypes.number.isRequired,
       }).isRequired,
     }).isRequired,
+    exchangeDetail: PropTypes.object,
+    firstCurrentStage: PropTypes.number,
+    secondCurrentStage: PropTypes.number,
 };

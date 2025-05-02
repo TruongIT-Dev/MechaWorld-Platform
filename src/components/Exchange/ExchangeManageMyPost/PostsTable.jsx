@@ -11,14 +11,14 @@ import {
 
 const { confirm } = Modal;
 
-export default function PostsTable({ posts, onViewOffers, onViewGunplas, onDeletePost }) {
+export default function PostsTable({ posts, onViewOffers, onViewGunplas, onDeletePost, userPost }) {
     const statusColors = {
         active: "green",
         inactive: "default",
         exchanged: "blue",
         pending: "orange"
     };
-
+    console.log(userPost);
     // Delete post confirmation
     const showDeleteConfirm = (postId) => {
         confirm({
@@ -38,14 +38,14 @@ export default function PostsTable({ posts, onViewOffers, onViewGunplas, onDelet
     const columns = [
         {
             title: "Ảnh",
-            dataIndex: "gunplas",
+            dataIndex: "exchange_post",
             key: "image",
             width: 120,
             align: 'center',
-            render: (gunplas) => (
+            render: (exchange_post) => (
                 <div className="flex justify-center">
                     <Image
-                        src={gunplas[0]?.image || "/placeholder.png"}
+                        src={exchange_post?.post_image_urls[0] || "/placeholder.png"}
                         alt="Gundam image"
                         width={80}
                         height={80}
@@ -57,12 +57,12 @@ export default function PostsTable({ posts, onViewOffers, onViewGunplas, onDelet
         },
         {
             title: "Nội dung",
-            dataIndex: "content",
+            dataIndex: "exchange_post",
             key: "content",
             align: 'center',
-            render: (content) => (
+            render: (exchange_post) => (
                 <span>
-                    {content}
+                    {exchange_post?.content}
                 </span>
             ),
         },
@@ -72,9 +72,9 @@ export default function PostsTable({ posts, onViewOffers, onViewGunplas, onDelet
             dataIndex: "offers",
             width: 130,
             align: 'center',
-            render: (offers) => (
+            render: (offer_count) => (
                 <div className="flex items-center justify-center">
-                    <Badge count={offers} showZero offset={[10, 0]}>
+                    <Badge count={offer_count.length} showZero offset={[10, 0]}>
                         <SwapOutlined className="text-base" />
                     </Badge>
                 </div>
@@ -82,37 +82,41 @@ export default function PostsTable({ posts, onViewOffers, onViewGunplas, onDelet
         },
         {
             title: "Ngày đăng",
-            dataIndex: "createdAt",
+            dataIndex: "exchange_post",
             key: "createdAt",
             width: 120,
             align: 'center',
+            render: (exchange_post) => (
+                <div>{new Date(exchange_post?.created_at).toLocaleDateString()}</div>
+            )
         },
         {
             title: "Gundam trao đổi",
-            dataIndex: "gunplas",
+            dataIndex: "exchange_post_items",
             key: "gunplasCount",
             width: 140,
             align: 'center',
-            render: (gunplas, record) => (
+            render: (exchange_post_items) => (
                 <Button
                     icon={<EyeOutlined />}
-                    onClick={() => onViewGunplas(record)}
+                    onClick={() => onViewGunplas(exchange_post_items)}
                 >
-                    {gunplas.length} mô hình
+                    {exchange_post_items?.length} mô hình
                 </Button>
             ),
         },
         {
             title: "Trạng thái",
-            dataIndex: "status",
+            dataIndex: "exchange_post",
             key: "status",
             width: 120,
             align: 'center',
-            render: (status) => (
-                <Tag color={statusColors[status]}>
-                    {status === "active" ? "Đang trao đổi" :
-                        status === "inactive" ? "Tạm ngừng" :
-                            status === "exchanged" ? "Đã trao đổi" : "Đang xử lý"}
+            render: (exchange_post) => (
+                <Tag color={statusColors[exchange_post?.status]}>
+                    {exchange_post?.status === "open" ? "Đang trao đổi" :
+                        exchange_post?.status === "active" ? "Đang trao đổi" :
+                            exchange_post?.status === "inactive" ? "Tạm ngừng" :
+                                exchange_post?.status === "exchanged" ? "Đã trao đổi" : "Đang xử lý"}
                 </Tag>
             ),
         },
@@ -127,14 +131,14 @@ export default function PostsTable({ posts, onViewOffers, onViewGunplas, onDelet
                         icon={<MessageOutlined />}
                         type="primary"
                         onClick={() => onViewOffers(record)}
-                        disabled={record.offers === 0}
+                        disabled={record.offers.length === 0}
                         className="bg-blue-500"
                     >
                         Xem đề xuất
                     </Button>
-                    <Tooltip title="Chỉnh sửa">
+                    {/* <Tooltip title="Chỉnh sửa">
                         <Button icon={<EditOutlined />} />
-                    </Tooltip>
+                    </Tooltip> */}
                     <Tooltip title="Xóa">
                         <Button
                             danger
@@ -146,12 +150,13 @@ export default function PostsTable({ posts, onViewOffers, onViewGunplas, onDelet
             ),
         },
     ];
-
+    
     return (
         <div className="overflow-x-auto">
             <Table
                 columns={columns}
-                dataSource={posts}
+                // dataSource={posts}
+                dataSource={userPost}
                 rowKey="id"
                 pagination={{ pageSize: 3 }}
                 bordered
