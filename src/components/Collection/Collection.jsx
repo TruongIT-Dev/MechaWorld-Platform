@@ -1,11 +1,10 @@
 import PropTypes from 'prop-types';
-import React  from 'react';
 import { useSelector } from "react-redux";
 import {
   BankOutlined,
   WalletOutlined, EditOutlined
 } from '@ant-design/icons';
-import { Menu, Layout  } from 'antd';
+import { Menu, Layout } from 'antd';
 
 import { Outlet, Link } from 'react-router-dom';
 
@@ -17,7 +16,7 @@ const Collection = () => {
 
 
   const items = [
-    
+
     {
       key: "/collection",
       icon: <BankOutlined className="text-lg text-red-500" />,
@@ -31,7 +30,7 @@ const Collection = () => {
   ];
 
   return (
-    
+
     <Layout className="container">
 
       {/* Sidebar - Menu */}

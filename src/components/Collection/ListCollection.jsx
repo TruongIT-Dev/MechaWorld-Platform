@@ -1,19 +1,16 @@
 import PropTypes from 'prop-types';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useSelector } from "react-redux";
+import { Card, Row, Col, Button, Input, Tag, Typography, Modal, Descriptions, Collapse } from 'antd';
+
 import {
-  ShoppingOutlined,
-  UserOutlined,
-  BankOutlined,
-  WalletOutlined, EditOutlined, SearchOutlined, LeftOutlined, RightOutlined
+  SearchOutlined,
+  LeftOutlined,
+  RightOutlined
 } from '@ant-design/icons';
-import { Card, Row, Col, Button, Input, Select, Tag, Typography, Modal, Form, Dropdown, Menu, Layout, Descriptions, Image, Collapse } from 'antd';
-import { ShoppingCartOutlined, HeartOutlined, MoreOutlined, PlusOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
-import { SellingGundam, RestoreGundam } from "../../apis/Sellers/APISeller";
+
 import { GetGundamByID, getUser } from '../../apis/User/APIUser';
 
-import { useCart } from '../../context/CartContext';
-import { Outlet, Link, useLocation } from 'react-router-dom';
 const { Title } = Typography;
 
 // Thêm component GundamFilters
@@ -44,17 +41,12 @@ const GundamFilters = ({ gradeList, activeFilter, filterByGrade }) => {
 
 const gradeList = ['Entry Grade', 'High Grade', 'Master Grade', 'Real Grade', 'Perfect Grade', 'Super Deformed'];
 
-function ListCollection({ }) {
-  const { Sider, Content } = Layout;
+function ListCollection() {
   const user = useSelector((state) => state.auth.user);
   const [gundamList, setGundamList] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
   const [selectedCondition, setSelectedCondition] = useState(null);
   const [selectedGrade, setSelectedGrade] = useState(null);
-  const [sellModalVisible, setSellModalVisible] = useState(false);
-  const [confirmSell, setConfirmSell] = useState(false);
-  const [isConfirmedSell, setIsConfirmedSell] = useState(false);
-  const [form] = Form.useForm();
   const [userRole, setUserRole] = useState(null);
   const [activeGradeFilter, setActiveGradeFilter] = useState('All');
   const [searchTerm, setSearchTerm] = useState('');
@@ -101,19 +93,6 @@ function ListCollection({ }) {
     const images = getImageList();
     setCurrentImageIndex((prev) => (prev < images.length - 1 ? prev + 1 : 0));
   };
-
-  const items = [
-    {
-      key: "/member/profile/auction-history",
-      icon: <BankOutlined className="text-lg text-red-500" />,
-      label: <Link to="/collection">Bộ sưu tập</Link>,
-    },
-    {
-      key: "/member/profile/wallet",
-      icon: <WalletOutlined className="text-lg text-green-500" />,
-      label: <Link to="/collection/add">Thêm vào bộ sưu tập</Link>,
-    },
-  ];
 
   useEffect(() => {
     getUser(user.id)
@@ -173,91 +152,6 @@ function ListCollection({ }) {
       case 'Super Deformed': return 'magenta';
       default: return 'default';
     }
-  };
-
-  const handleSellProduct = (product) => {
-    SellingGundam(user.id, product.gundam_id)
-      .then(() => window.location.reload())
-      .catch(error => console.error(error));
-  };
-
-  const handleAuctionProduct = (product) => {
-    setSellModalVisible(true);
-  };
-
-  const renderStatusButton = (product) => {
-    const { status } = product;
-    const { Text } = Typography;
-
-    if (status === "in store") {
-      return (
-        <>
-          <Button
-            type="primary"
-            className="bg-green-600 hover:bg-green-500 w-full mb-2"
-            onClick={() => setConfirmSell(true)}
-          >
-            Đăng bán
-          </Button>
-          <Button
-            className="bg-red-600 hover:bg-red-400 text-white w-full"
-            onClick={() => handleAuctionProduct(product)}
-          >
-            Đấu giá
-          </Button>
-
-          <Modal
-            width={500}
-            title="Xác nhận đăng bán sản phẩm"
-            open={confirmSell}
-            onCancel={() => setConfirmSell(false)}
-            footer={[
-              <Button key="cancel" onClick={() => setConfirmSell(false)} disabled={isConfirmedSell}>
-                Hủy
-              </Button>,
-              <Button
-                key="submit"
-                type="primary"
-                onClick={() => {
-                  setIsConfirmedSell(true);
-                  handleSellProduct(product);
-                }}
-                loading={isConfirmedSell}
-                danger
-              >
-                Xác nhận đăng bán
-              </Button>
-            ]}
-            centered
-          >
-            <div className="flex flex-col items-center text-center py-4">
-              <ExclamationCircleOutlined className="text-blue-500 text-5xl mb-4" />
-              <Text>
-                Bạn chắc chắn muốn đăng bán sản phẩm này chứ? <br />
-                Sản phẩm sẽ được bày bán và người mua có thể xem & đặt hàng.
-              </Text>
-            </div>
-          </Modal>
-        </>
-      );
-    }
-
-    const statusMap = {
-      auctioning: { text: "Đang đấu giá", color: "blue" },
-      published: { text: "Đang bán", color: "green" },
-      exchange: { text: "Đang trao đổi", color: "cyan" },
-      processing: { text: "Đang xử lý", color: "yellow" },
-      "pending auction approval": { text: "Chờ duyệt đấu giá", color: "yellow" },
-    };
-
-    const statusTag = statusMap[status];
-    return statusTag ? (
-      <Tag color={statusTag.color} className="w-full text-sm font-semibold text-center">
-        {statusTag.text.toUpperCase()}
-      </Tag>
-    ) : (
-      <Tag color="default">Không rõ</Tag>
-    );
   };
 
   return (
