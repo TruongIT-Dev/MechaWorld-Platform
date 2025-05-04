@@ -390,8 +390,8 @@ function ListCollection({}) {
                     )}
                 </div>
                 
-                <div>
-                    <h2 className="text-2xl font-bold mb-4">{selectedProduct.name}</h2>
+                <div className='ml-4'>
+                    <h2 className="text-2xl font-bold mb-4 ">{selectedProduct.name}</h2>
                     {/* <Descriptions title="THÔNG SỐ GUNDAM" bordered layout="vertical">
                               <Descriptions.Item label="Tên mô hình" span={3}>{selectedProduct.name}</Descriptions.Item>
                               <Descriptions.Item label="Grade">{selectedProduct.grade}</Descriptions.Item>
@@ -410,10 +410,14 @@ function ListCollection({}) {
                               <Descriptions.Item label="Mô tả sản phẩm" span={3}>{selectedProduct.description}</Descriptions.Item>
                           </Descriptions> */}
                     
-                    <div className="space-y-3">
+                    <div className="space-y-3 ">
                         <div className="flex">
-                            <span className="font-semibold w-1/3">Dòng sản phẩm:</span>
+                            <span className="font-semibold w-1/3">Dòng phim:</span>
                             <span>{selectedProduct.series}</span>
+                        </div>
+                        <div className="flex">
+                            <span className="font-semibold w-1/3">Phiên bản:</span>
+                            <span>{selectedProduct.version}</span>
                         </div>
                         <div className="flex">
                             <span className="font-semibold w-1/3">Hãng sản xuất:</span>
@@ -428,12 +432,20 @@ function ListCollection({}) {
                             <span>{selectedProduct.scale}</span>
                         </div>
                         <div className="flex">
-                            <span className="font-semibold w-1/3">Tình trạng:</span>
-                            <span>{selectedProduct.condition === "new" ? "Mới" : "Đã qua sử dụng"}</span>
+                            <span className="font-semibold w-1/3">Khối lượng:</span>
+                            <span>{selectedProduct.weight}</span>
                         </div>
                         <div className="flex">
-                            <span className="font-semibold w-1/3">Số lượng:</span>
-                            <span>{selectedProduct.quantity}</span>
+                            <span className="font-semibold w-1/3">Tình trạng:</span>
+                            <span>{selectedProduct.condition === "new" ? "Hàng full box" : "Đã qua sử dụng"}</span>
+                        </div>
+                        <div className="flex">
+                            <span className="font-semibold w-1/3">Số lượng mảnh:</span>
+                            <span>{selectedProduct.parts_total}</span>
+                        </div>
+                        <div className="flex">
+                            <span className="font-semibold w-1/3">Chất liệu:</span>
+                            <span>{selectedProduct.material}</span>
                         </div>
                         <div className="flex">
                             <span className="font-semibold w-1/3">Giá:</span>
