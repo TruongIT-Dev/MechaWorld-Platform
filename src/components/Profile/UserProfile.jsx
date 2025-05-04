@@ -179,8 +179,6 @@ const ProfilePage = () => {
           ...user,
           phone_number: newPhoneNumber
         });
-      } else {
-
       }
 
       if (response.status === 400) {

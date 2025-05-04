@@ -1,79 +1,97 @@
 import {
   ShoppingOutlined,
-  PieChartOutlined,
   BankOutlined,
   ShopOutlined,
   InboxOutlined,
-  SolutionOutlined,
 } from '@ant-design/icons';
-import { useSelector } from 'react-redux';
-import { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { useEffect } from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import { Menu, Layout, Card, Avatar, Tag } from 'antd';
 
 import { GetSellerStatus } from "../../apis/Sellers/APISeller";
 import { GetShopInfoById } from "../../apis/Seller Profile/APISellerProfile";
-
+import { updateShopInfo, updateSellerPlan } from '../../features/user/userSlice';
 
 const { Sider, Content } = Layout;
-
 
 const items = [
   {
     key: "1",
-    icon: <ShopOutlined className="text-lg text-blue-500" />,
-    label: "Quản Lý Shop",
-    children: [
-      { key: "2", label: <Link to="/shop/dashboard">Thông tin Shop</Link> },
-      { key: "3", label: <Link to="/shop/address">Địa chỉ lấy hàng</Link> },
-    ],
+    icon: <ShopOutlined />,
+    label: <Link to="/shop/dashboard">Quản Lý Shop</Link>,
   },
   {
-    key: '4',
+    key: '2',
     icon: <InboxOutlined />,
     label: <Link to="/shop/management">Quản Lý Sản Phẩm</Link>,
   },
   {
-    key: '5',
+    key: '3',
     icon: <ShoppingOutlined />,
     label: <Link to="/shop/order-management">Quản Lý Đơn Hàng</Link>,
   },
   {
-    key: '6',
-    icon: <BankOutlined className="text-lg text-red-500" />,
+    key: '4',
+    icon: <BankOutlined />,
     label: <Link to="/shop/auction-management">Quản Lý Đấu Giá</Link>
   },
 ];
 
-
 export default function ShopPage() {
-
   const location = useLocation();
+  const dispatch = useDispatch();
 
   const user = useSelector((state) => state.auth.user);
-  const [sellerData, setSellerData] = useState([]);
-  const [sellerPlan, setSellerPlan] = useState([]);
+  const shopInfo = useSelector((state) => state.user.shop);
+  const sellerPlan = useSelector((state) => state.user.sellerPlan);
 
+  // const allState = useSelector((state) => state);
+  // console.log("allState", allState);
+  
+
+  // console.log("shopInfo", shopInfo);
+  // console.log("sellerPlan", sellerPlan);
 
   useEffect(() => {
+    // Fetch shop info từ API và cập nhật vào Redux
+    const fetchShopInfo = async () => {
+      try {
+        const response = await GetShopInfoById(user.id);
+        const shopData = response.data;
+        // Cập nhật vào Redux
+        dispatch(updateShopInfo(shopData));
+      } catch (error) {
+        console.error("Error fetching shop info:", error);
+      }
+    };
 
-    GetSellerStatus(user.id).then((res) => {
-      // console.log("Seller Status Data: ", res.data);
-      setSellerPlan(res.data);
-    }).catch((error) => {
-      console.error("Error fetching seller status: ", error);
-    });
+    // Fetch seller status từ API và cập nhật vào Redux
+    const fetchSellerStatus = async () => {
+      try {
+        const response = await GetSellerStatus(user.id);
+        const statusData = response.data;
+        // console.log("statusData", statusData);
 
+        // Cập nhật vào Redux
+        dispatch(updateSellerPlan(statusData));
+      } catch (error) {
+        console.error("Error fetching seller status:", error);
+      }
+    };
 
-    GetShopInfoById(user.id).then((res) => {
-      // console.log("Seller Data: ", res.data);
-      setSellerData(res.data);
-    }).catch((error) => {
-      console.error("Error fetching seller data: ", error);
-    });
-  }, []);
+    // Luôn fetch thông tin shop và seller status mỗi khi component mount
+    fetchShopInfo();
+    fetchSellerStatus();
+  }, [user.id, dispatch]);
 
-
+  // Lấy giá trị hiển thị từ Redux store
+  const shopName = shopInfo?.shop_name || "Đang tải...";
+  const subscriptionName = sellerPlan?.subscription_name || "Đang tải...";
+  const listingsUsed = sellerPlan?.listings_used || 0;
+  const maxListings = sellerPlan?.max_listings || 0;
+  const auctionsUsed = sellerPlan?.open_auctions_used || 0;
+  const maxAuctions = sellerPlan?.max_open_auctions || 0;
 
   return (
     <>
@@ -85,8 +103,8 @@ export default function ShopPage() {
               <div className="flex items-center gap-5">
                 <Avatar className='p-5 bg-blue-500' icon={<ShopOutlined />} size="large" />
                 <div>
-                  <p className="font-bold text-base">{sellerData.shop_name}</p>
-                  <Tag color="blue" className="text-xs">{sellerPlan?.subscription_name}</Tag>
+                  <p className="font-bold text-base">{shopName}</p>
+                  <Tag color="blue" className="text-xs">{subscriptionName}</Tag>
                 </div>
               </div>
             </div>
@@ -95,13 +113,13 @@ export default function ShopPage() {
               {/* Lượt bán sản phẩm */}
               <div className="flex justify-between">
                 <span className="text-sm text-gray-600">Lượt đăng bán:</span>
-                <span className="font-semibold">{sellerPlan?.listings_used} / {sellerPlan?.max_listings}</span>
+                <span className="font-semibold">{listingsUsed} / {maxListings}</span>
               </div>
 
               {/* Lượt đấu giá */}
               <div className="flex justify-between">
                 <span className="text-sm text-gray-600">Lượt đấu giá:</span>
-                <span className="font-semibold">{sellerPlan?.open_auctions_used} / {sellerPlan?.max_open_auctions}</span>
+                <span className="font-semibold">{auctionsUsed} / {maxAuctions}</span>
               </div>
             </div>
           </Card>
@@ -109,7 +127,6 @@ export default function ShopPage() {
           <Menu
             mode="inline"
             selectedKeys={[location.pathname]} // Highlight menu dựa trên đường dẫn hiện tại
-            defaultOpenKeys={["/shop/info"]} // Mở menu mặc định
             items={items} />
         </Sider>
 
@@ -121,5 +138,4 @@ export default function ShopPage() {
       </Layout>
     </>
   );
-
 }
