@@ -157,7 +157,7 @@ const Carts = () => {
                 <div className="flex-1">
                   <h3 className="font-medium text-lg mb-1">{item.gundam_name}</h3>
                   <p className="text-red-500 font-semibold text-lg">
-                    {item.gundam_price.toLocaleString()} VNĐ
+                    {item.gundam_price.toLocaleString()} đ
                   </p>
                 </div>
 
@@ -191,7 +191,7 @@ const Carts = () => {
           <div className="flex items-center">
             <div className="mr-6">
               <span className="text-gray-600 mr-2">Tổng thanh toán:</span>
-              <span className="text-xl font-bold text-red-500">{totalPrice().toLocaleString()} VNĐ</span>
+              <span className="text-xl font-bold text-red-500">{totalPrice().toLocaleString()} đ</span>
             </div>
 
             <Button

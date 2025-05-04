@@ -1,134 +1,85 @@
-// Parent component that manages state and handles data fetching
-import { useState, useEffect } from 'react';
-import { Layout, message, Spin, Empty, Typography } from 'antd';
+import PropTypes from 'prop-types';
+import React  from 'react';
+import { useSelector } from "react-redux";
+import {
+  BankOutlined,
+  WalletOutlined, EditOutlined
+} from '@ant-design/icons';
+import { Menu, Layout  } from 'antd';
 
-import GundamFilters from './GundamFilters';
-import GundamDetail from './GundamDetail';
-import GundamCollectionList from './GundamCollectionList';
+import { Outlet, Link } from 'react-router-dom';
 
-import { getMockData } from './data';
 
-const { Content } = Layout;
 
 const Collection = () => {
-    // State management for the component
-    const [loading, setLoading] = useState(true);
-    const [collections, setCollections] = useState([]);
-    const [filteredCollections, setFilteredCollections] = useState([]);
-    const [selectedGundam, setSelectedGundam] = useState(null);
-    const [isModalOpen, setIsModalOpen] = useState(false);
-
-    const [activeFilter, setActiveFilter] = useState('All');
-
-    // Gọi lấy List danh sách các Grade - Fix cứng code tạm thời
-    const gradeList = ['Entry Grade', 'High Grade', 'Master Grade', 'Real Grade', 'Perfect Grade', 'Super Deformed'];
-
-    // Fetch lấy toàn bộ Gundam in Store
-    useEffect(() => {
-        // Giả lập API call để lấy dữ liệu
-        const fetchCollections = async () => {
-            try {
-                // Trong ứng dụng thực tế, đây sẽ là API call
-                setTimeout(() => {
-                    const mockData = getMockData();
-                    setCollections(mockData);
-                    setFilteredCollections(mockData);
+  const { Sider, Content } = Layout;
+  const user = useSelector((state) => state.auth.user);
 
 
-                    setLoading(false);
-                }, 1000);
-            } catch (error) {
-                console.error("Lỗi khi tải dữ liệu:", error);
-                message.error("Không thể tải dữ liệu bộ sưu tập.");
-                setLoading(false);
-            }
-        };
+  const items = [
+    
+    {
+      key: "/collection",
+      icon: <BankOutlined className="text-lg text-red-500" />,
+      label: <Link to="/collection/list">Bộ sưu tập</Link>,
+    },
+    {
+      key: "/collection/add",
+      icon: <WalletOutlined className="text-lg text-green-500" />,
+      label: <Link to="/collection/add">Thêm vào bộ sưu tập</Link>,
+    },
+  ];
 
-        fetchCollections();
-    }, []);
+  return (
+    
+    <Layout className="container">
 
-    // Filter collection based on grade
-    const filterByGrade = (grade) => {
-        setActiveFilter(grade);
-        if (grade === 'All') {
-            setFilteredCollections(collections);
-        } else {
-            const filtered = collections.filter(item => item.grade === grade);
-            setFilteredCollections(filtered);
-        }
-    };
-
-    // Handle open Gundam details Modal
-    const showGundamDetails = (gundam) => {
-        setSelectedGundam(gundam);
-        setIsModalOpen(true);
-    };
-
-    // Handle modal close
-    const handleModalClose = () => {
-        setIsModalOpen(false);
-    };
-
-    // Toggle favorite status
-    const toggleEditGundam = () => {
-        console.log("Toggle Edit");
-
-    };
-
-    return (
-        <Layout className="min-h-screen mt-32">
-            <Content className="p-4 md:p-6">
-                <div className="max-w-7xl mx-auto">
-                    <div className="bg-white p-4 md:p-6 rounded-lg shadow-sm mb-6">
-
-                        {/* Title component */}
-                        <CollectionTitle />
-
-                        {/* Filter component */}
-                        <GundamFilters
-                            gradeList={gradeList}
-                            activeFilter={activeFilter}
-                            filterByGrade={filterByGrade}
-                        />
-
-                        {loading ? (
-                            <LoadingSpinner />
-                        ) : filteredCollections.length === 0 ? (
-                            <Empty description="Không tìm thấy mô hình Gundam nào phù hợp với bộ lọc" />
-                        ) : (
-                            <GundamCollectionList
-                                filteredCollections={filteredCollections}
-                                gradeList={gradeList}
-                                showGundamDetails={showGundamDetails}
-                                toggleEditGundam={toggleEditGundam}
-                            />
-                        )}
-                    </div>
-                </div>
-            </Content>
-
-            {/* Gundam Detail Modal */}
-            <GundamDetail
-                selectedGundam={selectedGundam}
-                isModalOpen={isModalOpen}
-                handleModalClose={handleModalClose}
-                toggleEditGundam={toggleEditGundam}
+      {/* Sidebar - Menu */}
+      <Sider width={250} className="bg-white shadow-md h-fit  p-4 mt-36 mb-4">
+        <div className='flex flex-col'>
+          <div className="flex items-center py-2 gap-3 border-b">
+            <img
+              src={user?.avatar_url}
+              className="w-10 h-10 bg-gray-100 rounded-full object-contain"
+              alt="Avatar"
             />
-        </Layout>
-    );
+            <div className='flex flex-col'>
+              <p className="font-bold">{user?.full_name}</p>
+
+              <div className='flex items-center space-x-2 text-sm text-gray-400'>
+                <EditOutlined className='mt-1' />
+                <Link to="/member/profile/user">
+                  Sửa hồ sơ
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+
+
+        {/* Menu Điều Hướng */}
+        <Menu
+          mode="inline"
+          selectedKeys={[location.pathname]} // Highlight menu dựa trên đường dẫn hiện tại
+          defaultOpenKeys={["/collection/list"]} // Mở menu mặc định
+          items={items}
+        />
+
+      </Sider>
+
+      <Layout className="flex-1 py-4 ml-6 mt-32">
+        <Content className="bg-white rounded-lg shadow-md h-full w-full">
+
+
+          <Outlet />
+        </Content>
+      </Layout>
+    </Layout>
+  );
 };
 
-// Simple components can be defined in the same file
-const CollectionTitle = () => (
-    <div className='w-full text-center uppercase'>
-        <Typography.Title level={3} className="m-0">Bộ sưu tập Gundam của bạn</Typography.Title>
-    </div>
-);
-
-const LoadingSpinner = () => (
-    <div className="flex justify-center items-center h-64">
-        <Spin size="large" tip="Đang tải bộ sưu tập..." />
-    </div>
-);
+Collection.propTypes = {
+  setIsCreating: PropTypes.func.isRequired,
+};
 
 export default Collection;

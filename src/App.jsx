@@ -41,6 +41,9 @@ import {
   ExchangeDetailInformation,
   ExchangeGundamManagement,
   Collection,
+  AddCollection,
+  ListCollection,
+  ShopInfo,
   ShopAddress,
   PageNotFound,
   ExchangeList,
@@ -118,8 +121,11 @@ function App() {
 
 
             {/* Collection Route */}
-            <Route path="collection" element={<Collection />} />
-
+            <Route path="collection" element={<Collection />} >
+              <Route path="list" element={<ListCollection />} />
+              <Route path="add" element={<AddCollection />} />
+            </Route>
+            
             {/* Cart route */}
             <Route path="cart" element={<CartPage1 />} />
 
