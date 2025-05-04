@@ -43,7 +43,6 @@ import {
   Collection,
   AddCollection,
   ListCollection,
-  ShopInfo,
   ShopAddress,
   PageNotFound,
   ExchangeList,

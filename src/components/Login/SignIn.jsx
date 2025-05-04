@@ -36,7 +36,7 @@ export default function SignIn() {
 
         // Chuyển trang
         setTimeout(() => {
-          navigate("/");
+          window.location.href = "/";
         }, 2000)
 
 
