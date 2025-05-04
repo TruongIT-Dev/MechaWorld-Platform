@@ -261,10 +261,10 @@ function ListCollection({ }) {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8 bg-gray-50 min-h-screen">
+    <div className="container mx-auto px-4 py-4 bg-gray-50 min-h-screen">
       {/* Featured Products */}
       <div className="px-[10px]">
-        <h2 className="text-[36px] text-center font-bold text-gray-800 ">Bộ Sưu Tập</h2>
+        <h2 className="text-[36px] text-center font-bold text-gray-800 mb-2">Bộ Sưu Tập</h2>
 
         {/* Thêm ô tìm kiếm */}
         <div className="flex justify-center mb-6">
