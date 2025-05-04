@@ -4,11 +4,13 @@ import ProgressSection from "./ExchangeProcess/ProgressSection";
 import ExchangeInformation from "./ExchangeInformation";
 import ExchangeLoader from "./ExchangeLoader";
 import { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { getUserAddresses } from "../../apis/User/APIUser";
 import { getExchangeDetail } from "../../apis/Exchange/APIExchange";
 import { useParams } from "react-router-dom";
-
+// import { updateDeliveryFee, updateExchangeData } from "../../features/exchange/exchangeSlice";
+// import { checkDeliveryFee } from "../../apis/GHN/APIGHN";
+import { selectDeliveryFee, hasDeliveryFee } from "../../utils/exchangeUtils";
 const ExchangeDetailInformation = () => {
   // This component is responsible for displaying the exchange detail information, including the exchange information section, action buttons, and progress section.
   // It uses the ExchangeInformationSection, ActionButtons, and ProgressSection components to render the respective sections.
@@ -27,12 +29,12 @@ const ExchangeDetailInformation = () => {
   const [exchangeDetail, setExchangeDetail] = useState(null);
   // State quản lý trạng thái tải dữ liệu
   const [isLoading, setIsLoading] = useState(true);
-
+  const dispatch = useDispatch();
   const [firstAddress, setFirstAddress] = useState(null);
   const [secondAddress, setSecondAddress] = useState(null);
   const [currentUser2, setFirstUser] = useState();
   const [partner, setSecondUser] = useState();
-
+  const [deliverData, setDeliverData] = useState(null);
   const [address, setAddress] = useState([]);
   const [selectedAddress, setSelectedAddress] = useState(null);
   const [selectedPickupAddress, setSelectedPickupAddress] = useState(null);
@@ -84,6 +86,32 @@ const ExchangeDetailInformation = () => {
   //   setFirstCurrentStage(0);
   //   setSecondCurrentStage(0);
   // };
+  const fee = useSelector((state) =>
+    selectDeliveryFee(state, currentUser.id, exchangeDetail?.id)
+  );
+  
+  const isFeeAvailable = useSelector((state) =>
+    hasDeliveryFee(state, exchangeDetail?.current_user.id, exchangeDetail?.id)
+  );
+  const isPartnerFeeAvailable = useSelector((state) =>
+    hasDeliveryFee(state, exchangeDetail?.partner.id, exchangeDetail?.id)
+  );
+  // console.log('partner id: ',exchangeDetail?.partner.id);
+  // console.log('your id: ',exchangeDetail?.current_user.id);
+  // console.log('partner check: ',isPartnerFeeAvailable);
+  // console.log('your check: ',isFeeAvailable);
+
+  // const cacheDeliveryFee = (userId, exchangeId, fee) => {
+  //   const key = `${userId}_${exchangeId}`;
+  //   localStorage.setItem(key, JSON.stringify(fee));
+  // };
+  
+  // const getCachedDeliveryFee = (userId, exchangeId) => {
+  //   const key = `${userId}_${exchangeId}`;
+  //   const raw = localStorage.getItem(key);
+  //   return raw ? JSON.parse(raw) : null;
+  // };
+  
 
 
   const fetchExchangeData = async () => {
@@ -194,9 +222,19 @@ const ExchangeDetailInformation = () => {
         setExchangeDetail(res.data);
         setFirstUser(res.data.current_user);
         setSecondUser(res.data.partner);
+        // const yourDeData = getCachedDeliveryFee(res.data.current_user.id, res.data.id)
+        // const partnerDeData = getCachedDeliveryFee(res.data.partner.id, res.data.id)
+        
         // console.log(res.data.current_user);
         // console.log(res.data.partner);
         // console.log(res.data);
+
+
+        //  console.log(yourDeData);
+          // console.log(partnerDeData);
+
+
+
         switch (res.data.status) {
           case "pending":
             if (res.data.current_user.from_address === null) {
@@ -207,7 +245,10 @@ const ExchangeDetailInformation = () => {
               } else {
                 setFirstCurrentStage(3); // Nếu có delivery_fee nhưng chưa thanh toán
               }
+            } else if (isFeeAvailable === true) {
+              setFirstCurrentStage(3); // Nếu isFeeAvailable là true
             } else {
+              console.log("qua bước này rồi nhé");
               setFirstCurrentStage(2); // Nếu có from_address nhưng không có delivery_fee
             }
   
@@ -219,8 +260,10 @@ const ExchangeDetailInformation = () => {
               } else {
                 setSecondCurrentStage(3); 
               }
-            } else {
-              setSecondCurrentStage(2); 
+            } else if (isPartnerFeeAvailable === true) {
+              setSecondCurrentStage(3); 
+            } else  {
+              setSecondCurrentStage(2)
             }
             break;
   
@@ -232,8 +275,8 @@ const ExchangeDetailInformation = () => {
             break;
   
           case "completed":
-            setFirstCurrentStage(6); // Nếu giao dịch đã hoàn tất
-            setSecondCurrentStage(6); 
+            setFirstCurrentStage(5); // Nếu giao dịch đã hoàn tất
+            setSecondCurrentStage(5); 
             break;
   
           default:
@@ -262,12 +305,13 @@ const ExchangeDetailInformation = () => {
       const addresses = await getUserAddresses(currentUser.id).then((res) => res.data);
 
       const pickupAddress = addresses.filter((address) => address.is_pickup_address === true);
-      console.log("pickupAddress" ,pickupAddress);
+      // console.log("pickupAddress" ,pickupAddress);
       const primaryAddress = addresses.filter((address) => address.is_primary === true);
       
       // console.log(addresses);
       setSelectedAddress(primaryAddress[0]);
       setSelectedPickupAddress(pickupAddress[0]);
+      setAddress(addresses);
       // console.log(selectedPickupAddress);
       // console.log("checking data",selectedAddress);
     } catch (error) {
@@ -283,11 +327,11 @@ const ExchangeDetailInformation = () => {
     };
     fetchData();
 
-    const fetchAddress = async () => {
-      const response = await getUserAddresses(currentUser.id).then((res) => res.data);
-      setAddress(response);
-    }
-    fetchAddress();
+    // const fetchAddress = async () => {
+    //   const response = await getUserAddresses(currentUser.id).then((res) => res.data);
+    //   setAddress(response);
+    // }
+    // fetchAddress();
     // console.log("checking selectedAddress data", selectedAddress);
   }, [firstCurrentStage, secondCurrentStage]);
 
@@ -308,6 +352,8 @@ const ExchangeDetailInformation = () => {
               secondUser={secondUser}
               currentUser={currentUser2}
               partner={partner}
+              deliverData={deliverData}
+              setDeliverData={setDeliverData}
               exchangeDetail={exchangeDetail}
               firstGundamGroup={firstGundamGroup}
               secondGundamGroup={secondGundamGroup}
@@ -328,6 +374,8 @@ const ExchangeDetailInformation = () => {
               oppositeCurrentStage={secondCurrentStage}
               setSecondCurrentStage={setSecondCurrentStage}
               exchangeData={exchangeData}
+              deliverData={deliverData}
+              setDeliverData={setDeliverData}
               exchangeDetail={exchangeDetail}
               selectedAddress={selectedAddress}
               selectedPickupAddress={selectedPickupAddress}

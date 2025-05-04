@@ -2,8 +2,10 @@ import { combineSlices, configureStore } from "@reduxjs/toolkit"
 import { setupListeners } from "@reduxjs/toolkit/query"
 import { authSlice } from "../features/auth/authSlice"
 import { userSlice } from "../features/user/userSlice"
+import { exchangeSlice } from "../features/exchange/exchangeSlice"
 import storage from "redux-persist/lib/storage"; 
 import { persistReducer, persistStore } from "redux-persist";
+import { deliveryFeePersistence } from "../features/exchange/middleware/deliveryFeePersistence";
 
 // `combineSlices` automatically combines the reducers using
 // their `reducerPath`s, therefore we no longer need to call `combineReducers`.
@@ -11,12 +13,12 @@ import { persistReducer, persistStore } from "redux-persist";
 const persistConfig = {
   key: "root", 
   storage, 
-  whitelist: ["auth", "user"], 
+  whitelist: ["auth", "user", "exchange"], 
 };
 // The store setup is wrapped in `makeStore` to allow reuse
 // when setting up tests that need the same store config
 
-const rootReducer = combineSlices(authSlice, userSlice)
+const rootReducer = combineSlices(authSlice, userSlice, exchangeSlice)
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);
 
@@ -31,9 +33,9 @@ export const makeStore = preloadedState => {
     middleware: (getDefaultMiddleware) =>
       getDefaultMiddleware({
         serializableCheck: {
-          ignoredActions: ["persist/PERSIST"], 
+          ignoredActions: ["persist/PERSIST"],
         },
-      }),
+      }).concat(deliveryFeePersistence),    
     preloadedState,
   })
   // configure listeners using the provided defaults

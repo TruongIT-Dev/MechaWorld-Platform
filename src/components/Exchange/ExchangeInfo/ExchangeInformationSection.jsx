@@ -20,6 +20,8 @@ const ExchangeInformationSection = ({
   currentUser,
   partner,
   secondUser,
+  deliverData,
+  setDeliverData,
   setFirstCurrentStage,
   setSecondCurrentStage,
   selectedPickupAddress,
@@ -41,7 +43,7 @@ const ExchangeInformationSection = ({
   // console.log("check firstUser", currentUser);
   // console.log("check secondUser", partner);
   // console.log("check selectedAddress", selectedAddress);
-  console.log("check selectedPickupAddress", selectedPickupAddress);
+  // console.log("check selectedPickupAddress", selectedPickupAddress);
 
 
   useEffect(() => {
