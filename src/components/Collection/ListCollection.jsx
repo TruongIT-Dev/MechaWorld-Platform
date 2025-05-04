@@ -392,6 +392,23 @@ function ListCollection({}) {
                 
                 <div>
                     <h2 className="text-2xl font-bold mb-4">{selectedProduct.name}</h2>
+                    {/* <Descriptions title="THÔNG SỐ GUNDAM" bordered layout="vertical">
+                              <Descriptions.Item label="Tên mô hình" span={3}>{selectedProduct.name}</Descriptions.Item>
+                              <Descriptions.Item label="Grade">{selectedProduct.grade}</Descriptions.Item>
+                              <Descriptions.Item label="Tỷ lệ">{selectedProduct.scale}</Descriptions.Item>
+                              <Descriptions.Item label="Khối lượng">{selectedProduct.weight}</Descriptions.Item>
+                              <Descriptions.Item label="Phiên bản">{selectedProduct.version}</Descriptions.Item>
+                              <Descriptions.Item label="Vật liệu">{selectedProduct.material}</Descriptions.Item>
+                              <Descriptions.Item label="Tống số mảnh">{selectedProduct.quantity}</Descriptions.Item>
+                              <Descriptions.Item label="Dòng phim" span={1}>{selectedProduct.series}</Descriptions.Item>
+                              <Descriptions.Item label="Nhà sản xuất">{selectedProduct.manufacturer}</Descriptions.Item>
+                              <Descriptions.Item label="Năm sản xuất">{selectedProduct.release_year}</Descriptions.Item>
+                              <Descriptions.Item label="Tình trạng">{selectedProduct.condition}</Descriptions.Item>
+                              <Descriptions.Item label="Giá mua">{selectedProduct.price.toLocaleString('vi-VN')}đ</Descriptions.Item>
+                              <Descriptions.Item label="Ngày mua">{selectedProduct.purchaseDate}</Descriptions.Item>
+                              <Descriptions.Item label="Mô tả tình trạng" span={3}><span>{selectedProduct.condition === "new" ? "Mới" : "Đã qua sử dụng"}</span></Descriptions.Item>
+                              <Descriptions.Item label="Mô tả sản phẩm" span={3}>{selectedProduct.description}</Descriptions.Item>
+                          </Descriptions> */}
                     
                     <div className="space-y-3">
                         <div className="flex">
