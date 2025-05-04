@@ -35,7 +35,7 @@ const Collection = () => {
     <Layout className="container">
 
       {/* Sidebar - Menu */}
-      <Sider width={250} className="bg-white shadow-md h-fit rounded-lg p-4 mt-36 mb-4">
+      <Sider width={250} className="bg-white shadow-md h-fit  p-4 mt-36 mb-4">
         <div className='flex flex-col'>
           <div className="flex items-center py-2 gap-3 border-b">
             <img

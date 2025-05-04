@@ -5,7 +5,7 @@ import {
   ShoppingOutlined,
   UserOutlined,
   BankOutlined,
-  WalletOutlined, EditOutlined
+  WalletOutlined, EditOutlined, SearchOutlined
 } from '@ant-design/icons';
 import { Card, Row, Col, Button, Input, Select, Tag, Typography, Modal, Form, Dropdown,Menu, Layout  } from 'antd';
 import { ShoppingCartOutlined, HeartOutlined, MoreOutlined, PlusOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
@@ -14,6 +14,34 @@ import { GetGundamByID, getUser } from '../../apis/User/APIUser';
 
 import { useCart } from '../../context/CartContext';
 import { Outlet, Link, useLocation } from 'react-router-dom';
+const { Title } = Typography;
+// Thêm component GundamFilters
+const GundamFilters = ({ gradeList, activeFilter, filterByGrade }) => {
+  return (
+    <div className="flex flex-wrap justify-center items-center gap-2 my-6">
+      <Button
+        type={activeFilter === 'All' ? 'primary' : 'default'}
+        className={activeFilter === 'All' ? 'bg-blue-500' : ''}
+        onClick={() => filterByGrade('All')}
+      >
+        Tất cả
+      </Button>
+
+      {gradeList.map(grade => (
+        <Button
+          key={grade}
+          type={activeFilter === grade ? 'primary' : 'default'}
+          className={activeFilter === grade ? 'bg-blue-500' : ''}
+          onClick={() => filterByGrade(grade)}
+        >
+          {grade}
+        </Button>
+      ))}
+    </div>
+  );
+};
+
+const gradeList = ['Entry Grade', 'High Grade', 'Master Grade', 'Real Grade', 'Perfect Grade', 'Super Deformed'];
 
 function ListCollection({}) {
     const { Sider, Content } = Layout;
@@ -26,11 +54,24 @@ function ListCollection({}) {
     const [confirmSell, setConfirmSell] = useState(false);
     const [isConfirmedSell, setIsConfirmedSell] = useState(false);
     const [form] = Form.useForm();
-    const [userRole, setUserRole] = useState(null); // Thêm state để lưu role
-    const { cartItems, addToCart, loading } = useCart();
+    const [userRole, setUserRole] = useState(null);
+    const [activeGradeFilter, setActiveGradeFilter] = useState('All'); 
+    const [searchTerm, setSearchTerm] = useState('');
+    const [detailModalVisible, setDetailModalVisible] = useState(false);
+    const [selectedProduct, setSelectedProduct] = useState(null); 
+
+    // Hàm mở modal chi tiết
+    const showDetailModal = (product) => {
+      setSelectedProduct(product);
+      setDetailModalVisible(true);
+    };
+
+    // Hàm đóng modal
+    const handleDetailCancel = () => {
+        setDetailModalVisible(false);
+    };
   
     const items = [
-      
       {
         key: "/member/profile/auction-history",
         icon: <BankOutlined className="text-lg text-red-500" />,
@@ -44,10 +85,9 @@ function ListCollection({}) {
     ];
   
     useEffect(() => {
-      // Lấy thông tin người dùng để kiểm tra role
       getUser(user.id)
         .then((response) => {
-          setUserRole(response.data.role); // Lưu role vào state
+          setUserRole(response.data.role);
           console.log(response.data.role);
         })
         .catch((error) => {
@@ -59,6 +99,7 @@ function ListCollection({}) {
           setGundamList(response.data);
           setFilteredData(response.data);
           console.log(user.id);
+          console.log('Danh sách sản phẩm:', response.data);
         })
         .catch((error) => {
           console.error("Lỗi khi lấy danh sách sản phẩm:", error);
@@ -66,31 +107,45 @@ function ListCollection({}) {
     }, [user.id]);
   
     // Lọc dữ liệu
-    useEffect(() => {
-      let filtered = gundamList;
-      if (selectedCondition) {
-        filtered = filtered.filter((item) => item.condition === selectedCondition);
-      }
-      if (selectedGrade) {
-        filtered = filtered.filter((item) => item.grade === selectedGrade);
-      }
-      setFilteredData(filtered);
-    }, [selectedCondition, selectedGrade, gundamList]);
+    // Lọc dữ liệu
+useEffect(() => {
+  let filtered = gundamList;
   
-    const handleAddToCart = async (id) => {
-      try {
-          if (!userId) {
-              message.error('Bạn cần phải Đăng nhập trước!');
-              navigate('/member/login');
-              return;
-          }
+  // Lọc theo condition
+  if (selectedCondition) {
+    filtered = filtered.filter((item) => item.condition === selectedCondition);
+  }
   
-          await addToCart({ id }); // Sử dụng hàm addToCart từ context
-          setAdded(true);
+  // Lọc theo grade
+  if (selectedGrade && selectedGrade !== 'All') {
+    filtered = filtered.filter((item) => item.grade === selectedGrade);
+  }
+
+  // Lọc theo từ khóa tìm kiếm
+  if (searchTerm) {
+    filtered = filtered.filter((item) => 
+      item.name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  }
   
-      } catch (error) {
-          message.error("Lỗi khi thêm vào giỏ hàng!");
-          console.error("Error:", error);
+  setFilteredData(filtered);
+}, [selectedCondition, selectedGrade, gundamList, searchTerm]); 
+  
+    // Hàm xử lý filter theo grade
+    const filterByGrade = (grade) => {
+      setActiveGradeFilter(grade);
+      setSelectedGrade(grade === 'All' ? null : grade);
+    };
+  
+    const getGradeColor = (grade) => {
+      switch (grade) {
+          case 'Entry Grade': return 'cyan';
+          case 'High Grade': return 'green';
+          case 'Real Grade': return 'purple';
+          case 'Master Grade': return 'blue';
+          case 'Perfect Grade': return 'gold';
+          case 'Super Deformed': return 'magenta';
+          default: return 'default';
       }
   };
   
@@ -103,10 +158,6 @@ function ListCollection({}) {
     const handleAuctionProduct = (product) => {
       setSellModalVisible(true);
     };
-  
-  
-  
-  
   
     const renderStatusButton = (product) => {
       const { status } = product;
@@ -182,14 +233,31 @@ function ListCollection({}) {
         <Tag color="default">Không rõ</Tag>
       );
     };
+    
   return (
-    <div className="container mx-auto px-4 py-8  bg-gray-50 min-h-screen">
+    <div className="container mx-auto px-4 py-8 bg-gray-50 min-h-screen">
+      {/* Featured Products */}
+      <div className="px-[10px]">
+        <h2 className="text-[36px] text-center font-bold text-gray-800 ">Bộ Sưu Tập</h2>
 
-
-
-    {/* Featured Products */}
-    <div className="px-[50px]"> {/* Di chuyển margin ra container cha */}
-        <h2 className="text-[36px] font-bold text-gray-800 mb-12">Bộ Sưu Tập</h2>
+        {/* Thêm ô tìm kiếm */}
+        <div className="flex justify-center mb-6">
+          <Input
+            placeholder="Tìm kiếm theo tên..."
+            prefix={<SearchOutlined />}
+            allowClear
+            onChange={(e) => setSearchTerm(e.target.value)}
+            style={{ width: 300 }}
+          />
+        </div>
+        
+        {/* Thêm component GundamFilters vào đây */}
+        <GundamFilters 
+          gradeList={gradeList} 
+          activeFilter={activeGradeFilter} 
+          filterByGrade={filterByGrade} 
+        />
+        
         <Row gutter={[24, 24]} justify="start">
             {filteredData
             .filter(item => ["published", "in store"].includes(item.status))
@@ -200,107 +268,119 @@ function ListCollection({}) {
                 md={8} 
                 lg={6} 
                 key={item.gundam_id}
-                className="flex justify-center" // Thêm flex để căn giữa
+                className="flex justify-center "
             >
                 <Card
+                
                 hoverable
                 cover={
-                    <div className="h-64 bg-gray-200 flex items-center justify-center overflow-hidden">
+                    <div className=" bg-gray-200 flex items-center justify-center overflow-hidden">
                     <img 
                         alt={item.name} 
                         src={item.primary_image_url} 
-                        className="object-cover w-full h-full"
+                        className="object-cover h-[265px] w-[265px]"
+                        onClick={() => showDetailModal(item)}
                     />
                     </div>
                 }
-                actions={[
-                    <HeartOutlined key="wishlist" className="text-red-500" />,
-                    <ShoppingCartOutlined key="cart" />,
-                ]}
-                className="h-full w-full max-w-[300px] flex flex-col" // Thêm max-width và w-full
+                
                 bodyStyle={{ flex: 1 }}
                 >
-                <Card.Meta
-                    title={<span className="font-bold">{item.name}</span>}
-                    description={
-                    <>
-                        <span className="text-gray-600">{item.grade}</span>
-                        <div className="mt-2 text-lg font-semibold text-blue-600">
-                        {item.price?.toLocaleString()} đ
-                        </div>
-                    </>
-                    }
-                />
+                <div className="px-1">
+                    <div className="flex justify-between items-start mb-2">
+                        <Title level={5} className="m-0 text-gray-800 truncate" style={{ maxWidth: '80%' }} onClick={() => showDetailModal(item)}>
+                            {item.name}
+                        </Title>
+                        <Tag color={getGradeColor(item.grade)}>{item.scale}</Tag>
+                    </div>
+                    <div className="flex justify-between text-black text-[16px] mt-1 mb-3">
+                    <Tag color={getGradeColor(item.grade)}>{item.grade}</Tag>                       
+                    </div>
+                    <div className="flex justify-between text-gray-600 text-sm mt-1">
+                        <span>{item.series}</span>                       
+                    </div>
+                </div>
                 </Card>
-            </Col>
+            </Col>  
             ))}
         </Row>
-    </div>
-
-
-
-    {/* Hàng đang bán */}
-    {userRole === 'seller' && (
-        <div className="px-[50px]"> {/* Di chuyển margin ra container cha */}
-          <h2 className="text-[36px] font-bold text-gray-800 mb-12">Hàng đang bán</h2>
-          <Row gutter={[24, 24]} justify="start">
-              {filteredData
-              .filter(item => ["published"].includes(item.status))
-              .map((item) => (
-              <Col 
-                  xs={24} 
-                  sm={12} 
-                  md={8} 
-                  lg={6} 
-                  key={item.gundam_id}
-                  className="flex justify-center" // Thêm flex để căn giữa
-              >
-                  <Card
-                  hoverable
-                  cover={
-                      <div className="h-64 bg-gray-200 flex items-center justify-center overflow-hidden">
-                      <img 
-                          alt={item.name} 
-                          src={item.primary_image_url} 
-                          className="object-cover w-full h-full"
-                      />
-                      </div>
-                  }
-                  actions={[
-                      <HeartOutlined key="wishlist" className="text-red-500" />,
-                      <ShoppingCartOutlined key="cart" />,
-                  ]}
-                  className="h-full w-full max-w-[300px] flex flex-col" // Thêm max-width và w-full
-                  bodyStyle={{ flex: 1 }}
-                  >
-                  <Card.Meta
-                      title={<span className="font-bold">{item.name}</span>}
-                      description={
-                          <>
-                          <span className="text-gray-600">{item.grade}</span>
-                          <div className="mt-2 text-lg font-semibold text-blue-600">
-                              {item.price?.toLocaleString()} đ
-                          </div>
-                          <div className="mt-2 min-h-[80px]"> {/* Thêm min-height cho phần nút */}
-                              {renderStatusButton(item)}
-                          </div>
-                          </>
-                    }
-                    />
-                  </Card>
-              </Col>
-              ))}
-          </Row>
       </div>
-    )}
 
+
+      <Modal
+            title="Chi tiết sản phẩm"
+            visible={detailModalVisible}
+            onCancel={handleDetailCancel}
+            footer={[
+                <Button key="back" onClick={handleDetailCancel}>
+                    Đóng
+                </Button>,
+            ]}
+            width={800}
+        >
+            {selectedProduct && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <img 
+                            src={selectedProduct.primary_image_url} 
+                            alt={selectedProduct.name}
+                            className="w-full h-64 rounded-lg mt-16"
+                        />
+                    </div>
+                    <div>
+                        <h2 className="text-2xl font-bold mb-4">{selectedProduct.name}</h2>
+                        
+                        <div className="space-y-3">
+                            <div className="flex">
+                                <span className="font-semibold w-1/3">Dòng sản phẩm:</span>
+                                <span>{selectedProduct.series}</span>
+                            </div>
+                            <div className="flex">
+                                <span className="font-semibold w-1/3">Hãng sản xuất:</span>
+                                <span>{selectedProduct.manufacturer}</span>
+                            </div>
+                            <div className="flex">
+                                <span className="font-semibold w-1/3">Grade:</span>
+                                <span>{selectedProduct.grade}</span>
+                            </div>
+                            <div className="flex">
+                                <span className="font-semibold w-1/3">Tỉ lệ:</span>
+                                <span>{selectedProduct.scale}</span>
+                            </div>
+                            <div className="flex">
+                                <span className="font-semibold w-1/3">Tình trạng:</span>
+                                <span>{selectedProduct.condition === "new" ? "Mới" : "Đã qua sử dụng"}</span>
+                            </div>
+                            <div className="flex">
+                                <span className="font-semibold w-1/3">Số lượng:</span>
+                                <span>{selectedProduct.quantity}</span>
+                            </div>
+                            <div className="flex">
+                                <span className="font-semibold w-1/3">Giá:</span>
+                                <span>{selectedProduct.price.toLocaleString()} VND</span>
+                            </div>
+                            <div className="flex">
+                                <span className="font-semibold w-1/3">Năm phát hành:</span>
+                                <span>{selectedProduct.release_year}</span>
+                            </div>
+                            <div className="flex">
+                                <span className="font-semibold w-1/3">Trọng lượng:</span>
+                                <span>{selectedProduct.weight}g</span>
+                            </div>
+                            <div className="flex">
+                                <span className="font-semibold w-1/3">Mô tả:</span>
+                                <span>{selectedProduct.description || "Không có mô tả"}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+        </Modal>
     </div>
   );
-
-
 }
+
 ListCollection.propTypes = {
-  // isCreating: PropTypes.bool,
   setIsCreating: PropTypes.func.isRequired,
 };
 export default ListCollection;
