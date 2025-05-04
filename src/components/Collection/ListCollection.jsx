@@ -261,10 +261,10 @@ function ListCollection({}) {
     };
 
   return (
-    <div className="container mx-auto px-4 py-8 bg-gray-50 min-h-screen">
+    <div className="container mx-auto px-4 py-4 bg-gray-50 min-h-screen">
       {/* Featured Products */}
       <div className="px-[10px]">
-        <h2 className="text-[36px] text-center font-bold text-gray-800 ">Bộ Sưu Tập</h2>
+        <h2 className="text-[36px] text-center font-bold text-gray-800 mb-2">Bộ Sưu Tập</h2>
 
         {/* Thêm ô tìm kiếm */}
         <div className="flex justify-center mb-6">
@@ -323,7 +323,10 @@ function ListCollection({}) {
                     <Tag color={getGradeColor(item.grade)}>{item.grade}</Tag>                       
                     </div>
                     <div className="flex justify-between text-gray-600 text-sm mt-1">
-                        <span>{item.series}</span>                       
+                        <span>Series: {item.series}</span>                       
+                    </div>
+                    <div className="flex justify-between text-gray-600 text-sm mt-1">
+                        <span>Version: {item.version}</span>                       
                     </div>
                 </div>
                 </Card>
@@ -382,7 +385,7 @@ function ListCollection({}) {
                                     <img 
                                         src={img} 
                                         alt={`Ảnh ${index + 1}`} 
-                                        className="w-full h-full object-cover"
+                                        className="w-full h-50 object-cover"
                                     />
                                 </div>
                             ))}
@@ -411,51 +414,51 @@ function ListCollection({}) {
                           </Descriptions> */}
                     
                     <div className="space-y-3 ">
-                        <div className="flex">
+                        <div className="flex border-b border-gray-300 pb-2">
                             <span className="font-semibold w-1/3">Dòng phim:</span>
                             <span>{selectedProduct.series}</span>
                         </div>
-                        <div className="flex">
+                        <div className="flex border-b border-gray-300 pb-2">
                             <span className="font-semibold w-1/3">Phiên bản:</span>
                             <span>{selectedProduct.version}</span>
                         </div>
-                        <div className="flex">
+                        <div className="flex border-b border-gray-300 pb-2">
                             <span className="font-semibold w-1/3">Hãng sản xuất:</span>
                             <span>{selectedProduct.manufacturer}</span>
                         </div>
-                        <div className="flex">
+                        <div className="flex border-b border-gray-300 pb-2">
                             <span className="font-semibold w-1/3">Grade:</span>
                             <span>{selectedProduct.grade}</span>
                         </div>
-                        <div className="flex">
+                        <div className="flex border-b border-gray-300 pb-2">
                             <span className="font-semibold w-1/3">Tỉ lệ:</span>
                             <span>{selectedProduct.scale}</span>
                         </div>
-                        <div className="flex">
+                        <div className="flex border-b border-gray-300 pb-2">
                             <span className="font-semibold w-1/3">Khối lượng:</span>
-                            <span>{selectedProduct.weight}</span>
+                            <span>{selectedProduct.weight}g</span>
                         </div>
-                        <div className="flex">
+                        <div className="flex border-b border-gray-300 pb-2">
                             <span className="font-semibold w-1/3">Tình trạng:</span>
                             <span>{selectedProduct.condition === "new" ? "Hàng full box" : "Đã qua sử dụng"}</span>
                         </div>
-                        <div className="flex">
+                        <div className="flex border-b border-gray-300 pb-2">
                             <span className="font-semibold w-1/3">Số lượng mảnh:</span>
                             <span>{selectedProduct.parts_total}</span>
                         </div>
-                        <div className="flex">
+                        <div className="flex border-b border-gray-300 pb-2">
                             <span className="font-semibold w-1/3">Chất liệu:</span>
                             <span>{selectedProduct.material}</span>
                         </div>
-                        <div className="flex">
+                        <div className="flex border-b border-gray-300 pb-2">
                             <span className="font-semibold w-1/3">Giá:</span>
-                            <span>{selectedProduct.price.toLocaleString()} VND</span>
+                            <span>{selectedProduct.price.toLocaleString()} VNĐ</span>
                         </div>
-                        <div className="flex">
+                        <div className="flex border-b border-gray-300 pb-2">
                             <span className="font-semibold w-1/3">Năm phát hành:</span>
                             <span>{selectedProduct.release_year}</span>
                         </div>
-                        <div className="flex">
+                        <div className="flex border-b border-gray-300 pb-2">
                             <span className="font-semibold w-1/3">Mô tả:</span>
                             <span>{selectedProduct.description || "Không có mô tả"}</span>
                         </div>
