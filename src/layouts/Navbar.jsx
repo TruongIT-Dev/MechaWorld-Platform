@@ -1,6 +1,6 @@
 import { Input } from "antd";
 import { useSelector } from "react-redux"
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import { SearchOutlined } from "@ant-design/icons";
 
 import UserNavbar from "./UserNavbar";
@@ -34,13 +34,19 @@ const Menu = [
   },
 ];
 
-
 const Navbar = () => {
-
   const { isLoggedIn, user } = useSelector(state => state.auth);
+  const navigate = useNavigate();
 
   const onSearch = (value, _e, info) =>
-    console.log(info === null || info === void 0 ? void 0 : info.source, value);
+    console.log(info?.source, value);
+
+  const handleCollectionClick = (e, link) => {
+    if (link === "/collection/list" && !isLoggedIn) {
+      e.preventDefault();
+      navigate("/member/login");
+    }
+  };
 
   return (
     <div className="main-navbar fixed w-full bg-white dark:text-white shadow-md z-40 top-0 transition-all duration-300">
@@ -48,7 +54,6 @@ const Navbar = () => {
       <div className="p-4 bg-blue-300">
         <div className="container flex justify-between items-center gap-10">
           <div className="flex items-center">
-            {/* <img src={Logo} alt="Logo MechaWorld" className="w-[90px] h-[50px] object-contain" /> */}
             <a href="#" className="font-bold hover:text-blue-700 text-2xl sm:text-3xl flex gap-2">
               MechaWorld
             </a>
@@ -79,6 +84,7 @@ const Navbar = () => {
             <li key={data.id}>
               <NavLink
                 to={data.link}
+                onClick={(e) => handleCollectionClick(e, data.link)}
                 className={({ isActive }) =>
                   `inline-block text-lg px-4 py-2 uppercase 
                 transition-all duration-300 ease-in-out 

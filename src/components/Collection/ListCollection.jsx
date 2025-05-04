@@ -5,9 +5,9 @@ import {
   ShoppingOutlined,
   UserOutlined,
   BankOutlined,
-  WalletOutlined, EditOutlined
+  WalletOutlined, EditOutlined, SearchOutlined, LeftOutlined, RightOutlined
 } from '@ant-design/icons';
-import { Card, Row, Col, Button, Input, Select, Tag, Typography, Modal, Form, Dropdown,Menu, Layout  } from 'antd';
+import { Card, Row, Col, Button, Input, Select, Tag, Typography, Modal, Form, Dropdown, Menu, Layout, Descriptions, Image } from 'antd';
 import { ShoppingCartOutlined, HeartOutlined, MoreOutlined, PlusOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
 import { SellingGundam, RestoreGundam } from "../../apis/Sellers/APISeller";
 import { GetGundamByID, getUser } from '../../apis/User/APIUser';
@@ -15,6 +15,7 @@ import { GetGundamByID, getUser } from '../../apis/User/APIUser';
 import { useCart } from '../../context/CartContext';
 import { Outlet, Link, useLocation } from 'react-router-dom';
 const { Title } = Typography;
+
 // Thêm component GundamFilters
 const GundamFilters = ({ gradeList, activeFilter, filterByGrade }) => {
   return (
@@ -55,8 +56,51 @@ function ListCollection({}) {
     const [isConfirmedSell, setIsConfirmedSell] = useState(false);
     const [form] = Form.useForm();
     const [userRole, setUserRole] = useState(null);
-    const [activeGradeFilter, setActiveGradeFilter] = useState('All'); // Thêm state cho filter active
-    const { cartItems, addToCart, loading } = useCart();
+    const [activeGradeFilter, setActiveGradeFilter] = useState('All'); 
+    const [searchTerm, setSearchTerm] = useState('');
+    const [detailModalVisible, setDetailModalVisible] = useState(false);
+    const [selectedProduct, setSelectedProduct] = useState(null);
+    const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+    // Hàm mở modal chi tiết
+    const showDetailModal = (product) => {
+      setSelectedProduct(product);
+      setCurrentImageIndex(0); // Reset về ảnh chính khi mở modal
+      setDetailModalVisible(true);
+    };
+
+    // Hàm đóng modal
+    const handleDetailCancel = () => {
+        setDetailModalVisible(false);
+    };
+
+    // Hàm chuyển đổi ảnh
+    const switchImage = (index) => {
+      setCurrentImageIndex(index);
+    };
+
+    // Hàm lấy danh sách ảnh (ảnh chính + ảnh phụ)
+    const getImageList = () => {
+      if (!selectedProduct) return [];
+      
+      const images = [selectedProduct.primary_image_url];
+      if (selectedProduct.secondary_image_urls && selectedProduct.secondary_image_urls.length > 0) {
+        return images.concat(selectedProduct.secondary_image_urls);
+      }
+      return images;
+    };
+
+    // Hàm chuyển sang ảnh trước đó
+    const prevImage = () => {
+      const images = getImageList();
+      setCurrentImageIndex((prev) => (prev > 0 ? prev - 1 : images.length - 1));
+    };
+
+    // Hàm chuyển sang ảnh tiếp theo
+    const nextImage = () => {
+      const images = getImageList();
+      setCurrentImageIndex((prev) => (prev < images.length - 1 ? prev + 1 : 0));
+    };
   
     const items = [
       {
@@ -97,20 +141,23 @@ function ListCollection({}) {
     useEffect(() => {
       let filtered = gundamList;
       
-      // Lọc theo condition
       if (selectedCondition) {
         filtered = filtered.filter((item) => item.condition === selectedCondition);
       }
       
-      // Lọc theo grade
       if (selectedGrade && selectedGrade !== 'All') {
         filtered = filtered.filter((item) => item.grade === selectedGrade);
       }
+
+      if (searchTerm) {
+        filtered = filtered.filter((item) => 
+          item.name.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+      }
       
       setFilteredData(filtered);
-    }, [selectedCondition, selectedGrade, gundamList]);
+    }, [selectedCondition, selectedGrade, gundamList, searchTerm]); 
   
-    // Hàm xử lý filter theo grade
     const filterByGrade = (grade) => {
       setActiveGradeFilter(grade);
       setSelectedGrade(grade === 'All' ? null : grade);
@@ -126,7 +173,7 @@ function ListCollection({}) {
           case 'Super Deformed': return 'magenta';
           default: return 'default';
       }
-  };
+    };
   
     const handleSellProduct = (product) => {
       SellingGundam(user.id, product.gundam_id)
@@ -212,12 +259,23 @@ function ListCollection({}) {
         <Tag color="default">Không rõ</Tag>
       );
     };
-    
+
   return (
     <div className="container mx-auto px-4 py-8 bg-gray-50 min-h-screen">
       {/* Featured Products */}
       <div className="px-[10px]">
         <h2 className="text-[36px] text-center font-bold text-gray-800 ">Bộ Sưu Tập</h2>
+
+        {/* Thêm ô tìm kiếm */}
+        <div className="flex justify-center mb-6">
+          <Input
+            placeholder="Tìm kiếm theo tên..."
+            prefix={<SearchOutlined />}
+            allowClear
+            onChange={(e) => setSearchTerm(e.target.value)}
+            style={{ width: 300 }}
+          />
+        </div>
         
         {/* Thêm component GundamFilters vào đây */}
         <GundamFilters 
@@ -242,31 +300,30 @@ function ListCollection({}) {
                 
                 hoverable
                 cover={
-                    <div className="h-64 bg-gray-200 flex items-center justify-center overflow-hidden">
+                    <div className=" bg-gray-200 flex items-center justify-center overflow-hidden">
                     <img 
                         alt={item.name} 
                         src={item.primary_image_url} 
-                        className="object-cover w-full h-full"
+                        className="object-cover h-[265px] w-[265px]"
+                        onClick={() => showDetailModal(item)}
                     />
                     </div>
                 }
-                actions={[
-                    <HeartOutlined key="wishlist" className="text-red-500" />,
-                    <ShoppingCartOutlined key="cart" />,
-                ]}
                 
                 bodyStyle={{ flex: 1 }}
                 >
                 <div className="px-1">
                     <div className="flex justify-between items-start mb-2">
-                        <Title level={5} className="m-0 text-gray-800 truncate" style={{ maxWidth: '80%' }}>
+                        <Title level={5} className="m-0 text-gray-800 truncate" style={{ maxWidth: '80%' }} onClick={() => showDetailModal(item)}>
                             {item.name}
                         </Title>
                         <Tag color={getGradeColor(item.grade)}>{item.scale}</Tag>
                     </div>
+                    <div className="flex justify-between text-black text-[16px] mt-1 mb-3">
+                    <Tag color={getGradeColor(item.grade)}>{item.grade}</Tag>                       
+                    </div>
                     <div className="flex justify-between text-gray-600 text-sm mt-1">
-                        <span>{item.series}</span>
-                        
+                        <span>{item.series}</span>                       
                     </div>
                 </div>
                 </Card>
@@ -275,7 +332,109 @@ function ListCollection({}) {
         </Row>
       </div>
 
-
+      <Modal
+        title="Chi tiết sản phẩm"
+        visible={detailModalVisible}
+        onCancel={handleDetailCancel}
+        footer={[
+            <Button key="back" onClick={handleDetailCancel}>
+                Đóng
+            </Button>,
+        ]}
+        width={800}
+      >
+        {selectedProduct && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="relative">
+                    <div className="relative w-full h-64 rounded-lg overflow-hidden">
+                        <img 
+                            src={getImageList()[currentImageIndex]} 
+                            alt={selectedProduct.name}
+                            className="w-full h-full object-contain"
+                        />
+                        {getImageList().length > 1 && (
+                            <>
+                                <Button 
+                                    shape="circle" 
+                                    icon={<LeftOutlined />} 
+                                    onClick={prevImage}
+                                    className="absolute left-2 top-1/2 transform -translate-y-1/2 z-10"
+                                />
+                                <Button 
+                                    shape="circle" 
+                                    icon={<RightOutlined />} 
+                                    onClick={nextImage}
+                                    className="absolute right-2 top-1/2 transform -translate-y-1/2 z-10"
+                                />
+                            </>
+                        )}
+                    </div>
+                    
+                    {/* Hiển thị danh sách ảnh phụ */}
+                    {getImageList().length > 1 && (
+                        <div className="flex justify-center gap-2 mt-4 overflow-x-auto py-2">
+                            {getImageList().map((img, index) => (
+                                <div 
+                                    key={index} 
+                                    className={`cursor-pointer border-2 ${currentImageIndex === index ? 'border-blue-500' : 'border-transparent'}`}
+                                    onClick={() => switchImage(index)}
+                                >
+                                    <img 
+                                        src={img} 
+                                        alt={`Ảnh ${index + 1}`} 
+                                        className="w-full h-full object-cover"
+                                    />
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
+                
+                <div>
+                    <h2 className="text-2xl font-bold mb-4">{selectedProduct.name}</h2>
+                    
+                    <div className="space-y-3">
+                        <div className="flex">
+                            <span className="font-semibold w-1/3">Dòng sản phẩm:</span>
+                            <span>{selectedProduct.series}</span>
+                        </div>
+                        <div className="flex">
+                            <span className="font-semibold w-1/3">Hãng sản xuất:</span>
+                            <span>{selectedProduct.manufacturer}</span>
+                        </div>
+                        <div className="flex">
+                            <span className="font-semibold w-1/3">Grade:</span>
+                            <span>{selectedProduct.grade}</span>
+                        </div>
+                        <div className="flex">
+                            <span className="font-semibold w-1/3">Tỉ lệ:</span>
+                            <span>{selectedProduct.scale}</span>
+                        </div>
+                        <div className="flex">
+                            <span className="font-semibold w-1/3">Tình trạng:</span>
+                            <span>{selectedProduct.condition === "new" ? "Mới" : "Đã qua sử dụng"}</span>
+                        </div>
+                        <div className="flex">
+                            <span className="font-semibold w-1/3">Số lượng:</span>
+                            <span>{selectedProduct.quantity}</span>
+                        </div>
+                        <div className="flex">
+                            <span className="font-semibold w-1/3">Giá:</span>
+                            <span>{selectedProduct.price.toLocaleString()} VND</span>
+                        </div>
+                        <div className="flex">
+                            <span className="font-semibold w-1/3">Năm phát hành:</span>
+                            <span>{selectedProduct.release_year}</span>
+                        </div>
+                        <div className="flex">
+                            <span className="font-semibold w-1/3">Mô tả:</span>
+                            <span>{selectedProduct.description || "Không có mô tả"}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        )}
+      </Modal>
     </div>
   );
 }
