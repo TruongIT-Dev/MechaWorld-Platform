@@ -7,7 +7,7 @@ import {
   BankOutlined,
   WalletOutlined, EditOutlined, SearchOutlined, LeftOutlined, RightOutlined
 } from '@ant-design/icons';
-import { Card, Row, Col, Button, Input, Select, Tag, Typography, Modal, Form, Dropdown, Menu, Layout, Descriptions, Image } from 'antd';
+import { Card, Row, Col, Button, Input, Select, Tag, Typography, Modal, Form, Dropdown, Menu, Layout, Descriptions, Image, Collapse } from 'antd';
 import { ShoppingCartOutlined, HeartOutlined, MoreOutlined, PlusOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
 import { SellingGundam, RestoreGundam } from "../../apis/Sellers/APISeller";
 import { GetGundamByID, getUser } from '../../apis/User/APIUser';
@@ -44,221 +44,221 @@ const GundamFilters = ({ gradeList, activeFilter, filterByGrade }) => {
 
 const gradeList = ['Entry Grade', 'High Grade', 'Master Grade', 'Real Grade', 'Perfect Grade', 'Super Deformed'];
 
-function ListCollection({}) {
-    const { Sider, Content } = Layout;
-    const user = useSelector((state) => state.auth.user);
-    const [gundamList, setGundamList] = useState([]);
-    const [filteredData, setFilteredData] = useState([]);
-    const [selectedCondition, setSelectedCondition] = useState(null);
-    const [selectedGrade, setSelectedGrade] = useState(null);
-    const [sellModalVisible, setSellModalVisible] = useState(false);
-    const [confirmSell, setConfirmSell] = useState(false);
-    const [isConfirmedSell, setIsConfirmedSell] = useState(false);
-    const [form] = Form.useForm();
-    const [userRole, setUserRole] = useState(null);
-    const [activeGradeFilter, setActiveGradeFilter] = useState('All'); 
-    const [searchTerm, setSearchTerm] = useState('');
-    const [detailModalVisible, setDetailModalVisible] = useState(false);
-    const [selectedProduct, setSelectedProduct] = useState(null);
-    const [currentImageIndex, setCurrentImageIndex] = useState(0);
+function ListCollection({ }) {
+  const { Sider, Content } = Layout;
+  const user = useSelector((state) => state.auth.user);
+  const [gundamList, setGundamList] = useState([]);
+  const [filteredData, setFilteredData] = useState([]);
+  const [selectedCondition, setSelectedCondition] = useState(null);
+  const [selectedGrade, setSelectedGrade] = useState(null);
+  const [sellModalVisible, setSellModalVisible] = useState(false);
+  const [confirmSell, setConfirmSell] = useState(false);
+  const [isConfirmedSell, setIsConfirmedSell] = useState(false);
+  const [form] = Form.useForm();
+  const [userRole, setUserRole] = useState(null);
+  const [activeGradeFilter, setActiveGradeFilter] = useState('All');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [detailModalVisible, setDetailModalVisible] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
-    // Hàm mở modal chi tiết
-    const showDetailModal = (product) => {
-      setSelectedProduct(product);
-      setCurrentImageIndex(0); // Reset về ảnh chính khi mở modal
-      setDetailModalVisible(true);
-    };
+  // Hàm mở modal chi tiết
+  const showDetailModal = (product) => {
+    setSelectedProduct(product);
+    setCurrentImageIndex(0); // Reset về ảnh chính khi mở modal
+    setDetailModalVisible(true);
+  };
 
-    // Hàm đóng modal
-    const handleDetailCancel = () => {
-        setDetailModalVisible(false);
-    };
+  // Hàm đóng modal
+  const handleDetailCancel = () => {
+    setDetailModalVisible(false);
+  };
 
-    // Hàm chuyển đổi ảnh
-    const switchImage = (index) => {
-      setCurrentImageIndex(index);
-    };
+  // Hàm chuyển đổi ảnh
+  const switchImage = (index) => {
+    setCurrentImageIndex(index);
+  };
 
-    // Hàm lấy danh sách ảnh (ảnh chính + ảnh phụ)
-    const getImageList = () => {
-      if (!selectedProduct) return [];
-      
-      const images = [selectedProduct.primary_image_url];
-      if (selectedProduct.secondary_image_urls && selectedProduct.secondary_image_urls.length > 0) {
-        return images.concat(selectedProduct.secondary_image_urls);
-      }
-      return images;
-    };
+  // Hàm lấy danh sách ảnh (ảnh chính + ảnh phụ)
+  const getImageList = () => {
+    if (!selectedProduct) return [];
 
-    // Hàm chuyển sang ảnh trước đó
-    const prevImage = () => {
-      const images = getImageList();
-      setCurrentImageIndex((prev) => (prev > 0 ? prev - 1 : images.length - 1));
-    };
+    const images = [selectedProduct.primary_image_url];
+    if (selectedProduct.secondary_image_urls && selectedProduct.secondary_image_urls.length > 0) {
+      return images.concat(selectedProduct.secondary_image_urls);
+    }
+    return images;
+  };
 
-    // Hàm chuyển sang ảnh tiếp theo
-    const nextImage = () => {
-      const images = getImageList();
-      setCurrentImageIndex((prev) => (prev < images.length - 1 ? prev + 1 : 0));
-    };
-  
-    const items = [
-      {
-        key: "/member/profile/auction-history",
-        icon: <BankOutlined className="text-lg text-red-500" />,
-        label: <Link to="/collection">Bộ sưu tập</Link>,
-      },
-      {
-        key: "/member/profile/wallet",
-        icon: <WalletOutlined className="text-lg text-green-500" />,
-        label: <Link to="/collection/add">Thêm vào bộ sưu tập</Link>,
-      },
-    ];
-  
-    useEffect(() => {
-      getUser(user.id)
-        .then((response) => {
-          setUserRole(response.data.role);
-          console.log(response.data.role);
-        })
-        .catch((error) => {
-          console.error("Lỗi khi lấy thông tin người dùng:", error);
-        });
-  
-      GetGundamByID(user.id, "")
-        .then((response) => {
-          setGundamList(response.data);
-          setFilteredData(response.data);
-          console.log(user.id);
-          console.log('Danh sách sản phẩm:', response.data);
-        })
-        .catch((error) => {
-          console.error("Lỗi khi lấy danh sách sản phẩm:", error);
-        });
-    }, [user.id]);
-  
-    // Lọc dữ liệu
-    useEffect(() => {
-      let filtered = gundamList;
-      
-      if (selectedCondition) {
-        filtered = filtered.filter((item) => item.condition === selectedCondition);
-      }
-      
-      if (selectedGrade && selectedGrade !== 'All') {
-        filtered = filtered.filter((item) => item.grade === selectedGrade);
-      }
+  // Hàm chuyển sang ảnh trước đó
+  const prevImage = () => {
+    const images = getImageList();
+    setCurrentImageIndex((prev) => (prev > 0 ? prev - 1 : images.length - 1));
+  };
 
-      if (searchTerm) {
-        filtered = filtered.filter((item) => 
-          item.name.toLowerCase().includes(searchTerm.toLowerCase())
-        );
-      }
-      
-      setFilteredData(filtered);
-    }, [selectedCondition, selectedGrade, gundamList, searchTerm]); 
-  
-    const filterByGrade = (grade) => {
-      setActiveGradeFilter(grade);
-      setSelectedGrade(grade === 'All' ? null : grade);
-    };
-  
-    const getGradeColor = (grade) => {
-      switch (grade) {
-          case 'Entry Grade': return 'cyan';
-          case 'High Grade': return 'green';
-          case 'Real Grade': return 'purple';
-          case 'Master Grade': return 'blue';
-          case 'Perfect Grade': return 'gold';
-          case 'Super Deformed': return 'magenta';
-          default: return 'default';
-      }
-    };
-  
-    const handleSellProduct = (product) => {
-      SellingGundam(user.id, product.gundam_id)
-        .then(() => window.location.reload())
-        .catch(error => console.error(error));
-    };
-  
-    const handleAuctionProduct = (product) => {
-      setSellModalVisible(true);
-    };
-  
-    const renderStatusButton = (product) => {
-      const { status } = product;
-      const { Text } = Typography;
-  
-      if (status === "in store") {
-        return (
-          <>
-            <Button
-              type="primary"
-              className="bg-green-600 hover:bg-green-500 w-full mb-2"
-              onClick={() => setConfirmSell(true)}
-            >
-              Đăng bán
-            </Button>
-            <Button
-              className="bg-red-600 hover:bg-red-400 text-white w-full"
-              onClick={() => handleAuctionProduct(product)}
-            >
-              Đấu giá
-            </Button>
-  
-            <Modal
-              width={500}
-              title="Xác nhận đăng bán sản phẩm"
-              open={confirmSell}
-              onCancel={() => setConfirmSell(false)}
-              footer={[
-                <Button key="cancel" onClick={() => setConfirmSell(false)} disabled={isConfirmedSell}>
-                  Hủy
-                </Button>,
-                <Button
-                  key="submit"
-                  type="primary"
-                  onClick={() => {
-                    setIsConfirmedSell(true);
-                    handleSellProduct(product);
-                  }}
-                  loading={isConfirmedSell}
-                  danger
-                >
-                  Xác nhận đăng bán
-                </Button>
-              ]}
-              centered
-            >
-              <div className="flex flex-col items-center text-center py-4">
-                <ExclamationCircleOutlined className="text-blue-500 text-5xl mb-4" />
-                <Text>
-                  Bạn chắc chắn muốn đăng bán sản phẩm này chứ? <br />
-                  Sản phẩm sẽ được bày bán và người mua có thể xem & đặt hàng.
-                </Text>
-              </div>
-            </Modal>
-          </>
-        );
-      }
-  
-      const statusMap = {
-        auctioning: { text: "Đang đấu giá", color: "blue" },
-        published: { text: "Đang bán", color: "green" },
-        exchange: { text: "Đang trao đổi", color: "cyan" },
-        processing: { text: "Đang xử lý", color: "yellow" },
-        "pending auction approval": { text: "Chờ duyệt đấu giá", color: "yellow" },
-      };
-  
-      const statusTag = statusMap[status];
-      return statusTag ? (
-        <Tag color={statusTag.color} className="w-full text-sm font-semibold text-center">
-          {statusTag.text.toUpperCase()}
-        </Tag>
-      ) : (
-        <Tag color="default">Không rõ</Tag>
+  // Hàm chuyển sang ảnh tiếp theo
+  const nextImage = () => {
+    const images = getImageList();
+    setCurrentImageIndex((prev) => (prev < images.length - 1 ? prev + 1 : 0));
+  };
+
+  const items = [
+    {
+      key: "/member/profile/auction-history",
+      icon: <BankOutlined className="text-lg text-red-500" />,
+      label: <Link to="/collection">Bộ sưu tập</Link>,
+    },
+    {
+      key: "/member/profile/wallet",
+      icon: <WalletOutlined className="text-lg text-green-500" />,
+      label: <Link to="/collection/add">Thêm vào bộ sưu tập</Link>,
+    },
+  ];
+
+  useEffect(() => {
+    getUser(user.id)
+      .then((response) => {
+        setUserRole(response.data.role);
+        console.log(response.data.role);
+      })
+      .catch((error) => {
+        console.error("Lỗi khi lấy thông tin người dùng:", error);
+      });
+
+    GetGundamByID(user.id, "")
+      .then((response) => {
+        setGundamList(response.data);
+        setFilteredData(response.data);
+        console.log(user.id);
+        console.log('Danh sách sản phẩm:', response.data);
+      })
+      .catch((error) => {
+        console.error("Lỗi khi lấy danh sách sản phẩm:", error);
+      });
+  }, [user.id]);
+
+  // Lọc dữ liệu
+  useEffect(() => {
+    let filtered = gundamList;
+
+    if (selectedCondition) {
+      filtered = filtered.filter((item) => item.condition === selectedCondition);
+    }
+
+    if (selectedGrade && selectedGrade !== 'All') {
+      filtered = filtered.filter((item) => item.grade === selectedGrade);
+    }
+
+    if (searchTerm) {
+      filtered = filtered.filter((item) =>
+        item.name.toLowerCase().includes(searchTerm.toLowerCase())
       );
+    }
+
+    setFilteredData(filtered);
+  }, [selectedCondition, selectedGrade, gundamList, searchTerm]);
+
+  const filterByGrade = (grade) => {
+    setActiveGradeFilter(grade);
+    setSelectedGrade(grade === 'All' ? null : grade);
+  };
+
+  const getGradeColor = (grade) => {
+    switch (grade) {
+      case 'Entry Grade': return 'cyan';
+      case 'High Grade': return 'green';
+      case 'Real Grade': return 'purple';
+      case 'Master Grade': return 'blue';
+      case 'Perfect Grade': return 'gold';
+      case 'Super Deformed': return 'magenta';
+      default: return 'default';
+    }
+  };
+
+  const handleSellProduct = (product) => {
+    SellingGundam(user.id, product.gundam_id)
+      .then(() => window.location.reload())
+      .catch(error => console.error(error));
+  };
+
+  const handleAuctionProduct = (product) => {
+    setSellModalVisible(true);
+  };
+
+  const renderStatusButton = (product) => {
+    const { status } = product;
+    const { Text } = Typography;
+
+    if (status === "in store") {
+      return (
+        <>
+          <Button
+            type="primary"
+            className="bg-green-600 hover:bg-green-500 w-full mb-2"
+            onClick={() => setConfirmSell(true)}
+          >
+            Đăng bán
+          </Button>
+          <Button
+            className="bg-red-600 hover:bg-red-400 text-white w-full"
+            onClick={() => handleAuctionProduct(product)}
+          >
+            Đấu giá
+          </Button>
+
+          <Modal
+            width={500}
+            title="Xác nhận đăng bán sản phẩm"
+            open={confirmSell}
+            onCancel={() => setConfirmSell(false)}
+            footer={[
+              <Button key="cancel" onClick={() => setConfirmSell(false)} disabled={isConfirmedSell}>
+                Hủy
+              </Button>,
+              <Button
+                key="submit"
+                type="primary"
+                onClick={() => {
+                  setIsConfirmedSell(true);
+                  handleSellProduct(product);
+                }}
+                loading={isConfirmedSell}
+                danger
+              >
+                Xác nhận đăng bán
+              </Button>
+            ]}
+            centered
+          >
+            <div className="flex flex-col items-center text-center py-4">
+              <ExclamationCircleOutlined className="text-blue-500 text-5xl mb-4" />
+              <Text>
+                Bạn chắc chắn muốn đăng bán sản phẩm này chứ? <br />
+                Sản phẩm sẽ được bày bán và người mua có thể xem & đặt hàng.
+              </Text>
+            </div>
+          </Modal>
+        </>
+      );
+    }
+
+    const statusMap = {
+      auctioning: { text: "Đang đấu giá", color: "blue" },
+      published: { text: "Đang bán", color: "green" },
+      exchange: { text: "Đang trao đổi", color: "cyan" },
+      processing: { text: "Đang xử lý", color: "yellow" },
+      "pending auction approval": { text: "Chờ duyệt đấu giá", color: "yellow" },
     };
+
+    const statusTag = statusMap[status];
+    return statusTag ? (
+      <Tag color={statusTag.color} className="w-full text-sm font-semibold text-center">
+        {statusTag.text.toUpperCase()}
+      </Tag>
+    ) : (
+      <Tag color="default">Không rõ</Tag>
+    );
+  };
 
   return (
     <div className="container mx-auto px-4 py-8 bg-gray-50 min-h-screen">
@@ -276,192 +276,189 @@ function ListCollection({}) {
             style={{ width: 300 }}
           />
         </div>
-        
+
         {/* Thêm component GundamFilters vào đây */}
-        <GundamFilters 
-          gradeList={gradeList} 
-          activeFilter={activeGradeFilter} 
-          filterByGrade={filterByGrade} 
+        <GundamFilters
+          gradeList={gradeList}
+          activeFilter={activeGradeFilter}
+          filterByGrade={filterByGrade}
         />
-        
+
         <Row gutter={[24, 24]} justify="start">
-            {filteredData
+          {filteredData
             .filter(item => ["published", "in store"].includes(item.status))
             .map((item) => (
-            <Col 
-                xs={24} 
-                sm={12} 
-                md={8} 
-                lg={6} 
+              <Col
+                xs={24}
+                sm={12}
+                md={8}
+                lg={6}
                 key={item.gundam_id}
                 className="flex justify-center "
-            >
+              >
                 <Card
-                
-                hoverable
-                cover={
+
+                  hoverable
+                  cover={
                     <div className=" bg-gray-200 flex items-center justify-center overflow-hidden">
-                    <img 
-                        alt={item.name} 
-                        src={item.primary_image_url} 
+                      <img
+                        alt={item.name}
+                        src={item.primary_image_url}
                         className="object-cover h-[265px] w-[265px]"
                         onClick={() => showDetailModal(item)}
-                    />
+                      />
                     </div>
-                }
-                
-                bodyStyle={{ flex: 1 }}
+                  }
+
+                  bodyStyle={{ flex: 1 }}
                 >
-                <div className="px-1">
+                  <div className="px-1">
                     <div className="flex justify-between items-start mb-2">
-                        <Title level={5} className="m-0 text-gray-800 truncate" style={{ maxWidth: '80%' }} onClick={() => showDetailModal(item)}>
-                            {item.name}
-                        </Title>
-                        <Tag color={getGradeColor(item.grade)}>{item.scale}</Tag>
+                      <Title level={5} className="m-0 text-gray-800 truncate" style={{ maxWidth: '80%' }} onClick={() => showDetailModal(item)}>
+                        {item.name}
+                      </Title>
+                      <Tag color={getGradeColor(item.grade)}>{item.scale}</Tag>
                     </div>
                     <div className="flex justify-between text-black text-[16px] mt-1 mb-3">
-                    <Tag color={getGradeColor(item.grade)}>{item.grade}</Tag>                       
+                      <Tag color={getGradeColor(item.grade)}>{item.grade}</Tag>
                     </div>
                     <div className="flex justify-between text-gray-600 text-sm mt-1">
-                        <span>{item.series}</span>                       
+                      <span>{item.series}</span>
                     </div>
-                </div>
+                  </div>
                 </Card>
-            </Col>  
+              </Col>
             ))}
         </Row>
       </div>
 
       <Modal
-        title="Chi tiết sản phẩm"
-        visible={detailModalVisible}
+        title={<span className='flex justify-center font-medium text-xl m-0'>THÔNG SỐ CHI TIẾT GUNDAM</span>}
+        open={detailModalVisible}
         onCancel={handleDetailCancel}
-        footer={[
-            <Button key="back" onClick={handleDetailCancel}>
-                Đóng
-            </Button>,
-        ]}
-        width={800}
+        footer={[]}
+        width={600}
       >
         {selectedProduct && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="relative">
-                    <div className="relative w-full h-64 rounded-lg overflow-hidden">
-                        <img 
-                            src={getImageList()[currentImageIndex]} 
-                            alt={selectedProduct.name}
-                            className="w-full h-full object-contain"
-                        />
-                        {getImageList().length > 1 && (
-                            <>
-                                <Button 
-                                    shape="circle" 
-                                    icon={<LeftOutlined />} 
-                                    onClick={prevImage}
-                                    className="absolute left-2 top-1/2 transform -translate-y-1/2 z-10"
-                                />
-                                <Button 
-                                    shape="circle" 
-                                    icon={<RightOutlined />} 
-                                    onClick={nextImage}
-                                    className="absolute right-2 top-1/2 transform -translate-y-1/2 z-10"
-                                />
-                            </>
-                        )}
-                    </div>
-                    
-                    {/* Hiển thị danh sách ảnh phụ */}
-                    {getImageList().length > 1 && (
-                        <div className="flex justify-center gap-2 mt-4 overflow-x-auto py-2">
-                            {getImageList().map((img, index) => (
-                                <div 
-                                    key={index} 
-                                    className={`cursor-pointer border-2 ${currentImageIndex === index ? 'border-blue-500' : 'border-transparent'}`}
-                                    onClick={() => switchImage(index)}
-                                >
-                                    <img 
-                                        src={img} 
-                                        alt={`Ảnh ${index + 1}`} 
-                                        className="w-full h-full object-cover"
-                                    />
-                                </div>
-                            ))}
-                        </div>
-                    )}
+          <div className="max-h-screen h-[600px] overflow-auto px-2 py-4">
+            {/* Phần hiển thị hình ảnh - 2 cột */}
+            <div className="flex mb-6">
+              {/* Cột chính chứa ảnh lớn */}
+              <div className="w-4/5 pr-2">
+                <div className="relative w-full h-64 rounded-lg overflow-hidden border border-gray-200">
+                  <img
+                    src={getImageList()[currentImageIndex]}
+                    alt={selectedProduct.name}
+                    className="w-full h-full object-contain"
+                  />
+                  {getImageList().length > 1 && (
+                    <>
+                      <Button
+                        shape="circle"
+                        icon={<LeftOutlined />}
+                        onClick={prevImage}
+                        className="absolute left-2 top-1/2 transform -translate-y-1/2 z-10"
+                      />
+                      <Button
+                        shape="circle"
+                        icon={<RightOutlined />}
+                        onClick={nextImage}
+                        className="absolute right-2 top-1/2 transform -translate-y-1/2 z-10"
+                      />
+                    </>
+                  )}
                 </div>
-                
-                <div className='ml-4'>
-                    <h2 className="text-2xl font-bold mb-4 ">{selectedProduct.name}</h2>
-                    {/* <Descriptions title="THÔNG SỐ GUNDAM" bordered layout="vertical">
-                              <Descriptions.Item label="Tên mô hình" span={3}>{selectedProduct.name}</Descriptions.Item>
-                              <Descriptions.Item label="Grade">{selectedProduct.grade}</Descriptions.Item>
-                              <Descriptions.Item label="Tỷ lệ">{selectedProduct.scale}</Descriptions.Item>
-                              <Descriptions.Item label="Khối lượng">{selectedProduct.weight}</Descriptions.Item>
-                              <Descriptions.Item label="Phiên bản">{selectedProduct.version}</Descriptions.Item>
-                              <Descriptions.Item label="Vật liệu">{selectedProduct.material}</Descriptions.Item>
-                              <Descriptions.Item label="Tống số mảnh">{selectedProduct.quantity}</Descriptions.Item>
-                              <Descriptions.Item label="Dòng phim" span={1}>{selectedProduct.series}</Descriptions.Item>
-                              <Descriptions.Item label="Nhà sản xuất">{selectedProduct.manufacturer}</Descriptions.Item>
-                              <Descriptions.Item label="Năm sản xuất">{selectedProduct.release_year}</Descriptions.Item>
-                              <Descriptions.Item label="Tình trạng">{selectedProduct.condition}</Descriptions.Item>
-                              <Descriptions.Item label="Giá mua">{selectedProduct.price.toLocaleString('vi-VN')}đ</Descriptions.Item>
-                              <Descriptions.Item label="Ngày mua">{selectedProduct.purchaseDate}</Descriptions.Item>
-                              <Descriptions.Item label="Mô tả tình trạng" span={3}><span>{selectedProduct.condition === "new" ? "Mới" : "Đã qua sử dụng"}</span></Descriptions.Item>
-                              <Descriptions.Item label="Mô tả sản phẩm" span={3}>{selectedProduct.description}</Descriptions.Item>
-                          </Descriptions> */}
-                    
-                    <div className="space-y-3 ">
-                        <div className="flex">
-                            <span className="font-semibold w-1/3">Dòng phim:</span>
-                            <span>{selectedProduct.series}</span>
-                        </div>
-                        <div className="flex">
-                            <span className="font-semibold w-1/3">Phiên bản:</span>
-                            <span>{selectedProduct.version}</span>
-                        </div>
-                        <div className="flex">
-                            <span className="font-semibold w-1/3">Hãng sản xuất:</span>
-                            <span>{selectedProduct.manufacturer}</span>
-                        </div>
-                        <div className="flex">
-                            <span className="font-semibold w-1/3">Grade:</span>
-                            <span>{selectedProduct.grade}</span>
-                        </div>
-                        <div className="flex">
-                            <span className="font-semibold w-1/3">Tỉ lệ:</span>
-                            <span>{selectedProduct.scale}</span>
-                        </div>
-                        <div className="flex">
-                            <span className="font-semibold w-1/3">Khối lượng:</span>
-                            <span>{selectedProduct.weight}</span>
-                        </div>
-                        <div className="flex">
-                            <span className="font-semibold w-1/3">Tình trạng:</span>
-                            <span>{selectedProduct.condition === "new" ? "Hàng full box" : "Đã qua sử dụng"}</span>
-                        </div>
-                        <div className="flex">
-                            <span className="font-semibold w-1/3">Số lượng mảnh:</span>
-                            <span>{selectedProduct.parts_total}</span>
-                        </div>
-                        <div className="flex">
-                            <span className="font-semibold w-1/3">Chất liệu:</span>
-                            <span>{selectedProduct.material}</span>
-                        </div>
-                        <div className="flex">
-                            <span className="font-semibold w-1/3">Giá:</span>
-                            <span>{selectedProduct.price.toLocaleString()} VND</span>
-                        </div>
-                        <div className="flex">
-                            <span className="font-semibold w-1/3">Năm phát hành:</span>
-                            <span>{selectedProduct.release_year}</span>
-                        </div>
-                        <div className="flex">
-                            <span className="font-semibold w-1/3">Mô tả:</span>
-                            <span>{selectedProduct.description || "Không có mô tả"}</span>
-                        </div>
+              </div>
+
+              {/* Cột phụ chứa các ảnh nhỏ */}
+              {getImageList().length > 1 && (
+                <div className="w-1/5 pl-2 flex flex-col gap-2 max-h-64 overflow-y-auto">
+                  {getImageList().map((img, index) => (
+                    <div
+                      key={index}
+                      className={`cursor-pointer border-2 ${currentImageIndex === index ? 'border-blue-500' : 'border-gray-200'} rounded`}
+                      onClick={() => switchImage(index)}
+                    >
+                      <img
+                        src={img}
+                        alt={`Ảnh ${index + 1}`}
+                        className="w-full h-16 object-cover"
+                      />
                     </div>
+                  ))}
                 </div>
+              )}
             </div>
+
+            {/* Thông số kỹ thuật được nhóm */}
+            <Collapse defaultActiveKey={['1', '2', '3', '4']} className="mb-4">
+              {/* Nhóm 1 */}
+              <Collapse.Panel header="THÔNG TIN CƠ BẢN" key="1">
+                <Descriptions
+                  bordered
+                  size="small"
+                  column={1}
+                  labelStyle={{ fontWeight: 'bold', width: '40%' }}
+                >
+                  <Descriptions.Item label="Tên mô hình">{selectedProduct.name}</Descriptions.Item>
+                  <Descriptions.Item label="Dòng phim">{selectedProduct.series}</Descriptions.Item>
+                  <Descriptions.Item label="Phiên bản">{selectedProduct.version}</Descriptions.Item>
+                  <Descriptions.Item label="Nhà sản xuất">{selectedProduct.manufacturer}</Descriptions.Item>
+                  <Descriptions.Item label="Năm sản xuất">{selectedProduct.release_year}</Descriptions.Item>
+                </Descriptions>
+              </Collapse.Panel>
+
+              {/* Nhóm 2 */}
+              <Collapse.Panel header="THÔNG SỐ KỸ THUẬT" key="2">
+                <Descriptions
+                  bordered
+                  size="small"
+                  column={1}
+                  labelStyle={{ fontWeight: 'bold', width: '40%' }}
+                >
+                  <Descriptions.Item label="Grade">{selectedProduct.grade}</Descriptions.Item>
+                  <Descriptions.Item label="Tỷ lệ">{selectedProduct.scale}</Descriptions.Item>
+                  <Descriptions.Item label="Khối lượng">{selectedProduct.weight}</Descriptions.Item>
+                  <Descriptions.Item label="Vật liệu">{selectedProduct.material}</Descriptions.Item>
+                  <Descriptions.Item label="Tổng số mảnh">{selectedProduct.quantity}</Descriptions.Item>
+                </Descriptions>
+              </Collapse.Panel>
+
+              {/* Nhóm 3 */}
+              <Collapse.Panel header="THÔNG TIN MUA HÀNG & TÌNH TRẠNG" key="3">
+                <Descriptions
+                  bordered
+                  size="small"
+                  column={1}
+                  labelStyle={{ fontWeight: 'bold', width: '40%' }}
+                >
+                  <Descriptions.Item label="Giá mua">{selectedProduct.price.toLocaleString('vi-VN')}đ</Descriptions.Item>
+                  {selectedProduct.purchaseDate && (
+                    <Descriptions.Item label="Ngày mua">{selectedProduct.purchaseDate}</Descriptions.Item>
+                  )}
+                  <Descriptions.Item label="Tình trạng">
+                    <span>{selectedProduct.condition === "new" ? "Mới" : "Đã qua sử dụng"}</span>
+                  </Descriptions.Item>
+
+                  {selectedProduct.condition_description && (
+                    <Descriptions.Item label="Mô tả tình trạng">
+                      <span>{selectedProduct.condition_description}</span>
+                    </Descriptions.Item>
+                  )}
+                </Descriptions>
+              </Collapse.Panel>
+
+              {selectedProduct.description && (
+
+                // Nhóm 4
+                <Collapse.Panel header="MÔ TẢ SẢN PHẨM" key="4">
+                  <Typography.Paragraph className="p-3 bg-gray-50 rounded-md">
+                    {selectedProduct.description}
+                  </Typography.Paragraph>
+                </Collapse.Panel>
+              )}
+            </Collapse>
+          </div>
         )}
       </Modal>
     </div>
