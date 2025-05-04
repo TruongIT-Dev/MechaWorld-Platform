@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Layout, Card, Tabs, Typography } from "antd";
 import { myPosts, offers } from "./Data";
 
@@ -6,6 +6,7 @@ import PostsTable from "./PostsTable";
 import OffersDrawer from "./OffersDrawer";
 import ListGundamModal from "./ListGundamModal";
 import OfferDetailModal from "./OfferDetailModal";
+import { getAllUserExchangePost } from "../../../apis/Exchange/APIExchange";
 
 const { Content } = Layout;
 const { TabPane } = Tabs;
@@ -19,26 +20,28 @@ export default function ExchangeMyPost() {
     const [selectedOffer, setSelectedOffer] = useState(null);
     const [postOffers, setPostOffers] = useState([]);
     const [gunplasModalVisible, setGunplasModalVisible] = useState(false);
+    const [userPost,setUserPost] = useState([]);
 
     // View post offers
     const viewOffers = (post) => {
-        setSelectedPost(post);
-        // Filter offers for the selected post
-        const filteredOffers = offers.filter(offer => offer.postId === post.id);
-        setPostOffers(filteredOffers);
+        setPostOffers(post.offers);
+        // setSelectedPost(post);
+        console.log(post.offers);
         setOffersDrawerVisible(true);
     };
 
     // View gunplas in the post
     const viewGunplas = (post) => {
         setSelectedPost(post);
-        setGunplasModalVisible(true);
+        // setGunplasModalVisible(true);
+        console.log(post);
     };
 
     // View offer details
     const viewOfferDetail = (offer) => {
         setSelectedOffer(offer);
         setOfferDetailModalVisible(true);
+        console.log(offer);
     };
 
     // Handle offer actions (accept/reject)
@@ -52,6 +55,11 @@ export default function ExchangeMyPost() {
         console.log(`Post ${postId} deleted`);
         // In a real app, you would delete the post from your database
     };
+    useEffect(()=> {
+        getAllUserExchangePost().then((res) => {
+            setUserPost(res.data);
+        })
+    },[])
 
     return (
         <Layout className="min-h-screen bg-gray-100 mt-5">
@@ -63,6 +71,7 @@ export default function ExchangeMyPost() {
                         <TabPane tab="Bài viết của tôi" key="1">
                             <PostsTable
                                 posts={myPosts}
+                                userPost={userPost}
                                 onViewOffers={viewOffers}
                                 onViewGunplas={viewGunplas}
                                 onDeletePost={handleDeletePost}

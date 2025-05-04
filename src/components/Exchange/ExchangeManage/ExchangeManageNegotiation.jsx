@@ -9,7 +9,9 @@ import {
     ArrowDownOutlined,
     ArrowUpOutlined,
 } from "@ant-design/icons";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { getAllExchangeOffer, updateExchangeOffer } from "../../../apis/Exchange/APIExchange";
+import { useSelector } from "react-redux";
 
 
 // Mock data with more entries
@@ -58,81 +60,96 @@ const mockData = generateData(12);
 // Filter only pending negotiations
 const pendingNegotiations = mockData.filter(item => item.status.text === "Đang chờ xác nhận");
 
-
 export default function ExchangeManageNegotiation() {
 
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [currentNegotiation, setCurrentNegotiation] = useState(null);
+    const [currentCompensation, setCurrentCompensation] = useState(null);
+    const [compensationID, setCompensationID] = useState(null);
     const [form] = Form.useForm();
-
+    const user = useSelector((state) => state.auth.user)
     const [compensationType, setCompensationType] = useState('none');
-
-
+    const [offerData, setOfferData] = useState([]);
     const handleEditNegotiation = (record) => {
         setCurrentNegotiation(record);
         form.setFieldsValue({
-            paymentAmount: record.paymentAmount,
-            note: record.note
+            compensationAmount: record.offer.compensation_amount,
+            note: record.offer.note
         });
+
+        console.log('check log: ',record);
+        // console.log(record.offer.compensation_amount);
+        // console.log(currentNegotiation.offer.compensation_amount);
         setIsModalVisible(true);
     };
 
 
     const handleModalCancel = () => {
+        setCurrentCompensation(null);
+        setCurrentNegotiation(null);
+        setCompensationID(null);
         setIsModalVisible(false);
     };
 
     const handleModalSubmit = () => {
         form.validateFields().then(values => {
-            console.log("Updated negotiation:", values);
             // Here you would typically update the data and send it to backend
-            setIsModalVisible(false);
+            const offerData = {
+                ...values,
+                id: compensationID,
+                requireCompensation: currentCompensation
+            };
+            console.log("Updated negotiation:", offerData);
+            updateExchangeOffer(currentNegotiation?.offer.id, offerData);
+            // handleModalCancel();
+            // setIsModalVisible(false);
         });
     };
+
+    useEffect(() => {
+        getAllExchangeOffer().then((res) => {
+            setOfferData(res.data);
+            console.log(res.data);
+        })
+  
+    },[])
 
     // Columns for negotiation tab
     const negotiationColumns = [
         {
-            title: "STT",
-            dataIndex: "key",
-            key: "key",
-            width: 60,
-            align: "center",
-        },
-        {
             title: "Người trao đổi",
-            dataIndex: "user",
-            key: "user",
+            dataIndex: "poster",
+            key: "poster",
             width: 160,
             render: (user) => (
                 <Space>
                     <Avatar
-                        src={`/avatar-${user.toLowerCase()}.png`}
+                        src={user.avatar_url}
                         icon={<UserOutlined />}
                         className="border-2 border-blue-500"
                     />
-                    <span className="font-medium">{user}</span>
+                    <span className="font-medium">{user.full_name}</span>
                 </Space>
             ),
         },
         {
             title: "Gundam bạn muốn nhận",
-            dataIndex: "otherComic",
-            key: "otherComic",
+            dataIndex: "offer",
+            key: "poster_item",
             width: 220,
-            render: (model) => (
+            render: (offer) => (
                 <Space direction="vertical" size={0}>
-                    <Typography.Text strong>{model.title}</Typography.Text>
-                    <Typography.Text type="secondary">{model.subtitle}</Typography.Text>
+                    <Typography.Text strong>{offer.poster_exchange_items[0].name}</Typography.Text>
+                    <Typography.Text type="secondary">{offer.poster_exchange_items[0].series}</Typography.Text>
                 </Space>
             )
         },
         {
             title: "Gundam bạn trao đổi",
-            dataIndex: "yourComic",
-            key: "yourComic",
+            dataIndex: "offer",
+            key: "offer_item",
             width: 140,
-            render: (src) => (
+            render: (offer) => (
                 <div className="flex justify-center">
                     <Card
                         hoverable
@@ -141,7 +158,7 @@ export default function ExchangeManageNegotiation() {
                         cover={
                             <img
                                 alt="Gundam model"
-                                src={src}
+                                src={offer.offerer_exchange_items[0].primary_image_url}
                                 className="object-cover h-20 w-20"
                             />
                         }
@@ -151,29 +168,33 @@ export default function ExchangeManageNegotiation() {
         },
         {
             title: "Bù trừ tiền",
-            dataIndex: "paymentDirection",
-            key: "paymentDirection",
+            dataIndex: "offer",
+            key: "compensation",
             width: 180,
-            render: (direction, record) => (
-                <Space>
-                    {direction === "you" ? (
-                        <Typography.Text type="danger">
-                            <ArrowDownOutlined /> Bạn bù {record.paymentAmount.toLocaleString()}đ
-                        </Typography.Text>
-                    ) : (
-                        <Typography.Text type="success">
-                            <ArrowUpOutlined /> Họ bù {record.paymentAmount.toLocaleString()}đ
-                        </Typography.Text>
-                    )}
-                </Space>
+            render: (offer) => (
+                offer.payer_id !== null && offer.compensation_amount !== null ? (
+                    <Space>
+                        {offer.payer_id === user.id ? (
+                            <Typography.Text type="danger">
+                                <ArrowDownOutlined /> Bạn bù {offer.compensation_amount.toLocaleString()}đ
+                            </Typography.Text>
+                        ) : (
+                            <Typography.Text type="success">
+                                <ArrowUpOutlined /> Họ bù {offer.compensation_amount.toLocaleString()}đ
+                            </Typography.Text>
+                        )}
+                    </Space>
+                ) : (
+                    <Typography.Text>Không có bù tiền</Typography.Text>
+                )
             ),
         },
         {
             title: "Note",
-            dataIndex: "note",
+            dataIndex: "offer",
             key: "note",
             width: 160,
-            render: (_, record) => (
+            render: (record) => (
                 <p>{record.note}</p>
             ),
         },
@@ -186,6 +207,7 @@ export default function ExchangeManageNegotiation() {
                     className="bg-blue-500"
                     type="primary"
                     size="middle"
+                    disabled={!record.offer.last_negotiation_at}
                     onClick={() => handleEditNegotiation(record)}
                 >
                     Chỉnh sửa đề xuất
@@ -199,7 +221,8 @@ export default function ExchangeManageNegotiation() {
         <>
             <Table
                 columns={negotiationColumns}
-                dataSource={pendingNegotiations}
+                // dataSource={pendingNegotiations}
+                dataSource={offerData}
                 pagination={{
                     pageSize: 3,
                     showSizeChanger: true,
@@ -253,6 +276,7 @@ export default function ExchangeManageNegotiation() {
                                         type={compensationType === 'none' ? 'primary' : 'default'}
                                         onClick={() => {
                                             setCompensationType('none');
+                                            setCurrentCompensation(false);
                                             form.setFieldsValue({
                                                 compensationType: 'none',
                                                 compensationAmount: 0
@@ -263,19 +287,23 @@ export default function ExchangeManageNegotiation() {
                                         Không ai bù trừ tiền
                                     </Button>
                                     <Button
-                                        type={compensationType === 'receiver' ? 'primary' : 'default'}
+                                        // type={currentNegotiation.offer.payer_id === currentNegotiation.poster.id ? 'default' : 'default'}
                                         onClick={() => {
                                             setCompensationType('receiver');
+                                            setCompensationID(currentNegotiation.poster.id);
+                                            setCurrentCompensation(true);
                                             form.setFieldsValue({ compensationType: 'receiver' });
                                         }}
                                         className={compensationType === 'receiver' ? 'bg-blue-500' : ''}
                                     >
-                                        Toàn sẽ bù tiền
+                                        {currentNegotiation.poster.full_name} sẽ bù tiền
                                     </Button>
                                     <Button
-                                        type={compensationType === 'sender' ? 'primary' : 'default'}
+                                        // type={currentNegotiation.offer.payer_id === user.id ? 'primary' : 'default'}
                                         onClick={() => {
                                             setCompensationType('sender');
+                                            setCompensationID(user.id);
+                                            setCurrentCompensation(true);
                                             form.setFieldsValue({ compensationType: 'sender' });
                                         }}
                                         className={compensationType === 'sender' ? 'bg-blue-500' : ''}
@@ -283,12 +311,12 @@ export default function ExchangeManageNegotiation() {
                                         Bạn sẽ bù tiền
                                     </Button>
                                 </div>
-                                <Form.Item
+                                {/* <Form.Item
                                     name="compensationType"
                                     hidden
                                 >
                                     <Input value="463,000VND" />
-                                </Form.Item>
+                                </Form.Item> */}
                             </Form.Item>
 
                             <Form.Item
@@ -308,6 +336,7 @@ export default function ExchangeManageNegotiation() {
                                     parser={(value) => value.replace(/\$\s?|(,*)/g, '')}
                                     addonBefore={<DollarOutlined />}
                                     disabled={compensationType === 'none'}
+                                    defaultValue={currentNegotiation.offer.compensation_amount}
                                 />
                             </Form.Item>
 

@@ -1,12 +1,15 @@
 import { useState } from 'react';
 import PropTypes from 'prop-types';
 import { Modal, Card, Button, Avatar } from 'antd';
+import DealsInformation from './ExchangeInfo/DealsInformation';
+import ViewBothGundamsLists from './ExchangeInfo/ViewBothGundamsLists';
 
 const ExchangeInformation = ({
   firstCurrentStage,
   secondCurrentStage,
   exchangeData,
   firstUser,
+  exchangeDetail,
   secondUser,
   firstGundamGroup,
   secondGundamGroup,
@@ -33,7 +36,7 @@ const ExchangeInformation = ({
   };
 
   return (
-    <div className="exchange-information-container">
+    <div className="exchange-information-container mb-3">
       <div className="flex justify-between items-center gap-[10%]">
         <Button
           type="danger"
@@ -91,53 +94,32 @@ const ExchangeInformation = ({
         onCancel={handleCloseModal}
         footer={null}
       >
-        <div className="modal-content">
-          <Card title={`Gundam của ${firstUser.name}`} className="gundam-card">
-            {firstGundamGroup?.[0]?.gundams?.length > 0 ? (
-              firstGundamGroup[0].gundams.map((gundam) => (
-                <div key={gundam.id} className="mb-4">
-                  <p><strong>Tên:</strong> {gundam.name}</p>
-                  <p><strong>Grade:</strong> {gundam.grade}</p>
-                  <p><strong>Scale:</strong> {gundam.scale}</p>
-                  <p><strong>Condition:</strong> {gundam.condition}</p>
-                  <p><strong>Manufacturer:</strong> {gundam.manufacturer}</p>
-                  {/* <img src={{gundam.}} alt="" /> */}
-                </div>
-              ))
-            ) : (
-              <p>Không có Gundam nào để hiển thị.</p>
-            )}
-          </Card>
-
-          <Card title={`Gundam của ${secondUser.name}`} className="gundam-card">
-            {secondGundamGroup?.[0]?.gundams?.length > 0 ? (
-              secondGundamGroup[0].gundams.map((gundam) => (
-                <div key={gundam.id} className="mb-4">
-                  <p><strong>Tên:</strong> {gundam.name}</p>
-                  <p><strong>Grade:</strong> {gundam.grade}</p>
-                  <p><strong>Scale:</strong> {gundam.scale}</p>
-                  <p><strong>Condition:</strong> {gundam.condition}</p>
-                  <p><strong>Manufacturer:</strong> {gundam.manufacturer}</p>
-                </div>
-              ))
-            ) : (
-              <p>Không có Gundam nào để hiển thị.</p>
-            )}
-          </Card>
-        </div>
+        <>
+          <DealsInformation
+            exchangeDetails={exchangeDetail}
+            self={firstUser}
+            theOther={secondUser}
+          />
+                    
+          <ViewBothGundamsLists
+            currentGundam={firstUser}
+            partnerGundam={secondUser}
+          />
+        </>
       </Modal>
     </div>
   );
 };
 
 ExchangeInformation.propTypes = {
-  firstCurrentStage: PropTypes.object.isRequired,
-  secondCurrentStage: PropTypes.object.isRequired,
-  exchangeData: PropTypes.object.isRequired,
-  firstUser: PropTypes.object.isRequired,
-  secondUser: PropTypes.object.isRequired,
-  firstGundamGroup: PropTypes.object.isRequired,
-  secondGundamGroup: PropTypes.object.isRequired,
+  firstCurrentStage: PropTypes.number,
+  secondCurrentStage: PropTypes.number,
+  exchangeData: PropTypes.object,
+  firstUser: PropTypes.object,
+  secondUser: PropTypes.object,
+  firstGundamGroup: PropTypes.array,
+  secondGundamGroup: PropTypes.array,
+  exchangeDetail: PropTypes.object,
 };
 
 export default ExchangeInformation;

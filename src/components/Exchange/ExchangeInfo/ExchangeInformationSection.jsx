@@ -10,15 +10,21 @@ import DeliveryProcessInfo from "./DeliveryProcessInfo";
 import SuccessfulExchange from "./SuccessfulExchange";
 import DealsInformation from "./DealsInformation";
 import { Avatar } from "antd";
+import ConfirmExchangeDelivery from "./ConfirmExchangeDelivery";
 
 const ExchangeInformationSection = ({
   firstCurrentStage,
   secondCurrentStage,
   exchangeData,
   firstUser,
+  currentUser,
+  partner,
   secondUser,
   setFirstCurrentStage,
   setSecondCurrentStage,
+  selectedPickupAddress,
+  setSelectedPickupAddress,
+  exchangeDetail,
   firstAddress,
   secondAddress,
   address,
@@ -29,11 +35,15 @@ const ExchangeInformationSection = ({
 }) => {
 //   const [refundRequestsList, setRefundRequestsList] = useState([]);
 //   const [userRefundRequest, setUserRefundRequest] = useState(null);
-
-  const isFailed = ["FAILED", "REJECTED"].includes(exchangeData.status);
+  const isFailed = ["failed", "canceled"].includes(exchangeDetail?.status);
   // console.log("check exchange data", exchangeData);
-  console.log("check selectedAddress", selectedAddress);
-  console.log("check exchangeData", exchangeData);
+  // console.log("check exchangeDetails", exchangeDetail);
+  // console.log("check firstUser", currentUser);
+  // console.log("check secondUser", partner);
+  // console.log("check selectedAddress", selectedAddress);
+  console.log("check selectedPickupAddress", selectedPickupAddress);
+
+
   useEffect(() => {
     if (isFailed) {
       fetchUserRefundRequest();
@@ -57,11 +67,11 @@ const ExchangeInformationSection = ({
     if (isFailed) {
       return {
         title: `Trao đổi ${
-          exchangeData.status === "FAILED" ? "thất bại" : "đã bị từ chối"
+          exchangeData.status === "failed" ? "thất bại" : "đã bị từ chối"
         }`,
         subTitle: (
           <p className="text-red-600 leading-tight">
-            {exchangeData.status === "FAILED"
+            {exchangeData.status === "failed"
               ? "Trao đổi được hệ thống ghi nhận là thất bại khi một trong hai người trao đổi dừng trao đổi hoặc xảy ra vấn đề trong lúc trao đổi."
               : "Trao đổi được hệ thống ghi nhận là bị từ chối khi yêu cầu của bạn không được người đăng bài chấp thuận hoặc người đăng bài đã chấp nhận một yêu cầu trao đổi khác."}
           </p>
@@ -69,32 +79,19 @@ const ExchangeInformationSection = ({
       };
     }
     switch (firstCurrentStage) {
-      case 0:
-        return {
-          title: "Xác nhận danh sách sản phẩm trao đổi",
-          subTitle: (
-            <p className="leading-tight">
-              Xác nhận danh sách sản phẩm từ cả hai bên trước khi tiến hành các
-              bước tiếp theo.
-            </p>
-          ),
-        };
       case 1:
         return {
-          title: "Xác nhận tiền bù và tiền cọc",
-          subTitle: exchangeData.isRequestUser ? (
+          title: "Xác nhận Thông tin giao dịch",
+          subTitle: exchangeDetail?.payer_id === currentUser?.id ? (
             <p className="leading-tight">
-              Bạn sẽ tiến hành xác nhận tiền bù và tiền cọc cho cuộc trao đổi
-              này, dựa trên những sản phẩm mà bạn đã chọn để trao đổi.
-              <br />
-              Mức tiền sẽ được gửi đến và xác nhận bởi{" "}
-              <span className="font-semibold">{secondUser.name}</span>.
-            </p>
+            Mức tiền bù sẽ được đưa ra từ người gửi yêu cầu đề xuất cho cuộc trao đổi, bạn sẽ trả số tiền bù cho <span className="font-semibold">{partner?.full_name}</span>.
+          </p>
           ) : (
             <p className="leading-tight">
-              Mức tiền bù và tiền cọc sẽ được đưa ra từ người yêu cầu trao đổi,
-              sau đó sẽ được xác nhận bởi chính bạn để hoàn tất quá trình xác
-              nhận.
+              Mức tiền bù sẽ được đưa ra từ người gửi yêu cầu đề xuất cho cuộc trao đổi này, dựa trên những sản phẩm mà bạn đã chọn để trao đổi. 
+              <br />
+              Mức tiền sẽ được gửi đến {" "}
+              <span className="font-semibold">{currentUser?.full_name}</span>.
             </p>
           ),
         };
@@ -174,36 +171,23 @@ const ExchangeInformationSection = ({
     }
 
     switch (firstCurrentStage) {
-      case 0:
-        return (
-          <ViewBothGundamsLists
-            requestGundamsList={exchangeData.requestUserList.map(
-              (item) => item.gundam
-            )}
-            postGundamsList={exchangeData.postUserList.map(
-              (item) => item.gundam
-            )}
-            isRequestUser={exchangeData.isRequestUser}
-          />
-        );
       case 1:
-        return (
-        
-          <DealsInformation
-            exchangeDetails={exchangeData}
-            self={firstUser}
-            theOther={secondUser}
-          />
-        )
-       
-      case 2:
         return (
           <SubmitDeliveryInfo
             selectedAddress={selectedAddress}
             setSelectedAddress={setSelectedAddress}
+            setSelectedPickupAddress={setSelectedPickupAddress}
+            selectedPickupAddress={selectedPickupAddress}
             addresses={address}
             setAddresses={setAddress}
-            fetchUserAddress={() => {}} // cập nhật nếu cần
+            fetchUserAddress={() => {}} 
+          /> 
+        )
+       
+      case 2:
+        return (
+          <ConfirmExchangeDelivery
+            exchangeDetail={exchangeDetail}
           />
         );
       case 3:
@@ -235,8 +219,8 @@ const ExchangeInformationSection = ({
           <div className="w-full text-center border border-gray-500 rounded-lg py-2">
             Đang chờ{" "}
             <span className="font-semibold inline-flex items-center gap-1">
-              <Avatar size={24} src={secondUser.avatar} />
-              {secondUser.name}
+              <Avatar size={24} src={secondUser.avatar_url} />
+              {secondUser.full_name}
             </span>{" "}
             xác nhận giao hàng thành công...
           </div>
@@ -249,7 +233,7 @@ const ExchangeInformationSection = ({
   };
 
   return (
-    <div className="w-full flex flex-col gap-8 mt-4">
+    <div className="w-full flex flex-col gap-2 mt-4">
       <div className="flex items-start justify-between gap-16">
         <div className="basis-2/3">
           <p className="text-xl font-semibold uppercase">{getTitle()?.title}</p>
@@ -282,20 +266,23 @@ const ExchangeInformationSection = ({
 };
 
 ExchangeInformationSection.propTypes = {
-  firstCurrentStage: PropTypes.number.isRequired,
-  secondCurrentStage: PropTypes.number.isRequired,
-  exchangeData: PropTypes.object.isRequired,
-  firstUser: PropTypes.object.isRequired,
-  secondUser: PropTypes.object.isRequired,
-  setFirstCurrentStage: PropTypes.func.isRequired,
-  setSecondCurrentStage: PropTypes.func.isRequired,
-  firstAddress: PropTypes.string.isRequired,
-  secondAddress: PropTypes.string.isRequired,
-  address: PropTypes.array.isRequired,
-  setAddress: PropTypes.func.isRequired,
+  firstCurrentStage: PropTypes.number,
+  secondCurrentStage: PropTypes.number,
+  exchangeData: PropTypes.object,
+  firstUser: PropTypes.object,
+  secondUser: PropTypes.object,
+  setFirstCurrentStage: PropTypes.func,
+  setSecondCurrentStage: PropTypes.func,
+  firstAddress: PropTypes.string,
+  secondAddress: PropTypes.string,
+  address: PropTypes.array,
+  setAddress: PropTypes.func,
   selectedAddress: PropTypes.object,
-  setSelectedAddress: PropTypes.func.isRequired,
-  setIsLoading: PropTypes.func.isRequired,
+  setSelectedAddress: PropTypes.func,
+  setIsLoading: PropTypes.func,
+  exchangeDetail: PropTypes.object,
+  currentUser: PropTypes.object,
+  partner: PropTypes.object,
 };
 
 export default ExchangeInformationSection;

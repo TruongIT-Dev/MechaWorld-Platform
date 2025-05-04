@@ -6,6 +6,8 @@ import ExchangeLoader from "./ExchangeLoader";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { getUserAddresses } from "../../apis/User/APIUser";
+import { getExchangeDetail } from "../../apis/Exchange/APIExchange";
+import { useParams } from "react-router-dom";
 
 const ExchangeDetailInformation = () => {
   // This component is responsible for displaying the exchange detail information, including the exchange information section, action buttons, and progress section.
@@ -22,22 +24,26 @@ const ExchangeDetailInformation = () => {
 
   // State lưu trữ dữ liệu trao đổi và địa chỉ người dùng
   const [exchangeData, setExchangeData] = useState([]);
-
+  const [exchangeDetail, setExchangeDetail] = useState(null);
   // State quản lý trạng thái tải dữ liệu
   const [isLoading, setIsLoading] = useState(true);
 
-  const [firstAddress, setFirstAddress] = useState("");
-  const [secondAddress, setSecondAddress] = useState("");
+  const [firstAddress, setFirstAddress] = useState(null);
+  const [secondAddress, setSecondAddress] = useState(null);
+  const [currentUser2, setFirstUser] = useState();
+  const [partner, setSecondUser] = useState();
 
   const [address, setAddress] = useState([]);
   const [selectedAddress, setSelectedAddress] = useState(null);
+  const [selectedPickupAddress, setSelectedPickupAddress] = useState(null);
+  const ExchangeId = () => {
+    const { id } = useParams();
+    return id;
+  };
 
-  // The firstUser and secondUser variables are used to determine the users involved in the exchange process.
-  // These variables are set based on the isRequestUser property of the exchangeData object, which indicates whether the current user is the request user or the post user.
-  // Depending on the value of isRequestUser, the firstUser and secondUser variables are assigned the appropriate user objects from the exchangeData object.
-  // This allows the component to display the correct information for each user in the exchange process.
-  // The firstUser variable represents the user who is requesting the exchange, while the secondUser variable represents the user who is posting the exchange.
-  // These variables are used to render the exchange information and action buttons for each user.
+  const exchangeId = ExchangeId();
+
+ 
   const firstUser = exchangeData?.exchange
     ? exchangeData.isRequestUser
       ? exchangeData.exchange.requestUser
@@ -50,12 +56,7 @@ const ExchangeDetailInformation = () => {
       : exchangeData.exchange.requestUser
     : null;
 
-  // The firstGundamGroup and secondGundamGroup variables are used to determine the groups of users involved in the exchange process.
-  // These variables are set based on the isRequestUser property of the exchangeData object, which indicates whether the current user is the request user or the post user.
-  // Depending on the value of isRequestUser, the firstGundamGroup and secondGundamGroup variables are assigned the appropriate user lists from the exchangeData object.
-  // This allows the component to display the correct information for each group of users in the exchange process.
-  // The firstGundamGroup variable represents the group of users who are requesting the exchange, while the secondGundamGroup variable represents the group of users who are posting the exchange.
-  // These variables are used to render the exchange information and action buttons for each group of users.
+
 
   const firstGundamGroup = exchangeData
     ? exchangeData.isRequestUser
@@ -181,17 +182,75 @@ const ExchangeDetailInformation = () => {
           },         
         ],
         initialStage: {
-          firstUser:5, 
-          secondUser: 5, 
+          firstUser: 2, 
+          secondUser: 2, 
         },
 
       };
 
       setExchangeData(fakeExchangeData);
 
+      getExchangeDetail(exchangeId).then((res) => {
+        setExchangeDetail(res.data);
+        setFirstUser(res.data.current_user);
+        setSecondUser(res.data.partner);
+        // console.log(res.data.current_user);
+        // console.log(res.data.partner);
+        // console.log(res.data);
+        switch (res.data.status) {
+          case "pending":
+            if (res.data.current_user.from_address === null) {
+              setFirstCurrentStage(1); // Nếu from_address là null
+            } else if (res.data.current_user.delivery_fee !== null) {
+              if (res.data.current_user.delivery_fee_paid == true) {
+                setFirstCurrentStage(4); // Nếu delivery_fee_paid = true
+              } else {
+                setFirstCurrentStage(3); // Nếu có delivery_fee nhưng chưa thanh toán
+              }
+            } else {
+              setFirstCurrentStage(2); // Nếu có from_address nhưng không có delivery_fee
+            }
+  
+            if (res.data.partner.from_address === null) {
+              setSecondCurrentStage(1); 
+            } else if (res.data.partner.delivery_fee !== null) {
+              if (res.data.partner.delivery_fee_paid == true) {
+                setSecondCurrentStage(4); 
+              } else {
+                setSecondCurrentStage(3); 
+              }
+            } else {
+              setSecondCurrentStage(2); 
+            }
+            break;
+  
+          case "packaging":
+          case "delivering":
+          case "delivered":
+            setFirstCurrentStage(4); // Nếu đang đóng gói, giao hàng hoặc đã giao hàng
+            setSecondCurrentStage(4); 
+            break;
+  
+          case "completed":
+            setFirstCurrentStage(6); // Nếu giao dịch đã hoàn tất
+            setSecondCurrentStage(6); 
+            break;
+  
+          default:
+            setFirstCurrentStage(0); // Mặc định nếu không khớp trạng thái nào
+            setSecondCurrentStage(0); 
+            break;
+        }
+      })
+
+      // console.log(firstCurrentStage);
+      // console.log(secondCurrentStage);
       // Thiết lập tiến trình ban đầu dựa trên dữ liệu nhận được
-      setFirstCurrentStage(fakeExchangeData.initialStage.firstUser);
-      setSecondCurrentStage(fakeExchangeData.initialStage.secondUser);
+      // setFirstCurrentStage(fakeExchangeData.initialStage.firstUser);
+      // setSecondCurrentStage(fakeExchangeData.initialStage.secondUser);
+
+
+
     } catch (error) {
       console.error("Lỗi khi lấy dữ liệu trao đổi:", error);
     }
@@ -200,12 +259,16 @@ const ExchangeDetailInformation = () => {
   // Hàm lấy địa chỉ người dùng từ API
   const fetchUserAddress = async () => {
     try {
-      // Giả định gọi API và nhận danh sách địa chỉ
       const addresses = await getUserAddresses(currentUser.id).then((res) => res.data);
-      // lọc địa chỉ có isPrimary = true
+
+      const pickupAddress = addresses.filter((address) => address.is_pickup_address === true);
+      console.log("pickupAddress" ,pickupAddress);
       const primaryAddress = addresses.filter((address) => address.is_primary === true);
+      
       // console.log(addresses);
       setSelectedAddress(primaryAddress[0]);
+      setSelectedPickupAddress(pickupAddress[0]);
+      // console.log(selectedPickupAddress);
       // console.log("checking data",selectedAddress);
     } catch (error) {
       console.error("Lỗi khi lấy địa chỉ người dùng:", error);
@@ -226,7 +289,7 @@ const ExchangeDetailInformation = () => {
     }
     fetchAddress();
     // console.log("checking selectedAddress data", selectedAddress);
-  }, []);
+  }, [firstCurrentStage, secondCurrentStage]);
 
 
 
@@ -243,10 +306,15 @@ const ExchangeDetailInformation = () => {
               setSecondCurrentStage={setSecondCurrentStage}
               firstUser={firstUser}
               secondUser={secondUser}
+              currentUser={currentUser2}
+              partner={partner}
+              exchangeDetail={exchangeDetail}
               firstGundamGroup={firstGundamGroup}
               secondGundamGroup={secondGundamGroup}
               exchangeData={exchangeData}
               address={address}
+              selectedPickupAddress={selectedPickupAddress}
+              setSelectedPickupAddress={setSelectedPickupAddress}
               setAddress={setAddress}
               selectedAddress={selectedAddress}
               setSelectedAddress={setSelectedAddress}
@@ -260,14 +328,17 @@ const ExchangeDetailInformation = () => {
               oppositeCurrentStage={secondCurrentStage}
               setSecondCurrentStage={setSecondCurrentStage}
               exchangeData={exchangeData}
+              exchangeDetail={exchangeDetail}
               selectedAddress={selectedAddress}
+              selectedPickupAddress={selectedPickupAddress}
             />
             <ExchangeInformation
               firstCurrentStage={firstCurrentStage}
               secondCurrentStage={secondCurrentStage}
               exchangeData={exchangeData}
-              firstUser={firstUser}
-              secondUser={secondUser}
+              firstUser={currentUser2}
+              secondUser={partner}
+              exchangeDetail={exchangeDetail}
               firstGundamGroup={firstGundamGroup}
               secondGundamGroup={secondGundamGroup}
             />
@@ -277,7 +348,9 @@ const ExchangeDetailInformation = () => {
           <div className="basis-1/3 min-w-fit ">
             <ProgressSection 
             firstCurrentStage={firstCurrentStage} 
+            secondCurrentStage={secondCurrentStage} 
             exchangeData={exchangeData}
+            exchangeDetail={exchangeDetail}
             />
           </div>
         </>
