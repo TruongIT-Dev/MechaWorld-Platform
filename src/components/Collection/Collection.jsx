@@ -1,84 +1,26 @@
-import PropTypes from 'prop-types';
-import { useSelector } from "react-redux";
-import {
-  BankOutlined,
-  WalletOutlined, EditOutlined
-} from '@ant-design/icons';
-import { Menu, Layout } from 'antd';
 
-import { Outlet, Link } from 'react-router-dom';
+import { useState } from "react";
+
+import ShopProduct from "./ListCollection";  // Bảng hiển thị dữ liệu
+import ShopProductCreate from "./AddCollection"; // Form tạo sản phẩm
 
 
-
-const Collection = () => {
-  const { Sider, Content } = Layout;
-  const user = useSelector((state) => state.auth.user);
-
-
-  const items = [
-
-    {
-      key: "/collection",
-      icon: <BankOutlined className="text-lg text-red-500" />,
-      label: <Link to="/collection/list">Bộ sưu tập</Link>,
-    },
-    {
-      key: "/collection/add",
-      icon: <WalletOutlined className="text-lg text-green-500" />,
-      label: <Link to="/collection/add">Thêm vào bộ sưu tập</Link>,
-    },
-  ];
+export default function Collection  ()  {
+  const [isCreating, setIsCreating] = useState(false);
 
   return (
-
-    <Layout className="container">
-
-      {/* Sidebar - Menu */}
-      <Sider width={250} className="bg-white shadow-md h-fit  p-4 mt-36 mb-4">
-        <div className='flex flex-col'>
-          <div className="flex items-center py-2 gap-3 border-b">
-            <img
-              src={user?.avatar_url}
-              className="w-10 h-10 bg-gray-100 rounded-full object-contain"
-              alt="Avatar"
-            />
-            <div className='flex flex-col'>
-              <p className="font-bold">{user?.full_name}</p>
-
-              <div className='flex items-center space-x-2 text-sm text-gray-400'>
-                <EditOutlined className='mt-1' />
-                <Link to="/member/profile/user">
-                  Sửa hồ sơ
-                </Link>
-              </div>
-            </div>
+    <div>
+      {/* Nếu đang ở chế độ tạo sản phẩm */}
+      {isCreating ? (
+        <ShopProductCreate setIsCreating={setIsCreating} />
+      ) : (
+        <>
+          <div>
+            {/* Hiển thị bảng sản phẩm */}
+            <ShopProduct setIsCreating={setIsCreating} isCreating={isCreating} />
           </div>
-        </div>
-
-
-        {/* Menu Điều Hướng */}
-        <Menu
-          mode="inline"
-          selectedKeys={[location.pathname]} // Highlight menu dựa trên đường dẫn hiện tại
-          defaultOpenKeys={["/collection/list"]} // Mở menu mặc định
-          items={items}
-        />
-
-      </Sider>
-
-      <Layout className="flex-1 py-4 ml-6 mt-32">
-        <Content className="bg-white rounded-lg shadow-md h-full w-full">
-
-
-          <Outlet />
-        </Content>
-      </Layout>
-    </Layout>
+        </>
+      )}
+    </div>
   );
-};
-
-Collection.propTypes = {
-  setIsCreating: PropTypes.func.isRequired,
-};
-
-export default Collection;
+}
