@@ -13,7 +13,7 @@ import { incrementListingsUsed, decrementListingsUsed, updateSellerPlan } from '
 
 function ShopProduct({ isCreating, setIsCreating }) {
 
-  console.log("setIsCreating", setIsCreating);
+  // console.log("setIsCreating", setIsCreating);
   
 
     const dispatch = useDispatch();

@@ -1,7 +1,7 @@
 import { useSelector } from "react-redux";
 import { useEffect, useState } from "react";
 import { Table, Row, Tag, Button, Dropdown, Modal, message, Upload, Space, Tooltip, Input, Select } from "antd";
-import { StopOutlined, EllipsisOutlined, UserOutlined, DollarOutlined, WalletOutlined, BankOutlined, MobileOutlined, CreditCardOutlined, ClockCircleOutlined, CheckCircleOutlined, GiftOutlined, CarOutlined, FileTextOutlined, CheckOutlined, CloseCircleOutlined, QuestionCircleOutlined, MessageOutlined, EyeOutlined } from "@ant-design/icons";
+import { StopOutlined, EllipsisOutlined, DollarOutlined, WalletOutlined, BankOutlined, MobileOutlined, CreditCardOutlined, ClockCircleOutlined, CheckCircleOutlined, GiftOutlined, CarOutlined, FileTextOutlined, CheckOutlined, CloseCircleOutlined, QuestionCircleOutlined, MessageOutlined, EyeOutlined } from "@ant-design/icons";
 
 import { GetOrder, ConfirmOrder } from "../../apis/Sellers/APISeller";
 import { PackagingOrder } from '../../apis/Orders/APIOrder';
@@ -424,7 +424,7 @@ function ShopOrderManagement() {
 
       {/* Modal đóng gói sản phẩm */}
       <Modal
-        title="Xác nhận đóng gói sản phẩm"
+        title={<span className="w-full flex justify-center text-lg font-semibold">XÁC NHẬN ĐÓNG GÓI ĐƠN HÀNG</span>}
         open={isModalPackageVisible}
         onCancel={() => setIsModalPackageVisible(false)}
         footer={[
@@ -438,19 +438,19 @@ function ShopOrderManagement() {
             loading={loading}
             className="bg-blue-500 hover:bg-blue-600"
           >
-            Xác nhận đóng gói
+            Xác nhận
           </Button>
         ]}
       >
         <div className="mb-4">
-          <p className="font-medium mb-2">Mã đơn hàng: {selectedOrder?.code}</p>
-          <p className="text-red-500 font-medium">
+          <p className="mb-2 text-lg">Mã đơn hàng: <strong>{selectedOrder?.code}</strong></p>
+          <p className="text-red-400 font-medium">
             Yêu cầu shop gửi ảnh xác thực đã đóng gói sản phẩm. Sau khi xác thực, bên vận chuyển sẽ bắt đầu lấy hàng. Nếu mặt hàng không khớp với hình ảnh đã xác thực, Shop sẽ chịu trách nhiệm bồi thường.
           </p>
         </div>
         <div className="mt-6">
-          <label className="font-bold">
-            <span className="text-red-500">*</span> Ảnh xác thực đóng gói (tối đa 5 ảnh)
+          <label className="font-medium">
+            <span className="text-red-500">*</span> Gửi ảnh xác minh (tối đa 5 ảnh)
           </label>
           <br />
           <Upload

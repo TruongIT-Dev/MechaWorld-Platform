@@ -1,10 +1,19 @@
-import React, { useEffect, useState } from 'react';
-import { Modal, Descriptions, Divider, Card, Avatar, Image, Tag, Button, Steps, Tabs } from 'antd';
-import { ShopOutlined, UserOutlined, EnvironmentOutlined, ClockCircleOutlined, DollarOutlined } from '@ant-design/icons';
-
-const { Step } = Steps;
+import { Modal, Descriptions, Divider, Card, Avatar, Image, Tag, Tabs } from 'antd';
+import { ShopOutlined, UserOutlined, EnvironmentOutlined, ClockCircleOutlined, PhoneOutlined } from '@ant-design/icons';
+import { useState, useEffect } from 'react';
 
 const OrderHistoryDetail = ({ visible, onClose, orderData }) => {
+    // Track active tab in component state
+    const [activeTab, setActiveTab] = useState('1');
+
+    // console.log("activeTab", activeTab);
+
+    // Reset active tab when modal opens
+    useEffect(() => {
+        if (visible) {
+            setActiveTab('1');
+        }
+    }, [visible]);
 
     if (!orderData) return null;
 
@@ -17,7 +26,6 @@ const OrderHistoryDetail = ({ visible, onClose, orderData }) => {
         order_transaction,
         to_delivery_information
     } = orderData;
-
 
     // Format currency
     const formatCurrency = (amount) => {
@@ -39,17 +47,17 @@ const OrderHistoryDetail = ({ visible, onClose, orderData }) => {
     };
 
     // Map status to step
-    const getOrderStatus = () => {
-        const statusMap = {
-            'pending': 0,
-            'confirmed': 1,
-            'shipping': 2,
-            'delivered': 3,
-            'completed': 4,
-            'canceled': -1
-        };
-        return statusMap[order.status] || 0;
-    };
+    // const getOrderStatus = () => {
+    //     const statusMap = {
+    //         'pending': 0,
+    //         'confirmed': 1,
+    //         'shipping': 2,
+    //         'delivered': 3,
+    //         'completed': 4,
+    //         'canceled': -1
+    //     };
+    //     return statusMap[order.status] || 0;
+    // };
 
     // Map status to color
     const getStatusColor = (status) => {
@@ -79,6 +87,10 @@ const OrderHistoryDetail = ({ visible, onClose, orderData }) => {
         return statusTextMap[status] || status;
     };
 
+    // Controlled onChange handler
+    const handleTabChange = (key) => {
+        setActiveTab(key);
+    };
 
     const items = [
         {
@@ -149,7 +161,6 @@ const OrderHistoryDetail = ({ visible, onClose, orderData }) => {
                         </Descriptions.Item>
                         <Descriptions.Item label="Trạng thái đơn hàng" span={3}>
                             <Tag color={getStatusColor(order_transaction.status)}>
-                                {/* {order_transaction.status === 'pending' ? 'Chờ thanh toán' : getStatusText(order_transaction.status)} */}
                                 {getStatusText(order.status)}
                             </Tag>
                         </Descriptions.Item>
@@ -179,8 +190,8 @@ const OrderHistoryDetail = ({ visible, onClose, orderData }) => {
                         </Descriptions.Item>
                         <Descriptions.Item label="Số điện thoại" span={3}>
                             <div className="flex items-center gap-2">
-                                <UserOutlined />
-                                <span>{to_delivery_information.full_name}</span>
+                                <PhoneOutlined />
+                                <span>{to_delivery_information.phone_number}</span>
                             </div>
 
                         </Descriptions.Item>
@@ -211,14 +222,19 @@ const OrderHistoryDetail = ({ visible, onClose, orderData }) => {
     return (
         <Modal
             title={<h1 className='text-center font-bold text-xl'>CHI TIẾT ĐƠN MUA</h1>}
-            centered
             open={visible}
             onCancel={onClose}
             footer={null}
             width={800}
             className="order-detail-modal"
+            destroyOnClose={true}
         >
-            <Tabs defaultActiveKey="1" items={items} centered />
+            <Tabs
+                activeKey={activeTab}
+                items={items}
+                onChange={handleTabChange}
+                centered
+            />
         </Modal>
     );
 };

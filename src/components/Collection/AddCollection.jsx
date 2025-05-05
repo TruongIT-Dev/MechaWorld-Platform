@@ -7,7 +7,7 @@ import { InfoCircleOutlined, UploadOutlined, CloseOutlined, PlusOutlined } from 
 import { GetGrades } from '../../apis/Gundams/APIGundam';
 import { PostGundam } from "../../apis/User/APIUser";
 
-import ImageUpload from "../Shop/ImageUpload";
+import ImageUpload from "../Shop/ProductManagement/FormSteps/ImageUpload";
 
 const { Option } = Select;
 
