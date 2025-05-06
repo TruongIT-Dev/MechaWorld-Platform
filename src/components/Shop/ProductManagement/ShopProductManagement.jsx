@@ -7,13 +7,13 @@ export default function ShopProductManagement() {
   const [isCreating, setIsCreating] = useState(false);
 
   return (
-    <div>
+    <div className="container mx-auto px-4">
       {/* Nếu đang ở chế độ tạo sản phẩm */}
       {isCreating ? (
         <ShopProductCreate setIsCreating={setIsCreating} />
       ) : (
         <>
-          <div>
+          <div className="container mx-auto px-4">
             {/* Hiển thị bảng sản phẩm */}
             <ShopProduct setIsCreating={setIsCreating} isCreating={isCreating} />
           </div>

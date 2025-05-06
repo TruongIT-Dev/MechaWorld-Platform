@@ -6,7 +6,8 @@ import { Card, Row, Col, Button, Input, Tag, Typography, Modal, Descriptions, Co
 import {
   SearchOutlined,
   LeftOutlined,
-  RightOutlined
+  RightOutlined,
+  PlusOutlined
 } from '@ant-design/icons';
 
 import { GetGundamByID, getUser } from '../../apis/User/APIUser';
@@ -41,7 +42,7 @@ const GundamFilters = ({ gradeList, activeFilter, filterByGrade }) => {
 
 const gradeList = ['Entry Grade', 'High Grade', 'Master Grade', 'Real Grade', 'Perfect Grade', 'Super Deformed'];
 
-function ListCollection() {
+function ListCollection({ isCreating, setIsCreating }) {
   const user = useSelector((state) => state.auth.user);
   const [gundamList, setGundamList] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
@@ -155,7 +156,7 @@ function ListCollection() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-4 bg-gray-50 min-h-screen">
+    <div className="container mx-auto px-4 py-[150px] bg-gray-50 min-h-screen">
       {/* Featured Products */}
       <div className="px-[10px]">
         <h2 className="text-[36px] text-center font-bold text-gray-800 mb-2">Bộ Sưu Tập</h2>
@@ -169,6 +170,14 @@ function ListCollection() {
             onChange={(e) => setSearchTerm(e.target.value)}
             style={{ width: 300 }}
           />
+          <Button
+                  type="primary"
+                  icon={<PlusOutlined />}
+                  className="bg-blue-500 hover:bg-[#4a90e2] text-white w-full md:w-auto ml-4"
+                  onClick={() => setIsCreating(true)}
+                >
+                  Thêm sản phẩm
+          </Button>
         </div>
 
         {/* Thêm component GundamFilters vào đây */}
