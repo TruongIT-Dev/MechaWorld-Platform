@@ -1,7 +1,7 @@
 import Cookies from "js-cookie";
 import PropTypes from "prop-types";
 import { useEffect, useState } from "react";
-import { Form, message, notification, Steps, Card, Button, Space } from "antd";
+import { Form, message, notification, Steps, Card, Button, Space, Breadcrumb } from "antd";
 import { ArrowLeftOutlined, ArrowRightOutlined, CheckOutlined } from '@ant-design/icons';
 
 import { GetGrades } from '../../../apis/Gundams/APIGundam';
@@ -232,7 +232,8 @@ const ShopProductCreate = ({ setIsCreating }) => {
 
   return (
     <div className="bg-white p-6 rounded-lg shadow-sm mx-auto">
-      <h2 className="text-2xl font-semibold mb-6 text-gray-800 border-b pb-3">Thêm Sản Phẩm Gundam Mới</h2>
+
+      <h2 className="text-2xl font-semibold text-gray-800 pb-3 uppercase mb-6 border-b">Thêm Sản Phẩm Gundam Mới</h2>
 
       <Steps current={currentStep} className="mb-8">
         {steps.map(item => (
@@ -264,23 +265,25 @@ const ShopProductCreate = ({ setIsCreating }) => {
           </div>
           <div>
             {currentStep < steps.length - 1 && (
-              <Button
-                type="primary"
-                onClick={nextStep}
-                className="bg-blue-500"
-                icon={<ArrowRightOutlined />}
-              >
-                Tiếp theo
-              </Button>
-            )}
-            {currentStep === steps.length - 1 && (
               <Space>
                 <Button
                   onClick={() => setIsCreating(false)}
                   disabled={isUploading}
                 >
-                  Hủy
+                  Hủy thêm sản phẩm
                 </Button>
+                <Button
+                  type="primary"
+                  onClick={nextStep}
+                  className="bg-blue-500"
+                  icon={<ArrowRightOutlined />}
+                >
+                  Tiếp theo
+                </Button>
+              </Space>
+            )}
+            {currentStep === steps.length - 1 && (
+              <Space>
                 <Button
                   type="primary"
                   onClick={handleFinish}

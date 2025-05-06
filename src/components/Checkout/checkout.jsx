@@ -12,11 +12,9 @@ import { getUserAddresses, postUserAddresses, updateAddress } from '../../apis/U
 
 import axios from 'axios';
 import Cookies from 'js-cookie';
-import footerLogo from "../../assets/image/icon/iconwallet.png";
-
+import WalletImg from "../../assets/image/icon/iconwallet.png";
 
 const { Option } = Select;
-
 
 const groupByShop = (items) => {
   return items.reduce((acc, item) => {
@@ -27,9 +25,7 @@ const groupByShop = (items) => {
   }, {});
 };
 
-
 const Checkout = () => {
-
   const location = useLocation();
   const user = useSelector((state) => state.auth.user);
   const navigate = useNavigate();
@@ -53,7 +49,6 @@ const Checkout = () => {
   const [userBalance, setUserBalance] = useState(0);
   const [rawExpectedDeliveryDate, setRawExpectedDeliveryDate] = useState('');
   const [expectedDeliveryDate, setExpectedDeliveryDate] = useState('');
-
 
   const [isCalculatingShipping, setIsCalculatingShipping] = useState(false);
 
@@ -305,33 +300,51 @@ const Checkout = () => {
       return;
     }
 
-    const orderPayload = {
-      buyer_address_id: userAddress.id,
-      delivery_fee: shippingFee,
-      expected_delivery_time: rawExpectedDeliveryDate,
-      gundam_ids: selectedItems.map(item => item.gundam_id),
-      items_subtotal: totalPrice,
-      note: note,
-      payment_method: paymentMethod,
-      seller_id: selectedItems[0].seller_id,
-      total_amount: totalPrice + shippingFee,
-      completed_at: null
-    };
+    // Procesar cada tienda de forma independiente
+    const shops = Object.entries(groupedCartItems);
+    let hasError = false;
+    let errorDetails = null;
 
     try {
-      await CheckoutCart(orderPayload);
+      // Mostrar loading mientras se procesan las órdenes
+      message.loading({ content: "Đang xử lý đơn hàng...", key: "orderProcessing", duration: 0 });
+
+      // Iterar a través de cada tienda y crear órdenes por separado
+      for (const [shopName, items] of shops) {
+        const shopTotal = items.reduce((sum, item) => sum + item.gundam_price, 0);
+        const shopShippingFee = Math.round(shippingFee * (items.length / selectedItems.length));
+
+        const orderPayload = {
+          buyer_address_id: userAddress.id,
+          delivery_fee: shopShippingFee,
+          expected_delivery_time: rawExpectedDeliveryDate,
+          gundam_ids: items.map(item => item.gundam_id),
+          items_subtotal: shopTotal,
+          note: note,
+          payment_method: paymentMethod,
+          seller_id: items[0].seller_id, // Usar el ID de vendedor de esta tienda
+          total_amount: shopTotal + shopShippingFee,
+          completed_at: null
+        };
+
+        // Llamar a la API para crear la orden
+        await CheckoutCart(orderPayload);
+      }
+
+      // Cerrar notificación de carga y mostrar éxito
+      message.destroy("orderProcessing");
       message.success("Đặt hàng thành công!");
       navigate('/member/profile/orderHistory');
-
-      // console.log("Order response:", res.data);
     } catch (error) {
+      // Cerrar notificación de carga
+      message.destroy("orderProcessing");
       console.error("Checkout error:", error);
 
-      // ✅ Lấy status và message từ response BE
+      // Obtener detalles del error
       const status = error?.response?.status;
       const errorKey = error?.response?.data?.error || 'unknown';
 
-      // ✅ Gọi Modal hiển thị lỗi
+      // Mostrar notificación de error
       ShowErrorNotification(status, errorKey);
     }
   };
@@ -655,7 +668,7 @@ const Checkout = () => {
                 <Radio value="wallet">
                   <div className="flex items-center justify-between w-full p-2 border border-transparent hover:border-gray-200 rounded-md">
                     <div className="flex items-center">
-                      <img src={footerLogo} alt="wallet" className="max-w-[50px] mr-3" />
+                      <img src={WalletImg} alt="wallet" className="max-w-[50px] mr-3" />
                       <div>
                         <p className="font-medium text-base">Thanh toán bằng ví ComZone</p>
                         <p className="text-gray-500 text-xs mt-1">
@@ -699,8 +712,8 @@ const Checkout = () => {
 
       {/* Sidebar */}
       <div className="col-span-1">
-        <div className='sticky top-20'>
-          <Card className=''>
+        <div className="sticky top-20">
+          <Card className="">
             <div className="flex justify-between items-center">
               <p className="text-xl font-bold">ĐƠN HÀNG</p>
               <a href="/cart" className="text-blue-500 text-sm">Quay lại giỏ hàng</a>

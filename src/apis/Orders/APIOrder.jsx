@@ -36,9 +36,9 @@ export const CheckoutCart = (checkoutData) => {
 }
 
 
-// POST Confirm Order received (By Buyer)
-export const ReceivedOrder = (orderId) => {
-  return axios.patch(`/orders/${orderId}/received`, {
+// POST Confirm Order Delevered (By Buyer)
+export const ConfirmOrderDelivered = (orderId) => {
+  return axios.patch(`/orders/${orderId}/complete`, {
     headers: {
       "Content-Type": "application/json",
     },
