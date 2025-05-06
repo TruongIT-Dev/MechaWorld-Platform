@@ -16,10 +16,12 @@ const ExchangeInformationSection = ({
   firstCurrentStage,
   secondCurrentStage,
   exchangeData,
-  firstUser,
   currentUser,
   partner,
-  secondUser,
+  deliverData,
+  deliverPartnerData,
+  setDeliverPartnerData,
+  setDeliverData,
   setFirstCurrentStage,
   setSecondCurrentStage,
   selectedPickupAddress,
@@ -41,7 +43,7 @@ const ExchangeInformationSection = ({
   // console.log("check firstUser", currentUser);
   // console.log("check secondUser", partner);
   // console.log("check selectedAddress", selectedAddress);
-  console.log("check selectedPickupAddress", selectedPickupAddress);
+  // console.log("check selectedPickupAddress", selectedPickupAddress);
 
 
   useEffect(() => {
@@ -193,11 +195,15 @@ const ExchangeInformationSection = ({
       case 3:
         return (
           <PlaceDeposit
-            exchangeDetails={exchangeData}
+            exchangeDetails={exchangeDetail}
             firstAddress={firstAddress}
             secondAddress={secondAddress}
-            firstUser={firstUser}
-            secondUser={secondUser}
+            firstUser={currentUser}
+            deliverData={deliverData}
+            deliverPartnerData={deliverPartnerData}
+            setDeliverPartnerData={setDeliverPartnerData}
+            setDeliverData={setDeliverData}
+            secondUser={partner}
             fetchExchangeDetails={() => {}}
             setIsLoading={setIsLoading}
           />
@@ -205,9 +211,9 @@ const ExchangeInformationSection = ({
       case 4:
         return (
           <DeliveryProcessInfo
-            exchangeDetails={exchangeData}
-            firstUser={firstUser}
-            secondUser={secondUser}
+            exchangeDetails={exchangeDetail}
+            firstUser={currentUser}
+            secondUser={partner}
             firstAddress={firstAddress}
             secondAddress={secondAddress}
             fetchExchangeDetails={() => {}}
@@ -219,14 +225,14 @@ const ExchangeInformationSection = ({
           <div className="w-full text-center border border-gray-500 rounded-lg py-2">
             Đang chờ{" "}
             <span className="font-semibold inline-flex items-center gap-1">
-              <Avatar size={24} src={secondUser.avatar_url} />
-              {secondUser.full_name}
+              <Avatar size={24} src={partner.avatar_url} />
+              {partner.full_name}
             </span>{" "}
             xác nhận giao hàng thành công...
           </div>
         );
       case 6:
-        return <SuccessfulExchange exchangeDetails={exchangeData} />;
+        return <SuccessfulExchange exchangeDetails={exchangeDetail} />;
       default:
         return null;
     }

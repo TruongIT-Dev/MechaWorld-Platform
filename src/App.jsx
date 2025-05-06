@@ -59,15 +59,18 @@ import { logout, updateUser } from "./features/auth/authSlice";
 
 import Spinner from "./components/Spinner";
 import PageLoading from "./components/PageLoading";
+import { restoreDeliveryFees } from "./features/exchange/middleware/deliveryFeePersistence";
 
+
+
+
+
+// Initialize Firebase
 function App() {
+
 
   const dispatch = useDispatch();
 
-  // const accessToken = useSelector((state) => state.auth.access_token);
-  // const userId = useSelector((state) => state.auth.user);
-
-  // console.log(accessToken, userId);
 
   useEffect(() => {
     const accessToken = Cookies.get("access_token");
@@ -76,6 +79,7 @@ function App() {
         if (userData) {
           // console.log(userData)
           dispatch(updateUser(userData.data));
+          dispatch(restoreDeliveryFees());
         } else {
           dispatch(logout());
         }

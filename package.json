@@ -20,6 +20,7 @@
     "aos": "^2.3.4",
     "axios": "^1.7.9",
     "bearer-token": "^2.0.2",
+    "firebase": "^11.6.1",
     "js-cookie": "^3.0.5",
     "jwt-decode": "^4.0.0",
     "lucide-react": "^0.474.0",

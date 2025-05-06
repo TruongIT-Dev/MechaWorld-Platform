@@ -2,13 +2,18 @@ import { useEffect, useState } from 'react';
 import { Button, Modal, Alert, Space, notification } from 'antd';
 import { MonitorCheck, House,CreditCardIcon, PackageCheck } from 'lucide-react';
 import PropTypes from 'prop-types';
-import { addressExchange } from '../../../apis/Exchange/APIExchange';
+import { addressExchange, payDeliveryfee } from '../../../apis/Exchange/APIExchange';
+import { useDispatch } from 'react-redux';
+import { updateDeliveryFee, updateExchangeData } from '../../../features/exchange/exchangeSlice';
+import { checkDeliveryFee } from '../../../apis/GHN/APIGHN';
+import { saveDeliveryFee } from '../../../utils/exchangeUtils';
 
 const ActionButtons = ({ 
   exchangeDetail, 
   currentStage, 
   oppositeCurrentStage,
   setSecondCurrentStage,
+  deliverPartnerData,
   setFirstCurrentStage, 
   selectedAddress,
   selectedPickupAddress,
@@ -16,11 +21,49 @@ const ActionButtons = ({
   const [isAddressModalVisible, setIsAddressModalVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [stageButton, setStageButton] = useState();
+  const dispatch = useDispatch();
   // Function to update the stage
   const moveToNextStage = () => {
     setFirstCurrentStage(stageButton + 1);
   };
-
+  // const cacheDeliveryFee = (userId, exchangeId, fee) => {
+  //   const key = `${userId}_${exchangeId}`;
+  //   localStorage.setItem(key, JSON.stringify(fee));
+  //   sessionStorage.setItem(key, JSON.stringify(fee));
+  // };
+  const handleDeliverFee = () => {
+    console.log("111");
+    // dispatch(updateExchangeData(exchangeDetail))
+        const deliverData ={
+          service_type_id:2,
+          from_district_id:exchangeDetail.partner.from_address.ghn_district_id,
+          from_ward_code: exchangeDetail.partner.from_address.ghn_ward_code,
+          to_district_id:exchangeDetail.current_user.to_address.ghn_district_id,
+          to_ward_code:exchangeDetail.current_user.to_address.ghn_ward_code,
+          length:30,
+          width:40,
+          height:20,
+          weight:exchangeDetail.partner.items[0].weight,
+          insurance_value:0,
+          coupon: null
+        }
+        checkDeliveryFee(deliverData).then((res) => {
+            if (res.status === 200) {
+            const deliveryData = {
+              deliveryFee: res.data.data,
+              userID: exchangeDetail.current_user.id,
+              exchange_id: exchangeDetail.id,
+            };
+            dispatch(updateDeliveryFee(deliveryData));
+            console.log("nhập phí vận chuyển",res.data.data);
+            saveDeliveryFee(exchangeDetail.current_user.id,exchangeDetail.id,res.data.data);
+            moveToNextStage();
+            setIsAddressModalVisible(false);
+          } else {
+            console.log("xảy ra lỗi");
+          }
+        })
+  }
   // Handler for stage 1 - Confirm transaction
   const handleConfirmTransaction = () => {
     console.log("Confirming transaction...");
@@ -82,20 +125,37 @@ const ActionButtons = ({
       
     }, 1000);
   };
-
+  const getCachedDeliveryFee = (userId, exchangeId) => {
+      const key = `${userId}_${exchangeId}_deliverDate`;
+      const raw = localStorage.getItem(key);
+      return raw ? JSON.parse(raw) : null;
+  };
   // Handler for stage 3 - Process payment
   const handlePayment = () => {
     console.log("Processing payment...");
     setIsLoading(true);
-    
+    // const key = `${exchangeDetail.current_user.id}_${exchangeDetail.id}_deliverDate`;
+    const raw = getCachedDeliveryFee(exchangeDetail.current_user.id,exchangeDetail.id);
+    console.log(raw);
+    const data = {
+      expected_delivery_time: raw.to_estimate_date ,
+      delivery_fee: raw.total ,
+      note: raw?.note || "Không có"
+    };
+
     // Simulate API call
     setTimeout(() => {
       setIsLoading(false);
-      moveToNextStage();
-      notification.success({
-        message: "Thanh toán thành công",
-        description: "Thanh toán đã được xử lý, bạn có thể tiếp tục theo dõi đơn hàng"
-      });
+
+      payDeliveryfee(exchangeDetail.id, data).then((res) => {
+        if(res.status === 200) {
+          moveToNextStage();
+          notification.success({
+              message: "Thanh toán thành công",
+              description: "Thanh toán đã được xử lý, bạn có thể tiếp tục theo dõi đơn hàng"
+          });
+        }
+      })
     }, 1500);
   };
   useEffect(() => {
@@ -244,7 +304,7 @@ const ActionButtons = ({
             </Button>
             <Button 
               type="primary" 
-              onClick={moveToNextStage}
+              onClick={handleDeliverFee}
               loading={isLoading}
               className="bg-blue-500"
             >
@@ -264,7 +324,7 @@ ActionButtons.propTypes = {
   setFirstCurrentStage: PropTypes.func,
   setSecondCurrentStage: PropTypes.func,
   selectedAddress: PropTypes.shape({
-    id: PropTypes.string.isRequired,
+    id: PropTypes.number.isRequired,
     full_name: PropTypes.string,
     phone_number: PropTypes.string,
     detail: PropTypes.string,
@@ -273,7 +333,7 @@ ActionButtons.propTypes = {
     province_name: PropTypes.string
   }),
   selectedPickupAddress: PropTypes.shape({
-    id: PropTypes.string.isRequired,
+    id: PropTypes.number.isRequired,
     full_name: PropTypes.string,
     phone_number: PropTypes.string,
     detail: PropTypes.string,
