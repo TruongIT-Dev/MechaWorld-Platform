@@ -1,7 +1,6 @@
 /* eslint-disable no-unused-vars */
 import PropTypes from "prop-types";
 import { useState, useEffect } from "react";
-import ViewBothGundamsLists from "./ViewBothGundamsLists";
 
 import SubmitAmounts from "./SubmitAmounts";
 import SubmitDeliveryInfo from "./SubmitDeliveryInfo";
@@ -281,10 +280,16 @@ ExchangeInformationSection.propTypes = {
   setSecondCurrentStage: PropTypes.func,
   firstAddress: PropTypes.string,
   secondAddress: PropTypes.string,
+  deliverData: PropTypes.object,
+  deliverPartnerData: PropTypes.object,
   address: PropTypes.array,
   setAddress: PropTypes.func,
   selectedAddress: PropTypes.object,
   setSelectedAddress: PropTypes.func,
+  selectedPickupAddress: PropTypes.object,
+  setSelectedPickupAddress: PropTypes.func,
+  setDeliverPartnerData: PropTypes.func,
+  setDeliverData: PropTypes.func,
   setIsLoading: PropTypes.func,
   exchangeDetail: PropTypes.object,
   currentUser: PropTypes.object,

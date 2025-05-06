@@ -275,11 +275,11 @@ const SettingAddress = () => {
               <div className="mt-2 flex items-center space-x-2">
                 {addr.is_primary ? (
                   <span className="px-2 py-1 text-xs font-semibold text-white bg-red-500 rounded">
-                    Địa chỉ giao hàng
+                    Địa chỉ nhận hàng
                   </span>
                 ) : (
                   <Button size="small" onClick={() => setPrimaryAddress(addr.id)}>
-                    Thiết lập địa chỉ giao hàng
+                    Thiết lập địa chỉ nhận hàng
                   </Button>
                 )}
                 {addr.is_pickup_address ? (

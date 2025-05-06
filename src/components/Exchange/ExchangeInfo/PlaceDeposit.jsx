@@ -16,11 +16,10 @@ export default function PlaceDeposit({
   // fetchExchangeDetails,
   deliverPartnerData,
   setDeliverPartnerData,
-  deliverData,
   setDeliverData,
   setIsLoading,
 }) {
-  const [deliveryDetails, setDeliveryDetails] = useState(deliverPartnerData);
+  const [deliveryDetails] = useState(deliverPartnerData);
   const [total, setTotal] = useState(0);
   const [note, setNote] = useState(null);
   const [deliverDate, setDeliverDate] = useState (null);
@@ -35,7 +34,7 @@ export default function PlaceDeposit({
       await getDeliveryFee(exchange.current_user.id, exchange.id)
               .then((yourDeliFee) => {
                 setDeliverData(yourDeliFee);
-                console.log("Delivery fee:", yourDeliFee);
+                // console.log("Delivery fee:", yourDeliFee);
               })
               .catch((error) => {
                 console.error("Error fetching delivery fee:", error);
@@ -44,7 +43,7 @@ export default function PlaceDeposit({
       await  getDeliveryFee(exchange.partner.id,exchange.id)
               .then((yourDeliFee) => {
                 setDeliverPartnerData(yourDeliFee);
-                console.log("Delivery partner fee:", yourDeliFee);
+                // console.log("Delivery partner fee:", yourDeliFee);
               })
               .catch((error) => {
                 console.error("Error fetching delivery fee:", error);
@@ -63,14 +62,16 @@ export default function PlaceDeposit({
             exchangeDetails?.payer_id === firstUser.id ? exchangeDetails.compensation_amount : 0)
       );
       await checkTimeDeliver(deliverData).then((res) => {
-        console.log(res.data);
+        // console.log(res.data);
         setDeliverDate(res.data);
         const key = `${firstUser.id}_${exchange.id}_deliverDate`;
+        
         const data = {
           ...res.data.data.leadtime_order,
-          total:total,
-          note:note
-        }
+          total: total,
+          note: note
+        };
+        // console.log(data);
         localStorage.setItem(key, JSON.stringify(data));
       });
 
@@ -88,9 +89,9 @@ export default function PlaceDeposit({
 
   useEffect(() => {
     fetchDeliveryFeeAndDeliveryTime();
-    console.log(deliveryDetails);
-    console.log(exchangeDetails);
-  }, []);
+    // console.log(deliveryDetails);
+    // console.log(exchangeDetails);
+  }, [note]);
 
   const formatDate =
     moment(deliverDate?.data.leadtime_order.from_estimate_date).format('DD/MM') + " - " + moment(deliverDate?.data.leadtime_order.to_estimate_date).format('DD/MM/YYYY');
@@ -292,6 +293,8 @@ PlaceDeposit.propTypes = {
   }),
   fetchExchangeDetails: PropTypes.func,
   setIsLoading: PropTypes.func,
+  setDeliverPartnerData: PropTypes.func,
+  setDeliverData: PropTypes.func,
   deliverPartnerData: PropTypes.object,
   deliverData: PropTypes.object,
 };

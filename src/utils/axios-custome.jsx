@@ -41,7 +41,7 @@ axios.interceptors.request.use(function (config) {
 
     const accessToken = Cookies.get('access_token'); 
         if (accessToken) {
-            console.log(accessToken);
+            // console.log(accessToken);
             config.headers.Authorization = `Bearer ${accessToken}`;
         } else {
             console.warn("Không thấy access_token trong Cookies....");
