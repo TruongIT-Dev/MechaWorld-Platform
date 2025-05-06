@@ -195,7 +195,7 @@ ProgressSection.propTypes = {
         firstUser: PropTypes.number.isRequired,
         secondUser: PropTypes.number.isRequired,
       }).isRequired,
-    }).isRequired,
+    }),
     exchangeDetail: PropTypes.object,
     firstCurrentStage: PropTypes.number,
     secondCurrentStage: PropTypes.number,

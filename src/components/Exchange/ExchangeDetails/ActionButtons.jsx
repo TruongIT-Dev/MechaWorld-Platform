@@ -2,16 +2,18 @@ import { useEffect, useState } from 'react';
 import { Button, Modal, Alert, Space, notification } from 'antd';
 import { MonitorCheck, House,CreditCardIcon, PackageCheck } from 'lucide-react';
 import PropTypes from 'prop-types';
-import { addressExchange } from '../../../apis/Exchange/APIExchange';
+import { addressExchange, payDeliveryfee } from '../../../apis/Exchange/APIExchange';
 import { useDispatch } from 'react-redux';
 import { updateDeliveryFee, updateExchangeData } from '../../../features/exchange/exchangeSlice';
 import { checkDeliveryFee } from '../../../apis/GHN/APIGHN';
+import { saveDeliveryFee } from '../../../utils/exchangeUtils';
 
 const ActionButtons = ({ 
   exchangeDetail, 
   currentStage, 
   oppositeCurrentStage,
   setSecondCurrentStage,
+  deliverPartnerData,
   setFirstCurrentStage, 
   selectedAddress,
   selectedPickupAddress,
@@ -54,6 +56,7 @@ const ActionButtons = ({
             };
             dispatch(updateDeliveryFee(deliveryData));
             console.log("nhập phí vận chuyển",res.data.data);
+            saveDeliveryFee(exchangeDetail.current_user.id,exchangeDetail.id,res.data.data);
             moveToNextStage();
             setIsAddressModalVisible(false);
           } else {
@@ -122,20 +125,37 @@ const ActionButtons = ({
       
     }, 1000);
   };
-
+  const getCachedDeliveryFee = (userId, exchangeId) => {
+      const key = `${userId}_${exchangeId}_deliverDate`;
+      const raw = localStorage.getItem(key);
+      return raw ? JSON.parse(raw) : null;
+  };
   // Handler for stage 3 - Process payment
   const handlePayment = () => {
     console.log("Processing payment...");
     setIsLoading(true);
-    
+    // const key = `${exchangeDetail.current_user.id}_${exchangeDetail.id}_deliverDate`;
+    const raw = getCachedDeliveryFee(exchangeDetail.current_user.id,exchangeDetail.id);
+    console.log(raw);
+    const data = {
+      expected_delivery_time: raw.to_estimate_date ,
+      delivery_fee: raw.total ,
+      note: raw?.note || "Không có"
+    };
+
     // Simulate API call
     setTimeout(() => {
       setIsLoading(false);
-      moveToNextStage();
-      notification.success({
-        message: "Thanh toán thành công",
-        description: "Thanh toán đã được xử lý, bạn có thể tiếp tục theo dõi đơn hàng"
-      });
+
+      payDeliveryfee(exchangeDetail.id, data).then((res) => {
+        if(res.status === 200) {
+          moveToNextStage();
+          notification.success({
+              message: "Thanh toán thành công",
+              description: "Thanh toán đã được xử lý, bạn có thể tiếp tục theo dõi đơn hàng"
+          });
+        }
+      })
     }, 1500);
   };
   useEffect(() => {

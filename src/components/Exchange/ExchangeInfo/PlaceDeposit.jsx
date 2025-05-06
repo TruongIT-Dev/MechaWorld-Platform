@@ -3,23 +3,28 @@ import { useEffect, useState } from "react";
 import PropTypes from "prop-types";
 // import { privateAxios } from "../../../../middleware/axiosInstance";
 import moment from "moment/min/moment-with-locales";
+import { getDeliveryFee } from "../../../utils/exchangeUtils";
+import { checkTimeDeliver } from "../../../apis/GHN/APIGHN";
 // import PayButton from "./buttons/PayButton";
 
 moment.locale("vi");
 
 export default function PlaceDeposit({
   exchangeDetails,
-  firstAddress,
-  secondAddress,
   firstUser,
   secondUser,
   // fetchExchangeDetails,
+  deliverPartnerData,
+  setDeliverPartnerData,
+  deliverData,
+  setDeliverData,
   setIsLoading,
 }) {
-  const [deliveryDetails, setDeliveryDetails] = useState();
+  const [deliveryDetails, setDeliveryDetails] = useState(deliverPartnerData);
   const [total, setTotal] = useState(0);
-
-  const exchange = exchangeDetails.exchange;
+  const [note, setNote] = useState(null);
+  const [deliverDate, setDeliverDate] = useState (null);
+  const exchange = exchangeDetails;
   const  CurrencySplitter = (x) => {
     if (!x || x === 0) return "0";
     return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
@@ -27,38 +32,51 @@ export default function PlaceDeposit({
   const fetchDeliveryFeeAndDeliveryTime = async () => {
     setIsLoading(true);
     try {
-      // const deliveryRes = await privateAxios.get(
-      //   `deliveries/exchange/to-user/${exchange.id}`
-      // );
-
-      // const deliDetailsRes = await privateAxios.get(
-      //   `deliveries/details/${deliveryRes.data.id}`
-      // );
-
-
-      // const deliveryDetails = deliDetailsRes.data;
-      const fakedeliveryDetails = [
-        {
-          deliveryFee: 50000,
-          estDeliveryTime: moment().add(3, "days"),
-        },
-      ];
-      const firstDelivery = fakedeliveryDetails[0]; 
-
-      setDeliveryDetails({
-        fee: firstDelivery.deliveryFee,
-        estTime: firstDelivery.estDeliveryTime,
+      await getDeliveryFee(exchange.current_user.id, exchange.id)
+              .then((yourDeliFee) => {
+                setDeliverData(yourDeliFee);
+                console.log("Delivery fee:", yourDeliFee);
+              })
+              .catch((error) => {
+                console.error("Error fetching delivery fee:", error);
+              });
+              
+      await  getDeliveryFee(exchange.partner.id,exchange.id)
+              .then((yourDeliFee) => {
+                setDeliverPartnerData(yourDeliFee);
+                console.log("Delivery partner fee:", yourDeliFee);
+              })
+              .catch((error) => {
+                console.error("Error fetching delivery fee:", error);
+              });
+      const deliverData = {
+        from_district_id: exchange.partner.from_address.ghn_district_id,
+        from_ward_code: exchange.partner.from_address.ghn_ward_code,
+        to_district_id: exchange.current_user.to_address.ghn_district_id,
+        to_ward_code: exchange.current_user.to_address.ghn_ward_code,
+        service_id: 53321
+      };
+      
+      setTotal(
+        deliverPartnerData?.total +
+          (exchangeDetails.payer_id &&
+            exchangeDetails?.payer_id === firstUser.id ? exchangeDetails.compensation_amount : 0)
+      );
+      await checkTimeDeliver(deliverData).then((res) => {
+        console.log(res.data);
+        setDeliverDate(res.data);
+        const key = `${firstUser.id}_${exchange.id}_deliverDate`;
+        const data = {
+          ...res.data.data.leadtime_order,
+          total:total,
+          note:note
+        }
+        localStorage.setItem(key, JSON.stringify(data));
       });
 
 
-      setTotal(
-        exchange.depositAmount +
-        firstDelivery.deliveryFee +
-          (exchangeDetails.exchange.compensateUser &&
-          exchangeDetails.exchange.compensateUser.id === firstUser.id
-            ? exchange.compensationAmount
-            : 0)
-      );
+
+      
 
       
     } catch (err) {
@@ -75,8 +93,8 @@ export default function PlaceDeposit({
   }, []);
 
   const formatDate =
-    moment(deliveryDetails?.estTime).format("dddd DD/MM").charAt(0).toUpperCase() +
-    moment(deliveryDetails?.estTime).format("dddd DD/MM/yyyy").slice(1);
+    moment(deliverDate?.data.leadtime_order.from_estimate_date).format('DD/MM') + " - " + moment(deliverDate?.data.leadtime_order.to_estimate_date).format('DD/MM/YYYY');
+    
 
   return (
     <div className="w-ful flex flex-row gap-5 REM px-10">
@@ -114,10 +132,10 @@ export default function PlaceDeposit({
           </div>
           <div className="mt-2 flex flex-col gap-2 font-light">
             <p>
-              Tên người gửi: <span className="font-medium">{secondUser.full_name}</span>
+              Tên người gửi: <span className="font-medium">{secondUser?.full_name}</span>
             </p>
             <h2>
-              Địa chỉ: <span className="font-medium">{secondAddress}</span>
+              Địa chỉ: <span className="font-medium">{exchange.partner.from_address?.detail}, {exchange.partner.from_address?.ward_name}, {exchange.partner.from_address?.district_name}</span>
             </h2>
           </div>
         </div>
@@ -151,10 +169,10 @@ export default function PlaceDeposit({
           </div>
           <div className="mt-2 flex flex-col gap-2 font-light">
             <p>
-              Tên người nhận: <span className="font-medium">{firstUser.full_name}</span>
+              Tên người nhận: <span className="font-medium">{firstUser?.full_name}</span>
             </p>
             <h2>
-              Địa chỉ: <span className="font-medium">{firstAddress}</span>
+              Địa chỉ: <span className="font-medium">{exchange.current_user.to_address?.detail}, {exchange.current_user.to_address?.ward_name}, {exchange.current_user.to_address?.district_name}</span>
             </h2>
           </div>
         </div>
@@ -177,23 +195,28 @@ export default function PlaceDeposit({
             <p className="font-semibold text-sm">Trao đổi</p>
           </div>
 
-          <div className="flex items-center justify-between text-xs font-light px-4">
-            <p>Tổng tiền cọc:</p>
-            <p className="font-semibold">
-              {CurrencySplitter(exchangeDetails.exchange.depositAmount || 0)} đ
-            </p>
-          </div>
 
-          {exchangeDetails.exchange.compensateUser &&
-            exchangeDetails.exchange.compensateUser.id === firstUser.id && (
+          {exchangeDetails.payer_id &&
+            exchangeDetails?.payer_id === firstUser.id ? (
               <div
                 className={`relative flex items-center justify-between text-xs font-light px-4 ${
-                  exchangeDetails.exchange.compensationAmount === 0 && "opacity-30"
+                  exchangeDetails?.compensation_amount === 0 && "opacity-30"
                 }`}
               >
                 <p>Tổng tiền bù:</p>
                 <p className="font-semibold">
-                  {CurrencySplitter(exchangeDetails.exchange.compensationAmount || 0)} đ
+                  {CurrencySplitter(exchangeDetails?.compensation_amount || 0)} đ
+                </p>
+              </div>
+            ) : (
+              <div
+                className={`relative flex items-center justify-between text-xs font-light px-4 ${
+                  exchangeDetails?.compensation_amount === 0 && "opacity-30"
+                }`}
+              >
+                <p>Tổng tiền bù:</p>
+                <p className="font-semibold">
+                  {CurrencySplitter(0)} đ
                 </p>
               </div>
             )}
@@ -214,7 +237,7 @@ export default function PlaceDeposit({
           </div>
           <div className="flex items-center justify-between text-xs font-light px-4">
             <p>Phí giao hàng:</p>
-            <p className="font-semibold">{CurrencySplitter(deliveryDetails?.fee || 0)} đ</p>
+            <p className="font-semibold">{CurrencySplitter(deliveryDetails?.total || 0)} đ</p>
           </div>
           <div className="flex items-center justify-between text-xs font-light px-4 italic">
             <p>Ngày nhận hàng dự kiến:</p>
@@ -239,31 +262,36 @@ export default function PlaceDeposit({
           Chúng tôi chỉ hỗ trợ hình thức thanh toán bằng Ví để đảm bảo
           quyền lợi và an toàn cho người tham gia trao đổi.
         </p>
+        <div className="flex flex-col gap-2">
+
+          <input
+            type="text"
+            id="note"
+            placeholder="Ghi chú cho người giao hàng"
+            value={note || ""}
+            onChange={(e) => setNote(e.target.value)}
+            className="border border-gray-300 rounded-md p-2 text-sm"
+          />
+        </div>
       </div>
+      
     </div>
   );
 }
 PlaceDeposit.propTypes = {
-  exchangeDetails: PropTypes.shape({
-    exchange: PropTypes.shape({
-      id: PropTypes.number.isRequired,
-      depositAmount: PropTypes.number.isRequired,
-      compensationAmount: PropTypes.number,
-      compensateUser: PropTypes.shape({
-        id: PropTypes.string.isRequired,
-      }),
-    }).isRequired,
-  }).isRequired,
+  exchangeDetails: PropTypes.object,
   firstAddress: PropTypes.string,
   secondAddress: PropTypes.string,
   firstUser: PropTypes.shape({
     id: PropTypes.string,
     full_name: PropTypes.string,
-  }).isRequired,
+  }),
   secondUser: PropTypes.shape({
     id: PropTypes.string,
     full_name: PropTypes.string,
-  }).isRequired,
+  }),
   fetchExchangeDetails: PropTypes.func,
   setIsLoading: PropTypes.func,
+  deliverPartnerData: PropTypes.object,
+  deliverData: PropTypes.object,
 };

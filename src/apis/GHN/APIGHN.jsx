@@ -26,7 +26,11 @@ export const checkDeliveryFee = (deliveryData) => {
 }
 export const checkTimeDeliver = (deliveryData) => {
     return axios.post(`https://dev-online-gateway.ghn.vn/shiip/public-api/v2/shipping-order/leadtime`,{
-        deliveryData
+        from_district_id:deliveryData.from_district_id,
+        from_ward_code: deliveryData.from_ward_code,
+        to_district_id:deliveryData.to_district_id,
+        to_ward_code:deliveryData.to_ward_code,
+        service_id:deliveryData.service_id,
     },{
         headers: {
             token: token,

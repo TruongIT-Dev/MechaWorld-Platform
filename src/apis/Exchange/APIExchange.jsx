@@ -75,3 +75,10 @@ export const addressExchange = (exchangeID,firstID, secondID) => {
         to_address_id:  secondID,   // địa chỉ nhận
     })
 }
+export const payDeliveryfee =(exchangeID, deliverryData) => {
+    return axios.post(`/exchanges/${exchangeID}/pay-delivery-fee`, {
+        delivery_fee: deliverryData.delivery_fee,
+        expected_delivery_time: deliverryData.expected_delivery_time,
+        note: deliverryData.note,
+    })
+}
