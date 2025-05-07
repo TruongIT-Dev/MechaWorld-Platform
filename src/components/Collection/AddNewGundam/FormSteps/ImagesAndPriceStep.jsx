@@ -5,15 +5,16 @@ import { InfoCircleOutlined } from '@ant-design/icons';
 import ImageUpload from './ImageUpload';
 
 const ImagesAndPriceStep = ({
-    form,
+    // form,
     primaryImage,
     setPrimaryImage,
     secondaryImages,
     setSecondaryImages
 }) => {
-    const handlePriceChange = (value) => {
-        form.setFieldsValue({ price: value });
-    };
+    
+    // const handlePriceChange = (value) => {
+    //     form.setFieldsValue({ price: value });
+    // };
 
     return (
         <div className="space-y-6 container mx-auto py-4">
@@ -39,7 +40,7 @@ const ImagesAndPriceStep = ({
             <div className="grid grid-cols-2 gap-4">
                 <Form.Item
                     name="weight"
-                    label="Cân nặng"
+                    label="Khối lượng"
                     rules={[{ required: true, message: "Vui lòng nhập cân nặng!" }]}
                     tooltip={{
                         title: 'Dùng để tính chi phí vận chuyển. (3.500 vnd / 500g)',
@@ -55,7 +56,7 @@ const ImagesAndPriceStep = ({
                     />
                 </Form.Item>
 
-                <Form.Item
+                {/* <Form.Item
                     label="Giá bán"
                     name="price"
                     rules={[{ required: true, message: "Vui lòng nhập giá bán!" }]}
@@ -74,7 +75,7 @@ const ImagesAndPriceStep = ({
                         parser={(value) => value.replace(/[^0-9]/g, "")}
                         addonAfter="VNĐ"
                     />
-                </Form.Item>
+                </Form.Item> */}
             </div>
 
             <Alert
@@ -84,9 +85,8 @@ const ImagesAndPriceStep = ({
                         <p>Vui lòng kiểm tra lại thông tin sản phẩm trước khi đăng ký.</p>
                         <ul className="list-disc pl-5 mt-2">
                             <li>Đã thêm đầy đủ hình ảnh (ảnh chính và ảnh phụ)</li>
-                            <li>Đã điền đầy đủ thông tin về phiên bản và năm phát hành</li>
+                            <li>Đã điền đầy đủ thông tin cơ bản và đầy đủ về sản phẩm</li>
                             <li>Đã mô tả chính xác tình trạng của sản phẩm</li>
-                            <li>Đã nhập giá bán hợp lý</li>
                         </ul>
                     </div>
                 }

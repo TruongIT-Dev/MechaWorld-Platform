@@ -72,9 +72,9 @@ export const ListProductToAution = React.lazy(() => import("../components/Aution
 export const CensorProductToAution = React.lazy(() => import("../components/Aution/Moderator/CensorAution"));
 
 // Collection route
-export const Collection = React.lazy(() => import("../components/Collection/Collection"));
-export const AddCollection = React.lazy(() => import("../components/Collection/AddCollection"));
-export const ListCollection = React.lazy(() => import("../components/Collection/ListCollection"));
+export const GundamCollectionApp = React.lazy(() => import("../components/Collection/Collection"));
+export const CollectionContainer = React.lazy(() => import("../components/Collection/CollectionContainer"));
+export const AddCollection = React.lazy(() => import("../components/Collection/AddNewGundam/AddCollection"));
 
 
 // Moderator route

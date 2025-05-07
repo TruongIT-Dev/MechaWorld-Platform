@@ -1,26 +1,45 @@
 
-import { useState } from "react";
+// import { useState } from "react";
 
-import ShopProduct from "./ListCollection";  // Bảng hiển thị dữ liệu
-import ShopProductCreate from "./AddCollection"; // Form tạo sản phẩm
+// import ListCollection from "./ListCollection";  // Bảng hiển thị dữ liệu
+// import AddCollection from "./AddCollection"; // Form tạo sản phẩm
 
 
-export default function Collection  ()  {
+// export default function Collection() {
+//   const [isCreating, setIsCreating] = useState(false);
+
+//   return (
+//     <div>
+//       {/* Nếu đang ở chế độ tạo sản phẩm */}
+//       {isCreating ? (
+//         <AddCollection setIsCreating={setIsCreating} />
+//       ) : (
+//         <>
+//           <div>
+//             {/* Hiển thị UI trang Collection */}
+//             <ListCollection setIsCreating={setIsCreating} isCreating={isCreating} />
+//           </div>
+//         </>
+//       )}
+//     </div>
+//   );
+// }
+import { useState } from 'react';
+import CollectionContainer from './CollectionContainer';
+import AddCollection from "./AddNewGundam/AddCollection";
+
+const GundamCollectionApp = () => {
   const [isCreating, setIsCreating] = useState(false);
 
   return (
     <div>
-      {/* Nếu đang ở chế độ tạo sản phẩm */}
       {isCreating ? (
-        <ShopProductCreate setIsCreating={setIsCreating} />
+        <AddCollection setIsCreating={setIsCreating} />
       ) : (
-        <>
-          <div>
-            {/* Hiển thị bảng sản phẩm */}
-            <ShopProduct setIsCreating={setIsCreating} isCreating={isCreating} />
-          </div>
-        </>
+        <CollectionContainer setIsCreating={setIsCreating} />
       )}
     </div>
   );
-}
+};
+
+export default GundamCollectionApp;

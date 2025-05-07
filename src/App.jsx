@@ -40,14 +40,14 @@ import {
   ModExchanges,
   ExchangeDetailInformation,
   ExchangeGundamManagement,
-  Collection,
   AddCollection,
-  ListCollection,
   ShopAddress,
   PageNotFound,
   ExchangeList,
   ExchangeManage,
   ExchangeMyPost,
+  CollectionContainer,
+  GundamCollectionApp,
 
 } from "./routes/router";
 
@@ -62,15 +62,10 @@ import PageLoading from "./components/PageLoading";
 import { restoreDeliveryFees } from "./features/exchange/middleware/deliveryFeePersistence";
 
 
-
-
-
 // Initialize Firebase
 function App() {
 
-
   const dispatch = useDispatch();
-
 
   useEffect(() => {
     const accessToken = Cookies.get("access_token");
@@ -124,8 +119,8 @@ function App() {
 
 
             {/* Collection Route */}
-            <Route path="collection" element={<Collection />} >
-              <Route path="list" element={<ListCollection />} />
+            <Route path="collection" element={<GundamCollectionApp />} >
+              <Route path="list" element={<CollectionContainer />} />
               <Route path="add" element={<AddCollection />} />
             </Route>
             

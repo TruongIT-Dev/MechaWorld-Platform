@@ -93,13 +93,13 @@ const fakeRequests = [
 
 export default function ExchangeList() {
     const [selectedRequest, setSelectedRequest] = useState(null);
-    
+
     // Modal List Poster Gundam Avaiable
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [requestData, setRequestData] = useState();
     // Moda Offer Exchange Request
     const [isOfferModalOpen, setIsOfferModalOpen] = useState(false);
-    const [listRequest,setListRequest] = useState([]);
+    const [listRequest, setListRequest] = useState([]);
     const user = useSelector((state) => state.auth.user);
     const [requestPost, setRequestPost] = useState(null);
     const [yourGundamList, setYourGundamList] = useState([]);
@@ -108,29 +108,29 @@ export default function ExchangeList() {
     const [expandedContent, setExpandedContent] = useState(false);
 
     const handleOpenModal = (request) => {
-         console.log(request);
+        console.log(request);
         setSelectedRequest(request.exchange_post_items);
         setIsModalOpen(true);
-       
+
     };
     const handleOfferModal = (request) => {
-         // console.log(request);
+        // console.log(request);
         setSelectedRequest(request.exchange_post_items);
         setRequestData(request.poster);
         setRequestPost(request.exchange_post);
         setIsOfferModalOpen(true);
-       
+
     };
     useEffect(() => {
-            getAllExchangePost().then((res) => {
-                setListRequest(res.data);
-            })
-            GetGundamByID(user.id,"").then((res) => {
-                setYourGundamList(res.data);
-            })
-            
-           
-    },[])
+        getAllExchangePost().then((res) => {
+            setListRequest(res.data);
+        })
+        GetGundamByID(user.id, "").then((res) => {
+            setYourGundamList(res.data);
+        })
+
+
+    }, [])
 
     return (
         <>
@@ -236,15 +236,10 @@ export default function ExchangeList() {
                                 title={<Text strong className='text-base'>{item.title}</Text>}
                                 description={
                                     <>
-                                        <div>Tên Gundam: <Text strong>{item.name}</Text>
-                                        </div>
-                                        <div>Phân khúc: {item.grade}</div>
-                                        <div>
-                                            Tình trạng: <Text strong>{item.condition}</Text>
-                                        </div>
-                                        <div>
-                                            Phiên bản: <Text strong>{item.version}</Text>
-                                        </div>
+                                        <div><Text className='text-base' strong>{item.name}</Text></div>
+                                        <div> Tình trạng: <Text strong>{item.condition}</Text> </div>
+                                        <div> Phân khúc: <Text strong>{item.grade}</Text></div>
+                                        <div> Phiên bản: <Text strong>{item.version}</Text></div>
                                     </>
                                 }
                             />
