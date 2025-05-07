@@ -1,4 +1,4 @@
-import { Avatar, Button, Card, Form, Input, InputNumber, Modal, Space, Table, Typography } from "antd";
+import { Avatar, Button, Card, Form, Input, InputNumber, message, Modal, Space, Table, Typography } from "antd";
 import {
     UserOutlined,
     SyncOutlined,
@@ -100,9 +100,17 @@ export default function ExchangeManageNegotiation() {
                 requireCompensation: currentCompensation
             };
             console.log("Updated negotiation:", offerData);
-            updateExchangeOffer(currentNegotiation?.offer.id, offerData);
+            updateExchangeOffer(currentNegotiation?.offer.id, offerData).then((res) => {
+                if (res.status === 200) {
+
+                    setTimeout(
+                        message.success('Cập nhập đề xuất thành công.'), 800
+                    );
+                    // setIsModalVisible(false);
+                    handleModalCancel();
+                }
+            });
             // handleModalCancel();
-            // setIsModalVisible(false);
         });
     };
 
@@ -190,12 +198,12 @@ export default function ExchangeManageNegotiation() {
             ),
         },
         {
-            title: "Note",
+            title: "Yêu cầu thương lượng",
             dataIndex: "offer",
             key: "note",
             width: 160,
             render: (record) => (
-                <p>{record.note}</p>
+                <p>{record.negotiation_notes[record.negotiations_count].content || 'Không có'}</p>
             ),
         },
         {

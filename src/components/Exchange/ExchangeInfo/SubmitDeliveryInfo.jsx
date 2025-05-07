@@ -10,9 +10,7 @@ import { InfoCircleOutlined } from '@ant-design/icons';
 const { Option } = Select;
 const SubmitDeliveryInfo = ({
   selectedAddress,
-  setSelectedAddress,
   selectedPickupAddress,
-  setSelectedPickupAddress,
   addresses,
   setAddresses,
   fetchUserAddress,

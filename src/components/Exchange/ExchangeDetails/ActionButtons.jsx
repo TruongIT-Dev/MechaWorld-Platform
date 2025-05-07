@@ -112,7 +112,7 @@ const ActionButtons = ({
     // Simulate API call
     setTimeout(() => {
       setIsLoading(false);
-      addressExchange(exchangeDetail.id,selectedAddress.id,selectedPickupAddress.id).then((res) => {
+      addressExchange(exchangeDetail.id,selectedPickupAddress.id,selectedAddress.id).then((res) => {
         if (res.status === 200) {
           moveToNextStage();
           notification.success({
@@ -127,23 +127,24 @@ const ActionButtons = ({
   };
   const getCachedDeliveryFee = (userId, exchangeId) => {
       const key = `${userId}_${exchangeId}_deliverDate`;
+      console.log(key);
       const raw = localStorage.getItem(key);
+      console.log(raw);
       return raw ? JSON.parse(raw) : null;
   };
   // Handler for stage 3 - Process payment
   const handlePayment = () => {
     console.log("Processing payment...");
-    setIsLoading(true);
+    // setIsLoading(true);
     // const key = `${exchangeDetail.current_user.id}_${exchangeDetail.id}_deliverDate`;
     const raw = getCachedDeliveryFee(exchangeDetail.current_user.id,exchangeDetail.id);
-    console.log(raw);
+    // console.log(raw);
     const data = {
       expected_delivery_time: raw.to_estimate_date ,
       delivery_fee: raw.total ,
       note: raw?.note || "Không có"
     };
 
-    // Simulate API call
     setTimeout(() => {
       setIsLoading(false);
 

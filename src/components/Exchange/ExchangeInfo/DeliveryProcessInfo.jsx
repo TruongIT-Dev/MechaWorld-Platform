@@ -1,12 +1,11 @@
 import { useState,useEffect } from "react";
+import PropTypes from "prop-types";
 import TimerCountdown from "./TimerCountdown";
 import { Modal } from "antd";
-// import { set } from "@antv/util";
 
 const DeliveryProcessInfo = (
   { firstUser, secondUser, firstAddress, secondAddress, exchangeDetails, fetchExchangeDetails }
 ) => {
-
   const [receiveDelivery, setReceiveDelivery] = useState('');
   const [sendDelivery, setSendDelivery] = useState('');
   const [isShowingReceivedDelivery, setIsShowingReceivedDelivery] =useState(true);
@@ -14,7 +13,7 @@ const DeliveryProcessInfo = (
   const [isRefundRequest, setIsRefundRequest] = useState(false);
   const fakeDelivery = {
     id: 1,
-    exchange: exchangeDetails.exchange,
+    exchange: exchangeDetails,
     status: "pending",
     deliveryTrackingCode: 2213,
     deliveryFee: 50000,
@@ -90,7 +89,7 @@ const DeliveryProcessInfo = (
         <div className="mb-4">
           <h3 className="font-semibold text-gray-800">Người gửi</h3>
           <p className="font-light">
-              {isShowingReceivedDelivery ? secondUser.name : firstUser.name}
+              {isShowingReceivedDelivery ? secondUser.full_name : firstUser.full_name}
             </p>
             <p className="font-light">
               {isShowingReceivedDelivery ? secondAddress : firstAddress}
@@ -101,7 +100,7 @@ const DeliveryProcessInfo = (
               Người nhận {isShowingReceivedDelivery && "(Bạn)"}:
             </h3>
             <p className="font-light">
-              {isShowingReceivedDelivery ? firstUser.name : secondUser.name}
+              {isShowingReceivedDelivery ? firstUser.full_name : secondUser.full_name}
             </p>
             <p className="font-light">
               {isShowingReceivedDelivery ? firstAddress : secondAddress}
@@ -223,5 +222,13 @@ const DeliveryProcessInfo = (
     </div>
   )
 }
+DeliveryProcessInfo.propTypes = {
+  firstUser: PropTypes.object,
+  secondUser: PropTypes.object,
+  firstAddress: PropTypes.object,
+  secondAddress: PropTypes.object,
+  exchangeDetails: PropTypes.object,
+  fetchExchangeDetails: PropTypes.func,
+};
 
-export default DeliveryProcessInfo
+export default DeliveryProcessInfo;

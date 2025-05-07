@@ -154,7 +154,7 @@ const ProgressSection = (
         <div className="mt-4 flex flex-col items-center">
           <div 
             className={`w-12 h-12 rounded-full flex items-center justify-center
-              ${(currentStepLeft === leftSteps.length - 1 && currentStepRight === rightSteps.length - 1) 
+              ${(currentStepLeft === leftSteps.length  && currentStepRight === rightSteps.length ) 
                 ? 'bg-green-500 text-white' 
                 : 'bg-gray-200 text-gray-400'}`}
           >

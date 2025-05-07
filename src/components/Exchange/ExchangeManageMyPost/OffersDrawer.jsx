@@ -9,7 +9,7 @@ import {
 } from "@ant-design/icons";
 import { useState } from "react";
 import { useSelector } from "react-redux";
-import { acceptOffer } from "../../../apis/Exchange/APIExchange";
+import { acceptOffer, requestNegotiation } from "../../../apis/Exchange/APIExchange";
 
 const { Text } = Typography;
 
@@ -44,7 +44,12 @@ export default function OffersDrawer({ visible, post, offers, onClose, onViewOff
         acceptOffer(offer.post_id,offer.id).then((res) => {
             if(res.status == 200) {
                console.log(res.data);
-                message.success('Chấp nhận offer')
+               
+                setTimeout(() => {
+                    message.success('Đã chấp nhận đề xuất. Điều hướng qua trang trao đổi');
+                    window.location.href = `/exchange/detail/${res.data.id}`;
+                }, 1000);
+                
 
             }
         }).catch((error) =>{
@@ -54,8 +59,17 @@ export default function OffersDrawer({ visible, post, offers, onClose, onViewOff
 
 
     const handleModalSubmit = (values) => {
-        console.log(values);
-
+        console.log(values.note);
+        requestNegotiation(offers[0].post_id,offers[0]?.id,values.note).then((res) => {
+            if (res.status === 200) {
+                setTimeout(
+                    message.success('Đã gửi thương lượng'), 1300
+                )
+                setIsModalVisible(false);
+            }
+        })
+        // console.log(offers[0].id);
+        // console.log(offers[0]?.post_id);
     }
 
     return (
