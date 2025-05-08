@@ -42,7 +42,15 @@ export default function ExchangeManageList() {
         { label: "Bị hủy", value: "canceled" },
         { label: "Trao đổi thất bại", value: "failed" }
     ];
-
+    const statusMap = {
+        pending: "Đang chờ",
+        packaging: "Đang đóng gói",
+        delivering: "Đang vận chuyển",
+        delivered: "Đã giao",
+        completed: "Hoàn thành",
+        canceled: "Đã hủy",
+        failed: "Thất bại",
+    };
 
     const columns = [
             // {
@@ -94,11 +102,39 @@ export default function ExchangeManageList() {
                 dataIndex: "status",
                 key: "status",
                 width: 220,
-                render: (src) => (
-                    <Space direction="vertical" size={0}>
-                        <Typography.Text strong>{src}</Typography.Text>
-                    </Space>
-                ),
+                render: (status) => {
+                    let color = "";
+                    switch (status) {
+                        case "pending":
+                            color = "blue";
+                            break;
+                        case "packaging":
+                            color = "orange";
+                            break;
+                        case "delivering":
+                            color = "cyan";
+                            break;
+                        case "delivered":
+                            color = "green";
+                            break;
+                        case "completed":
+                            color = "success";
+                            break;
+                        case "canceled":
+                            color = "red";
+                            break;
+                        case "failed":
+                            color = "volcano";
+                            break;
+                        default:
+                            color = "default";
+                    }
+                    return (
+                        <Tag color={color} key={status}>
+                            {statusMap[status] || "Không xác định"}
+                        </Tag>
+                    );
+                },
             },
             {
                 title: "Thời gian",
