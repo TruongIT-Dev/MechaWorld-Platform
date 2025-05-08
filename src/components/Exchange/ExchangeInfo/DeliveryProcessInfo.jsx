@@ -14,7 +14,6 @@ import {
   Steps,
   message,
   Empty,
-  Tooltip
 } from "antd";
 import { 
   SwapOutlined, 
@@ -39,8 +38,6 @@ const { TextArea } = Input;
 const { confirm } = Modal;
 
 const DeliveryProcessInfo = ({ 
-  firstUser, 
-  secondUser, 
   exchangeDetails, 
   fetchExchangeDetails,
   setIsLoading
@@ -60,13 +57,6 @@ const DeliveryProcessInfo = ({
     ? exchangeDetails?.partner?.order
     : exchangeDetails?.current_user?.order;
     
-  const currentDelivery = isShowingSendOrder
-    ? exchangeDetails?.current_user
-    : exchangeDetails?.partner;
-    
-  const recipientInfo = isShowingSendOrder
-    ? exchangeDetails?.partner
-    : exchangeDetails?.current_user;
 
   // Toggle between send and receive orders
   const toggleOrderView = () => {
@@ -104,6 +94,7 @@ const DeliveryProcessInfo = ({
       fetchOrderDetail(currentOrder.id);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
+    
   }, [currentOrder, isShowingSendOrder]);
   
   useEffect(() => {
@@ -154,6 +145,7 @@ const DeliveryProcessInfo = ({
           message.success("Xác nhận đóng gói thành công");
           setPackagingModalVisible(false);
           setFileList([]);
+          fetchExchangeDetails();
         }
       }).finally(
         setIsLoading(false)
@@ -173,6 +165,7 @@ const DeliveryProcessInfo = ({
     setTimeout(() => {
       message.success("Gửi khiếu nại thành công");
       setComplaintModalVisible(false);
+      fetchExchangeDetails();
       complaintForm.resetFields();
       setIsLoading(false);
     }, 1000);
@@ -205,6 +198,7 @@ const DeliveryProcessInfo = ({
           // setIsLoading(false);
 
           // Call fetchExchangeDetails() to refresh data
+          fetchExchangeDetails()
         }, 1000);
       }
     });
