@@ -1,234 +1,723 @@
-import { useState,useEffect } from "react";
+import { useState, useEffect } from "react";
 import PropTypes from "prop-types";
+import { 
+  Card, 
+  Button, 
+  Tag, 
+  Space, 
+  Typography, 
+  Modal, 
+  Form, 
+  Input, 
+  Upload, 
+  Divider,
+  Steps,
+  message,
+  Empty,
+  Tooltip
+} from "antd";
+import { 
+  SwapOutlined, 
+  InboxOutlined, 
+  CheckCircleOutlined, 
+  ClockCircleOutlined, 
+  EnvironmentOutlined,
+  PhoneOutlined,
+  UserOutlined,
+  UploadOutlined,
+  ExclamationCircleOutlined,
+  SearchOutlined
+} from "@ant-design/icons";
 import TimerCountdown from "./TimerCountdown";
-import { Modal } from "antd";
+import { checkDeliverySatus } from "../../../apis/GHN/APIGHN";
+import { GetOrderDetail, PackagingOrder, ConfirmOrderDelivered } from "../../../apis/Orders/APIOrder";
 
-const DeliveryProcessInfo = (
-  { firstUser, secondUser, firstAddress, secondAddress, exchangeDetails, fetchExchangeDetails }
-) => {
-  const [receiveDelivery, setReceiveDelivery] = useState('');
-  const [sendDelivery, setSendDelivery] = useState('');
-  const [isShowingReceivedDelivery, setIsShowingReceivedDelivery] =useState(true);
-  const [userRefundRequest, setUserRefundRequest] = useState();
-  const [isRefundRequest, setIsRefundRequest] = useState(false);
-  const fakeDelivery = {
-    id: 1,
-    exchange: exchangeDetails,
-    status: "pending",
-    deliveryTrackingCode: 2213,
-    deliveryFee: 50000,
-    estimatedDeliveryTime: "2023-10-10",
-    overallStatus: "DELIVERED",
-    packagingImages: [
-      "https://example.com/image1.jpg",
-      "https://example.com/image2.jpg",
-    ],
-    expiredAt: "2023-10-15",
-    note: "Ghi chú",
-    from: {
-      user: {
-        id: 1,
-        fullName: "Nguyễn Văn A",
-        phoneNumber: "0901234567",
-        email: "checking@gmail.com",
-        avatar: "https://example.com/avatar.jpg",
-        role: "member",
-        balance: 1000000,
-        address: "123 Đường ABC, Quận 1, TP.HCM",
-      },
-      fullName: "Nguyễn Văn A",
-      phoneNumber: "0901234567",
-      provinceId: 201,
-      districtId: 123,
-      wardId: "456",
-      detail: "123 Đường ABC, Quận 1, TP.HCM",
-    },
-    to: {
-      user: {
-        id: 2,
-        fullName: "Trần Thị B",
-        phoneNumber: "0907654321",
-        email: "checking2@gmail.com",
-        avatar: "https://example.com/avatar2.jpg",
-        role: "member",
-        balance: 2000000,
-        address: "456 Đường XYZ, Quận 2, TP.HCM",
-      },
-      fullName: "Trần Thị B",
-      phoneNumber: "0907654321",
-      provinceId: 202,
-      districtId: 124,
-      wardId: "457",
-      detail: "456 Đường XYZ, Quận 2, TP.HCM",
-    }
+const { Title, Text, Paragraph } = Typography;
+const { Step } = Steps;
+const { Dragger } = Upload;
+const { TextArea } = Input;
+const { confirm } = Modal;
+
+const DeliveryProcessInfo = ({ 
+  firstUser, 
+  secondUser, 
+  exchangeDetails, 
+  fetchExchangeDetails,
+  setIsLoading
+}) => {
+  // State management
+  const [isShowingSendOrder, setIsShowingSendOrder] = useState(false);
+  const [packagingModalVisible, setPackagingModalVisible] = useState(false);
+  const [complaintModalVisible, setComplaintModalVisible] = useState(false);
+  const [fileList, setFileList] = useState([]);
+  const [complaintForm] = Form.useForm();
+  const [orderDetail, setOrderDetail] = useState(null);
+  const [ghnDetail, setghnDetail] = useState(null);
+  const [isOrderDetailModalVisible, setIsOrderDetailModalVisible] = useState(false);
+  
+  // Determine which orders to display based on current view
+  const currentOrder = isShowingSendOrder 
+    ? exchangeDetails?.partner?.order
+    : exchangeDetails?.current_user?.order;
+    
+  const currentDelivery = isShowingSendOrder
+    ? exchangeDetails?.current_user
+    : exchangeDetails?.partner;
+    
+  const recipientInfo = isShowingSendOrder
+    ? exchangeDetails?.partner
+    : exchangeDetails?.current_user;
+
+  // Toggle between send and receive orders
+  const toggleOrderView = () => {
+    setIsShowingSendOrder(!isShowingSendOrder);
   };
 
+
+  // Mock function to fetch delivery status - would be replaced with actual API call
+  const fetchDeliveryStatus = async (trackingCode) => {
+    console.log("Fetching delivery status for:", trackingCode);
+    // This would be the actual API call to GHN
+    // For now, we'll simulate a response
+      await checkDeliverySatus(trackingCode).then( (res) => {
+        if (res.status === 200){
+         setghnDetail(res.data.data);
+          console.log(res.data.data);
+        }
+      })
+  };
+  const fetchOrderDetail = async (orderId) => {
+    console.log("Fetching order detail for:", orderId);
+    await GetOrderDetail(orderId).then((res)=> {
+      if (res.status === 200){
+        setOrderDetail(res.data);
+        console.log(res.data);
+      }
+    })
+  }
+
   useEffect(() => {
-   setReceiveDelivery(fakeDelivery);
-   setSendDelivery(fakeDelivery);
-  }, []);
+    console.log(exchangeDetails);
+    console.log('current order', currentOrder);
+  
+    if (currentOrder?.id) {
+      fetchOrderDetail(currentOrder.id);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentOrder, isShowingSendOrder]);
+  
+  useEffect(() => {
+    if (orderDetail?.order_delivery?.delivery_tracking_code) {
+      fetchDeliveryStatus(orderDetail.order_delivery.delivery_tracking_code);
+    }
+  }, [orderDetail]);
+  
+  useEffect(() => {
+    if (orderDetail?.order_delivery?.delivery_tracking_code) {
+      fetchDeliveryStatus(orderDetail.order_delivery.delivery_tracking_code);
+    }
+  }, [orderDetail]);
+  
+  useEffect(() => {
+    if (orderDetail?.order_delivery?.delivery_tracking_code) {
+      fetchDeliveryStatus(orderDetail.order_delivery.delivery_tracking_code);
+    }
+  }, [orderDetail]);
+  
+  // Handle packaging image upload
+  const handlePackagingUpload = ({ fileList }) => {
+    setFileList(fileList);
+  };
+
+  
+  // Submit package confirmation
+  const handlePackagingConfirm = () => {
+    if (fileList.length === 0) {
+      message.error("Vui lòng tải lên ít nhất một hình ảnh đóng gói");
+      return;
+    }
+    
+    setIsLoading(true);
+    console.log("Submitting packaging confirmation with images:", fileList);
+    const formData = new FormData();
+
+    fileList.forEach((file) => {
+        formData.append("package_images", file.originFileObj);
+    });
+    
 
 
-  return (
-    <div> 
-      <div>
-        <h2>
-          Thông tin giao hàng (
-            {isShowingReceivedDelivery ? "Đơn nhận" : "Đơn gửi"})
-        </h2>
-        <button
-          onClick={() =>
-            setIsShowingReceivedDelivery(!isShowingReceivedDelivery)
-          }
-          className="underline rounded-md text-sm px-4 py-2 uppercase duration-200 hover:font-semibold"
-        >
-          {isShowingReceivedDelivery ? "Xem đơn gửi" : "Xem đơn nhận"}
-        </button>
-      </div>
-      <div className="grow flex flex-col">
-        <div className="mb-4">
-          <h3 className="font-semibold text-gray-800">Người gửi</h3>
-          <p className="font-light">
-              {isShowingReceivedDelivery ? secondUser.full_name : firstUser.full_name}
-            </p>
-            <p className="font-light">
-              {isShowingReceivedDelivery ? secondAddress : firstAddress}
-            </p>
-        </div>
-        <div className="mb-4">
-            <h3 className="font-semibold text-gray-800">
-              Người nhận {isShowingReceivedDelivery && "(Bạn)"}:
-            </h3>
-            <p className="font-light">
-              {isShowingReceivedDelivery ? firstUser.full_name : secondUser.full_name}
-            </p>
-            <p className="font-light">
-              {isShowingReceivedDelivery ? firstAddress : secondAddress}
-            </p>
+    // Simulate API call with timeout
+    setTimeout(async () => {
+      await PackagingOrder(currentOrder.id, formData).then((res)=> {
+        if( res.status ===200) {
+          message.success("Xác nhận đóng gói thành công");
+          setPackagingModalVisible(false);
+          setFileList([]);
+        }
+      }).finally(
+        setIsLoading(false)
+      );
+      
+        }, 1000);
+  };
+  
+  // Submit complaint
+  const handleComplaintSubmit = (values) => {
+    setIsLoading(true);
+    
+    // In a real implementation, this would be an API call
+    console.log("Submitting complaint:", values);
+    
+    // Simulate API call with timeout
+    setTimeout(() => {
+      message.success("Gửi khiếu nại thành công");
+      setComplaintModalVisible(false);
+      complaintForm.resetFields();
+      setIsLoading(false);
+    }, 1000);
+  };
+  
+  // Confirm delivery completion
+  const showDeliveryConfirmation = () => {
+    confirm({
+      title: 'Xác nhận đã nhận hàng',
+      icon: <CheckCircleOutlined />,
+      content: 'Bạn xác nhận đã nhận được hàng và kiểm tra không có vấn đề gì? Hành động này không thể hoàn tác.',
+      okText: 'Xác nhận',
+      okType: 'primary',
+      cancelText: 'Hủy',
+      onOk() {
+        setIsLoading(true);
+        
+        // In a real implementation, this would be an API call
+        console.log("Confirming delivery completion");
+        
+        // Simulate API call with timeout
+        setTimeout(async () => {
+          await ConfirmOrderDelivered(currentOrder.id).then((res)=> {
+            if( res.status ===200) {
+              message.success("Xác nhận đã nhận hàng thành công");
+            }
+          }).finally(
+            setIsLoading(false)
+          );
+          // setIsLoading(false);
+
+          // Call fetchExchangeDetails() to refresh data
+        }, 1000);
+      }
+    });
+  };
+  
+  // Render delivery status steps
+  const renderDeliverySteps = (values) => {
+    // Define order status mapping to steps
+    const statusMap = {
+      "ready_to_pick": 0,
+      "picking": 1, 
+      "picked": 1,
+      "storing": 2,
+      "delivering": 3,
+      "delivered": 4,
+      "delivery_failed": 3,
+      "return": 2,
+      "return_storing": 2,
+      "returned": 1,
+      "cancel": 0,
+      "waiting_to_return": 3
+    };
+    
+    const currentStep = statusMap[values?.status] || 0;
+    
+    return (
+      <Steps 
+        current={currentStep}
+        size="small"
+        className="my-4"
+      >
+        <Step title="Chờ lấy hàng" />
+        <Step title="Đã lấy hàng" />
+        <Step title="Trung chuyển" />
+        <Step title="Đang giao" />
+        <Step title="Đã giao" />
+      </Steps>
+    );
+  };
+  
+  // Format date from ISO string to readable format
+  const formatDate = (dateString) => {
+    if (!dateString) return "";
+    const options = { 
+      year: 'numeric', 
+      month: '2-digit', 
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit'
+    };
+    return new Date(dateString).toLocaleDateString('vi-VN', options);
+  };
+  
+  // Render the main content based on order status
+  const renderMainContent = () => {
+    // If no order exists yet
+    if (!currentOrder) {
+      return (
+        <Empty 
+          description="Chưa có thông tin đơn hàng" 
+          image={Empty.PRESENTED_IMAGE_SIMPLE}
+        />
+      );
+    }
+    
+    // If order exists but packaging not completed (for sender)
+    if (isShowingSendOrder && !currentOrder.is_packaged) {
+      return (
+        <div className="p-4 border rounded-md bg-blue-50">
+          <div className="flex flex-col xl:flex-row items-center justify-between gap-2 mb-4">
+            <Title level={4} className="m-0">TIẾN HÀNH ĐÓNG GÓI</Title>
+            
+            <Space>
+              <Text className="text-gray-600">Thời hạn:</Text>
+              <Tag color="orange" className="text-base">72 giờ</Tag>
+              <Text className="text-gray-600">Còn lại:</Text>
+              <TimerCountdown
+                targetDate={new Date(new Date(currentOrder?.created_at).getTime() + 72 * 60 * 60 * 1000)}
+                // targetDate={currentOrder?.created_at}
+
+              />
+            </Space>
           </div>
-      </div>
-      {(isShowingReceivedDelivery && receiveDelivery.deliveryTrackingCode) ||
-        (!isShowingReceivedDelivery && sendDelivery.deliveryTrackingCode) ? (
-          <div>
-            <div>
-                <h3> Mã vận đơn: &emsp;{" "}
-                  <span className="font-light">
-                    {isShowingReceivedDelivery
-                      ? receiveDelivery.deliveryTrackingCode
-                      : sendDelivery.deliveryTrackingCode}
-                  </span>
-                </h3>
-                <button
-                  onClick={()=> window.open(
-                    `https://tracking.ghn.dev/?order_code=${isShowingReceivedDelivery ? receiveDelivery.deliveryTrackingCode : sendDelivery.deliveryTrackingCode}`,
-                    "_blank")?.focus()
-                  }
-                  className="flex items-center gap-2 px-2 rounded-md border border-gray-400  text-xs duration-200 hover:bg-gray-200"
-                >
-                  <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  width="16"
-                  height="16"
-                  fill="currentColor"
-                  >
-                    <path d="M18.031 16.6168L22.3137 20.8995L20.8995 22.3137L16.6168 18.031C15.0769 19.263 13.124 20 11 20C6.032 20 2 15.968 2 11C2 6.032 6.032 2 11 2C15.968 2 20 6.032 20 11C20 13.124 19.263 15.0769 18.031 16.6168ZM16.0247 15.8748C17.2475 14.6146 18 12.8956 18 11C18 7.1325 14.8675 4 11 4C7.1325 4 4 7.1325 4 11C4 14.8675 7.1325 18 11 18C12.8956 18 14.6146 17.2475 15.8748 16.0247L16.0247 15.8748Z"></path>
-                  </svg>
-                  Theo dõi giao hàng
-                </button>
-                <div>
-                  <h3>Trạng thái:</h3>
-                </div>
-                <div>
-                  <h3>
-                    Thời gian dự kiếm: 
-                  </h3>
-                </div>
-
-            </div>
-
+          
+          <Paragraph className="text-gray-600 mb-4">
+            Vui lòng đóng gói sản phẩm của bạn và tải lên hình ảnh đóng gói để xác nhận.
+            Đơn vị vận chuyển sẽ liên hệ với bạn để lấy hàng sau khi xác nhận đóng gói.
+          </Paragraph>
+          <div className="items-center">
+            <Button 
+              type="primary" 
+              className="bg-blue-500 "
+              icon={<InboxOutlined />}
+              onClick={() => setPackagingModalVisible(true)}
+            >
+              Xác nhận đóng gói
+            </Button>
+            <Button 
+              type="default" 
+              className="ml-2"
+              onClick={() => setIsOrderDetailModalVisible(true)}
+            >
+              Thông tin đơn hàng
+            </Button>
           </div>
-        ) : (
-          <div className="basis-1/2 flex flex-col">
-              <p className="text-xl font-semibold">TIẾN HÀNH ĐÓNG GÓI</p>
-
-              <div className="flex flex-col xl:flex-row items-center justify-between gap-2 my-2">
-                <p className="flex items-center gap-1 font-light text-sm">
-                  Thời hạn:&ensp;
-                  <span className="text-base font-semibold">72 giờ</span>
-                  (sau khi thanh toán)
-                </p>
-                <span className="flex items-center justify-center gap-2">
-                  <p className="text-sm font-light">Còn lại:</p>
-                  <TimerCountdown
-                    targetDate={sendDelivery?.expiredAt || new Date()}
-                    exchange={exchangeDetails}
-                    fetchExchangeDetails={fetchExchangeDetails}
-                  />
-                </span>
+          <Modal
+            title="Thông tin đơn hàng"
+            open={isOrderDetailModalVisible}
+            onCancel={() => setIsOrderDetailModalVisible(false)}
+            footer={[
+              <Button key="close" onClick={() => setIsOrderDetailModalVisible(false)}>
+                Đóng
+              </Button>,
+            ]}
+          >
+            {orderDetail ? (
+              <div>
+                <p><strong>Mã đơn:</strong> {orderDetail?.order?.code || "Không có"}</p>
+                <p><strong>Phí giao hàng:</strong> {orderDetail?.order?.delivery_fee?.toLocaleString("vi-VN")} VND</p>
+                <p><strong>Tổng tiền:</strong> {orderDetail?.order?.total_amount?.toLocaleString("vi-VN")} VND</p>
+                <p><strong>Ghi chú:</strong> {orderDetail?.order?.note || "Không có ghi chú"}</p>
               </div>
+            ) : (
+              <p>Không có thông tin đơn hàng.</p>
+            )}
+          </Modal>
+        </div>
+      );
+    }
+    
+    // If order exists and has tracking code
+    if (isShowingSendOrder && orderDetail?.order_delivery.delivery_tracking_code !== null) {
+      return (
+        <div className="p-4 border rounded-md">
+          <div className="flex flex-col md:flex-row items-start justify-between gap-4 mb-4">
+            <div>
+              <div className="flex items-center gap-2 mb-2">
+                <Tag color="blue" className="text-base">Mã vận đơn</Tag>
+                <Text copyable strong className="text-lg">{orderDetail?.order_delivery.delivery_tracking_code}</Text>
+              </div>
+              
+              {ghnDetail && (
+                <div className="flex flex-col gap-1">
+                  <Text className="text-gray-600">
+                    <CheckCircleOutlined className="mr-2" />
+                    Trạng thái: {renderDeliverySteps(ghnDetail)}
+                  </Text>
+                  
+                  <Text className="text-gray-600">
+                    <ClockCircleOutlined className="mr-2" />
+                    Thời gian dự kiến: {formatDate(ghnDetail.leadtime)}
+                  </Text>
+                </div>
+              )}
+            </div>
+            
+            <Space>
+              <Button
+                icon={<SearchOutlined />}
+                onClick={() => 
+                  window.open(
+                    `https://tracking.ghn.dev/?order_code=${orderDetail?.order_delivery.delivery_tracking_code}`,
+                    "_blank"
+                  )
+                }
+              >
+                Theo dõi giao hàng
+              </Button>
+              
+              {!isShowingSendOrder && currentOrder.status === "delivered" && (
+                <Button 
+                  type="primary"
+                  className="bg-green-500"
+                  icon={<CheckCircleOutlined />}
+                  onClick={showDeliveryConfirmation}
+                >
+                  Xác nhận đã nhận hàng
+                </Button>
+              )}
+              
+              {!isShowingSendOrder && currentOrder.status === "delivered" &&(
+                <Button 
+                  danger
+                  icon={<ExclamationCircleOutlined />}
+                  onClick={() => setComplaintModalVisible(true)}
+                >
+                  Gửi khiếu nại
+                </Button>
+              )}
+            </Space>
+          </div>
+          
+          {/* {ghnDetail && renderDeliverySteps()} */}
+          
+          {currentOrder.is_packaged ===true && (
+            <div className="mt-4">
+              <Text strong>Hình ảnh đóng gói:</Text>
+              <div className="flex flex-wrap gap-2 mt-2">
+                {currentOrder.packaging_image_urls?.map((url, index) => (
+                  <div key={index} className="w-24 h-24 relative">
+                    <img 
+                      src={url} 
+                      alt={`Packaging ${index + 1}`} 
+                      className="w-full h-full object-cover rounded-md"
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    }
+    
+    // Default state - waiting for action from the other party
+    return (
+      <div className="p-4 border rounded-md">
+          <div className="flex flex-col md:flex-row items-start justify-between gap-4 mb-4">
+            <div>
+              <div className="flex items-center gap-2 mb-2">
+                <Tag color="blue" className="text-base">Mã vận đơn</Tag>
+                <Text copyable strong className="text-lg">{orderDetail?.order_delivery.delivery_tracking_code}</Text>
+              </div>
+              
+              {ghnDetail && (
+                <div className="flex flex-col gap-1">
+                  <Text className="text-gray-600">
+                    <CheckCircleOutlined className="mr-2" />
+                    Trạng thái: {renderDeliverySteps(ghnDetail)}
+                  </Text>
+                  
+                  <Text className="text-gray-600">
+                    <ClockCircleOutlined className="mr-2" />
+                    Thời gian dự kiến: {formatDate(ghnDetail.leadtime)}
+                  </Text>
+                </div>
+              )}
+            </div>
+            
+            <Space>
+              <Button
+                icon={<SearchOutlined />}
+                onClick={() => 
+                  window.open(
+                    `https://tracking.ghn.dev/?order_code=${orderDetail?.order_delivery.delivery_tracking_code}`,
+                    "_blank"
+                  )
+                }
+              >
+                Theo dõi giao hàng
+              </Button>
+              
+              {!isShowingSendOrder && currentOrder.status === "delivered" && (
+                <Button 
+                  type="primary"
+                  className="bg-green-500"
+                  icon={<CheckCircleOutlined />}
+                  onClick={showDeliveryConfirmation}
+                >
+                  Xác nhận đã nhận hàng
+                </Button>
+              )}
+              
+              {!isShowingSendOrder && currentOrder.status === "delivered" &&(
+                <Button 
+                  danger
+                  icon={<ExclamationCircleOutlined />}
+                  onClick={() => setComplaintModalVisible(true)}
+                >
+                  Gửi khiếu nại
+                </Button>
+              )}
+            </Space>
+          </div>
+          
+          {/* {ghnDetail && renderDeliverySteps()} */}
+          
+          {currentOrder.is_packaged ===true && (
+            <div className="mt-4">
+              <Text strong>Hình ảnh đóng gói:</Text>
+              <div className="flex flex-wrap gap-2 mt-2">
+                {currentOrder.packaging_image_urls?.map((url, index) => (
+                  <div key={index} className="w-24 h-24 relative">
+                    <img 
+                      src={url} 
+                      alt={`Packaging ${index + 1}`} 
+                      className="w-full h-full object-cover rounded-md"
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+    );
+  };
+  
+  // Render sender/recipient information
+  const renderAddressInfo = (title, user, isSender = true) => {
+    const addressInfo = isSender 
+      ? user?.from_address 
+      : user?.to_address;
+    
+    if (!addressInfo) return null;
+    
+    return (
+      <div className="mb-4">
+        <Text strong className="text-base">{title}</Text>
+        <Card className="mt-2 border-gray-200">
+          <div className="flex items-start gap-3">
+            <div>
+              <UserOutlined className="text-xl bg-gray-100 p-2 rounded-full" />
+            </div>
+            <div>
+              <Text strong>{addressInfo.full_name}</Text>
+              <div className="flex items-center gap-1 text-gray-600">
+                <PhoneOutlined />
+                <Text>{addressInfo.phone_number}</Text>
+              </div>
+            </div>
+          </div>
+          
+          <div className="mt-3 pl-8">
+            <div className="flex items-start gap-2 text-gray-600">
+              <EnvironmentOutlined className="mt-1" />
+              <Text>
+                {addressInfo.detail}, {addressInfo.ward_name}, {addressInfo.district_name}, {addressInfo.province_name}
+              </Text>
+            </div>
+          </div>
+        </Card>
+      </div>
+    );
+  };
+  
+  return (
+    <div className="w-full">
+      {/* Header with toggle button */}
+      <div className="flex justify-between items-center mb-4">
+        <Title level={3} className="m-0">
+          {isShowingSendOrder ? "Thông tin đơn gửi hàng" : "Thông tin đơn nhận hàng"}
+        </Title>
+        
+        <Button 
+          icon={<SwapOutlined />} 
+          onClick={toggleOrderView}
+        >
+          Xem đơn {isShowingSendOrder ? "nhận" : "gửi"}
+        </Button>
+      </div>
+      
+      <Divider />
+      
+      {/* Shipping addresses information */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+        {renderAddressInfo(
+          isShowingSendOrder ? "Người gửi (Bạn)" : "Người gửi",
+          isShowingSendOrder ? exchangeDetails?.current_user : exchangeDetails?.partner,
+          true
+        )}
+        
+        {renderAddressInfo(
+          isShowingSendOrder ? "Người nhận" : "Người nhận (Bạn)",
+          isShowingSendOrder ? exchangeDetails?.partner : exchangeDetails?.current_user,
+          false
+        )}
+      </div>
+      
+      {/* Main order content */}
+      {renderMainContent()}
+      
+      {/* Packaging confirmation modal */}
+      <Modal
+        title="Xác nhận đóng gói"
+        open={packagingModalVisible}
+        onCancel={() => setPackagingModalVisible(false)}
+        onOk={handlePackagingConfirm}
+        okText="Xác nhận"
+        cancelText="Hủy"
+        okButtonProps={{ className: 'bg-blue-500' }}
+      >
+        <Paragraph className="mb-4">
+          Vui lòng tải lên ít nhất một hình ảnh của sản phẩm đã được đóng gói để xác nhận.
+          Điều này giúp đảm bảo tính minh bạch trong quá trình trao đổi.
+        </Paragraph>
+        
+        <Dragger
+          fileList={fileList}
+          onChange={handlePackagingUpload}
+          beforeUpload={() => false}
+          multiple
+          maxCount={5}
+          accept="image/*"
+        >
+          <p className="ant-upload-drag-icon">
+            <InboxOutlined />
+          </p>
+          <p className="ant-upload-text">Nhấn hoặc kéo thả hình ảnh vào khu vực này</p>
+          <p className="ant-upload-hint">Hỗ trợ tải lên một hoặc nhiều hình ảnh (tối đa 5 hình)</p>
+        </Dragger>
+        
+        {fileList.length > 0 && (
+          <div className="mt-3">
+            <Text strong>Đã chọn {fileList.length} hình ảnh</Text>
           </div>
         )}
-        {isShowingReceivedDelivery &&
-        (receiveDelivery.overallStatus === "DELIVERED" ? (
-          !userRefundRequest ? (
-            <div>
-              <h3 className="font-semibold text-gray-800">Đã giao hàng</h3>
-              <p className="font-light">Bạn đã nhận hàng thành công!</p>
-              <p className="font-light">Vui lòng xác nhận để hoàn tất giao dịch.</p>
-              <button className="mt-2 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 duration-200">
-                Xác nhận
-              </button>
-              <button className="mt-2 px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 duration-200">
-                Yêu cầu hoàn tiền
-              </button>
-              <Modal>
-
-              </Modal>
-            </div>
-          ) : (
-            <div>
-              <h3 className="font-semibold text-gray-800">Yêu cầu hoàn tiền</h3>
-              <p className="font-light">
-                Bạn đã yêu cầu hoàn tiền cho đơn hàng này.
-              </p>
-              <p className="font-light">Vui lòng đợi xác nhận từ người gửi.</p>
-            </div>
-          )
-        ) : receiveDelivery.overallStatus === "FAILED" ? (
-          <div>
-            <h3 className="font-semibold text-gray-800">Giao hàng thất bại</h3>
-            <p className="font-light">
-              Đơn hàng đã không được giao thành công.
-            </p>
-            <p className="font-light">Vui lòng kiểm tra lại thông tin.</p>
-            <button className="mt-2 px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 duration-200">
-              Liên hệ hỗ trợ 
-            </button>
-          </div>
-        ) : (
-          <div
-            className={`${
-              (!receiveDelivery || !receiveDelivery.deliveryTrackingCode) &&
-              "hidden"
-            } mt-5 r`}
+      </Modal>
+      
+      {/* Complaint modal */}
+      <Modal
+        title="Gửi khiếu nại"
+        open={complaintModalVisible}
+        onCancel={() => setComplaintModalVisible(false)}
+        footer={null}
+      >
+        <Form
+          form={complaintForm}
+          layout="vertical"
+          onFinish={handleComplaintSubmit}
+        >
+          <Form.Item
+            name="complaintType"
+            label="Loại khiếu nại"
+            rules={[{ required: true, message: 'Vui lòng chọn loại khiếu nại' }]}
           >
-            <p className="w-full text-center text-sm font-light italic pb-4">
-              Trên đường giao hàng đến bạn...
-            </p>
-            {/* <LinearProgress /> */}
-          </div>
-        ))}
+            <select className="w-full p-2 border border-gray-300 rounded">
+              <option value="">-- Chọn loại khiếu nại --</option>
+              <option value="damaged">Sản phẩm bị hư hại</option>
+              <option value="wrong_item">Sản phẩm không đúng mô tả</option>
+              <option value="delivery_issue">Vấn đề về vận chuyển</option>
+              <option value="other">Khác</option>
+            </select>
+          </Form.Item>
+          
+          <Form.Item
+            name="description"
+            label="Mô tả chi tiết"
+            rules={[{ required: true, message: 'Vui lòng mô tả chi tiết vấn đề' }]}
+          >
+            <TextArea rows={4} placeholder="Mô tả chi tiết vấn đề bạn gặp phải..." />
+          </Form.Item>
+          
+          <Form.Item
+            name="photos"
+            label="Hình ảnh minh chứng (không bắt buộc)"
+          >
+            <Upload
+              listType="picture-card"
+              beforeUpload={() => false}
+              maxCount={3}
+              accept="image/*"
+            >
+              <div>
+                <UploadOutlined />
+                <div style={{ marginTop: 8 }}>Tải lên</div>
+              </div>
+            </Upload>
+          </Form.Item>
+          
+          <Form.Item className="mb-0 flex justify-end">
+            <Space>
+              <Button onClick={() => setComplaintModalVisible(false)}>
+                Hủy
+              </Button>
+              <Button type="primary" htmlType="submit" className="bg-blue-500">
+                Gửi khiếu nại
+              </Button>
+            </Space>
+          </Form.Item>
+        </Form>
+      </Modal>
     </div>
-  )
-}
+  );
+};
+
 DeliveryProcessInfo.propTypes = {
   firstUser: PropTypes.object,
   secondUser: PropTypes.object,
-  firstAddress: PropTypes.object,
-  secondAddress: PropTypes.object,
-  exchangeDetails: PropTypes.object,
-  fetchExchangeDetails: PropTypes.func,
+  exchangeDetails: PropTypes.shape({
+    id: PropTypes.string,
+    status: PropTypes.string,
+    expiredAt: PropTypes.string,
+    current_user: PropTypes.shape({
+      id: PropTypes.string,
+      full_name: PropTypes.string,
+      avatar_url: PropTypes.string,
+      from_address: PropTypes.object,
+      to_address: PropTypes.object,
+      order: PropTypes.shape({
+        id: PropTypes.string,
+        status: PropTypes.string,
+        delivery_tracking_code: PropTypes.string,
+        is_packaged: PropTypes.bool,
+        packaging_image_urls: PropTypes.arrayOf(PropTypes.string)
+      })
+    }),
+    partner: PropTypes.shape({
+      id: PropTypes.string,
+      full_name: PropTypes.string,
+      avatar_url: PropTypes.string,
+      from_address: PropTypes.object,
+      to_address: PropTypes.object,
+      order: PropTypes.shape({
+        id: PropTypes.string,
+        status: PropTypes.string,
+        delivery_tracking_code: PropTypes.string,
+        is_packaged: PropTypes.bool,
+        packaging_image_urls: PropTypes.arrayOf(PropTypes.string)
+      })
+    })
+  }),
+  fetchExchangeDetails: PropTypes.func.isRequired,
+  setIsLoading: PropTypes.func.isRequired
 };
 
 export default DeliveryProcessInfo;

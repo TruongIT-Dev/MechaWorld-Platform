@@ -220,16 +220,7 @@ const ExchangeInformationSection = ({
           />
         );
       case 5:
-        return (
-          <div className="w-full text-center border border-gray-500 rounded-lg py-2">
-            Đang chờ{" "}
-            <span className="font-semibold inline-flex items-center gap-1">
-              <Avatar size={24} src={partner.avatar_url} />
-              {partner.full_name}
-            </span>{" "}
-            xác nhận giao hàng thành công...
-          </div>
-        );
+        return <SuccessfulExchange exchangeDetails={exchangeDetail} />;
       case 6:
         return <SuccessfulExchange exchangeDetails={exchangeDetail} />;
       default:
