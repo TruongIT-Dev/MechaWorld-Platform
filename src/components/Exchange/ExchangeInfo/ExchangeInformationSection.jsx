@@ -240,7 +240,7 @@ const ExchangeInformationSection = ({
         </div>
         {!isFailed && (
           <button
-            onClick={fetchExchangeData()}
+            onClick={() => fetchExchangeData()}
             // onClick={() => {}}
             className="min-w-fit flex items-center gap-2 px-2 py-1 rounded-lg border border-gray-300 duration-200 hover:bg-gray-100"
           >

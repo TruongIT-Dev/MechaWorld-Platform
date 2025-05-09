@@ -17,8 +17,6 @@ export default function PostsTable({ posts, onViewOffers, onViewGunplas, onDelet
         exchanged: "blue",
         pending: "orange"
     };
-    // console.log(userPost);
-
     // Delete post confirmation
     const showDeleteConfirm = (postId) => {
         confirm({
@@ -29,6 +27,7 @@ export default function PostsTable({ posts, onViewOffers, onViewGunplas, onDelet
             okType: 'danger',
             cancelText: 'Hủy',
             onOk() {
+                // console.log(postId);
                 onDeletePost(postId);
             }
         });
@@ -125,7 +124,7 @@ export default function PostsTable({ posts, onViewOffers, onViewGunplas, onDelet
             key: "action",
             width: 180,
             align: 'center',
-            render: (_, record) => (
+            render: (record) => (
                 <Space>
                     <Button
                         icon={<MessageOutlined />}
@@ -143,7 +142,7 @@ export default function PostsTable({ posts, onViewOffers, onViewGunplas, onDelet
                         <Button
                             danger
                             icon={<DeleteOutlined />}
-                            onClick={() => showDeleteConfirm(record.id)}
+                            onClick={() => showDeleteConfirm(record.exchange_post.id)}
                         />
                     </Tooltip>
                 </Space>

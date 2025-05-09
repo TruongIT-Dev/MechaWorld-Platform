@@ -108,6 +108,10 @@ export default function ExchangeManageNegotiation() {
                     );
                     // setIsModalVisible(false);
                     handleModalCancel();
+                }else if (res.status === 422 ) {
+                        setTimeout(
+                            message.success('Ví của bạn không đủ không đủ tiền để đề xuất. Vui lòng nạp thêm tiền vào tài khoản!'), 800
+                        );
                 }
             });
             // handleModalCancel();
