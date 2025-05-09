@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
-import { Layout, Card, Tabs, Typography } from "antd";
+import { Layout, Card, Tabs, Typography, message } from "antd";
 import { myPosts, offers } from "./Data";
 
 import PostsTable from "./PostsTable";
 import OffersDrawer from "./OffersDrawer";
 import ListGundamModal from "./ListGundamModal";
 import OfferDetailModal from "./OfferDetailModal";
-import { getAllUserExchangePost } from "../../../apis/Exchange/APIExchange";
+import { deleteExchangePost, getAllUserExchangePost } from "../../../apis/Exchange/APIExchange";
 
 const { Content } = Layout;
 const { TabPane } = Tabs;
@@ -53,7 +53,14 @@ export default function ExchangeMyPost() {
     // Delete post
     const handleDeletePost = (postId) => {
         console.log(`Post ${postId} deleted`);
-        // In a real app, you would delete the post from your database
+        deleteExchangePost(postId).then((res) => {
+            if ( res.sttatus === 200) {
+                message.success(`Đã xóa bài viết!`);
+                getAllUserExchangePost().then((res) => {
+                    setUserPost(res.data);
+                })
+            }
+        })
     };
     useEffect(()=> {
         getAllUserExchangePost().then((res) => {

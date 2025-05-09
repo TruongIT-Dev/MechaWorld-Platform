@@ -215,7 +215,7 @@ const ExchangeDetailInformation = () => {
 
 
 
-  }, [firstCurrentStage, secondCurrentStage]);
+  }, [ ]);
 
 
 
