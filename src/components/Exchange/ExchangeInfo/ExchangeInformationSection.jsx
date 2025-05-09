@@ -33,6 +33,7 @@ const ExchangeInformationSection = ({
   selectedAddress,
   setSelectedAddress,
   setIsLoading,
+  fetchExchangeData,
 }) => {
 //   const [refundRequestsList, setRefundRequestsList] = useState([]);
 //   const [userRefundRequest, setUserRefundRequest] = useState(null);
@@ -203,7 +204,7 @@ const ExchangeInformationSection = ({
             setDeliverPartnerData={setDeliverPartnerData}
             setDeliverData={setDeliverData}
             secondUser={partner}
-            fetchExchangeDetails={() => {}}
+            fetchExchangeDetails={fetchExchangeData}
             setIsLoading={setIsLoading}
           />
         );
@@ -215,21 +216,12 @@ const ExchangeInformationSection = ({
             secondUser={partner}
             firstAddress={firstAddress}
             secondAddress={secondAddress}
-            fetchExchangeDetails={() => {}}
+            fetchExchangeDetails={fetchExchangeData}
             setIsLoading={setIsLoading}
           />
         );
       case 5:
-        return (
-          <div className="w-full text-center border border-gray-500 rounded-lg py-2">
-            Đang chờ{" "}
-            <span className="font-semibold inline-flex items-center gap-1">
-              <Avatar size={24} src={partner.avatar_url} />
-              {partner.full_name}
-            </span>{" "}
-            xác nhận giao hàng thành công...
-          </div>
-        );
+        return <SuccessfulExchange exchangeDetails={exchangeDetail} />;
       case 6:
         return <SuccessfulExchange exchangeDetails={exchangeDetail} />;
       default:
@@ -248,7 +240,8 @@ const ExchangeInformationSection = ({
         </div>
         {!isFailed && (
           <button
-            onClick={() => {}}
+            onClick={fetchExchangeData()}
+            // onClick={() => {}}
             className="min-w-fit flex items-center gap-2 px-2 py-1 rounded-lg border border-gray-300 duration-200 hover:bg-gray-100"
           >
             <svg
@@ -284,6 +277,7 @@ ExchangeInformationSection.propTypes = {
   deliverPartnerData: PropTypes.object,
   address: PropTypes.array,
   setAddress: PropTypes.func,
+  fetchExchangeData: PropTypes.func,
   selectedAddress: PropTypes.object,
   setSelectedAddress: PropTypes.func,
   selectedPickupAddress: PropTypes.object,

@@ -39,3 +39,15 @@ export const checkTimeDeliver = (deliveryData) => {
         }
     })
 }
+
+
+export const checkDeliverySatus = (orderId) => {
+    return axios.post(`https://dev-online-gateway.ghn.vn/shiip/public-api/v2/shipping-order/detail`,{
+        order_code: orderId
+    },{
+        headers: {
+            token: token,
+            "Content-Type": "application/json"
+        }
+    })
+}

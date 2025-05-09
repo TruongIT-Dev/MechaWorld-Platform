@@ -1,8 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { useEffect, useState } from "react";
-import axios from '../../../utils/axios-custome';
 
-export default function TimerCountdown({ targetDate, exchange, fetchExchangeDetails }) {
+export default function TimerCountdown({ targetDate }) {
   const [time, setTime] = useState({ d: 0, h: 0, m: 0, s: 0 });
   const [timer, setTimer] = useState(null);
 
@@ -17,43 +16,35 @@ export default function TimerCountdown({ targetDate, exchange, fetchExchangeDeta
 
   const calculateTimeLeft = () => {
     const now = new Date().getTime();
-    const target = new Date(targetDate).getTime();
+    const target = new Date(targetDate).getTime(); // Sử dụng trực tiếp targetDate
     const difference = target - now;
-    // console.log("echange time",exchange);
+  
     if (difference <= 0) {
       clearInterval(timer);
       setTime({ d: 0, h: 0, m: 0, s: 0 });
-
-        // axios
-        // .patch(`deposits/exchange/expired/${exchange.id}`)
-        // .then(() => {
-        //   fetchExchangeDetails();
-        // })
-        // .catch((err) => console.log(err));
-
-      return;
+      return 0; // Trả về 0 nếu đã hết thời gian
     }
-
-    return Math.floor(difference / 1000);
+  
+    return Math.floor(difference / 1000); // Trả về số giây còn lại
   };
 
   useEffect(() => {
+    console.log(targetDate)
     const initialSeconds = calculateTimeLeft();
     setTime(secondsToTime(initialSeconds || 0));
-
+  
     const newTimer = setInterval(() => {
       const remainingTime = calculateTimeLeft();
-      if (!remainingTime) return;
-
-      if (remainingTime > 0) {
-        setTime(secondsToTime(remainingTime));
-      } else {
+      if (remainingTime <= 0) {
         clearInterval(newTimer);
+        return;
       }
+  
+      setTime(secondsToTime(remainingTime));
     }, 1000);
-
+  
     setTimer(newTimer);
-
+  
     return () => clearInterval(newTimer);
   }, [targetDate]);
 

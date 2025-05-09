@@ -4,23 +4,20 @@ import ProgressSection from "./ExchangeProcess/ProgressSection";
 import ExchangeInformation from "./ExchangeInformation";
 import ExchangeLoader from "./ExchangeLoader";
 import { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import { getUserAddresses } from "../../apis/User/APIUser";
 import { getExchangeDetail } from "../../apis/Exchange/APIExchange";
 import { useParams } from "react-router-dom";
    
-import { selectDeliveryFee, hasDeliveryFee, getDeliveryFee } from "../../utils/exchangeUtils";
+import {  hasDeliveryFee, getDeliveryFee } from "../../utils/exchangeUtils";
 const ExchangeDetailInformation = () => {
   const currentUser = useSelector((state) => state.auth.user);
 
   const [firstCurrentStage, setFirstCurrentStage] = useState(-1);
   const [secondCurrentStage, setSecondCurrentStage] = useState(-1);
 
-  // State lưu trữ dữ liệu trao đổi và địa chỉ người dùng
   const [exchangeDetail, setExchangeDetail] = useState(null);
-  // State quản lý trạng thái tải dữ liệu
   const [isLoading, setIsLoading] = useState(true);
-  const dispatch = useDispatch();
   const [firstAddress, setFirstAddress] = useState(null);
   const [secondAddress, setSecondAddress] = useState(null);
   const [currentUser2, setFirstUser] = useState();
@@ -53,9 +50,10 @@ const ExchangeDetailInformation = () => {
   //   setFirstCurrentStage(0);
   //   setSecondCurrentStage(0);
   // };
-  const fee = useSelector((state) =>
-    selectDeliveryFee(state, currentUser.id, exchangeDetail?.id)
-  );
+
+  // const fee = useSelector((state) =>
+  //   selectDeliveryFee(state, currentUser.id, exchangeDetail?.id)
+  // );
   
   const isFeeAvailable = useSelector((state) =>
     hasDeliveryFee(state, exchangeDetail?.current_user.id, exchangeDetail?.id)
@@ -248,6 +246,7 @@ const ExchangeDetailInformation = () => {
               firstAddress={firstAddress}
               secondAddress={secondAddress}
               setIsLoading={setIsLoading}
+              fetchExchangeData={fetchExchangeData}
             />
             <ActionButtons
               currentStage={firstCurrentStage}

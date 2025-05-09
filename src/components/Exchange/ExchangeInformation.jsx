@@ -1,13 +1,10 @@
 import { useState } from 'react';
 import PropTypes from 'prop-types';
-import { Modal, Card, Button, Avatar } from 'antd';
+import { Modal, Button, Avatar } from 'antd';
 import DealsInformation from './ExchangeInfo/DealsInformation';
 import ViewBothGundamsLists from './ExchangeInfo/ViewBothGundamsLists';
 
 const ExchangeInformation = ({
-  firstCurrentStage,
-  secondCurrentStage,
-  exchangeData,
   firstUser,
   exchangeDetail,
   secondUser,
@@ -35,9 +32,14 @@ const ExchangeInformation = ({
     setIsCheckboxChecked(false);
   };
 
+  if ([ 'completed'].includes(exchangeDetail.status)) {
+    return null;
+  }
+
   return (
     <div className="exchange-information-container mb-3">
       <div className="flex justify-between items-center gap-[10%]">
+      {['delivering', 'delivered'].includes(exchangeDetail.status) && (
         <Button
           type="danger"
           className="flex-3 bg-red-300 hover:bg-red-700 border-red-400 hover:text-white"
@@ -46,6 +48,7 @@ const ExchangeInformation = ({
         >
           Dừng Giao Dịch
         </Button>
+      )}
         <Button
           type="primary"
           className="flex-5 bg-blue-400 hover:bg-blue-700"

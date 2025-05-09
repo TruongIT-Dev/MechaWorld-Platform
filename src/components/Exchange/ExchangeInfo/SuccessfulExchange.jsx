@@ -13,21 +13,21 @@ const SuccessfulExchange = () => {
 
       <div className="basis-1/3 flex flex-col items-stretch justify-between gap-4">
         <div className="flex items-center justify-center">
-          <p className="font-light italic text-sm border border-gray-400 rounded-lg p-2">
-            "Quá trình trao đổi đã hoàn tất. Chúng tôi hy vọng bạn sẽ có một
-            khoảng thời gian tận hưởng với những tập truyện mới!"
+          <p className=" italic text-sm border border-gray-400 rounded-lg p-2">
+            &quot;Quá trình trao đổi đã hoàn tất. Chúng tôi hy vọng bạn sẽ có một
+            khoảng thời gian tận hưởng bộ sưu tập mới!&quot;
           </p>
         </div>
 
         <div className="min-w-max flex flex-col items-stretch gap-1">
           <button
-            onClick={() => navigate("/profile/wallet")}
+            onClick={() => navigate("/member/profile/wallet")}
             className="border border-gray-300 p-2 rounded-lg duration-200 hover:bg-gray-100"
           >
             Kiểm tra ví
           </button>
           <button
-            onClick={() => navigate("/exchange/request")}
+            onClick={() => navigate("/exchange/list")}
             className="bg-sky-800 text-white p-2 rounded-lg duration-200 hover:bg-sky-900"
           >
             Tiếp tục trao đổi

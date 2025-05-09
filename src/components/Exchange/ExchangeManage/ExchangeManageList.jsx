@@ -3,66 +3,23 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import {
     UserOutlined,
-    SyncOutlined,
-    CheckCircleOutlined,
-    CloseCircleOutlined,
-    ClockCircleOutlined,
+    // SyncOutlined,
+    // CheckCircleOutlined,
+    // CloseCircleOutlined,
+    // ClockCircleOutlined,
 } from "@ant-design/icons";
-import { getAllExchangeOffer, getAllExchangeParticipating } from "../../../apis/Exchange/APIExchange";
+import { getAllExchangeParticipating } from "../../../apis/Exchange/APIExchange";
 import moment from "moment/min/moment-with-locales";
 
 moment.locale("vi");
 const { Text } = Typography;
 
-// Mock data with more entries
-const generateData = (count) => {
-    const statuses = [
-        { text: "Đang chờ xác nhận", color: "orange", icon: <ClockCircleOutlined /> },
-        { text: "Đã xác nhận", color: "blue", icon: <SyncOutlined spin /> },
-        { text: "Thành công", color: "green", icon: <CheckCircleOutlined /> },
-        { text: "Bị từ chối", color: "red", icon: <CloseCircleOutlined /> }
-    ];
 
-    const users = ["Minh", "Toàn", "Nhật", "Hùng", "Khoa", "Quân", "Dũng"];
-    const gundamModels = [
-        { title: "RX-78-2 Gundam", subtitle: "Mobile Suit Gundam" },
-        { title: "Zaku II", subtitle: "Mobile Suit Gundam" },
-        { title: "Gundam Exia", subtitle: "Gundam 00" },
-        { title: "Strike Freedom Gundam", subtitle: "Gundam SEED Destiny" },
-        { title: "Unicorn Gundam", subtitle: "Gundam Unicorn" },
-        { title: "Wing Gundam Zero", subtitle: "Gundam Wing" },
-        { title: "Gundam Barbatos", subtitle: "Gundam Iron-Blooded Orphans" }
-    ];
-
-    const times = [
-        "Hôm nay lúc 02:51",
-        "Hôm qua lúc 15:20",
-        "15/04/2025 lúc 09:45",
-        "12/04/2025 lúc 19:30",
-        "05/04/2025 lúc 14:15",
-        "01/04/2025 lúc 10:10"
-    ];
-
-    return Array.from({ length: count }, (_, i) => ({
-        key: (i + 1).toString(),
-        user: users[Math.floor(Math.random() * users.length)],
-        otherComic: gundamModels[Math.floor(Math.random() * gundamModels.length)],
-        yourComic: `/gundam${(i % 5) + 1}.png`,
-        time: times[Math.floor(Math.random() * times.length)],
-        status: statuses[Math.floor(Math.random() * statuses.length)],
-        paymentDirection: Math.random() > 0.5 ? "you" : "them",
-        paymentAmount: Math.floor(Math.random() * 500 + 100) * 1000,
-        note: "Mẫu này tôi rất thích, mong bạn đồng ý trao đổi."
-    }));
-};
-
-const mockData = generateData(12);
 // Filter only pending negotiations
 
 export default function ExchangeManageList() {
     const [activeFilter, setActiveFilter] = useState("all");
 
-    const [offerData, setOfferData] = useState([]);
     const [exchangeData, setExchangeData] = useState([]);
     const [filteredData, setFilteredData] = useState(exchangeData);
     // Filter functionality
@@ -71,18 +28,7 @@ export default function ExchangeManageList() {
         if (filter === "all") {
             setFilteredData(exchangeData);
         } else {
-            const statusMap = {
-                "pending": "Đang trao đổi",
-                "failed": "Trao đổi thất bại",
-                "canceled": "Bị hủy",
-                "completed": "Thành công",
-                "ongoing": "Đang chờ xác nhận",
-                "packaging": "Đang đóng gói",
-                "delivering": "Đang vận chuyển",
-                "delivered": "Đã được giao",
-            };
-
-            setFilteredData(exchangeData.filter(item => {item.status === statusMap[filter]}));
+            setFilteredData(exchangeData.filter(item => item.status === filter));
         }
     };
 
@@ -96,7 +42,15 @@ export default function ExchangeManageList() {
         { label: "Bị hủy", value: "canceled" },
         { label: "Trao đổi thất bại", value: "failed" }
     ];
-
+    const statusMap = {
+        pending: "Đang chờ",
+        packaging: "Đang đóng gói",
+        delivering: "Đang vận chuyển",
+        delivered: "Đã giao",
+        completed: "Hoàn thành",
+        canceled: "Đã hủy",
+        failed: "Thất bại",
+    };
 
     const columns = [
             // {
@@ -148,11 +102,39 @@ export default function ExchangeManageList() {
                 dataIndex: "status",
                 key: "status",
                 width: 220,
-                render: (src) => (
-                    <Space direction="vertical" size={0}>
-                        <Typography.Text strong>{src}</Typography.Text>
-                    </Space>
-                ),
+                render: (status) => {
+                    let color = "";
+                    switch (status) {
+                        case "pending":
+                            color = "blue";
+                            break;
+                        case "packaging":
+                            color = "orange";
+                            break;
+                        case "delivering":
+                            color = "cyan";
+                            break;
+                        case "delivered":
+                            color = "green";
+                            break;
+                        case "completed":
+                            color = "success";
+                            break;
+                        case "canceled":
+                            color = "red";
+                            break;
+                        case "failed":
+                            color = "volcano";
+                            break;
+                        default:
+                            color = "default";
+                    }
+                    return (
+                        <Tag color={color} key={status}>
+                            {statusMap[status] || "Không xác định"}
+                        </Tag>
+                    );
+                },
             },
             {
                 title: "Thời gian",
@@ -192,12 +174,13 @@ export default function ExchangeManageList() {
         ];
 
         useEffect(() => {
-                getAllExchangeOffer().then((res) => {
-                    setOfferData(res.data);
-                    console.log(res.data);
-                })
+                // getAllExchangeOffer().then((res) => {
+                //     setOfferData(res.data);
+                //     console.log(res.data);
+                // })
                 getAllExchangeParticipating().then((res) => {
                     setExchangeData(res.data);
+                    setFilteredData(res.data);
                     console.log(res.data);
                 })
         },[])
@@ -213,7 +196,7 @@ export default function ExchangeManageList() {
                             className="text-black text-base"
                             key={option.value}
                             type={activeFilter === option.value ? "primary" : "link"}
-                            onClick={() => filterData(option.value)}
+                            onClick={() => {filterData(option.value); console.log(option.value)}}
                         >
                             {option.label}
                         </Button>
