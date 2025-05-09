@@ -1,11 +1,9 @@
 import { Table, Badge, Button, Tag, Space, Tooltip, Modal, Image } from "antd";
 import {
     MessageOutlined,
-    EditOutlined,
     DeleteOutlined,
     ExclamationCircleOutlined,
     EyeOutlined,
-    SwapLeftOutlined,
     SwapOutlined
 } from "@ant-design/icons";
 
@@ -13,12 +11,14 @@ const { confirm } = Modal;
 
 export default function PostsTable({ posts, onViewOffers, onViewGunplas, onDeletePost, userPost }) {
     const statusColors = {
+        open: "green",
         active: "green",
         inactive: "default",
         exchanged: "blue",
         pending: "orange"
     };
-    console.log(userPost);
+    // console.log(userPost);
+
     // Delete post confirmation
     const showDeleteConfirm = (postId) => {
         confirm({
@@ -81,16 +81,6 @@ export default function PostsTable({ posts, onViewOffers, onViewGunplas, onDelet
             ),
         },
         {
-            title: "Ngày đăng",
-            dataIndex: "exchange_post",
-            key: "createdAt",
-            width: 120,
-            align: 'center',
-            render: (exchange_post) => (
-                <div>{new Date(exchange_post?.created_at).toLocaleDateString()}</div>
-            )
-        },
-        {
             title: "Gundam trao đổi",
             dataIndex: "exchange_post_items",
             key: "gunplasCount",
@@ -119,6 +109,16 @@ export default function PostsTable({ posts, onViewOffers, onViewGunplas, onDelet
                                 exchange_post?.status === "exchanged" ? "Đã trao đổi" : "Đang xử lý"}
                 </Tag>
             ),
+        },
+        {
+            title: "Ngày đăng",
+            dataIndex: "exchange_post",
+            key: "createdAt",
+            width: 120,
+            align: 'center',
+            render: (exchange_post) => (
+                <div>{new Date(exchange_post?.created_at).toLocaleDateString()}</div>
+            )
         },
         {
             title: "Hành động",
@@ -150,7 +150,7 @@ export default function PostsTable({ posts, onViewOffers, onViewGunplas, onDelet
             ),
         },
     ];
-    
+
     return (
         <div className="overflow-x-auto">
             <Table

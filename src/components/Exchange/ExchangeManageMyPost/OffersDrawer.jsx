@@ -1,11 +1,11 @@
-import { Drawer, Button, Card, Badge, List, Space, Avatar, Tag, Divider, Typography, Modal, Form, Input, InputNumber, message } from "antd";
+import { Drawer, Button, Badge, List, Space, Avatar, Divider, Typography, Modal, Form, Input, message } from "antd";
 import {
-    ClockCircleOutlined,
-    CheckCircleOutlined,
-    CloseCircleOutlined,
+    // ClockCircleOutlined,
+    // CheckCircleOutlined,
+    // CloseCircleOutlined,
     ArrowUpOutlined,
     ArrowDownOutlined,
-    DollarOutlined
+    // DollarOutlined
 } from "@ant-design/icons";
 import { useState } from "react";
 import { useSelector } from "react-redux";
@@ -18,41 +18,42 @@ export default function OffersDrawer({ visible, post, offers, onClose, onViewOff
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [form] = Form.useForm();
     const [compensationType, setCompensationType] = useState('none');
-    const user =useSelector((state) => state.auth.user);
+    const user = useSelector((state) => state.auth.user);
 
     if (!offers) return null;
 
-    const offerStatusMap = {
-        pending: { text: "Đang chờ xác nhận", color: "orange", icon: <ClockCircleOutlined /> },
-        accepted: { text: "Đã chấp nhận", color: "green", icon: <CheckCircleOutlined /> },
-        rejected: { text: "Đã từ chối", color: "red", icon: <CloseCircleOutlined /> }
-    };
+    // const offerStatusMap = {
+    //     pending: { text: "Đang chờ xác nhận", color: "orange", icon: <ClockCircleOutlined /> },
+    //     accepted: { text: "Đã chấp nhận", color: "green", icon: <CheckCircleOutlined /> },
+    //     rejected: { text: "Đã từ chối", color: "red", icon: <CloseCircleOutlined /> }
+    // };
 
 
     const handleModalCancel = () => {
         setIsModalVisible(false)
     }
 
-    const handleSelectCompensation = (type) => {
-        setCompensationType(type);
-        if (type === 'none') {
-            form.setFieldsValue({ compensationAmount: 0 });
-        }
-    };
+    // const handleSelectCompensation = (type) => {
+    //     setCompensationType(type);
+    //     if (type === 'none') {
+    //         form.setFieldsValue({ compensationAmount: 0 });
+    //     }
+    // };
+    
     const handleAcceptExchange = (offer) => {
         console.log(offer);
-        acceptOffer(offer.post_id,offer.id).then((res) => {
-            if(res.status == 200) {
-               console.log(res.data);
-               
+        acceptOffer(offer.post_id, offer.id).then((res) => {
+            if (res.status == 200) {
+                console.log(res.data);
+
                 setTimeout(() => {
                     message.success('Đã chấp nhận đề xuất. Điều hướng qua trang trao đổi');
                     window.location.href = `/exchange/detail/${res.data.id}`;
                 }, 1000);
-                
+
 
             }
-        }).catch((error) =>{
+        }).catch((error) => {
             message.error(error);
         })
     }
@@ -60,7 +61,7 @@ export default function OffersDrawer({ visible, post, offers, onClose, onViewOff
 
     const handleModalSubmit = (values) => {
         console.log(values.note);
-        requestNegotiation(offers[0].post_id,offers[0]?.id,values.note).then((res) => {
+        requestNegotiation(offers[0].post_id, offers[0]?.id, values.note).then((res) => {
             if (res.status === 200) {
                 setTimeout(
                     message.success('Đã gửi thương lượng'), 1300
@@ -168,16 +169,16 @@ export default function OffersDrawer({ visible, post, offers, onClose, onViewOff
                                     }
                                     description={
                                         <Space direction="vertical" size={0}>
-                                            <Text>{offer.offerer_exchange_items[0].name} - {offer.offerer_exchange_items[0].series}</Text>
+                                            <div><Text>{offer.offerer_exchange_items[0].name}</Text></div>
                                             <Text>
                                                 {offer.payer_id === null ? (
                                                     <Text type="success">
                                                         Không có bù trừ
                                                     </Text>
                                                 ) : offer.payer_id === user.id ? (
-                                                    <Text type="danger">
-                                                        <ArrowDownOutlined /> Bạn bù {offer.compensation_amount.toLocaleString()}đ
-                                                    </Text>
+                                                    <div className="text-gray-400">
+                                                        Đề xuất: <Text type="danger"> <ArrowDownOutlined />Bạn bù {offer.compensation_amount.toLocaleString()}đ </Text>
+                                                    </div>
                                                 ) : (
                                                     <Text type="success">
                                                         <ArrowUpOutlined /> Họ bù {offer.compensation_amount.toLocaleString()}đ
@@ -233,9 +234,6 @@ export default function OffersDrawer({ visible, post, offers, onClose, onViewOff
                         note: ''
                     }}
                 >
-                    
-
-                   
 
                     <Form.Item name="note" label="Ghi chú (không bắt buộc)">
                         <Input.TextArea

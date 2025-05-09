@@ -52,7 +52,7 @@ export default function ModalOfferExchange({ isOpen, onClose, requestData,gundam
 
     // Dữ liệu người hiện tại
     const currentUser = useSelector((state) => state.auth.user);
-   console.log(requestData);
+   
     const handleTabChange = (key) => {
         // Validate form trước khi chuyển sang tab khác
         if (key === '3' && activeTab === '1') {

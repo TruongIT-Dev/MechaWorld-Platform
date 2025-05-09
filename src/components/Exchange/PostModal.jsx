@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Input, Button, Upload, Form, Tooltip, Steps, Card, Row, Col, Checkbox, Typography, message, Divider } from "antd";
 import {
     PlusOutlined,
@@ -7,12 +7,16 @@ import {
     RobotOutlined,
     CheckCircleOutlined,
     ArrowLeftOutlined,
-    ArrowRightOutlined
+    ArrowRightOutlined,
+    EditOutlined,
+    SwapOutlined,
+    UpCircleOutlined,
+    UploadOutlined
 } from "@ant-design/icons";
 import { GetGundamByID } from "../../apis/User/APIUser";
 import { createExchangePost } from "../../apis/Exchange/APIExchange";
 
-const { Title, Text } = Typography;
+const { Text } = Typography;
 const { Step } = Steps;
 
 // Mock data for user's Gundam collection
@@ -27,13 +31,13 @@ const userGundams = [
     { id: 8, name: "Gundam Dynames", series: "Gundam 00", image: "/gundam8.png", condition: "Mới 88%" }
 ];
 
-export default function PostModal({ onClose, onSuccess,currentUser }) {
+export default function PostModal({ onClose, onSuccess, currentUser }) {
     const [form] = Form.useForm();
     const [currentStep, setCurrentStep] = useState(0);
     const [fileList, setFileList] = useState([]);
     const [selectedGundams, setSelectedGundams] = useState([]);
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [gundamList,setGundamList] = useState([]);
+    const [gundamList, setGundamList] = useState([]);
     const [postContent, setPostContent] = useState("");
     // Handle image upload
     const handleUpload = ({ fileList }) => {
@@ -83,10 +87,7 @@ export default function PostModal({ onClose, onSuccess,currentUser }) {
 
         setIsSubmitting(true);
 
-        // Simulate API call
-        setTimeout(() => {
-            setIsSubmitting(false);
-
+        try {
             // Get form values
             const formValues = form.getFieldsValue();
             const postData = {
@@ -95,40 +96,56 @@ export default function PostModal({ onClose, onSuccess,currentUser }) {
                 selectedGundams: selectedGundams.map(id => userGundams.find(g => g.id === id))
             };
 
-            console.log("Post data:", postData);
-
             const formData = new FormData();
-            formData.append("content", postData.content);            
+            formData.append("content", postData.content);
             fileList.forEach((file) => {
                 formData.append("post_images", file.originFileObj);
-            })
+            });
             postData.selectedGundams.forEach((gundam) => {
                 formData.append("post_item_id", gundam.id);
-              });
-              
-            createExchangePost(formData).then((res) => {
-                console.log("checking", res.data);
-            })
+            });
 
-            // Call the success callback from parent component
-            if (onSuccess) {
-                onSuccess(postData);
+            // Call API and check response status
+            const res = await createExchangePost(formData);
+            // console.log("checking", res);
+
+            // Only proceed if status is 201
+            if (res && res.status === 201) {
+                // Call the success callback from parent component
+                if (onSuccess) {
+                    onSuccess(postData);
+                }
+
+                // Reset form
+                form.resetFields();
+                setFileList([]);
+                setSelectedGundams([]);
+                setCurrentStep(0);
+
+                // Đăng bài thành công
+                // Truyền ngược về ExchangeNavigator
+            } else {
+                // Show error if status is not 201
+                message.error('Không thể tạo bài đăng. Vui lòng thử lại sau!');
             }
-
-            // Reset form
-            form.resetFields();
-            setFileList([]);
-            setSelectedGundams([]);
-            setCurrentStep(0);
-
-        }, 1500);
+        } catch (error) {
+            console.error("Error creating exchange post:", error);
+            message.error('Đã xảy ra lỗi khi tạo bài đăng!');
+        } finally {
+            setIsSubmitting(false);
+        }
     };
+
+    // Lấy danh sách Gundam mà user có và Filter chỉ những status "in store"
     useEffect(() => {
-        GetGundamByID(currentUser.id,"").then((res) => {
-            setGundamList(res.data);
+        GetGundamByID(currentUser.id, "").then((res) => {
+            // Filter for Gundam models with "in store" status
+            const inStoreGundams = res.data.filter(gundam => gundam.status === "in store");
+            setGundamList(inStoreGundams);
         });
-        console.log(gundamList);
-    },[])
+    }, []);
+
+
     // Step content
     const steps = [
         {
@@ -136,17 +153,17 @@ export default function PostModal({ onClose, onSuccess,currentUser }) {
             content: (
                 <div className="pt-2">
                     <Form.Item
-                    name="content"
-                    label="Nội dung bài viết"
-                    rules={[{ required: true, message: "Vui lòng nhập nội dung!" }]}
-                >
-                    <Input.TextArea
-                    placeholder="Mô tả chi tiết về Gundam bạn mong muốn trao đổi..."
-                    rows={4}
-                    className="shadow-sm text-lg"
-                    onChange={(e) => setPostContent(e.target.value)}
-                    />
-                </Form.Item>
+                        name="content"
+                        label="Nội dung bài viết"
+                        rules={[{ required: true, message: "Vui lòng nhập nội dung!" }]}
+                    >
+                        <Input.TextArea
+                            placeholder="Mô tả chi tiết về Gundam bạn mong muốn trao đổi..."
+                            autoSize={{ minRows: 5, maxRows: 10 }}
+                            className="shadow-sm text-lg"
+                            onChange={(e) => setPostContent(e.target.value)}
+                        />
+                    </Form.Item>
 
                     <Divider orientation="left">
                         <span className="flex items-center">
@@ -175,7 +192,7 @@ export default function PostModal({ onClose, onSuccess,currentUser }) {
                                 <div style={{ marginTop: 8 }}>Thêm ảnh</div>
                             </div>}
                         </Upload>
-                        {fileList.length >= 5 && <Text type="danger">Bạn chỉ có thể tải lên tối đa 5 ảnh.</Text>}
+                        {fileList.length >= 5 && <Text type="danger"> <InfoCircleOutlined /> Bạn chỉ có thể tải lên tối đa 5 ảnh.</Text>}
                         {fileList.length === 0 && <Text type="danger">Vui lòng tải lên ít nhất một hình ảnh!</Text>}
                     </Form.Item>
                 </div>
@@ -207,7 +224,7 @@ export default function PostModal({ onClose, onSuccess,currentUser }) {
                                             <img
                                                 alt={gundam.name}
                                                 src={gundam.primary_image_url}
-                                                className="max-h-full object-contain p-2"
+                                                className="w-full h-full object-cover"
                                             />
                                             {selectedGundams.includes(gundam.gundam_id) && (
                                                 <div className="absolute top-2 right-2">
@@ -242,8 +259,13 @@ export default function PostModal({ onClose, onSuccess,currentUser }) {
                     </Row>
 
                     {selectedGundams.length === 0 && (
-                        <div className="text-center my-4">
-                            <Text type="danger">Vui lòng chọn ít nhất một Gundam để trao đổi!</Text>
+                        <div className="text-left my-4 bg-red-50 border border-red-200 rounded-lg p-4 space-y-2 shadow-sm">
+                            <Text type="danger" className="block text-red-600 font-medium">
+                                <InfoCircleOutlined /> Vui lòng chọn ít nhất một Gundam từ bộ sưu tập của bạn để tạo bài viết.
+                            </Text>
+                            <Text type="danger" className="block text-red-600">
+                               - Những Gundam bạn chọn sẽ hiển thị cho người khác xem và đề xuất trao đổi.
+                            </Text>
                         </div>
                     )}
 
@@ -261,8 +283,8 @@ export default function PostModal({ onClose, onSuccess,currentUser }) {
         <div>
             <div className="mb-4">
                 <Steps current={currentStep} size="default">
-                    <Step title="Bài đăng trao đổi"/>
-                    <Step title="Chọn Gundam trao đổi" />
+                    <Step title="Tạo bài viết trao đổi" icon={<EditOutlined />} />
+                    <Step title="Chọn Gundam trao đổi" icon={<SwapOutlined />} />
                 </Steps>
             </div>
 
@@ -298,7 +320,7 @@ export default function PostModal({ onClose, onSuccess,currentUser }) {
                                 loading={isSubmitting}
                                 disabled={selectedGundams.length === 0}
                             >
-                                Đăng bài trao đổi
+                                <UploadOutlined /> Đăng bài
                             </Button>
                         )}
                     </div>

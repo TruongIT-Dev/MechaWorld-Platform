@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Layout, Card, Tabs, Typography } from "antd";
-import { myPosts, offers } from "./Data";
+import { myPosts } from "./Data";
 
 import PostsTable from "./PostsTable";
 import OffersDrawer from "./OffersDrawer";
@@ -34,14 +34,14 @@ export default function ExchangeMyPost() {
     const viewGunplas = (post) => {
         setSelectedPost(post);
         // setGunplasModalVisible(true);
-        console.log(post);
+        // console.log(post);
     };
 
     // View offer details
     const viewOfferDetail = (offer) => {
         setSelectedOffer(offer);
         setOfferDetailModalVisible(true);
-        console.log(offer);
+        // console.log(offer);
     };
 
     // Handle offer actions (accept/reject)
@@ -65,10 +65,10 @@ export default function ExchangeMyPost() {
         <Layout className="min-h-screen bg-gray-100 mt-5">
             <Content className="max-w-7xl mx-auto mt-24 px-4 py-6">
                 <Card className="shadow-md">
-                    <Title level={3} className="text-center mb-6">Quản Lý Bài Viết Trao Đổi Gundam</Title>
+                    <Title level={3} className="text-center mb-6 uppercase">Quản Lý Bài Viết Trao Đổi Gundam</Title>
 
                     <Tabs centered activeKey={activeTab} onChange={setActiveTab} type="card" size="large">
-                        <TabPane tab="Bài viết của tôi" key="1">
+                        <TabPane tab="Các bài viết của tôi" key="1">
                             <PostsTable
                                 posts={myPosts}
                                 userPost={userPost}

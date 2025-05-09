@@ -1,7 +1,9 @@
 // RequestList.jsx
-import { Card, List, Avatar, Typography, Modal, Button, Image, Carousel } from 'antd';
+import { Card, List, Avatar, Typography, Modal, Button, Image, Carousel, Input } from 'antd';
 import { UserOutlined, ClockCircleOutlined, PictureOutlined } from '@ant-design/icons';
+import moment from "moment/min/moment-with-locales";
 import { useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
 
 import Logo from '../../assets/image/Logo2.png';
 import Logo2 from '../../assets/image/Logo.png';
@@ -10,15 +12,16 @@ import Logo3 from '../../assets/image/Logo4.png';
 import GundamPic from '../../assets/image/gun9.jpg';
 import GundamPic2 from '../../assets/image/gun10.jpg';
 import GundamPic3 from '../../assets/image/gun2.jpg';
+
 import ModalOfferExchange from './ModalOfferExchange';
+
 import { getAllExchangePost } from '../../apis/Exchange/APIExchange';
-import moment from "moment/min/moment-with-locales";
-import { useSelector } from 'react-redux';
 import { GetGundamByID } from '../../apis/User/APIUser';
 
 moment.locale("vi");
 
 const { Link, Text, Paragraph } = Typography;
+const { Search } = Input;
 
 const fakeRequests = [
     {
@@ -92,15 +95,17 @@ const fakeRequests = [
 
 
 export default function ExchangeList() {
+    const user = useSelector((state) => state.auth.user);
+
     const [selectedRequest, setSelectedRequest] = useState(null);
 
     // Modal List Poster Gundam Avaiable
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [requestData, setRequestData] = useState();
+
     // Moda Offer Exchange Request
     const [isOfferModalOpen, setIsOfferModalOpen] = useState(false);
     const [listRequest, setListRequest] = useState([]);
-    const user = useSelector((state) => state.auth.user);
     const [requestPost, setRequestPost] = useState(null);
     const [yourGundamList, setYourGundamList] = useState([]);
 
@@ -108,11 +113,29 @@ export default function ExchangeList() {
     const [expandedContent, setExpandedContent] = useState(false);
 
     const handleOpenModal = (request) => {
-        console.log(request);
-        setSelectedRequest(request.exchange_post_items);
-        setIsModalOpen(true);
+        // console.log(request);
+        const conditionMap = {
+            "new": "Hàng mới",
+            "open box": "Đã mở hộp",
+            "used": "Đã qua sử dụng"
+        };
 
+        // Đây là mảng mới với condition đã được dịch
+        const translatedItems = request.exchange_post_items.map(item => {
+            // Tạo một bản sao của item
+            const translatedItem = { ...item };
+
+            // Thêm thuộc tính displayCondition với giá trị đã dịch
+            translatedItem.displayCondition = conditionMap[item.condition] || item.condition;
+
+            return translatedItem;
+        });
+
+        // Cập nhật state với mảng đã được dịch
+        setSelectedRequest(translatedItems);
+        setIsModalOpen(true);
     };
+
     const handleOfferModal = (request) => {
         // console.log(request);
         setSelectedRequest(request.exchange_post_items);
@@ -126,16 +149,54 @@ export default function ExchangeList() {
             setListRequest(res.data);
         })
         GetGundamByID(user.id, "").then((res) => {
-            setYourGundamList(res.data);
+            const conditionMap = {
+                "new": "Mới",
+                "open box": "Hộp đã mở",
+                "used": "Đã sử dụng"
+            };
+
+            const translatedGundams = res.data.map(gundam => ({
+                ...gundam,
+                displayCondition: conditionMap[gundam.condition] || gundam.condition
+            }));
+
+            setYourGundamList(translatedGundams);
         })
-
-
     }, [])
 
     return (
         <>
             <div className="bg-white p-4 shadow rounded-lg">
-                <h2 className="text-xl font-bold mb-3">CÁC BÀI VIẾT TRAO ĐỔI GUNDAM</h2>
+                <div className="flex justify-between items-center mb-3">
+                    <h2 className="text-xl font-bold">CÁC BÀI VIẾT TRAO ĐỔI GUNDAM</h2>
+
+                    {/* Phần tìm kiếm bài viết */}
+                    <div className="w-2/5">
+                        <Search
+                            placeholder="Tìm kiếm bài viết trao đổi..."
+                            allowClear
+                            onSearch={(value) => {
+                                // Xử lý tìm kiếm
+                                // Nếu có API tìm kiếm, có thể gọi API ở đây
+                                // Ví dụ: searchExchangePost(value).then(res => setListRequest(res.data))
+
+                                // Hoặc lọc từ danh sách đã có
+                                if (value) {
+                                    const filteredList = listRequest.filter(item =>
+                                        item.exchange_post.content.toLowerCase().includes(value.toLowerCase()) ||
+                                        item.poster.full_name.toLowerCase().includes(value.toLowerCase())
+                                    );
+                                    setListRequest(filteredList);
+                                } else {
+                                    // Nếu ô tìm kiếm trống, lấy lại toàn bộ danh sách
+                                    getAllExchangePost().then((res) => {
+                                        setListRequest(res.data);
+                                    });
+                                }
+                            }}
+                        />
+                    </div>
+                </div>
 
                 {/* List các Yêu cầu Trao đổi */}
                 <List
@@ -160,8 +221,17 @@ export default function ExchangeList() {
                                                 </div>
                                             </div>
                                             <div className='space-x-2'>
-                                                <Button onClick={() => handleOpenModal(item)} ghost type='primary' className='bg-blue-400'>Gundam Trao Đổi</Button>
-                                                <Button onClick={() => handleOfferModal(item)} type='primary' className='bg-blue-500 px-4'>Đề xuất trao đổi</Button>
+                                                <Button onClick={() => handleOpenModal(item)} ghost type='primary' className='bg-blue-400'>
+                                                    Gundam Trao Đổi
+                                                </Button>
+                                                <Button
+                                                    onClick={() => handleOfferModal(item)}
+                                                    type='primary'
+                                                    className='bg-blue-500 px-4'
+                                                    disabled={item.poster.id === user.id} // Khóa nút nếu người đăng là chính mình
+                                                >
+                                                    Đề xuất trao đổi
+                                                </Button>
                                             </div>
                                         </div>
                                     </div>
@@ -169,35 +239,44 @@ export default function ExchangeList() {
                                     {/* Nội dung bài Post */}
                                     <div className='content-post flex items-center'>
                                         {/* List ảnh Gundam đăng Trao đổi - Chỉ hiển thị ảnh đại diện */}
-                                        <div className="relative mr-4">
-                                            <Avatar
-                                                src={item.exchange_post.post_image_urls[0]}
-                                                size={150}
-                                                shape="square"
-                                                className="rounded-md"
-                                            />
-                                            {item.exchange_post.post_image_urls && item.exchange_post.post_image_urls.length > 1 && (
-                                                <div className="absolute bottom-0 right-0 bg-black bg-opacity-70 text-white text-xs px-1 py-0.5 rounded-bl-md rounded-tr-md flex items-center">
-                                                    <PictureOutlined className="mr-1" /> +{item.exchange_post.post_image_urls.length - 1}
-                                                </div>
-                                            )}
+                                        {/* List ảnh Gundam đăng Trao đổi - Hiển thị carousel ảnh */}
+                                        <div className="relative mr-4 w-48">
+                                            <Carousel autoplay={false} className="rounded-md overflow-hidden">
+                                                {item.exchange_post.post_image_urls.map((imageUrl, index) => (
+                                                    <div key={index}>
+                                                        <Image
+                                                            src={imageUrl}
+                                                            width={200}
+                                                            height={180}
+                                                            className="object-cover rounded-md"
+                                                            preview={true}
+                                                        />
+                                                    </div>
+                                                ))}
+                                            </Carousel>
                                         </div>
 
                                         {/* Nội dung chính của bài post */}
                                         <div className="flex-1">
                                             <Paragraph
-                                                ellipsis={!expandedContent ? { rows: 4 } : false}
+                                                ellipsis={
+                                                    item.exchange_post.content.split('\n').length > 5 && !expandedContent
+                                                        ? { rows: 5 }
+                                                        : false
+                                                }
                                                 className="text-base text-gray-600"
                                             >
                                                 {item.exchange_post.content}
                                             </Paragraph>
-                                            <Text
-                                                type="secondary"
-                                                className="text-blue-500 cursor-pointer text-sm"
-                                                onClick={() => setExpandedContent(!expandedContent)}
-                                            >
-                                                {expandedContent ? 'Ẩn bớt' : 'Xem thêm'}
-                                            </Text>
+                                            {item.exchange_post.content.split('\n').length > 5 && (
+                                                <Text
+                                                    type="secondary"
+                                                    className="text-blue-500 cursor-pointer text-sm"
+                                                    onClick={() => setExpandedContent(!expandedContent)}
+                                                >
+                                                    {expandedContent ? 'Ẩn bớt' : 'Xem thêm'}
+                                                </Text>
+                                            )}
                                         </div>
                                     </div>
                                 </div>
@@ -223,7 +302,7 @@ export default function ExchangeList() {
                 open={isModalOpen}
                 onCancel={() => setIsModalOpen(false)}
                 footer={null}
-                width={800}
+                width={900}
             >
                 <List
                     itemLayout="horizontal"
@@ -232,15 +311,15 @@ export default function ExchangeList() {
                     renderItem={(item) => (
                         <List.Item className="items-start">
                             <List.Item.Meta
-                                avatar={<Image src={item.primary_image_url} width={120} height={150} />}
+                                avatar={<Image src={item.primary_image_url} width={130} height={150} />}
                                 title={<Text strong className='text-base'>{item.title}</Text>}
                                 description={
-                                    <>
+                                    <div className='mt-7'>
                                         <div><Text className='text-base' strong>{item.name}</Text></div>
-                                        <div> Tình trạng: <Text strong>{item.condition}</Text> </div>
-                                        <div> Phân khúc: <Text strong>{item.grade}</Text></div>
+                                        <div>{item.series}</div>
                                         <div> Phiên bản: <Text strong>{item.version}</Text></div>
-                                    </>
+                                        <div> Tình trạng: <Text strong>{item.displayCondition}</Text> </div>
+                                    </div>
                                 }
                             />
                             <Carousel

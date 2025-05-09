@@ -1,17 +1,36 @@
-import { Avatar, Button, Layout, message, Modal, Input, Divider } from 'antd';
-import { UserOutlined, MenuOutlined, FilterOutlined } from '@ant-design/icons';
 import { useState } from 'react';
-import { NavLink } from 'react-router-dom';
-import PostModal from './PostModal';
-import { getUser } from '../../apis/User/APIUser';
 import { useSelector } from 'react-redux';
+import { NavLink } from 'react-router-dom';
+
+import { Button, Layout, message, Modal, Input, notification } from 'antd';
+import {
+    MenuOutlined,
+    FilterOutlined,
+    AppstoreOutlined,
+    ProfileOutlined,
+    SyncOutlined
+} from '@ant-design/icons';
+
+import PostModal from './PostModal';
 
 const { Content } = Layout;
 
 const navItems = [
-    { label: 'Các bài viết trao đổi', path: '/exchange/list' },
-    { label: 'Các cuộc trao đổi của bạn', path: '/exchange/manage' },
-    { label: 'Các bài viết trao đổi của bạn', path: '/exchange/my-post' },
+    {
+        label: 'Các bài viết trao đổi',
+        path: '/exchange/list',
+        icon: <AppstoreOutlined />
+    },
+    {
+        label: 'Quản lý bài viết của tôi',
+        path: '/exchange/my-post',
+        icon: <ProfileOutlined />
+    },
+    {
+        label: 'Quản lý các trao đổi của tôi',
+        path: '/exchange/manage',
+        icon: <SyncOutlined />
+    },
 ];
 
 const filterOptions = [
@@ -21,10 +40,13 @@ const filterOptions = [
 ];
 
 export default function ExchangeNavigator() {
+
+    const currentUser = useSelector((state) => state.auth.user)
+
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [activeFilter, setActiveFilter] = useState('all');
-    const currentUser = useSelector((state) => state.auth.user )
-    const [userData, setUserData] = useState();
+
+
     // Open modal
     const openModal = () => {
         setIsModalOpen(true);
@@ -40,8 +62,17 @@ export default function ExchangeNavigator() {
         console.log("Post created successfully:", postData);
         closeModal();
 
-        // Show success message
-        message.success("Đăng bài trao đổi Gundam thành công!");
+        // Show success notification
+        notification.success({
+            message: 'Đăng bài viết thành công!',
+            description: 'Bài viết bạn đã được đăng lên nền tảng.',
+            placement: 'topRight',
+        });
+
+        setTimeout(() => {
+            window.location.reload();
+        }, 1000)
+
     };
 
     // Handle filter change
@@ -70,14 +101,15 @@ export default function ExchangeNavigator() {
                 <h3 className="font-medium text-gray-700 mb-3">Điều hướng</h3>
                 <nav className="block w-full">
                     <ul className="text-gray-700 space-y-2">
-                        {navItems.map(({ label, path }) => (
+                        {navItems.map(({ label, path, icon }) => (
                             <li key={path}>
                                 <NavLink
                                     to={path}
                                     className={({ isActive }) =>
-                                        `block p-2 rounded cursor-pointer ${isActive ? 'bg-blue-100 text-blue-600 font-medium' : 'hover:bg-gray-100'}`
+                                        `block p-2 rounded cursor-pointer flex items-center ${isActive ? 'bg-blue-100 text-blue-600 font-medium' : 'hover:bg-gray-100'}`
                                     }
                                 >
+                                    <span className="mr-3">{icon}</span>
                                     {label}
                                 </NavLink>
                             </li>
@@ -113,14 +145,10 @@ export default function ExchangeNavigator() {
 
             {/* Post Modal */}
             <Modal
-                title={
-                    <div className="flex items-center text-blue-800">
-                        <span><span className="text-red-600">GUNDAM</span> EXCHANGE</span>
-                    </div>
-                }
+                title="ĐĂNG BÀI VIẾT TRAO ĐỔI"
                 open={isModalOpen}
                 onCancel={closeModal}
-                width={700}
+                width={600}
                 footer={null}
                 destroyOnClose
             >
