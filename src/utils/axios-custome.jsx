@@ -17,7 +17,7 @@ const instance = axios.create({
     },
     // `timeout` để chỉ định số mili - giây trước khi request hết giờ.
     // Nếu thời gian request lâu hơn `timeout` thì request sẽ được ngưng giữa chừng.
-    timeout: 10000,
+    timeout: 20000,
 
     // `withCredentials` biểu thị liệu việc tạo ra request cross-site `Access-Control`
     // thì có cần sử dụng credential hay không.
@@ -26,12 +26,12 @@ const instance = axios.create({
 
 // Lưu Token tại LocalStorage. Dự kiến sẽ đổi qua Cookie sau
 // Đã đổi qua cookie
-instance.defaults.headers.common = { 'Authorization': `Bearer ${accessToken}`}
+instance.defaults.headers.common = { 'Authorization': `Bearer ${accessToken}` }
 
 // Thêm một bộ đón chặn request
 axios.interceptors.request.use(function (config) {
     // Làm gì đó trước khi request dược gửi đi
-    
+
     // if (config.url?.startsWith('/cart')) {
     //     const access_token = Cookies.get('access_token');
     //     config.headers.Authorization = `Bearer ${access_token}`
@@ -39,15 +39,15 @@ axios.interceptors.request.use(function (config) {
     //   const accessToken = Cookies.get('access_token');
     //   console.log("đã qua request checking",accessToken);
 
-    const accessToken = Cookies.get('access_token'); 
-        if (accessToken) {
-            // console.log(accessToken);
-            config.headers.Authorization = `Bearer ${accessToken}`;
-        } else {
-            console.warn("Không thấy access_token trong Cookies....");
-        }
-        return config;
-    
+    const accessToken = Cookies.get('access_token');
+    if (accessToken) {
+        // console.log(accessToken);
+        config.headers.Authorization = `Bearer ${accessToken}`;
+    } else {
+        console.warn("Không thấy access_token trong Cookies....");
+    }
+    return config;
+
 }, function (error) {
     // Làm gì đó với lỗi request
     return Promise.reject(error);

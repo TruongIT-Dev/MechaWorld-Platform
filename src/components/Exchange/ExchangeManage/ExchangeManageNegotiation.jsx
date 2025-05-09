@@ -202,9 +202,14 @@ export default function ExchangeManageNegotiation() {
             dataIndex: "offer",
             key: "note",
             width: 160,
-            render: (record) => (
-                <p>{record.negotiation_notes[record.negotiations_count].content || 'Không có'}</p>
-            ),
+            render: (record) => {
+                // Log bên ngoài phần JSX return
+                console.log("record", record);
+
+                return (
+                    <p>{record.negotiation_notes[record.negotiations_count]?.content || 'Không có'}</p>
+                );
+            },
         },
         {
             title: "Hành động",

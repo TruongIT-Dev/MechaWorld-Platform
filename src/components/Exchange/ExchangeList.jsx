@@ -14,6 +14,7 @@ moment.locale("vi");
 
 const { Link, Text, Paragraph } = Typography;
 
+const { Search } = Input;
 
 export default function ExchangeList() {
     const user = useSelector((state) => state.auth.user);

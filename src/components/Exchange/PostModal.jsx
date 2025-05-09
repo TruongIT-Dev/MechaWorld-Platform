@@ -39,6 +39,10 @@ export default function PostModal({ onClose, onSuccess, currentUser }) {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [gundamList, setGundamList] = useState([]);
     const [postContent, setPostContent] = useState("");
+
+    // console.log("gundamList", gundamList);
+
+
     // Handle image upload
     const handleUpload = ({ fileList }) => {
         if (fileList.length > 5) {
@@ -90,10 +94,12 @@ export default function PostModal({ onClose, onSuccess, currentUser }) {
         try {
             // Get form values
             const formValues = form.getFieldsValue();
+
+            // Tìm kiếm trong gundamList (dữ liệu từ API) thay vì userGundams (mock data)
             const postData = {
                 content: postContent,
                 images: fileList.map(file => file.originFileObj),
-                selectedGundams: selectedGundams.map(id => userGundams.find(g => g.id === id))
+                selectedGundams: selectedGundams.map(id => gundamList.find(g => g.gundam_id === id))
             };
 
             const formData = new FormData();
@@ -101,13 +107,14 @@ export default function PostModal({ onClose, onSuccess, currentUser }) {
             fileList.forEach((file) => {
                 formData.append("post_images", file.originFileObj);
             });
+
+            // Thay đổi này: sử dụng gundam_id thay vì id
             postData.selectedGundams.forEach((gundam) => {
-                formData.append("post_item_id", gundam.id);
+                formData.append("post_item_id", gundam.gundam_id);
             });
 
             // Call API and check response status
             const res = await createExchangePost(formData);
-            // console.log("checking", res);
 
             // Only proceed if status is 201
             if (res && res.status === 201) {
@@ -264,7 +271,7 @@ export default function PostModal({ onClose, onSuccess, currentUser }) {
                                 <InfoCircleOutlined /> Vui lòng chọn ít nhất một Gundam từ bộ sưu tập của bạn để tạo bài viết.
                             </Text>
                             <Text type="danger" className="block text-red-600">
-                               - Những Gundam bạn chọn sẽ hiển thị cho người khác xem và đề xuất trao đổi.
+                                - Những Gundam bạn chọn sẽ hiển thị cho người khác xem và đề xuất trao đổi.
                             </Text>
                         </div>
                     )}
