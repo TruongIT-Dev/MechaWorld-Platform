@@ -35,6 +35,7 @@ const AuctionRequests = () => {
           key: item.id,
         }));
         setAuctionData(dataWithKeys);
+        console.log("Auction data:", dataWithKeys);
       } catch (error) {
         message.error("Lỗi khi tải danh sách yêu cầu đấu giá.");
         console.error(error);
@@ -89,28 +90,36 @@ const AuctionRequests = () => {
       dataIndex: "end_time",
       render: (time) => moment(time).format("DD/MM/YYYY HH:mm"),
     },
-    {
-      title: "Trạng thái",
-      dataIndex: "status",
-      render: (status) => (
-        <Tag color={statusColors[status] || "default"} className="capitalize">
-          {status}
-        </Tag>
-      ),
-    },
-    {
-      title: "",
-      key: "action",
-      render: (_, record) => (
-        <button 
-          onClick={() => handleDelete(record.id)}
-          className="text-indigo-500 hover:text-indigo-700"
-        >
-          <AiOutlineDelete size={22} />
-        </button>
-      ),
-    },
-  ];
+   {
+    title: "Trạng thái",
+    dataIndex: "status",
+    render: (status) => (
+      <Tag color={statusColors[status] || "default"} className="capitalize">
+        {status}
+      </Tag>
+    ),
+  },
+  {
+    title: "Lý do từ chối",
+    dataIndex: "rejected_reason",
+    render: (reason, record) => 
+      record.status === "rejected" ? (
+        <span className="text-red-500">{reason || "Không có lý do cụ thể"}</span>
+      ) : null,
+  },
+  {
+    title: "",
+    key: "action",
+    render: (_, record) => (
+      <button 
+        onClick={() => handleDelete(record.id)}
+        className="text-indigo-500 hover:text-indigo-700"
+      >
+        <AiOutlineDelete size={22} />
+      </button>
+    ),
+  },
+];
 
     // Lọc dữ liệu chỉ lấy các sản phẩm có status là "approved" hoặc "rejected"
     const filteredData = auctionData.filter(

@@ -613,10 +613,13 @@ function ShopProduct({ isCreating, setIsCreating }) {
                     ]}
                   >
                     <DatePicker
-                      showTime
-                      format="YYYY-MM-DD HH:mm:ss"
+                      format="YYYY-MM-DD"  // Chỉ hiển thị ngày
                       className="w-full"
                       disabledDate={(current) => current && current < moment().startOf('day')}
+                      onChange={(date) => {
+                        const dateWithTime = date ? date.startOf('day') : null;
+                        console.log(dateWithTime?.format("YYYY-MM-DD HH:mm:ss")); // 00:00:00
+                      }}
                     />
                   </Form.Item>
                 </Col>
@@ -637,10 +640,13 @@ function ShopProduct({ isCreating, setIsCreating }) {
                     ]}
                   >
                     <DatePicker
-                      showTime
-                      format="YYYY-MM-DD HH:mm:ss"
+                      format="YYYY-MM-DD"  // Chỉ hiển thị ngày
                       className="w-full"
                       disabledDate={(current) => current && current < moment().startOf('day')}
+                      onChange={(date) => {
+                        const dateWithTime = date ? date.startOf('day') : null;
+                        console.log(dateWithTime?.format("YYYY-MM-DD HH:mm:ss")); // 00:00:00
+                      }}
                     />
                   </Form.Item>
                 </Col>
