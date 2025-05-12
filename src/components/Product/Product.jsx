@@ -29,7 +29,6 @@ const Product = () => {
                     response = await GetGundams();
                     console.log("Trigger List All Gundam:", response);
                 }
-s
                 let filteredData = response?.data || [];
 
                 // ❗️Lọc chỉ những Gundam có status là "published"
