@@ -1,5 +1,8 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import { Suspense, useEffect } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import Cookies from "js-cookie";
+
 // import router
 import {
   HomePage,
@@ -51,9 +54,6 @@ import {
 
 } from "./routes/router";
 
-import Cookies from "js-cookie";
-import { useDispatch } from "react-redux";
-
 import { verifyToken } from "./apis/Authentication/APIAuth";
 import { logout, updateUser } from "./features/auth/authSlice";
 
@@ -63,18 +63,13 @@ import PageLoading from "./components/PageLoading";
 function App() {
 
   const dispatch = useDispatch();
-
-  // const accessToken = useSelector((state) => state.auth.access_token);
-  // const userId = useSelector((state) => state.auth.user);
-
-  // console.log(accessToken, userId);
+  const user = useSelector((state) => state.auth.user); // Lấy thông tin người dùng từ Redux
 
   useEffect(() => {
     const accessToken = Cookies.get("access_token");
     if (accessToken) {
       verifyToken(accessToken).then((userData) => {
         if (userData) {
-          // console.log(userData)
           dispatch(updateUser(userData.data));
         } else {
           dispatch(logout());
@@ -85,13 +80,28 @@ function App() {
     }
   }, [dispatch]);
 
+  // Phân quyền dựa trên vai trò
+  const ProtectedRoute = ({ children }) => {
+    if (user?.role === "moderator" || user?.role === "admin") {
+      return <Navigate to="/moderator" replace />;
+    }
+    return children; // Nếu không phải moderator/admin, hiển thị nội dung bình thường
+  };
+
   return (
     <>
       <PageLoading /> {/* Hiệu ứng loading khi chuyển trang */}
       <Suspense fallback={<Spinner />}> {/* Loading khi tải component */}
         <Routes>
           {/* Route màn hình role Member & Shop */}
-          <Route path="/" element={<UserLayout />} >
+          <Route
+            path="/"
+            element={
+              <ProtectedRoute>
+                <UserLayout />
+              </ProtectedRoute>
+            }
+          >
             <Route index element={<HomePage />} />
 
             {/* Product Route */}

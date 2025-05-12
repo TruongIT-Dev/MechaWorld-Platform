@@ -15,6 +15,10 @@ export const GetGundams = () => {
     return axios.get('/gundams?status=published')
 }
 
+export const GetGundamsAuction = () => {
+    return axios.get('/gundams?status=auctioning')
+}
+
 
 // Get All Gundams By Grade
 export const GetGundamByGrade = (grade) => {

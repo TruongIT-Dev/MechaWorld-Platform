@@ -1,33 +1,83 @@
-import { Table, Avatar, Button, Tooltip } from "antd";
+import { Table, Button, Tooltip, Modal, Input, message, Popconfirm } from "antd";
 import { InfoCircleOutlined } from "@ant-design/icons";
+import { useEffect, useState } from "react";
+import {
+  GetListAuctionRequestsForModerator,
+  ApproveAuctionRequest,
+  RejectAuctionRequest,
+} from "../../apis/Moderator/APIModerator";
 
-const auctionData = [
-  {
-    key: "1",
-    seller: { name: "Nguyễn Văn A", avatar: "https://via.placeholder.com/32" },
-    gundamName: "Gundam RX-78",
-    status: "Đang diễn ra",
-    startingPrice: 1000000,
-    stepPrice: 50000,
-    currentPrice: 1500000,
-  },
-  {
-    key: "2",
-    seller: { name: "Trần Thị B", avatar: "https://via.placeholder.com/32" },
-    gundamName: "Gundam Wing",
-    status: "Kết thúc",
-    startingPrice: 2000000,
-    stepPrice: 100000,
-    currentPrice: 3500000,
-  },
-];
-
-const formatCurrency = (value) => value.toLocaleString("vi-VN") + " đ";
+const formatCurrency = (value) =>
+  value?.toLocaleString("vi-VN") + " đ";
 
 const AuctionList = ({ searchTerm, filteredStatus }) => {
+  const [auctionData, setAuctionData] = useState([]);
+  const [rejectModalVisible, setRejectModalVisible] = useState(false);
+  const [rejectReason, setRejectReason] = useState("");
+  const [selectedRequestId, setSelectedRequestId] = useState(null);
+  const [loadingAction, setLoadingAction] = useState(false);
+
+  const fetchData = () => {
+    GetListAuctionRequestsForModerator()
+      .then((res) => {
+        const formatted = res.data.map((item) => ({
+          key: item.id,
+          id: item.id,
+          sellerId: item.seller_id,
+          gundamName: item.gundam_snapshot.name,
+          status: item.status,
+          startingPrice: item.starting_price,
+          stepPrice: item.bid_increment,
+        }));
+        setAuctionData(formatted);
+      })
+      .catch((err) => {
+        console.error("Lỗi khi tải danh sách đấu giá:", err);
+      });
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const handleApprove = async (id) => {
+    setLoadingAction(true);
+    try {
+      await ApproveAuctionRequest(id);
+      message.success("Phê duyệt thành công!");
+      fetchData();
+    } catch (error) {
+      message.error("Lỗi khi phê duyệt!");
+    }
+    setLoadingAction(false);
+  };
+
+  const handleReject = async () => {
+    if (!rejectReason.trim()) {
+      return message.warning("Vui lòng nhập lý do từ chối.");
+    }
+    setLoadingAction(true);
+    try {
+      await RejectAuctionRequest(selectedRequestId, rejectReason);
+      message.success("Từ chối thành công!");
+      fetchData();
+    } catch (error) {
+      message.error("Lỗi khi từ chối!");
+    }
+    setLoadingAction(false);
+    setRejectModalVisible(false);
+    setRejectReason("");
+    setSelectedRequestId(null);
+  };
+
+  const openRejectModal = (id) => {
+    setSelectedRequestId(id);
+    setRejectModalVisible(true);
+  };
+
   const filteredData = auctionData.filter(
     (item) =>
-      (item.seller.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (item.sellerId.toLowerCase().includes(searchTerm.toLowerCase()) ||
         item.gundamName.toLowerCase().includes(searchTerm.toLowerCase())) &&
       (filteredStatus ? item.status === filteredStatus : true)
   );
@@ -35,17 +85,19 @@ const AuctionList = ({ searchTerm, filteredStatus }) => {
   const columns = [
     {
       title: "Người bán",
-      dataIndex: "seller",
-      key: "seller",
-      render: (seller) => (
-        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-          <Avatar src={seller.avatar} size={32} />
-          <span>{seller.name}</span>
-        </div>
-      ),
+      dataIndex: "sellerId",
+      key: "sellerId",
     },
-    { title: "Tên Gundam", dataIndex: "gundamName", key: "gundamName" },
-    { title: "Trạng thái", dataIndex: "status", key: "status" },
+    {
+      title: "Tên Gundam",
+      dataIndex: "gundamName",
+      key: "gundamName",
+    },
+    {
+      title: "Trạng thái",
+      dataIndex: "status",
+      key: "status",
+    },
     {
       title: "Giá khởi điểm",
       dataIndex: "startingPrice",
@@ -59,12 +111,6 @@ const AuctionList = ({ searchTerm, filteredStatus }) => {
       render: formatCurrency,
     },
     {
-      title: "Giá hiện tại",
-      dataIndex: "currentPrice",
-      key: "currentPrice",
-      render: formatCurrency,
-    },
-    {
       title: "Chi tiết",
       key: "details",
       render: () => (
@@ -73,9 +119,60 @@ const AuctionList = ({ searchTerm, filteredStatus }) => {
         </Tooltip>
       ),
     },
+    {
+      title: "Hành động",
+      key: "actions",
+      render: (_, record) => {
+        if (record.status === "approved" || record.status === "rejected") {
+          return <span>Đã xử lý</span>;
+        }
+      
+        return (
+          <div style={{ display: "flex", gap: 8 }}>
+            <Popconfirm
+              title="Bạn có chắc chắn muốn phê duyệt yêu cầu này?"
+              onConfirm={() => handleApprove(record.id)}
+              okText="Phê duyệt"
+              cancelText="Hủy"
+            >
+              <Button type="primary" loading={loadingAction}>Phê duyệt</Button>
+            </Popconfirm>
+            <Button danger onClick={() => openRejectModal(record.id)}>
+              Từ chối
+            </Button>
+          </div>
+        );
+      },
+      
+    },
   ];
 
-  return <Table columns={columns} dataSource={filteredData} pagination={{ pageSize: 5 }} />;
+  return (
+    <>
+      <Table
+        columns={columns}
+        dataSource={filteredData}
+        pagination={{ pageSize: 5 }}
+      />
+
+      <Modal
+        title="Từ chối yêu cầu đấu giá"
+        visible={rejectModalVisible}
+        onOk={handleReject}
+        onCancel={() => setRejectModalVisible(false)}
+        okText="Xác nhận từ chối"
+        cancelText="Hủy"
+        confirmLoading={loadingAction}
+      >
+        <p>Vui lòng nhập lý do từ chối:</p>
+        <Input.TextArea
+          rows={4}
+          value={rejectReason}
+          onChange={(e) => setRejectReason(e.target.value)}
+        />
+      </Modal>
+    </>
+  );
 };
 
 export default AuctionList;

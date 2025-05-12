@@ -3,13 +3,14 @@ import { useSelector, useDispatch } from "react-redux";
 import { useEffect, useState } from "react";
 import { MoreOutlined, PlusOutlined } from "@ant-design/icons";
 import { ExclamationCircleOutlined } from '@ant-design/icons';
-import { Table, Row, Button, Select, Input, Modal, Dropdown, Form, Tag, Col, Typography } from "antd";
+import { Table, Row, Button, Select, Input, Modal, Dropdown, Form, Tag, Col, Typography,DatePicker  } from "antd";
 
 import { SellingGundam, RestoreGundam } from "../../../apis/Sellers/APISeller";
 import { GetGundamByID } from '../../../apis/User/APIUser';
 import { GetSellerStatus } from "../../../apis/Sellers/APISeller";
 import { incrementListingsUsed, decrementListingsUsed, updateSellerPlan } from '../../../features/user/userSlice';
-
+import { CreateAuctionRequest } from '../../../apis/Auction/APIAuction';
+import moment from 'moment';
 
 function ShopProduct({ isCreating, setIsCreating }) {
 
@@ -59,6 +60,50 @@ function ShopProduct({ isCreating, setIsCreating }) {
     useEffect(() => {
       fetchGundamList();
     }, []);
+
+    const handleFinish = async (values) => {
+      try {
+        setLoading(true);
+    
+        // Validate and convert time
+        const startTime = values.start_time?.isValid()
+          ? values.start_time.toISOString()
+          : null;
+    
+        const endTime = values.end_time?.isValid()
+          ? values.end_time.toISOString()
+          : null;
+    
+        if (!startTime || !endTime) {
+          throw new Error("Thời gian không hợp lệ");
+        }
+    
+        // Prepare data and ensure numeric fields are numbers
+        const auctionRequestData = {
+          bid_increment: Number(values.step), // Convert to number
+          buy_now_price: Number(values.final_price), // Convert to number
+          end_time: endTime,
+          gundam_id: selectedProduct.gundam_id,
+          start_time: startTime,
+          starting_price: Number(values.start_price), // Convert to number
+        };
+    
+        console.log("Dữ liệu gửi đi:", auctionRequestData); // Debugging
+    
+        // Call API
+        const response = await CreateAuctionRequest(user.id, auctionRequestData);
+    
+        // Handle success...
+      } catch (error) {
+        console.error("Lỗi khi tạo yêu cầu đấu giá:", error);
+        Modal.error({
+          title: "Lỗi",
+          content: error.message || "Có lỗi xảy ra khi gửi yêu cầu đấu giá",
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
 
     const handleSellProduct = async (product) => {
       setLoading(true);
@@ -175,11 +220,6 @@ function ShopProduct({ isCreating, setIsCreating }) {
       applyFilters(gundamList);
     }, [selectedCondition, selectedGrade, gundamList]);
 
-    const handleFinish = (values) => {
-      console.log("data input", values);
-      // Xử lý gửi yêu cầu đấu giá và đóng modal
-      setSellModalVisible(false);
-    }
 
     const searchGundam = (values) => {
       fetchGundamList(values);
@@ -321,7 +361,7 @@ function ShopProduct({ isCreating, setIsCreating }) {
             published: { text: "Đang bán", color: "green" },
             exchange: { text: "Đang trao đổi", color: "cyan" },
             processing: { text: "Đang xử lý", color: "yellow" },
-            "pending auction approval": { text: "Chờ duyệt đấu giá", color: "yellow" },
+            pending_auction_approval: { text: "Chờ duyệt đấu giá", color: "yellow" },
           };
 
           const statusTag = statusMap[status];
@@ -445,29 +485,175 @@ function ShopProduct({ isCreating, setIsCreating }) {
 
           {/* Auction Modal */}
           <Modal
-            title="Đấu giá Sản Phẩm"
+            title="Tạo yêu cầu đấu giá"
             open={sellModalVisible}
             onCancel={() => setSellModalVisible(false)}
             footer={null}
+            width={600}
           >
+            {selectedProduct && (
+              <div className="mb-4 p-4 border rounded-lg bg-gray-50">
+                <div className="flex items-center space-x-4">
+                  <img 
+                    src={selectedProduct.primary_image_url} 
+                    alt={selectedProduct.name} 
+                    className="w-20 h-20 object-cover rounded"
+                  />
+                  <div>
+                    <h3 className="font-semibold">{selectedProduct.name}</h3>
+                    <p>Phân khúc: {selectedProduct.grade}</p>
+                    <p>Tình trạng: {selectedProduct.condition === 'new' ? 'Hàng mới' : 
+                                    selectedProduct.condition === 'open box' ? 'Đã mở hộp' : 'Đã qua sử dụng'}</p>
+                  </div>
+                </div>
+              </div>
+            )}
+            
             <Form form={form} onFinish={handleFinish} layout="vertical">
-              {[
-                { label: "Giá khởi điểm (đ)", name: "start_price" },
-                { label: "Bước giá tối thiểu (đ)", name: "step" },
-                { label: "Mức cọc (đ)", name: "first_bind" },
-                { label: "Giá mua ngay (đ)", name: "final_price" },
-              ].map((item) => (
-                <Form.Item key={item.name} label={item.label} name={item.name} rules={[{ required: true }]}>
-                  <Input type="number" className="w-full" />
-                </Form.Item>
-              ))}
+              <Row gutter={16}>
+                <Col span={12}>
+                  <Form.Item 
+                    label="Giá khởi điểm (đ)" 
+                    name="start_price" 
+                    rules={[
+                      { required: true, message: 'Vui lòng nhập giá khởi điểm' },
+                      { 
+                        pattern: /^[1-9]\d*$/, 
+                        message: 'Giá phải là số nguyên dương' 
+                      }
+                    ]}
+                  >
+                    <Input 
+                      type="number" 
+                      className="w-full" 
+                      min={1}
+                      addonAfter="đ"
+                    />
+                  </Form.Item>
+                </Col>
+                <Col span={12}>
+                  <Form.Item
+                    label="Bước giá tối thiểu (đ)"
+                    name="step"
+                    rules={[
+                      { required: true, message: 'Vui lòng nhập bước giá' },
+                      {
+                        validator: (_, value) => {
+                          const startingPrice = form.getFieldValue('start_price');
+                          if (!value || !startingPrice) {
+                            return Promise.resolve();
+                          }
+                          const minStep = Math.ceil(startingPrice * 0.03); // 3% of starting_price
+                          const maxStep = Math.floor(startingPrice * 0.1); // 10% of starting_price
+                          if (value >= minStep && value <= maxStep) {
+                            return Promise.resolve();
+                          }
+                          return Promise.reject(
+                            new Error(`Bước giá phải nằm trong khoảng từ ${minStep.toLocaleString()} đến ${maxStep.toLocaleString()} đ`)
+                          );
+                        },
+                      },
+                    ]}
+                  >
+                    <Input
+                      type="number"
+                      className="w-full"
+                      min={1}
+                      addonAfter="đ"
+                    />
+                  </Form.Item>
+                </Col>
+              </Row>
 
-              <Form.Item label="Thời lượng đấu giá (1-7 Ngày)" name="duration" rules={[{ required: true }]}>
-                <Input type="number" max={7} min={1} className="w-full" />
-              </Form.Item>
+              <Row gutter={16}>
+                <Col span={12}>
+                  <Form.Item 
+                    label="Giá mua ngay (đ)" 
+                    name="final_price" 
+                    rules={[
+                      { required: true, message: 'Vui lòng nhập giá mua ngay' },
+                      ({ getFieldValue }) => ({
+                        validator(_, value) {
+                          if (!value || getFieldValue('start_price') < value) {
+                            return Promise.resolve();
+                          }
+                          return Promise.reject(new Error('Giá mua ngay phải lớn hơn giá khởi điểm'));
+                        },
+                      }),
+                    ]}
+                  >
+                    <Input 
+                      type="number" 
+                      className="w-full" 
+                      min={1}
+                      addonAfter="đ"
+                    />
+                  </Form.Item>
+                </Col>
+              </Row>
 
-              <Form.Item className="flex justify-center">
-                <Button type="primary" htmlType="submit" className="bg-blue-600 hover:bg-blue-400 text-white">
+              <Row gutter={16}>
+                <Col span={12}>
+                  <Form.Item
+                    label="Thời gian bắt đầu"
+                    name="start_time"
+                    rules={[
+                      { 
+                        required: true, 
+                        message: 'Vui lòng chọn ngày bắt đầu' 
+                      },
+                      ({ getFieldValue }) => ({
+                        validator(_, value) {
+                          if (value && value.isValid()) {
+                            return Promise.resolve();
+                          }
+                          return Promise.reject(new Error('Thời gian không hợp lệ'));
+                        },
+                      }),
+                    ]}
+                  >
+                    <DatePicker
+                      showTime
+                      format="YYYY-MM-DD HH:mm:ss"
+                      className="w-full"
+                      disabledDate={(current) => current && current < moment().startOf('day')}
+                    />
+                  </Form.Item>
+                </Col>
+                <Col span={12}>
+                  <Form.Item
+                    label="Thời gian kết thúc"
+                    name="end_time"
+                    rules={[
+                      { required: true, message: 'Vui lòng chọn ngày kết thúc' },
+                      ({ getFieldValue }) => ({
+                        validator(_, value) {
+                          if (!value || !getFieldValue('start_time') || new Date(value) > new Date(getFieldValue('start_time'))) {
+                            return Promise.resolve();
+                          }
+                          return Promise.reject(new Error('Thời gian kết thúc phải sau thời gian bắt đầu'));
+                        },
+                      }),
+                    ]}
+                  >
+                    <DatePicker
+                      showTime
+                      format="YYYY-MM-DD HH:mm:ss"
+                      className="w-full"
+                      disabledDate={(current) => current && current < moment().startOf('day')}
+                    />
+                  </Form.Item>
+                </Col>
+              </Row>
+
+              <Form.Item className="flex justify-center mt-4">
+                <Button 
+                  type="primary" 
+                  htmlType="submit" 
+                  className="bg-blue-600 hover:bg-blue-500 text-white w-full"
+                  size="large"
+                  loading={loading}
+                >
                   Gửi yêu cầu đấu giá
                 </Button>
               </Form.Item>

@@ -1,0 +1,68 @@
+import axios from '../../utils/axios-custome';
+import Cookies from 'js-cookie';
+
+// Axios request interceptor
+axios.interceptors.request.use((config) => {
+    const accessToken = Cookies.get('access_token'); // Lấy token từ cookie
+    if (accessToken) {
+        config.headers.Authorization = `Bearer ${accessToken}`;
+    }
+    return config;
+}, (error) => {
+    return Promise.reject(error);
+});
+
+// Axios response interceptor để xử lý lỗi 401 (token hết hạn)
+axios.interceptors.response.use((response) => {
+    return response;
+}, async (error) => {
+    const originalRequest = error.config;
+    if (error?.response?.status === 401 && !originalRequest._retry) {
+        originalRequest._retry = true;
+
+        // Gọi API refresh token để lấy access_token mới
+        try {
+            const refreshToken = Cookies.get('refresh_token'); // Lấy refresh_token từ cookie
+            const response = await axios.post('/auth/refresh', { refreshToken });
+            const newAccessToken = response.data.access_token;
+
+            // Lưu access_token mới vào cookie
+            Cookies.set('access_token', newAccessToken);
+
+            // Thêm access_token mới vào header và thử lại request
+            axios.defaults.headers.common['Authorization'] = `Bearer ${newAccessToken}`;
+            return axios(originalRequest);
+        } catch (refreshError) {
+            // Xử lý lỗi refresh token (ví dụ: đăng xuất người dùng)
+            console.error('Refresh token failed:', refreshError);
+            return Promise.reject(refreshError);
+        }
+    }
+    return Promise.reject(error);
+});
+
+
+// ************ GET - POST - PUT - PATCH - DELETE **************
+
+
+// GET List auction requests of a seller
+export const GetListAuctionRequests = (sellerID) => {
+    return axios.get(`/sellers/${sellerID}/auction-requests`);
+}
+
+// POST Create a new auction request by seller
+export const CreateAuctionRequest = (sellerID, requestData) => {
+    return axios.post(`/sellers/${sellerID}/auction-requests`, {
+        bid_increment: requestData.bid_increment,
+        buy_now_price: requestData.buy_now_price,
+        end_time: requestData.end_time,
+        gundam_id: requestData.gundam_id,
+        start_time: requestData.start_time,
+        starting_price: requestData.starting_price
+    });
+};
+
+// DELETE Delete an auction request by seller
+export const DeleteAuctionRequest = (sellerID, requestID) => {
+    return axios.delete(`/sellers/${sellerID}/auction-requests/${requestID}`);
+}
