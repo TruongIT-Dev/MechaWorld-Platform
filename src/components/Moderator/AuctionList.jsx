@@ -101,11 +101,24 @@ const AuctionList = ({ searchTerm, filteredStatus }) => {
       dataIndex: "gundamName",
       key: "gundamName",
     },
-    {
-      title: "Trạng thái",
-      dataIndex: "status",
-      key: "status",
-    },
+     {
+    title: "Trạng thái",
+    dataIndex: "status",
+    key: "status",
+    render: (status) => {
+      let className = '';
+      
+      if (status === 'approved') {
+        className = 'text-green-600 bg-green-50 px-2 py-1 rounded font-medium';
+      } else if (status === 'rejected') {
+        className = 'text-red-600 bg-red-50 px-2 py-1 rounded font-medium';
+      } else {
+        className = 'text-yellow-600 bg-yellow-50 px-2 py-1 rounded font-medium';
+      }
+      
+      return <span className={className}>{status}</span>;
+    }
+  },
     {
       title: "Giá khởi điểm",
       dataIndex: "startingPrice",
