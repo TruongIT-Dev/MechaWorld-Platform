@@ -3,7 +3,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { useEffect, useState } from "react";
 import { MoreOutlined, PlusOutlined } from "@ant-design/icons";
 import { ExclamationCircleOutlined } from '@ant-design/icons';
-import { Table, Row, Button, Select, Input, Modal, Dropdown, Form, Tag, Col, Typography,DatePicker  } from "antd";
+import { Table, Row, Button, Select, Input, Modal, Dropdown, Form, Tag, Col, Typography,DatePicker,message   } from "antd";
 
 import { SellingGundam, RestoreGundam } from "../../../apis/Sellers/APISeller";
 import { GetGundamByID } from '../../../apis/User/APIUser';
@@ -61,49 +61,68 @@ function ShopProduct({ isCreating, setIsCreating }) {
       fetchGundamList();
     }, []);
 
-    const handleFinish = async (values) => {
-      try {
-        setLoading(true);
+const handleFinish = async (values) => {
+  try {
+    setLoading(true);
     
-        // Validate and convert time
-        const startTime = values.start_time?.isValid()
-          ? values.start_time.toISOString()
-          : null;
+    // Validate and convert time
+    const startTime = values.start_time?.isValid()
+      ? values.start_time.startOf('day').toISOString()
+      : null;
     
-        const endTime = values.end_time?.isValid()
-          ? values.end_time.toISOString()
-          : null;
+    const endTime = values.end_time?.isValid()
+      ? values.end_time.startOf('day').toISOString()
+      : null;
     
-        if (!startTime || !endTime) {
-          throw new Error("Thời gian không hợp lệ");
-        }
+    if (!startTime || !endTime) {
+      throw new Error("Thời gian không hợp lệ");
+    }
     
-        // Prepare data and ensure numeric fields are numbers
-        const auctionRequestData = {
-          bid_increment: Number(values.step), // Convert to number
-          buy_now_price: Number(values.final_price), // Convert to number
-          end_time: endTime,
-          gundam_id: selectedProduct.gundam_id,
-          start_time: startTime,
-          starting_price: Number(values.start_price), // Convert to number
-        };
-    
-        console.log("Dữ liệu gửi đi:", auctionRequestData); // Debugging
-    
-        // Call API
-        const response = await CreateAuctionRequest(user.id, auctionRequestData);
-    
-        // Handle success...
-      } catch (error) {
-        console.error("Lỗi khi tạo yêu cầu đấu giá:", error);
-        Modal.error({
-          title: "Lỗi",
-          content: error.message || "Có lỗi xảy ra khi gửi yêu cầu đấu giá",
-        });
-      } finally {
-        setLoading(false);
-      }
+    // Prepare data
+    const auctionRequestData = {
+      bid_increment: Number(values.step),
+      buy_now_price: Number(values.final_price),
+      end_time: endTime,
+      gundam_id: selectedProduct.gundam_id,
+      start_time: startTime,
+      starting_price: Number(values.start_price),
     };
+    
+    console.log("Dữ liệu gửi đi:", auctionRequestData);
+    
+    // Call API
+    const response = await CreateAuctionRequest(user.id, auctionRequestData);
+    
+    // 1. Tắt modal
+    setSellModalVisible(false);
+    
+    // 2. Hiển thị thông báo thành công
+    message.success("Tạo yêu cầu đấu giá thành công!");
+    
+    // 3. Cập nhật state ngay lập tức mà không cần reload
+    // Giả sử bạn có một state gundamList chứa danh sách sản phẩm
+    // Bạn cần cập nhật status của sản phẩm vừa được đấu giá
+    setGundamList(prevList => 
+      prevList.map(item => 
+        item.gundam_id === selectedProduct.gundam_id 
+          ? { ...item, status: 'pending' } // hoặc status mới tùy API trả về
+          : item
+      )
+    );
+    
+    // Hoặc nếu bạn sử dụng fetchGundamList để lấy dữ liệu mới
+    await fetchGundamList(); // Đảm bảo hàm này cập nhật state đúng cách
+    
+    // 4. Reset form
+    form.resetFields();
+    
+  } catch (error) {
+    console.error("Lỗi khi tạo yêu cầu đấu giá:", error);
+    message.error(error.message || "Có lỗi xảy ra khi gửi yêu cầu đấu giá");
+  } finally {
+    setLoading(false);
+  }
+};
 
     const handleSellProduct = async (product) => {
       setLoading(true);
@@ -543,11 +562,14 @@ function ShopProduct({ isCreating, setIsCreating }) {
                           if (!value || !startingPrice) {
                             return Promise.resolve();
                           }
-                          const minStep = Math.ceil(startingPrice * 0.03); // 3% of starting_price
-                          const maxStep = Math.floor(startingPrice * 0.1); // 10% of starting_price
+
+                          const minStep = Math.max(Math.ceil(startingPrice * 0.03), 10000); // lấy giá trị lớn hơn giữa 3% và 10,000
+                          const maxStep = Math.floor(startingPrice * 0.1); // 10%
+
                           if (value >= minStep && value <= maxStep) {
                             return Promise.resolve();
                           }
+
                           return Promise.reject(
                             new Error(`Bước giá phải nằm trong khoảng từ ${minStep.toLocaleString()} đến ${maxStep.toLocaleString()} đ`)
                           );
@@ -555,6 +577,7 @@ function ShopProduct({ isCreating, setIsCreating }) {
                       },
                     ]}
                   >
+
                     <Input
                       type="number"
                       className="w-full"
