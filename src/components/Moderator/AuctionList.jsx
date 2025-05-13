@@ -1,4 +1,4 @@
-import { Table, Button, Tooltip, Modal, Input, message, Popconfirm } from "antd";
+import { Table, Button, Tooltip, Modal, Input, message, Popconfirm, Descriptions } from "antd";
 import { InfoCircleOutlined } from "@ant-design/icons";
 import { useEffect, useState } from "react";
 import {
@@ -16,6 +16,8 @@ const AuctionList = ({ searchTerm, filteredStatus }) => {
   const [rejectReason, setRejectReason] = useState("");
   const [selectedRequestId, setSelectedRequestId] = useState(null);
   const [loadingAction, setLoadingAction] = useState(false);
+  const [detailModalVisible, setDetailModalVisible] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState(null);
 
   const fetchData = () => {
     GetListAuctionRequestsForModerator()
@@ -28,6 +30,7 @@ const AuctionList = ({ searchTerm, filteredStatus }) => {
           status: item.status,
           startingPrice: item.starting_price,
           stepPrice: item.bid_increment,
+          gundamSnapshot: item.gundam_snapshot // Store the entire snapshot
         }));
         setAuctionData(formatted);
       })
@@ -75,6 +78,11 @@ const AuctionList = ({ searchTerm, filteredStatus }) => {
     setRejectModalVisible(true);
   };
 
+  const showDetailModal = (record) => {
+    setSelectedProduct(record.gundamSnapshot);
+    setDetailModalVisible(true);
+  };
+
   const filteredData = auctionData.filter(
     (item) =>
       (item.sellerId.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -113,9 +121,12 @@ const AuctionList = ({ searchTerm, filteredStatus }) => {
     {
       title: "Chi tiết",
       key: "details",
-      render: () => (
+      render: (_, record) => (
         <Tooltip title="Xem chi tiết">
-          <Button icon={<InfoCircleOutlined />} />
+          <Button 
+            icon={<InfoCircleOutlined />} 
+            onClick={() => showDetailModal(record)}
+          />
         </Tooltip>
       ),
     },
@@ -135,7 +146,13 @@ const AuctionList = ({ searchTerm, filteredStatus }) => {
               okText="Phê duyệt"
               cancelText="Hủy"
             >
-              <Button type="primary" loading={loadingAction}>Phê duyệt</Button>
+              <Button
+                className="text-green-600 border-green-600 hover:text-white hover:bg-green-600"
+                type="default"
+                loading={loadingAction}
+              >
+                Phê duyệt
+              </Button>
             </Popconfirm>
             <Button danger onClick={() => openRejectModal(record.id)}>
               Từ chối
@@ -143,7 +160,6 @@ const AuctionList = ({ searchTerm, filteredStatus }) => {
           </div>
         );
       },
-      
     },
   ];
 
@@ -158,11 +174,21 @@ const AuctionList = ({ searchTerm, filteredStatus }) => {
       <Modal
         title="Từ chối yêu cầu đấu giá"
         visible={rejectModalVisible}
-        onOk={handleReject}
         onCancel={() => setRejectModalVisible(false)}
-        okText="Xác nhận từ chối"
-        cancelText="Hủy"
-        confirmLoading={loadingAction}
+        footer={[
+          <Button key="cancel" onClick={() => setRejectModalVisible(false)}>
+            Hủy
+          </Button>,
+          <Button
+            key="reject"
+            onClick={handleReject}
+            loading={loadingAction}
+            type="default"
+            style={{ color: 'red', borderColor: 'red' }}
+          >
+            Xác nhận từ chối
+          </Button>,
+        ]}
       >
         <p>Vui lòng nhập lý do từ chối:</p>
         <Input.TextArea
@@ -170,6 +196,36 @@ const AuctionList = ({ searchTerm, filteredStatus }) => {
           value={rejectReason}
           onChange={(e) => setRejectReason(e.target.value)}
         />
+      </Modal>
+
+      {/* Product Detail Modal */}
+      <Modal
+        title="Chi tiết sản phẩm"
+        visible={detailModalVisible}
+        onCancel={() => setDetailModalVisible(false)}
+        footer={[
+          <Button key="back" onClick={() => setDetailModalVisible(false)}>
+            Đóng
+          </Button>,
+        ]}
+      >
+        {selectedProduct && (
+          <Descriptions bordered column={1}>
+            <Descriptions.Item label="Tên sản phẩm">{selectedProduct.name}</Descriptions.Item>
+            <Descriptions.Item label="Hình ảnh">
+              <img 
+                src={selectedProduct.image_url} 
+                alt={selectedProduct.name} 
+                style={{ maxWidth: '100%', maxHeight: '200px' }}
+              />
+            </Descriptions.Item>
+            <Descriptions.Item label="Grade">{selectedProduct.grade}</Descriptions.Item>
+            <Descriptions.Item label="Scale">{selectedProduct.scale}</Descriptions.Item>
+            <Descriptions.Item label="Số lượng">{selectedProduct.quantity}</Descriptions.Item>
+            <Descriptions.Item label="Trọng lượng">{selectedProduct.weight}g</Descriptions.Item>
+            <Descriptions.Item label="Slug">{selectedProduct.slug}</Descriptions.Item>
+          </Descriptions>
+        )}
       </Modal>
     </>
   );
