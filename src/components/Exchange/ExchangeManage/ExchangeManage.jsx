@@ -23,12 +23,12 @@ export default function ExchangeManage() {
                     size="large"
                     className="gundam-tabs"
                 >
-                    <TabPane tab="Cuộc trao đổi của bạn" key="1">
+                    <TabPane tab="Quản lý các cuộc trao đổi" key="1">
                         {/* List các Trao đổi Request */}
                         <ExchangeManageList />
                     </TabPane>
 
-                    <TabPane tab="Thương lượng được đề xuất" key="2">
+                    <TabPane tab="Quản lý các đề xuất trao đổi" key="2">
                         {/* List các Trao đổi đang Thương lượng */}
                         <ExchangeManageNegotiation />
                     </TabPane>

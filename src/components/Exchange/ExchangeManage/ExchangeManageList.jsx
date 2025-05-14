@@ -53,137 +53,137 @@ export default function ExchangeManageList() {
     };
 
     const columns = [
-            // {
-            //     title: "STT",
-            //     dataIndex: "key",
-            //     key: "key",
-            //     width: 60,
-            //     align: "center",
-            // },
-            {
-                title: "Người trao đổi",
-                dataIndex: "partner",
-                key: "partner",
-                width: 160,
-                render: (user) => (
-                    <Space>
-                        <Avatar
-                            src={user.avatar_url}
-                            icon={<UserOutlined />}
-                            className="border-2 border-blue-500"
-                        />
-                        <span className="font-medium">{user.full_name}</span>
-                    </Space>
-                ),
-            },
-            {
-                title: "Tiền bù trừ",
-                dataIndex: "compensation_amount",
-                key: "compensation_amount",
-                width: 220,
-                render: (offer) => (
-                    <Space direction="vertical" size={0}>
-                        <Text>
-                            {offer === null ? (
+        // {
+        //     title: "STT",
+        //     dataIndex: "key",
+        //     key: "key",
+        //     width: 60,
+        //     align: "center",
+        // },
+        {
+            title: "Người trao đổi",
+            dataIndex: "partner",
+            key: "partner",
+            width: 160,
+            render: (user) => (
+                <Space>
+                    <Avatar
+                        src={user.avatar_url}
+                        icon={<UserOutlined />}
+                        className="border-2 border-blue-500"
+                    />
+                    <span className="font-medium">{user.full_name}</span>
+                </Space>
+            ),
+        },
+        {
+            title: "Tiền bù trừ",
+            dataIndex: "compensation_amount",
+            key: "compensation_amount",
+            width: 220,
+            render: (offer) => (
+                <Space direction="vertical" size={0}>
+                    <Text>
+                        {offer === null ? (
                             <Text type="success">
                                 Không có bù trừ
                             </Text>
-                            ) : (
-                                <Text type="success">
-                                    {offer.toLocaleString()}đ
-                                </Text>
-                            )}
-                        </Text>
-                    </Space>
-                )
+                        ) : (
+                            <Text type="success">
+                                {offer.toLocaleString()}đ
+                            </Text>
+                        )}
+                    </Text>
+                </Space>
+            )
+        },
+        {
+            title: "Trạng thái",
+            dataIndex: "status",
+            key: "status",
+            width: 220,
+            render: (status) => {
+                let color = "";
+                switch (status) {
+                    case "pending":
+                        color = "blue";
+                        break;
+                    case "packaging":
+                        color = "orange";
+                        break;
+                    case "delivering":
+                        color = "cyan";
+                        break;
+                    case "delivered":
+                        color = "green";
+                        break;
+                    case "completed":
+                        color = "success";
+                        break;
+                    case "canceled":
+                        color = "red";
+                        break;
+                    case "failed":
+                        color = "volcano";
+                        break;
+                    default:
+                        color = "default";
+                }
+                return (
+                    <Tag color={color} key={status}>
+                        {statusMap[status] || "Không xác định"}
+                    </Tag>
+                );
             },
-            {
-                title: "Trạng thái",
-                dataIndex: "status",
-                key: "status",
-                width: 220,
-                render: (status) => {
-                    let color = "";
-                    switch (status) {
-                        case "pending":
-                            color = "blue";
-                            break;
-                        case "packaging":
-                            color = "orange";
-                            break;
-                        case "delivering":
-                            color = "cyan";
-                            break;
-                        case "delivered":
-                            color = "green";
-                            break;
-                        case "completed":
-                            color = "success";
-                            break;
-                        case "canceled":
-                            color = "red";
-                            break;
-                        case "failed":
-                            color = "volcano";
-                            break;
-                        default:
-                            color = "default";
+        },
+        {
+            title: "Thời gian",
+            dataIndex: "created_at",
+            key: "time",
+            width: 160,
+            render: (src) => (
+                <Space direction="vertical" size={0}>
+                    {moment(src.created_at).format('LL')
                     }
-                    return (
-                        <Tag color={color} key={status}>
-                            {statusMap[status] || "Không xác định"}
-                        </Tag>
-                    );
-                },
-            },
-            {
-                title: "Thời gian",
-                dataIndex: "created_at",
-                key: "time",
-                width: 160,
-                render: (src) => (
-                    <Space direction="vertical" size={0}>
-                        {moment(src.created_at).format('LL')
-                        }
-                    </Space>
-                ),
-            },
-            // {
-            //     title: "Trạng thái",
-            //     dataIndex: "status",
-            //     key: "status",
-            //     width: 180,
-            //     render: (status) => (
-            //         <Tag icon={status.icon} color={status.color}>
-            //             {status.text}
-            //         </Tag>
-            //     ),
-            // },
-            {
-                title: "Hành động",
-                key: "action",
-                width: 100,
-                render: (src) => (
-                    <Link to={`/exchange/detail/${src.id}`}>
-                        <Button className="bg-blue-500" type="primary" size="middle">
-                            Xem chi tiết
-                        </Button>
-                    </Link>
-                ),
-            },
-        ];
+                </Space>
+            ),
+        },
+        // {
+        //     title: "Trạng thái",
+        //     dataIndex: "status",
+        //     key: "status",
+        //     width: 180,
+        //     render: (status) => (
+        //         <Tag icon={status.icon} color={status.color}>
+        //             {status.text}
+        //         </Tag>
+        //     ),
+        // },
+        {
+            title: "Hành động",
+            key: "action",
+            width: 100,
+            render: (src) => (
+                <Link to={`/exchange/detail/${src.id}`}>
+                    <Button className="bg-blue-500" type="primary" size="middle">
+                        Xem chi tiết
+                    </Button>
+                </Link>
+            ),
+        },
+    ];
 
-        useEffect(() => {
-                // getAllExchangeOffer().then((res) => {
-                //     setOfferData(res.data);
-                //     console.log(res.data);
-                // })
-                getAllExchangeParticipating().then((res) => {
-                    setExchangeData(res.data);
-                    setFilteredData(res.data);
-                    console.log(res.data);
-                })
-        },[])
+    useEffect(() => {
+        // getAllExchangeOffer().then((res) => {
+        //     setOfferData(res.data);
+        //     console.log(res.data);
+        // })
+        getAllExchangeParticipating().then((res) => {
+            setExchangeData(res.data);
+            setFilteredData(res.data);
+            // console.log(res.data);
+        })
+    }, [])
 
 
     return (
@@ -192,11 +192,10 @@ export default function ExchangeManageList() {
                 <div className="flex justify-center w-full gap-2 overflow-x-auto py-2">
                     {filterOptions.map(option => (
                         <Button
-                            ghost
                             className="text-black text-base"
                             key={option.value}
                             type={activeFilter === option.value ? "primary" : "link"}
-                            onClick={() => {filterData(option.value); console.log(option.value)}}
+                            onClick={() => { filterData(option.value) }}
                         >
                             {option.label}
                         </Button>

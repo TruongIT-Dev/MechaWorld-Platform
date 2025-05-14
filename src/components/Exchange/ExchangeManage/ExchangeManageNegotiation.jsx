@@ -1,10 +1,6 @@
 import { Avatar, Button, Card, Form, Input, InputNumber, message, Modal, Space, Table, Typography } from "antd";
 import {
     UserOutlined,
-    SyncOutlined,
-    CheckCircleOutlined,
-    CloseCircleOutlined,
-    ClockCircleOutlined,
     DollarOutlined,
     ArrowDownOutlined,
     ArrowUpOutlined,
@@ -13,73 +9,25 @@ import { useEffect, useState } from "react";
 import { getAllExchangeOffer, updateExchangeOffer } from "../../../apis/Exchange/APIExchange";
 import { useSelector } from "react-redux";
 
-
-// Mock data with more entries
-const generateData = (count) => {
-    const statuses = [
-        { text: "Đang chờ xác nhận", color: "orange", icon: <ClockCircleOutlined /> },
-        { text: "Đã xác nhận", color: "blue", icon: <SyncOutlined spin /> },
-        { text: "Thành công", color: "green", icon: <CheckCircleOutlined /> },
-        { text: "Bị từ chối", color: "red", icon: <CloseCircleOutlined /> }
-    ];
-
-    const users = ["Minh", "Toàn", "Nhật", "Hùng", "Khoa", "Quân", "Dũng"];
-    const gundamModels = [
-        { title: "RX-78-2 Gundam", subtitle: "Mobile Suit Gundam" },
-        { title: "Zaku II", subtitle: "Mobile Suit Gundam" },
-        { title: "Gundam Exia", subtitle: "Gundam 00" },
-        { title: "Strike Freedom Gundam", subtitle: "Gundam SEED Destiny" },
-        { title: "Unicorn Gundam", subtitle: "Gundam Unicorn" },
-        { title: "Wing Gundam Zero", subtitle: "Gundam Wing" },
-        { title: "Gundam Barbatos", subtitle: "Gundam Iron-Blooded Orphans" }
-    ];
-
-    const times = [
-        "Hôm nay lúc 02:51",
-        "Hôm qua lúc 15:20",
-        "15/04/2025 lúc 09:45",
-        "12/04/2025 lúc 19:30",
-        "05/04/2025 lúc 14:15",
-        "01/04/2025 lúc 10:10"
-    ];
-
-    return Array.from({ length: count }, (_, i) => ({
-        key: (i + 1).toString(),
-        user: users[Math.floor(Math.random() * users.length)],
-        otherComic: gundamModels[Math.floor(Math.random() * gundamModels.length)],
-        yourComic: `/gundam${(i % 5) + 1}.png`,
-        time: times[Math.floor(Math.random() * times.length)],
-        status: statuses[Math.floor(Math.random() * statuses.length)],
-        paymentDirection: Math.random() > 0.5 ? "you" : "them",
-        paymentAmount: Math.floor(Math.random() * 500 + 100) * 1000,
-        note: "Mẫu này tôi rất thích, mong bạn đồng ý trao đổi."
-    }));
-};
-
-const mockData = generateData(12);
-// Filter only pending negotiations
-const pendingNegotiations = mockData.filter(item => item.status.text === "Đang chờ xác nhận");
-
 export default function ExchangeManageNegotiation() {
+
+    const [form] = Form.useForm();
+    const user = useSelector((state) => state.auth.user)
 
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [currentNegotiation, setCurrentNegotiation] = useState(null);
     const [currentCompensation, setCurrentCompensation] = useState(null);
     const [compensationID, setCompensationID] = useState(null);
-    const [form] = Form.useForm();
-    const user = useSelector((state) => state.auth.user)
     const [compensationType, setCompensationType] = useState('none');
     const [offerData, setOfferData] = useState([]);
+
+
     const handleEditNegotiation = (record) => {
         setCurrentNegotiation(record);
         form.setFieldsValue({
             compensationAmount: record.offer.compensation_amount,
             note: record.offer.note
         });
-
-        console.log('check log: ',record);
-        // console.log(record.offer.compensation_amount);
-        // console.log(currentNegotiation.offer.compensation_amount);
         setIsModalVisible(true);
     };
 
@@ -108,10 +56,10 @@ export default function ExchangeManageNegotiation() {
                     );
                     // setIsModalVisible(false);
                     handleModalCancel();
-                }else if (res.status === 422 ) {
-                        setTimeout(
-                            message.success('Ví của bạn không đủ không đủ tiền để đề xuất. Vui lòng nạp thêm tiền vào tài khoản!'), 800
-                        );
+                } else if (res.status === 422) {
+                    setTimeout(
+                        message.success('Ví của bạn không đủ không đủ tiền để đề xuất. Vui lòng nạp thêm tiền vào tài khoản!'), 800
+                    );
                 }
             });
             // handleModalCancel();
@@ -123,8 +71,7 @@ export default function ExchangeManageNegotiation() {
             setOfferData(res.data);
             console.log(res.data);
         })
-  
-    },[])
+    }, [])
 
     // Columns for negotiation tab
     const negotiationColumns = [
@@ -133,6 +80,7 @@ export default function ExchangeManageNegotiation() {
             dataIndex: "poster",
             key: "poster",
             width: 160,
+            align: 'center',
             render: (user) => (
                 <Space>
                     <Avatar
@@ -149,6 +97,7 @@ export default function ExchangeManageNegotiation() {
             dataIndex: "offer",
             key: "poster_item",
             width: 220,
+            align: 'center',
             render: (offer) => (
                 <Space direction="vertical" size={0}>
                     <Typography.Text strong>{offer.poster_exchange_items[0].name}</Typography.Text>
@@ -160,13 +109,14 @@ export default function ExchangeManageNegotiation() {
             title: "Gundam bạn trao đổi",
             dataIndex: "offer",
             key: "offer_item",
-            width: 140,
+            width: 160,
+            align: 'center',
             render: (offer) => (
                 <div className="flex justify-center">
                     <Card
                         hoverable
                         bodyStyle={{ padding: 0 }}
-                        style={{ width: 80, height: 80 }}
+                        style={{ width: 120, height: 80 }}
                         cover={
                             <img
                                 alt="Gundam model"
@@ -183,6 +133,7 @@ export default function ExchangeManageNegotiation() {
             dataIndex: "offer",
             key: "compensation",
             width: 180,
+            align: 'center',
             render: (offer) => (
                 offer.payer_id !== null && offer.compensation_amount !== null ? (
                     <Space>
@@ -202,14 +153,12 @@ export default function ExchangeManageNegotiation() {
             ),
         },
         {
-            title: "Yêu cầu thương lượng",
+            title: "Tin nhắn thương lượng",
             dataIndex: "offer",
             key: "note",
             width: 160,
+            align: 'center',
             render: (record) => {
-                // Log bên ngoài phần JSX return
-                console.log("record", record);
-
                 return (
                     <p>{record.negotiation_notes[record.negotiations_count]?.content || 'Không có'}</p>
                 );
@@ -219,6 +168,7 @@ export default function ExchangeManageNegotiation() {
             title: "Hành động",
             key: "action",
             width: 140,
+            align: 'center',
             render: (_, record) => (
                 <Button
                     className="bg-blue-500"

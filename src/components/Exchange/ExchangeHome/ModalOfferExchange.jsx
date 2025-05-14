@@ -1,42 +1,10 @@
 import { useState } from 'react';
-import { Modal, Tabs, Form, Input, InputNumber, Button, Card, Tag, Checkbox, message, Radio, Space } from 'antd';
-import { DollarOutlined, FileTextOutlined, SwapOutlined, InfoCircleOutlined } from '@ant-design/icons';
+import { Modal, Tabs, Form, Input, InputNumber, Button, Card, Tag, Checkbox, message } from 'antd';
+import { DollarOutlined, FileTextOutlined, SwapOutlined, InfoCircleOutlined, ArrowRightOutlined, UploadOutlined } from '@ant-design/icons';
 import { useSelector } from 'react-redux';
-import { createExchangeOffer } from '../../apis/Exchange/APIExchange';
+import { createExchangeOffer } from '../../../apis/Exchange/APIExchange';
 
-// Giả lập dữ liệu Gundam của người dùng hiện tại
-// const myGundams = [
-//     {
-//         id: 'mg1',
-//         name: 'Gundam Astray Red Frame',
-//         image: 'https://m.media-amazon.com/images/I/71xQGWfYJKL._AC_UF1000,1000_QL80_.jpg',
-//         condition: 'New',
-//         scale: '1/100 MG'
-//     },
-//     {
-//         id: 'mg2',
-//         name: 'Gundam Deathscythe Hell',
-//         image: 'https://m.media-amazon.com/images/I/71cOuEctNnL._AC_UF1000,1000_QL80_.jpg',
-//         condition: 'Built',
-//         scale: '1/144 RG'
-//     },
-//     {
-//         id: 'mg3',
-//         name: 'Nu Gundam Ver. Ka',
-//         image: 'https://m.media-amazon.com/images/I/615YhvfMjIL._AC_UF1000,1000_QL80_.jpg',
-//         condition: 'New',
-//         scale: '1/100 MG'
-//     },
-//     {
-//         id: 'mg4',
-//         name: 'Sazabi Ver. Ka',
-//         image: 'https://m.media-amazon.com/images/I/61BWmit0VXL._AC_UF1000,1000_QL80_.jpg',
-//         condition: 'Built',
-//         scale: '1/100 MG'
-//     }
-// ];
-
-export default function ModalOfferExchange({ isOpen, onClose, requestData,gundamList,yourGundamList, requestPost }) {
+export default function ModalOfferExchange({ isOpen, onClose, requestData, gundamList, yourGundamList, requestPost }) {
     const [form] = Form.useForm();
     const [activeTab, setActiveTab] = useState('1');
     const [selectedGundam, setSelectedGundam] = useState(null);
@@ -52,7 +20,7 @@ export default function ModalOfferExchange({ isOpen, onClose, requestData,gundam
 
     // Dữ liệu người hiện tại
     const currentUser = useSelector((state) => state.auth.user);
-   
+
     const handleTabChange = (key) => {
         // Validate form trước khi chuyển sang tab khác
         if (key === '3' && activeTab === '1') {
@@ -78,7 +46,6 @@ export default function ModalOfferExchange({ isOpen, onClose, requestData,gundam
 
     const handleCompensationTypeChange = (e) => {
         setCompensationType(e.target.value);
-        // Reset compensation amount when changing type
         if (e.target.value === 'none') {
             form.setFieldsValue({ compensationAmount: 0 });
         }
@@ -97,7 +64,7 @@ export default function ModalOfferExchange({ isOpen, onClose, requestData,gundam
 
                 // Giả lập gửi request API
                 setTimeout(() => {
-                    
+
                     const offerData = {
                         ...values,
                         poster_gundam_id: selectedGundam,
@@ -105,7 +72,7 @@ export default function ModalOfferExchange({ isOpen, onClose, requestData,gundam
                         offerer_gundam_id: selectedYourGundam,
                         compensationID: compensationID,
                         postID: requestPost?.id
-                        
+
                     };
                     // if (offerData.compensationAmount == 0 ) {
                     //     const fixOfferData = {
@@ -114,19 +81,18 @@ export default function ModalOfferExchange({ isOpen, onClose, requestData,gundam
                     //     }
                     //     createExchangeOffer(fixOfferData)
                     // }
-                    console.log('Submitting exchange offer:', offerData);
-                    createExchangeOffer(offerData).then((res) => {
+                    // console.log('Submitting exchange offer:', offerData);
 
-                        
-                    })
-                    
+                    // API Gửi Yêu cầu trao đổi
+                    createExchangeOffer(offerData)
                     message.success('Đã gửi yêu cầu trao đổi thành công!');
                     setIsSubmitting(false);
+
                     // Reset form và đóng modal
                     form.resetFields();
                     setSelectedGundam(null);
                     setSelectedYourGundam(null);
-                    setCompensationID(null);                
+                    setCompensationID(null);
                     setActiveTab('1');
                     setCompensationType('none');
                     onClose();
@@ -289,7 +255,7 @@ export default function ModalOfferExchange({ isOpen, onClose, requestData,gundam
                                             className='bg-blue-500'
                                             type="primary"
                                             onClick={() => handleTabChange('2')}>
-                                            Bước tiếp theo...
+                                            Tiếp theo < ArrowRightOutlined />
                                         </Button>
                                     </div>
                                 </Form.Item>
@@ -366,7 +332,7 @@ export default function ModalOfferExchange({ isOpen, onClose, requestData,gundam
                                         onClick={() => handleTabChange('3')}
                                         loading={isSubmitting}
                                         disabled={!selectedYourGundam}
-                                    >  Bước tiếp theo...
+                                    > Tiếp theo < ArrowRightOutlined />
                                     </Button>
                                 </div>
                             </div>
@@ -442,7 +408,7 @@ export default function ModalOfferExchange({ isOpen, onClose, requestData,gundam
                                         onClick={handleSubmit}
                                         loading={isSubmitting}
                                         disabled={!selectedGundam}>
-                                        Gửi đề xuất trao đổi
+                                        < UploadOutlined /> Gửi đề xuất trao đổi
                                     </Button>
                                 </div>
                             </div>

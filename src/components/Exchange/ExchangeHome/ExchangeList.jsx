@@ -1,14 +1,14 @@
 // RequestList.jsx
 import { Card, List, Avatar, Typography, Modal, Button, Image, Carousel, Input } from 'antd';
-import { UserOutlined, ClockCircleOutlined, PictureOutlined } from '@ant-design/icons';
+import { UserOutlined, ClockCircleOutlined } from '@ant-design/icons';
 import moment from "moment/min/moment-with-locales";
 import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 
 import ModalOfferExchange from './ModalOfferExchange';
 
-import { getAllExchangePost } from '../../apis/Exchange/APIExchange';
-import { GetGundamByID } from '../../apis/User/APIUser';
+import { getAllExchangePost } from '../../../apis/Exchange/APIExchange';
+import { GetGundamByID } from '../../../apis/User/APIUser';
 
 moment.locale("vi");
 
@@ -146,20 +146,22 @@ export default function ExchangeList() {
                                                 <Button onClick={() => handleOpenModal(item)} ghost type='primary' className='bg-blue-400'>
                                                     Gundam Trao Đổi
                                                 </Button>
-                                                <Button
-                                                    onClick={() => handleOfferModal(item)}
-                                                    type='primary'
-                                                    className='bg-blue-500 px-4'
-                                                    disabled={item.poster.id === user.id} // Khóa nút nếu người đăng là chính mình
-                                                >
-                                                    Đề xuất trao đổi
-                                                </Button>
+                                                {item.poster.id === user.id ? ("") : (
+                                                    <Button
+                                                        onClick={() => handleOfferModal(item)}
+                                                        type='primary'
+                                                        className='bg-blue-500 px-4'
+                                                        disabled={item.poster.id === user.id} // Khóa nút nếu người đăng là chính mình
+                                                    >
+                                                        Đề xuất trao đổi
+                                                    </Button>
+                                                )}
                                             </div>
                                         </div>
                                     </div>
 
                                     {/* Nội dung bài Post */}
-                                    <div className='content-post flex items-center'>
+                                    <div className='content-post flex items-start'>
                                         {/* List ảnh Gundam đăng Trao đổi - Chỉ hiển thị ảnh đại diện */}
                                         {/* List ảnh Gundam đăng Trao đổi - Hiển thị carousel ảnh */}
                                         <div className="relative mr-4 w-48">
@@ -168,8 +170,8 @@ export default function ExchangeList() {
                                                     <div key={index}>
                                                         <Image
                                                             src={imageUrl}
-                                                            width={200}
-                                                            height={180}
+                                                            width={190}
+                                                            height={150}
                                                             className="object-cover rounded-md"
                                                             preview={true}
                                                         />

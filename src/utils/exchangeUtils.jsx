@@ -14,8 +14,24 @@ export const selectDeliveryFee = (state, userID, exchangeID) => {
  * @param {string} exchangeID - ID của giao dịch
  * @param {object} feeData - Dữ liệu phí giao hàng
  */
+// export const saveDeliveryFee = async (userID, exchangeID, feeData) => {
+//   try {
+//     const docRef = doc(db, "deliveryFees", userID);
+//     await setDoc(
+//       docRef,
+//       {
+//         [exchangeID]: feeData,
+//       },
+//       { merge: true }
+//     );
+//     console.log("Phí giao hàng đã được lưu thành công.");
+//   } catch (error) {
+//     console.error("Lỗi khi lưu phí giao hàng:", error);
+//   }
+// };
 export const saveDeliveryFee = async (userID, exchangeID, feeData) => {
   try {
+    // Lưu vào Firestore
     const docRef = doc(db, "deliveryFees", userID);
     await setDoc(
       docRef,
@@ -24,6 +40,11 @@ export const saveDeliveryFee = async (userID, exchangeID, feeData) => {
       },
       { merge: true }
     );
+
+    // Lưu vào localStorage với cùng cấu trúc
+    const localStorageKey = `${userID}_${exchangeID}_deliverDate`;
+    localStorage.setItem(localStorageKey, JSON.stringify(feeData));
+
     console.log("Phí giao hàng đã được lưu thành công.");
   } catch (error) {
     console.error("Lỗi khi lưu phí giao hàng:", error);

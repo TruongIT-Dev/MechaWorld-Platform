@@ -2,7 +2,7 @@
 import { Layout, Row, Col } from 'antd';
 import { Outlet } from 'react-router-dom';
 
-import ExchangeNavigator from './ExchangeNavigator';
+import ExchangeNavigator from './ExchangeHome/ExchangeNavigator';
 
 export default function Exchange() {
     return (

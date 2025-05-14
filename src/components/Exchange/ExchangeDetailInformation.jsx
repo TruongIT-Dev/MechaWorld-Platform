@@ -1,15 +1,18 @@
-import ExchangeDetailInformationSection from "./ExchangeInfo/ExchangeInformationSection";
-import ActionButtons from "./ExchangeDetails/ActionButtons";
-import ProgressSection from "./ExchangeProcess/ProgressSection";
-import ExchangeInformation from "./ExchangeInformation";
-import ExchangeLoader from "./ExchangeLoader";
-import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
+import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
+
 import { getUserAddresses } from "../../apis/User/APIUser";
 import { getExchangeDetail } from "../../apis/Exchange/APIExchange";
-import { useParams } from "react-router-dom";
-   
-import {  hasDeliveryFee, getDeliveryFee } from "../../utils/exchangeUtils";
+
+import ExchangeLoader from "./ExchangeLoader";
+import ProgressSection from "./ExchangeProgress/ProgressSection";
+import ActionButtons from "./ExchangeToggleFooterButton/SubmitButton/ActionButtons";
+import ExchangeDetailInformationSection from "./ExchangeStages/ExchangeInformationSection";
+import ExchangeInformation from "./ExchangeToggleFooterButton/ViewInfoExchangeButton/ExchangeInformation";
+
+import { hasDeliveryFee, getDeliveryFee } from "../../utils/exchangeUtils";
+
 const ExchangeDetailInformation = () => {
   const currentUser = useSelector((state) => state.auth.user);
 
@@ -34,8 +37,6 @@ const ExchangeDetailInformation = () => {
 
   const exchangeId = ExchangeId();
 
-
-
   // Hàm xử lý khi một bên hoàn tất một bước
   // const handleNextStep = () => {
   //   if (firstCurrentStage < 5) {
@@ -54,7 +55,7 @@ const ExchangeDetailInformation = () => {
   // const fee = useSelector((state) =>
   //   selectDeliveryFee(state, currentUser.id, exchangeDetail?.id)
   // );
-  
+
   const isFeeAvailable = useSelector((state) =>
     hasDeliveryFee(state, exchangeDetail?.current_user.id, exchangeDetail?.id)
   );
@@ -70,44 +71,44 @@ const ExchangeDetailInformation = () => {
   //   const key = `${userId}_${exchangeId}`;
   //   localStorage.setItem(key, JSON.stringify(fee));
   // };
-  
+
   // const getCachedDeliveryFee = (userId, exchangeId) => {
   //   const key = `${userId}_${exchangeId}`;
   //   const raw = localStorage.getItem(key);
   //   return raw ? JSON.parse(raw) : null;
   // };
-          // const yourDeData = getCachedDeliveryFee(res.data.current_user.id, res.data.id)
-        // const partnerDeData = getCachedDeliveryFee(res.data.partner.id, res.data.id)
+  // const yourDeData = getCachedDeliveryFee(res.data.current_user.id, res.data.id)
+  // const partnerDeData = getCachedDeliveryFee(res.data.partner.id, res.data.id)
 
 
   const fetchExchangeData = async () => {
     try {
       // Giả định gọi API và nhận dữ liệu
-      
+
 
 
       getExchangeDetail(exchangeId).then(async (res) => {
         setExchangeDetail(res.data);
         setFirstUser(res.data.current_user);
         setSecondUser(res.data.partner);
-        
+
         await getDeliveryFee(res.data.current_user.id, res.data.id)
-        .then((yourDeliFee) => {
-          setDeliverData(yourDeliFee);
-          // console.log("Delivery fee:", yourDeliFee);
-        })
-        .catch((error) => {
-          console.error("Error fetching delivery fee:", error);
-        });
-        
-        await getDeliveryFee(res.data.partner.id,res.data.id)
-        .then((yourDeliFee) => {
-          setDeliverPartnerData(yourDeliFee);
-          // console.log("Delivery partner fee:", yourDeliFee);
-        })
-        .catch((error) => {
-          console.error("Error fetching delivery fee:", error);
-        });
+          .then((yourDeliFee) => {
+            setDeliverData(yourDeliFee);
+            // console.log("Delivery fee:", yourDeliFee);
+          })
+          .catch((error) => {
+            console.error("Error fetching delivery fee:", error);
+          });
+
+        await getDeliveryFee(res.data.partner.id, res.data.id)
+          .then((yourDeliFee) => {
+            setDeliverPartnerData(yourDeliFee);
+            // console.log("Delivery partner fee:", yourDeliFee);
+          })
+          .catch((error) => {
+            console.error("Error fetching delivery fee:", error);
+          });
 
 
 
@@ -121,49 +122,46 @@ const ExchangeDetailInformation = () => {
               } else {
                 setFirstCurrentStage(3); // Nếu có delivery_fee nhưng chưa thanh toán
               }
-            } else if (deliverData !== null||isFeeAvailable === true) {
+            } else if (deliverData !== null || isFeeAvailable === true) {
               setFirstCurrentStage(3); // Nếu isFeeAvailable là true
             } else {
-              console.log("qua bước này rồi nhé");
+              // console.log("qua bước này rồi nhé");
               setFirstCurrentStage(2); // Nếu có from_address nhưng không có delivery_fee
             }
-  
+
             if (res.data.partner.from_address === null) {
-              setSecondCurrentStage(1); 
+              setSecondCurrentStage(1);
             } else if (res.data.partner.delivery_fee !== null) {
               if (res.data.partner.delivery_fee_paid == true) {
-                setSecondCurrentStage(4); 
+                setSecondCurrentStage(4);
               } else {
-                setSecondCurrentStage(3); 
+                setSecondCurrentStage(3);
               }
-            } else if (deliverPartnerData !== null||isPartnerFeeAvailable === true) {
-              setSecondCurrentStage(3); 
-            } else  {
+            } else if (deliverPartnerData !== null || isPartnerFeeAvailable === true) {
+              setSecondCurrentStage(3);
+            } else {
               setSecondCurrentStage(2)
             }
             break;
-  
+
           case "packaging":
           case "delivering":
           case "delivered":
             setFirstCurrentStage(4); // Nếu đang đóng gói, giao hàng hoặc đã giao hàng
-            setSecondCurrentStage(4); 
+            setSecondCurrentStage(4);
             break;
-  
+
           case "completed":
             setFirstCurrentStage(5); // Nếu giao dịch đã hoàn tất
-            setSecondCurrentStage(5); 
+            setSecondCurrentStage(5);
             break;
-  
+
           default:
             setFirstCurrentStage(0); // Mặc định nếu không khớp trạng thái nào
-            setSecondCurrentStage(0); 
+            setSecondCurrentStage(0);
             break;
         }
       })
-
-
-
 
     } catch (error) {
       console.error("Lỗi khi lấy dữ liệu trao đổi:", error);
@@ -178,7 +176,7 @@ const ExchangeDetailInformation = () => {
       const pickupAddress = addresses.filter((address) => address.is_pickup_address === true);
       // console.log("pickupAddress" ,pickupAddress);
       const primaryAddress = addresses.filter((address) => address.is_primary === true);
-      
+
       // console.log(addresses);
       setSelectedAddress(primaryAddress[0]);
       setSelectedPickupAddress(pickupAddress[0]);
@@ -195,12 +193,6 @@ const ExchangeDetailInformation = () => {
       setIsLoading(true);
       await Promise.all([fetchExchangeData(), fetchUserAddress()]);
 
-  
-
-
-
-
-
       setIsLoading(false);
     };
     fetchData();
@@ -210,12 +202,7 @@ const ExchangeDetailInformation = () => {
     //   setAddress(response);
     // }
     // fetchAddress();
-
-
-
-
-
-  }, [ ]);
+  }, []);
 
 
 
@@ -225,7 +212,7 @@ const ExchangeDetailInformation = () => {
         <>
           {/* Bên trái */}
           <div className="basis-2/3 flex flex-col items-stretch justify-start gap-4 px-4 border-r border-gray-300">
-          <ExchangeDetailInformationSection
+            <ExchangeDetailInformationSection
               firstCurrentStage={firstCurrentStage}
               setFirstCurrentStage={setFirstCurrentStage}
               secondCurrentStage={secondCurrentStage}
@@ -248,33 +235,40 @@ const ExchangeDetailInformation = () => {
               setIsLoading={setIsLoading}
               fetchExchangeData={fetchExchangeData}
             />
-            <ActionButtons
-              currentStage={firstCurrentStage}
-              setFirstCurrentStage={setFirstCurrentStage}
-              oppositeCurrentStage={secondCurrentStage}
-              setSecondCurrentStage={setSecondCurrentStage}
-              deliverData={deliverData}
-              setDeliverData={setDeliverData}
-              deliverPartnerData={deliverPartnerData}
-              exchangeDetail={exchangeDetail}
-              selectedAddress={selectedAddress}
-              selectedPickupAddress={selectedPickupAddress}
-            />
-            <ExchangeInformation
-              firstCurrentStage={firstCurrentStage}
-              secondCurrentStage={secondCurrentStage}
-              firstUser={currentUser2}
-              secondUser={partner}
-              exchangeDetail={exchangeDetail}
-            />
+
+            <div className="flex flex-row gap-4 items-center">
+              <div className="flex-1">
+                <ExchangeInformation
+                  firstCurrentStage={firstCurrentStage}
+                  secondCurrentStage={secondCurrentStage}
+                  firstUser={currentUser2}
+                  secondUser={partner}
+                  exchangeDetail={exchangeDetail}
+                />
+              </div>
+              <div className="flex-1">
+                <ActionButtons
+                  currentStage={firstCurrentStage}
+                  setFirstCurrentStage={setFirstCurrentStage}
+                  oppositeCurrentStage={secondCurrentStage}
+                  setSecondCurrentStage={setSecondCurrentStage}
+                  deliverData={deliverData}
+                  setDeliverData={setDeliverData}
+                  deliverPartnerData={deliverPartnerData}
+                  exchangeDetail={exchangeDetail}
+                  selectedAddress={selectedAddress}
+                  selectedPickupAddress={selectedPickupAddress}
+                />
+              </div>
+            </div>
           </div>
 
           {/* Bên phải */}
           <div className="basis-1/3 min-w-fit ">
-            <ProgressSection 
-            firstCurrentStage={firstCurrentStage} 
-            secondCurrentStage={secondCurrentStage} 
-            exchangeDetail={exchangeDetail}
+            <ProgressSection
+              firstCurrentStage={firstCurrentStage}
+              secondCurrentStage={secondCurrentStage}
+              exchangeDetail={exchangeDetail}
             />
           </div>
         </>

@@ -126,8 +126,8 @@ const SecondForm = ({ user, setUser, setHasAddress }) => {
         fetchWards(value);
     };
     const handleUpdateAddress = async (values, addresses) => {
-        console.log("Data load: ",values);
-        console.log("Data addresses load: ",addresses);
+        // console.log("Data load: ",values);
+        // console.log("Data addresses load: ",addresses);
         const city = cities.find(city => city.ProvinceID === values.city);
         const district = districts.find(district => district.DistrictID === values.district);
         const ward = wards.find(ward => ward.WardCode === values.ward);
@@ -204,7 +204,7 @@ const SecondForm = ({ user, setUser, setHasAddress }) => {
             if (filteredCities.length > 0) {
               const selectedCityId = filteredCities[0].ProvinceID;
               setSelectedCity(selectedCityId);
-              console.log("Data city: ",filteredCities);
+            //   console.log("Data city: ",filteredCities);
                 
               const districtRes = await api.post(`district`, { province_id: selectedCityId });
               const districtsData = districtRes.data.data;
@@ -212,7 +212,7 @@ const SecondForm = ({ user, setUser, setHasAddress }) => {
               
                 
               const foundDistrict = districtsData.find((d) => d.DistrictName === address.district_name);
-              console.log("Data district: ",foundDistrict);
+            //   console.log("Data district: ",foundDistrict);
               if (foundDistrict) {
                 const selectedDistrictId = foundDistrict.DistrictID;
                 setSelectedDistrict(selectedDistrictId);
@@ -223,7 +223,7 @@ const SecondForm = ({ user, setUser, setHasAddress }) => {
                 
         
                 const foundWard = wardsData.find((w) => w.WardName === address.ward_name);
-                console.log("Data ward: ", foundWard);
+                // console.log("Data ward: ", foundWard);
                 form.setFieldsValue({
                   province_name: filteredCities ? filteredCities.ProvinceName : undefined,
                   city: selectedCityId,

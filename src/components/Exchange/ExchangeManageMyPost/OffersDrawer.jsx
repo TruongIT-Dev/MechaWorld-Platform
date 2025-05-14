@@ -1,66 +1,115 @@
-import { Drawer, Button, Badge, List, Space, Avatar, Divider, Typography, Modal, Form, Input, message } from "antd";
+import { Drawer, Button, Badge, List, Space, Avatar, Divider, Typography, Modal, Form, Input, message, notification } from "antd";
 import {
-    // ClockCircleOutlined,
-    // CheckCircleOutlined,
-    // CloseCircleOutlined,
     ArrowUpOutlined,
     ArrowDownOutlined,
-    // DollarOutlined
 } from "@ant-design/icons";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { acceptOffer, requestNegotiation } from "../../../apis/Exchange/APIExchange";
+import { checkWallet } from "../../../apis/User/APIUser";
 
 const { Text } = Typography;
 
-export default function OffersDrawer({ visible, post, offers, onClose, onViewOfferDetail }) {
+export default function OffersDrawer({ visible, offers, onClose, onViewOfferDetail }) {
+
+    const [form] = Form.useForm();
+    const user = useSelector((state) => state.auth.user);
+    const userId = useSelector((state) => state.auth.user.id);
 
     const [isModalVisible, setIsModalVisible] = useState(false);
-    const [form] = Form.useForm();
-    const [compensationType, setCompensationType] = useState('none');
-    const user = useSelector((state) => state.auth.user);
+    const [balance, setBalance] = useState(null);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
 
     if (!offers) return null;
-
-    // const offerStatusMap = {
-    //     pending: { text: "Đang chờ xác nhận", color: "orange", icon: <ClockCircleOutlined /> },
-    //     accepted: { text: "Đã chấp nhận", color: "green", icon: <CheckCircleOutlined /> },
-    //     rejected: { text: "Đã từ chối", color: "red", icon: <CloseCircleOutlined /> }
-    // };
-
 
     const handleModalCancel = () => {
         setIsModalVisible(false)
     }
 
-    // const handleSelectCompensation = (type) => {
-    //     setCompensationType(type);
-    //     if (type === 'none') {
-    //         form.setFieldsValue({ compensationAmount: 0 });
-    //     }
-    // };
-    
-    const handleAcceptExchange = (offer) => {
-        console.log(offer);
-        acceptOffer(offer.post_id, offer.id).then((res) => {
-            if (res.status == 200) {
-                console.log(res.data);
+    // Hàm kiểm tra số dư ví
+    useEffect(() => {
+        const fetchBalance = async () => {
+            if (!userId || !visible) return;
 
-                setTimeout(() => {
-                    message.success('Đã chấp nhận đề xuất. Điều hướng qua trang trao đổi');
-                    window.location.href = `/exchange/detail/${res.data.id}`;
-                }, 1000);
-
-
+            try {
+                setLoading(true);
+                const response = await checkWallet(userId);
+                // Giả sử API trả về data.balance
+                const walletBalance = response?.data?.balance || 0;
+                setBalance(walletBalance);
+                setError(null);
+            } catch (err) {
+                setError('Không thể kiểm tra số dư ví');
+                console.error('Error fetching wallet balance:', err);
+            } finally {
+                setLoading(false);
             }
-        }).catch((error) => {
-            message.error(error);
-        })
-    }
+        };
+
+        fetchBalance();
+    }, [userId, visible]);
+
+    // Hàm xử lý chấp nhận trao đổi được cập nhật
+    const handleAcceptExchange = async (offer) => {
+        try {
+
+            // Kiểm tra lại số dư ví hiện tại
+            const walletResponse = await checkWallet(userId);
+            const currentBalance = walletResponse?.data?.balance || 0;
+
+            // Xác định số tiền cần thanh toán
+            let requiredAmount = 0;
+
+            // Kiểm tra nếu user hiện tại phải bù trừ tiền
+            if (offer.payer_id === user.id && offer.compensation_amount > 0) {
+                requiredAmount = offer.compensation_amount;
+            }
+
+            // Kiểm tra số dư có đủ không
+            if (currentBalance < requiredAmount) {
+                notification.error({
+                    message: 'BẠN KHÔNG ĐỦ SỐ DƯ',
+                    description: (
+                        <div>
+                            <div>Số dư hiện tại: <strong>{currentBalance.toLocaleString()}đ</strong></div>
+                        </div>
+                    ),
+                    duration: 5,
+                });
+                return;
+            }
+
+            // Nếu đủ tiền hoặc không cần thanh toán, tiến hành chấp nhận đề xuất
+            const res = await acceptOffer(offer.post_id, offer.id);
+
+            if (res.status === 200) {
+                notification.success({
+                    message: 'CHẤP NHẬN ĐỀ XUẤT THÀNH CÔNG',
+                    // description: requiredAmount > 0 ?
+                    //     `Đã thanh toán ${requiredAmount.toLocaleString()}đ` :
+                    //     'Không có khoản bù trừ',
+                });
+
+                // Đóng drawer
+                onClose();
+
+                // Chuyển hướng sau 1.5 giây
+                setTimeout(() => {
+                    window.location.href = `/exchange/detail/${res.data.id}`;
+                }, 1500);
+            }
+        } catch (error) {
+            console.error('Error accepting offer:', error);
+            notification.error({
+                message: 'LỖI KHI CHẤP NHẬN ĐỀ XUẤT',
+                description: error.response?.data?.message || error.message || 'Có lỗi xảy ra, vui lòng thử lại',
+            });
+        }
+    };
 
 
     const handleModalSubmit = (values) => {
-        console.log(values.note);
         requestNegotiation(offers[0].post_id, offers[0]?.id, values.note).then((res) => {
             if (res.status === 200) {
                 setTimeout(
@@ -69,17 +118,17 @@ export default function OffersDrawer({ visible, post, offers, onClose, onViewOff
                 setIsModalVisible(false);
             }
         })
-        // console.log(offers[0].id);
-        // console.log(offers[0]?.post_id);
     }
 
     return (
         <>
             <Drawer
                 title={
-                    <div>
-                        <Text className="uppercase text-base" strong>Đề xuất trao đổi cho bài viết của bạn</Text>
-                    </div>
+                    <>
+                        <div>
+                            <Text className="uppercase text-base" strong>Đề xuất trao đổi cho bài viết của bạn</Text>
+                        </div>
+                    </>
                 }
                 width={500}
                 open={visible}
@@ -90,23 +139,6 @@ export default function OffersDrawer({ visible, post, offers, onClose, onViewOff
                     </div>
                 }
             >
-                {/* <Divider orientation="left">
-                <Space>
-                    <Badge>
-                        <Text strong>Nội dung bài viết</Text>
-                    </Badge>
-                </Space>
-            </Divider>
-
-            <Card className="mb-4 mt-0">
-                <Paragraph ellipsis={{ rows: 3 }}>
-                    {post.content}
-                </Paragraph>
-                <div className="mt-2">
-                    <Text strong>Số Gundam đem trao đổi: </Text>
-                    <Tag color="blue">{post.gunplas.length} mô hình</Tag>
-                </div>
-            </Card> */}
 
                 <Divider orientation="left">
                     <Space>
@@ -235,10 +267,10 @@ export default function OffersDrawer({ visible, post, offers, onClose, onViewOff
                     }}
                 >
 
-                    <Form.Item name="note" label="Ghi chú (không bắt buộc)">
+                    <Form.Item name="note" label="Tin nhắn" rules={{require: true}}>
                         <Input.TextArea
                             rows={4}
-                            placeholder="Nhập ghi chú về đề nghị trao đổi của bạn để chình sửa đề xuất..."
+                            placeholder="Nhập tin nhắn mong muốn đối tác chỉnh sửa lại đề xuất trao đổi..."
                             maxLength={500}
                             showCount
                         />

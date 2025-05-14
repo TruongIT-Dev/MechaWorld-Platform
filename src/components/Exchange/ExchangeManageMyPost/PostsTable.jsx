@@ -1,4 +1,4 @@
-import { Table, Badge, Button, Tag, Space, Tooltip, Modal, Image } from "antd";
+import { Table, Badge, Button, Tag, Space, Tooltip, Modal, Image, Typography } from "antd";
 import {
     MessageOutlined,
     DeleteOutlined,
@@ -9,7 +9,7 @@ import {
 
 const { confirm } = Modal;
 
-export default function PostsTable({ posts, onViewOffers, onViewGunplas, onDeletePost, userPost }) {
+export default function PostsTable({ onViewOffers, onViewGunplas, onDeletePost, userPost }) {
     const statusColors = {
         open: "green",
         active: "green",
@@ -58,13 +58,16 @@ export default function PostsTable({ posts, onViewOffers, onViewGunplas, onDelet
             title: "Nội dung",
             dataIndex: "exchange_post",
             key: "content",
-            align: 'center',
+            align: "center",
             render: (exchange_post) => (
-                <span>
+                <Typography.Paragraph
+                    ellipsis={{ rows: 4, expandable: true, symbol: 'Xem thêm' }}
+                    style={{ margin: 0, maxWidth: 400 }} // có thể giới hạn chiều ngang nếu cần
+                >
                     {exchange_post?.content}
-                </span>
+                </Typography.Paragraph>
             ),
-        },
+          },
         {
             title: "Đề xuất",
             key: "offers",

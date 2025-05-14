@@ -178,7 +178,7 @@ const CollectionContainer = ({ setIsCreating }) => {
         )
       );
 
-      // TODO: Add API call to update favorite status
+      // Add API call to update favorite status
       // await UpdateGundamFavorite(id, !item.is_favorite);
 
     } catch (error) {
@@ -197,7 +197,7 @@ const CollectionContainer = ({ setIsCreating }) => {
         )
       );
 
-      // TODO: Add API call to update wishlist status
+      // Add API call to update wishlist status
       // await UpdateGundamWishlist(id, !item.is_wishlist);
 
     } catch (error) {

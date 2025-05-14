@@ -1,19 +1,16 @@
-import { useState, useEffect } from 'react';
-import { Modal, Button, Collapse, Descriptions, Typography, Tabs, Input, Tooltip, Card } from 'antd';
+import { useState } from 'react';
+import { Modal, Button, Collapse, Descriptions, Typography, Tabs, Card } from 'antd';
 import {
     InfoCircleOutlined,
     LeftOutlined,
     RightOutlined,
     PlusOutlined,
-    // HeartOutlined,
-    // HeartFilled,
-    // StarOutlined,
-    // StarFilled
 } from '@ant-design/icons';
 // import { getGradeColor } from './utils';
 
 const DetailModal = ({ visible, product, onCancel, toggleFavorite, toggleWishlist }) => {
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
     // const [favorited, setFavorited] = useState(product?.is_favorite || false);
     // const [wishlisted, setWishlisted] = useState(product?.is_wishlist || false);
 
@@ -178,9 +175,17 @@ const DetailModal = ({ visible, product, onCancel, toggleFavorite, toggleWishlis
                                 >
                                     <Descriptions.Item label="Grade">{product.grade}</Descriptions.Item>
                                     <Descriptions.Item label="Tỷ lệ">{product.scale}</Descriptions.Item>
-                                    <Descriptions.Item label="Khối lượng">{product.weight}</Descriptions.Item>
+                                    <Descriptions.Item label="Khối lượng">{product.weight} (g)</Descriptions.Item>
                                     <Descriptions.Item label="Vật liệu">{product.material}</Descriptions.Item>
                                     <Descriptions.Item label="Tổng số mảnh">{product.quantity}</Descriptions.Item>
+                                    {/* <Descriptions.Item label="Phụ kiện thêm">{product.quantity}</Descriptions.Item> */}
+                                    {product.accessories && (
+                                        <Descriptions.Item label="Phụ kiện thêm">
+                                            {product.accessories.map((item, index) => (
+                                                <div className='text-gray-500' key={index}>+ {item.name} x {item.quantity}</div>
+                                            ))}
+                                        </Descriptions.Item>
+                                    )}
                                 </Descriptions>
                             </Collapse.Panel>
 
@@ -194,9 +199,11 @@ const DetailModal = ({ visible, product, onCancel, toggleFavorite, toggleWishlis
                                     column={1}
                                     labelStyle={{ fontWeight: 'bold', width: '40%' }}
                                 >
-                                    <Descriptions.Item label="Giá mua">
-                                        {product.price?.toLocaleString('vi-VN')}đ
-                                    </Descriptions.Item>
+                                    {product.price > 0 && (
+                                        <Descriptions.Item label="Giá mua">
+                                            {product.price.toLocaleString('vi-VN')}đ
+                                        </Descriptions.Item>
+                                    )}
                                     {product.purchaseDate && (
                                         <Descriptions.Item label="Ngày mua">{product.purchaseDate}</Descriptions.Item>
                                     )}
@@ -213,7 +220,7 @@ const DetailModal = ({ visible, product, onCancel, toggleFavorite, toggleWishlis
 
                             {product.description && (
                                 <Collapse.Panel
-                                    header={<span className="font-medium"><InfoCircleOutlined /> MÔ TẢ SẢN PHẨM</span>}
+                                    header={<span className="font-medium"><InfoCircleOutlined /> MÔ TẢ SẢN PHẨM </span>}
                                     key="4"
                                 >
                                     <Typography.Paragraph className="p-3 bg-gray-50 rounded-md">

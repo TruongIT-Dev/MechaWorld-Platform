@@ -60,7 +60,6 @@ const GundamCard = ({ item, onClick, onToggleFavorite, onToggleWishlist }) => (
             </div>
             <div className="mt-auto flex justify-between items-center">
                 <Typography.Text className="text-gray-600">{item.series}</Typography.Text>
-                <Typography.Text strong>{item.price?.toLocaleString('vi-VN')}đ</Typography.Text>
             </div>
         </div>
     </Card>

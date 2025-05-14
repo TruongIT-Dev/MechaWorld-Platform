@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { Layout, Card, Tabs, Typography, message } from "antd";
-import { myPosts, offers } from "./Data";
 
 import PostsTable from "./PostsTable";
 import OffersDrawer from "./OffersDrawer";
@@ -26,7 +25,7 @@ export default function ExchangeMyPost() {
     const viewOffers = (post) => {
         setPostOffers(post.offers);
         // setSelectedPost(post);
-        console.log(post.offers);
+        // console.log(post.offers);
         setOffersDrawerVisible(true);
     };
 
@@ -77,7 +76,6 @@ export default function ExchangeMyPost() {
                     <Tabs centered activeKey={activeTab} onChange={setActiveTab} type="card" size="large">
                         <TabPane tab="Các bài viết của tôi" key="1">
                             <PostsTable
-                                posts={myPosts}
                                 userPost={userPost}
                                 onViewOffers={viewOffers}
                                 onViewGunplas={viewGunplas}

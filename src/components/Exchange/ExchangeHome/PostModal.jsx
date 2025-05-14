@@ -10,26 +10,13 @@ import {
     ArrowRightOutlined,
     EditOutlined,
     SwapOutlined,
-    UpCircleOutlined,
     UploadOutlined
 } from "@ant-design/icons";
-import { GetGundamByID } from "../../apis/User/APIUser";
-import { createExchangePost } from "../../apis/Exchange/APIExchange";
+import { GetGundamByID } from "../../../apis/User/APIUser";
+import { createExchangePost } from "../../../apis/Exchange/APIExchange";
 
 const { Text } = Typography;
 const { Step } = Steps;
-
-// Mock data for user's Gundam collection
-const userGundams = [
-    { id: 1, name: "RX-78-2 Gundam", series: "Mobile Suit Gundam", image: "/gundam1.png", condition: "Mới 90%" },
-    { id: 2, name: "Zaku II", series: "Mobile Suit Gundam", image: "/gundam2.png", condition: "Mới 95%" },
-    { id: 3, name: "Gundam Exia", series: "Gundam 00", image: "/gundam3.png", condition: "Mới 85%" },
-    { id: 4, name: "Strike Freedom", series: "Gundam SEED Destiny", image: "/gundam4.png", condition: "Mới 100%" },
-    { id: 5, name: "Unicorn Gundam", series: "Gundam Unicorn", image: "/gundam5.png", condition: "Mới 80%" },
-    { id: 6, name: "Wing Zero", series: "Gundam Wing", image: "/gundam6.png", condition: "Mới 90%" },
-    { id: 7, name: "Gundam Barbatos", series: "Iron-Blooded Orphans", image: "/gundam7.png", condition: "Mới 75%" },
-    { id: 8, name: "Gundam Dynames", series: "Gundam 00", image: "/gundam8.png", condition: "Mới 88%" }
-];
 
 export default function PostModal({ onClose, onSuccess, currentUser }) {
     const [form] = Form.useForm();

@@ -302,8 +302,8 @@ const Checkout = () => {
 
     // Procesar cada tienda de forma independiente
     const shops = Object.entries(groupedCartItems);
-    let hasError = false;
-    let errorDetails = null;
+    // let hasError = false;
+    // let errorDetails = null;
 
     try {
       // Mostrar loading mientras se procesan las órdenes
@@ -384,7 +384,7 @@ const Checkout = () => {
           open={isAddressModalVisible}
           onCancel={() => setIsAddressModalVisible(false)}
           footer={null}
-          width={500}
+          width={600}
           centered
         >
           <Tabs defaultActiveKey="1">
@@ -446,7 +446,7 @@ const Checkout = () => {
                 form={form}
                 layout="vertical"
                 onFinish={onFinishAddress}
-              // className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4"
+              className="gap-4 mt-4"
               >
                 <Form.Item
                   label="Thành phố"

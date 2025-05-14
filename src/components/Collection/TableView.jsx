@@ -15,7 +15,6 @@ const TableView = ({ data, showDetailModal, toggleFavorite, toggleWishlist }) =>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tên mô hình</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Grade & Scale</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Series</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Giá</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Thao tác</th>
                 </tr>
             </thead>
@@ -39,9 +38,6 @@ const TableView = ({ data, showDetailModal, toggleFavorite, toggleWishlist }) =>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                             <div className="text-sm text-gray-900">{item.series}</div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            {item.price?.toLocaleString('vi-VN')}đ
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-left text-sm font-medium">
                             <Button type="link" onClick={() => showDetailModal(item)}>
