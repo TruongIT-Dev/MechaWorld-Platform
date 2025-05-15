@@ -539,13 +539,20 @@ const handleFinish = async (values) => {
                       { 
                         pattern: /^[1-9]\d*$/, 
                         message: 'Giá phải là số nguyên dương' 
+                      },
+                      {
+                        validator: (_, value) =>
+                          value >= 100000
+                            ? Promise.resolve()
+                            : Promise.reject(new Error('Giá khởi điểm phải từ 100000 VNĐ trở lên')),
                       }
                     ]}
+                    extra="Vui lòng nhập số tiền từ 100000 VNĐ trở lên."
                   >
                     <Input 
                       type="number" 
                       className="w-full" 
-                      min={1}
+                      min={100000}
                       addonAfter="đ"
                     />
                   </Form.Item>
@@ -597,13 +604,20 @@ const handleFinish = async (values) => {
                       { required: true, message: 'Vui lòng nhập giá mua ngay' },
                       ({ getFieldValue }) => ({
                         validator(_, value) {
-                          if (!value || getFieldValue('start_price') < value) {
+                          const startPrice = getFieldValue('start_price');
+                          const minFinalPrice = startPrice * 1.5;
+
+                          if (!value || value >= minFinalPrice) {
                             return Promise.resolve();
                           }
-                          return Promise.reject(new Error('Giá mua ngay phải lớn hơn giá khởi điểm'));
+
+                          return Promise.reject(
+                            new Error(`Giá mua ngay phải lớn hơn hoặc bằng 150% giá khởi điểm (${minFinalPrice.toLocaleString()} đ)`)
+                          );
                         },
                       }),
                     ]}
+                    extra="Giá mua ngay phải lớn hơn hoặc bằng 150% giá khởi điểm."
                   >
                     <Input 
                       type="number" 
@@ -612,68 +626,71 @@ const handleFinish = async (values) => {
                       addonAfter="đ"
                     />
                   </Form.Item>
+
                 </Col>
               </Row>
 
-              <Row gutter={16}>
-                <Col span={12}>
-                  <Form.Item
-                    label="Thời gian bắt đầu"
-                    name="start_time"
-                    rules={[
-                      { 
-                        required: true, 
-                        message: 'Vui lòng chọn ngày bắt đầu' 
-                      },
-                      ({ getFieldValue }) => ({
-                        validator(_, value) {
-                          if (value && value.isValid()) {
-                            return Promise.resolve();
-                          }
+            <Row gutter={16}>
+              <Col span={12}>
+                <Form.Item
+                  label="Thời gian bắt đầu"
+                  name="start_time"
+                  rules={[
+                    { required: true, message: 'Vui lòng chọn ngày bắt đầu' },
+                    ({ getFieldValue }) => ({
+                      validator(_, value) {
+                        if (!value || !value.isValid()) {
                           return Promise.reject(new Error('Thời gian không hợp lệ'));
-                        },
-                      }),
-                    ]}
-                  >
-                    <DatePicker
-                      format="YYYY-MM-DD"  // Chỉ hiển thị ngày
-                      className="w-full"
-                      disabledDate={(current) => current && current < moment().startOf('day')}
-                      onChange={(date) => {
-                        const dateWithTime = date ? date.startOf('day') : null;
-                        console.log(dateWithTime?.format("YYYY-MM-DD HH:mm:ss")); // 00:00:00
-                      }}
-                    />
-                  </Form.Item>
-                </Col>
-                <Col span={12}>
-                  <Form.Item
-                    label="Thời gian kết thúc"
-                    name="end_time"
-                    rules={[
-                      { required: true, message: 'Vui lòng chọn ngày kết thúc' },
-                      ({ getFieldValue }) => ({
-                        validator(_, value) {
-                          if (!value || !getFieldValue('start_time') || new Date(value) > new Date(getFieldValue('start_time'))) {
-                            return Promise.resolve();
-                          }
-                          return Promise.reject(new Error('Thời gian kết thúc phải sau thời gian bắt đầu'));
-                        },
-                      }),
-                    ]}
-                  >
-                    <DatePicker
-                      format="YYYY-MM-DD"  // Chỉ hiển thị ngày
-                      className="w-full"
-                      disabledDate={(current) => current && current < moment().startOf('day')}
-                      onChange={(date) => {
-                        const dateWithTime = date ? date.startOf('day') : null;
-                        console.log(dateWithTime?.format("YYYY-MM-DD HH:mm:ss")); // 00:00:00
-                      }}
-                    />
-                  </Form.Item>
-                </Col>
-              </Row>
+                        }
+                        const minStartDate = moment().add(2, 'days').startOf('day');
+                        if (value.isBefore(minStartDate)) {
+                          return Promise.reject(new Error('Thời gian bắt đầu phải cách ngày hôm nay ít nhất 2 ngày'));
+                        }
+                        return Promise.resolve();
+                      },
+                    }),
+                  ]}
+                >
+                  <DatePicker
+                    format="YYYY-MM-DD"
+                    className="w-full"
+                    disabledDate={(current) =>
+                      current && current < moment().add(2, 'days').startOf('day')
+                    }
+                  />
+                </Form.Item>
+              </Col>
+
+              <Col span={12}>
+                <Form.Item
+                  label="Thời gian kết thúc"
+                  name="end_time"
+                  rules={[
+                    { required: true, message: 'Vui lòng chọn ngày kết thúc' },
+                    ({ getFieldValue }) => ({
+                      validator(_, value) {
+                        const startDate = getFieldValue('start_time');
+                        if (!value || !value.isValid()) {
+                          return Promise.reject(new Error('Thời gian không hợp lệ'));
+                        }
+                        if (!startDate || value.isAfter(startDate)) {
+                          return Promise.resolve();
+                        }
+                        return Promise.reject(new Error('Thời gian kết thúc phải sau thời gian bắt đầu'));
+                      },
+                    }),
+                  ]}
+                >
+                  <DatePicker
+                    format="YYYY-MM-DD"
+                    className="w-full"
+                    disabledDate={(current) =>
+                      current && current < moment().add(2, 'days').startOf('day')
+                    }
+                  />
+                </Form.Item>
+              </Col>
+            </Row>
 
               <Form.Item className="flex justify-center mt-4">
                 <Button 
