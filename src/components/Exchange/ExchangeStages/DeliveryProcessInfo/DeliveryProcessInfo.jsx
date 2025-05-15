@@ -491,7 +491,7 @@ const DeliveryProcessInfo = ({
                 </Button>
               </Tooltip>
 
-              {!isShowingSendOrder && currentOrder.status === "delivered" && (
+              {!isShowingSendOrder && ghnDetail?.status === "delivered" && (
                 <Tooltip title="Xác nhận khi bạn đã nhận được hàng và kiểm tra không có vấn đề">
                   <Button
                     type="primary"
@@ -503,9 +503,9 @@ const DeliveryProcessInfo = ({
                     Xác nhận đã nhận hàng
                   </Button>
                 </Tooltip>
-              )}
+               )}
 
-              {!isShowingSendOrder && currentOrder.status === "delivered" && (
+              {!isShowingSendOrder && ghnDetail?.status === "delivered" && (
                 <Tooltip title="Gửi khiếu nại nếu có vấn đề với đơn hàng">
                   <Button
                     danger

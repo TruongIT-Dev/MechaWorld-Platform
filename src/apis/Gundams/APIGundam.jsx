@@ -24,5 +24,5 @@ export const GetGundamByGrade = (grade) => {
 
 // GET Specific Gundam By slug
 export const GetGundamDetailBySlug = (slug) => {
-    return axios.get(`/gundams/${slug}`);
+    return axios.get(`/gundams/by-slug/${slug}`);
 }

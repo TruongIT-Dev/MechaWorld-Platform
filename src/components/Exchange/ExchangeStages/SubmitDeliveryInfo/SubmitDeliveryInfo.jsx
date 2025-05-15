@@ -83,21 +83,21 @@ const SubmitDeliveryInfo = ({
       setIsPickupAddress(newPickup);
     }
   }, [addresses, selectedAddress, selectedPickupAddress, setIsPrimary, setIsPickupAddress]);
-
-  useEffect(() => {
-    const fetchAddress = async () => {
-      // Chỉ gọi API khi component mount hoặc khi dependency thay đổi
-      if (addresses.length === 0) {  // Chỉ fetch khi không có địa chỉ
-        const response = await fetchUserAddresses();
-        if (response) {
-          setAddresses(response);
+  const fetchAddress = async () => {
+        // Chỉ gọi API khi component mount hoặc khi dependency thay đổi
+        if (addresses.length === 0) {  // Chỉ fetch khi không có địa chỉ
+          const response = await fetchUserAddresses();
+          if (response) {
+            setAddresses(response);
+          }
         }
-      }
-    };
+  };
+  useEffect(() => {
+    
 
     fetchProvinces();
-    fetchAddress();
-  }, [fetchUserAddress]);
+    // fetchAddress();
+  }, [addresses]);
 
 
   // Hàm Fech Địa Chỉ của user

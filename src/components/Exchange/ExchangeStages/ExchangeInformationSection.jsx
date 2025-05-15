@@ -35,6 +35,7 @@ const ExchangeInformationSection = ({
   setSelectedAddress,
   setIsLoading,
   fetchExchangeData,
+  fetchUserAddress,
 }) => {
   //   const [refundRequestsList, setRefundRequestsList] = useState([]);
   //   const [userRefundRequest, setUserRefundRequest] = useState(null);
@@ -208,7 +209,7 @@ const ExchangeInformationSection = ({
         </div>
         {!isFailed && (
           <button
-            onClick={() => fetchExchangeData()}
+            onClick={() => {fetchExchangeData();fetchUserAddress()}}
             className="min-w-fit flex items-center gap-2 px-2 py-1 rounded-lg border border-gray-300 duration-200 hover:bg-gray-100"
           >
             <svg
@@ -245,6 +246,7 @@ ExchangeInformationSection.propTypes = {
   address: PropTypes.array,
   setAddress: PropTypes.func,
   fetchExchangeData: PropTypes.func,
+  fetchUserAddress: PropTypes.func,
   selectedAddress: PropTypes.object,
   setSelectedAddress: PropTypes.func,
   selectedPickupAddress: PropTypes.object,

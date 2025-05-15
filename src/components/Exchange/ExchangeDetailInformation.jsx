@@ -234,6 +234,7 @@ const ExchangeDetailInformation = () => {
               secondAddress={secondAddress}
               setIsLoading={setIsLoading}
               fetchExchangeData={fetchExchangeData}
+              fetchUserAddress={fetchUserAddress}
             />
 
             <div className="flex flex-row gap-4 items-center">
