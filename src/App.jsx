@@ -107,11 +107,11 @@ function App() {
             {/* Product Route */}
             <Route path="product" element={<ProductPage />} />
             <Route path="product/:slug" element={<ProductDetailPage />} />
-
+            
 
             {/* Aution Route */}
-            <Route path="aution" element={<AutionList />} />
-            <Route path="aution/detail" element={<AutionDetail />} />
+            <Route path="auction" element={<AutionList />} />
+            <Route path="auction/:auctionID" element={<AutionDetail />} />
 
             <Route path="admin/aution" element={<CensorProductToAution />} />
 

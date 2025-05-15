@@ -5,42 +5,72 @@ import { GiTakeMyMoney } from "react-icons/gi";
 import { MdOutlineFavorite } from "react-icons/md";
 import { Caption, PrimaryButton, Title } from "../Design";
 import { Input, Select, Card } from "antd";
-import { GetListAuctionRequestsForModerator } from "../../../apis/Moderator/APIModerator"; // đường dẫn đúng theo cấu trúc dự án của bạn
+import { GetListAuction } from "../../../apis/Auction/APIAuction";
 
 const { Search } = Input;
 const { Option } = Select;
 
 const AuctionCard = ({ auction }) => {
+  const getAuctionStatus = () => {
+    const now = new Date();
+    const startTime = new Date(auction.start_time);
+    const endTime = new Date(auction.end_time);
+    
+    if (now < startTime) {
+      return "Scheduled";
+    } else if (now >= startTime && now <= endTime) {
+      return "Live";
+    } else {
+      return "Ended";
+    }
+  };
+
+  
+
+  const status = getAuctionStatus();
+  const statusColor = status === "Live" ? "green" : status === "Ended" ? "red" : "blue";
+
+    // Hàm chuyển tới trang Chi tiết Gundam
+    const handleClickedDetailAution = (id) => {
+        window.location.assign(`/auction/${id}`);
+    };
+
   return (
     <div className="bg-white shadow-s1 rounded-xl p-4 w-full sm:w-[300px] mx-auto mt-4">
       <div className="h-40 sm:h-56 relative overflow-hidden">
-        <NavLink to={`/auction/${auction.id}`}>
-          <img
-            src={auction?.img}
-            alt={auction?.title}
-            className="w-full h-full object-cover rounded-xl hover:scale-105 hover:cursor-pointer transition-transform duration-300 ease-in-out"
-          />
-        </NavLink>
+          <div
+            onClick={() => handleClickedDetailAution(auction.id)}
+          >
+            <img
+              src={auction.gundam_snapshot?.image_url || "default-image.jpg"}
+              alt={auction.gundam_snapshot?.name || "No Name"}
+            />
+          </div>
         <div className="absolute top-0 left-0 p-2 w-full">
           <div className="flex items-center justify-between">
-            {auction?.isSoldout ? (
-              <Caption className="text-red-500 bg-red-100 px-3 py-1 text-sm rounded-full">Ending</Caption>
-            ) : (
-              <Caption className="text-green-500 bg-green-100 px-3 py-1 text-sm rounded-full">Living</Caption>
-            )}
-            <Caption className="text-green-500 bg-green-100 px-3 py-1 text-sm rounded-full">{auction?.totalBids} Bids</Caption>
+            <Caption className={`text-${statusColor}-500 bg-${statusColor}-100 px-3 py-1 text-sm rounded-full`}>
+              {status}
+            </Caption>
+            <Caption className="text-green-500 bg-green-100 px-3 py-1 text-sm rounded-full">
+              {auction.bid_count || 0} Bids
+            </Caption>
           </div>
         </div>
       </div>
       <div className="details mt-4">
-        <Title className="uppercase text-sm sm:text-base">{auction.title}</Title>
+        <Title className="uppercase text-sm sm:text-base">{auction.gundam_snapshot.name}</Title>
+        <div className="text-xs text-gray-500 mt-1">
+          {auction.gundam_snapshot.grade} - {auction.gundam_snapshot.scale}
+        </div>
         <hr className="mt-3" />
         <div className="flex items-center justify-between py-4">
           <div className="flex items-center gap-3 sm:gap-5">
             <RiAuctionFill size={30} className="text-green-500" />
             <div>
-              <Caption className="text-green-500">Giá Sàn</Caption>
-              <Title className="text-sm sm:text-base">{auction?.currentBid}</Title>
+              <Caption className="text-green-500">Giá hiện tại</Caption>
+              <Title className="text-sm sm:text-base">
+                {auction.current_price.toLocaleString()} VNĐ
+              </Title>
             </div>
           </div>
           <div className="w-[1px] h-10 bg-gray-300"></div>
@@ -48,7 +78,9 @@ const AuctionCard = ({ auction }) => {
             <GiTakeMyMoney size={30} className="text-red-500" />
             <div>
               <Caption className="text-red-500">Mua ngay</Caption>
-              <Title className="text-sm sm:text-base">{auction?.price} VNĐ</Title>
+              <Title className="text-sm sm:text-base">
+                {auction.buy_now_price.toLocaleString()} VNĐ
+              </Title>
             </div>
           </div>
         </div>
@@ -56,7 +88,7 @@ const AuctionCard = ({ auction }) => {
         <div className="flex items-center justify-between mt-3">
           <NavLink to={`/auction/${auction.id}`}>
             <PrimaryButton className="rounded-lg text-sm bg-blue-500 text-white hover:bg-blue-600">
-              Đấu Giá
+              {status === "Ended" ? "Xem kết quả" : "Đấu Giá"}
             </PrimaryButton>
           </NavLink>
           <PrimaryButton className="rounded-lg px-4 py-3 bg-red-500 text-white hover:bg-red-600">
@@ -70,38 +102,46 @@ const AuctionCard = ({ auction }) => {
 
 const AuctionList = () => {
   const [auctionData, setAuctionData] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchAuctions = async () => {
       try {
-        const response = await GetListAuctionRequestsForModerator();
-        const approvedAuctions = response.data.filter(item => item.status === "approved");
-        
-        console.log("Approved Auctions:", approvedAuctions);
-        console.log("All Auctions:", response.data);
+        setLoading(true);
+        const response = await GetListAuction();
+        console.log("Dữ liệu từ API:", response.data); // Kiểm tra dữ liệu từ API
 
-        const formattedData = approvedAuctions.map(item => ({
-          id: item.id,
-          title: item.gundam_snapshot.name,
-          currentBid: `${item.starting_price.toLocaleString()} VNĐ`,
-          img: item.gundam_snapshot.image_url,
-          price: item.buy_now_price.toLocaleString(),
-          totalBids: 0, 
-          isSoldout: new Date(item.end_time) < new Date(),
-        }));
+        const validAuctions = response.data.filter(auction => 
+          auction.status === "scheduled" && 
+          auction.gundam_snapshot && 
+          auction.start_time && 
+          auction.end_time
+        );
+        console.log("Dữ liệu hợp lệ sau khi lọc:", validAuctions); // Kiểm tra dữ liệu sau khi lọc
 
-        setAuctionData(formattedData);
+        validAuctions.sort((a, b) => new Date(b.start_time) - new Date(a.start_time));
+        setAuctionData(validAuctions);
       } catch (error) {
         console.error("Error fetching auction data:", error);
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchAuctions();
   }, []);
 
+  if (loading) {
+    return (
+      <div className="container mx-auto p-4 min-h-screen mt-14 flex justify-center items-center">
+        <div>Loading auctions...</div>
+      </div>
+    );
+  }
+
   return (
-    <div className="container mx-auto p-4 min-h-screen mt-14">
-      <div className="rounded-xl w-full mx-8 mt-10">
+    <div className="container mx-auto p-4 min-h-screen mt-24">
+      <div className="rounded-xl w-full  mt-10">
         <h1 className="text-3xl font-bold">Sàn Đấu Giá GunDam</h1>
         <p className="text-gray-400">Tham gia đấu giá các Gundam phiên bản giới hạn.</p>
       </div>
@@ -109,9 +149,11 @@ const AuctionList = () => {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
         <div className="col-span-3">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {auctionData.map((auction) => (
-              <AuctionCard key={auction.id} auction={auction} />
-            ))}
+            {auctionData.length > 0 ? (
+              auctionData.map((auction) => <AuctionCard key={auction.id} auction={auction} />)
+            ) : (
+              <div>No auctions available</div>
+            )}
           </div>
         </div>
 
@@ -119,10 +161,11 @@ const AuctionList = () => {
           <Card className="mb-6">
             <div className="mb-4">
               <label className="block text-sm font-medium mb-2">Sắp xếp theo</label>
-              <Select defaultValue="price" className="w-full">
-                <Option value="price">Giá tiền</Option>
-                <Option value="date">Ngày đăng</Option>
-                <Option value="popularity">Độ phổ biến</Option>
+              <Select defaultValue="newest" className="w-full">
+                <Option value="newest">Mới nhất</Option>
+                <Option value="price-low">Giá thấp đến cao</Option>
+                <Option value="price-high">Giá cao đến thấp</Option>
+                <Option value="ending-soon">Sắp kết thúc</Option>
               </Select>
             </div>
 
@@ -133,15 +176,22 @@ const AuctionList = () => {
           </Card>
 
           <Card>
-            <h3 className="text-lg font-bold mb-4">Sản phẩm mới nhất</h3>
-            {auctionData.slice(0, 3).map((auction) => (
-              <div key={auction.id} className="mb-4">
-                <div className="text-md font-semibold">{auction.title}</div>
-                <div className="text-sm text-gray-500">
-                  {auction.currentBid ? `Giá hiện tại: ${auction.currentBid}` : `Giá khởi điểm: ${auction.price} VNĐ`}
+            <h3 className="text-lg font-bold mb-4">Sản phẩm sắp kết thúc</h3>
+            {auctionData
+              .filter(auction => new Date(auction.end_time) > new Date())
+              .sort((a, b) => new Date(a.end_time) - new Date(b.end_time))
+              .slice(0, 3)
+              .map((auction) => (
+                <div key={auction.id} className="mb-4">
+                  <div className="text-md font-semibold">{auction.gundam_snapshot.name}</div>
+                  <div className="text-sm text-gray-500">
+                    Giá khởi điểm: {auction.current_price.toLocaleString()} VNĐ
+                  </div>
+                  <div className="text-xs text-gray-400">
+                    Kết thúc: {new Date(auction.end_time).toLocaleString()}
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
           </Card>
         </div>
       </div>

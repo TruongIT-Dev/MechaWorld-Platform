@@ -44,6 +44,7 @@ axios.interceptors.response.use((response) => {
 
 // ************ GET - POST - PUT - PATCH - DELETE **************
 
+// ************ SELLER **************
 
 // GET List auction requests of a seller
 export const GetListAuctionRequests = (sellerID) => {
@@ -65,4 +66,14 @@ export const CreateAuctionRequest = (sellerID, requestData) => {
 // DELETE Delete an auction request by seller
 export const DeleteAuctionRequest = (sellerID, requestID) => {
     return axios.delete(`/sellers/${sellerID}/auction-requests/${requestID}`);
+}
+
+// ************ USER **************
+
+export const GetListAuction = () => {
+    return axios.get(`/auctions`);
+}
+
+export const GetListAuctionDetial = (auctionID) => {
+    return axios.get(`/auctions/${auctionID}`);
 }
