@@ -48,7 +48,7 @@ export const ConfirmOrderDelivered = (orderId) => {
 
 
 // PATCH USER PAKAGING AN ORDER
-export const PackagingOrder = ( orderId, packagingData) => {
+export const PackagingOrder = (orderId, packagingData) => {
   return axios.patch(`/orders/${orderId}/package`, packagingData, {
     headers: {
       "Content-Type": "multipart/form-data",

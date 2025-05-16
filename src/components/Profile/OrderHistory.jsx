@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Tabs, Input, Card, Button, Tag, Avatar, Spin, message, Image, Empty, notification, Space, Modal } from "antd";
+import { Tabs, Input, Card, Button, Tag, Avatar, Spin, message, Image, Empty, notification, Modal } from "antd";
 import {
   SearchOutlined,
   ShopOutlined,
@@ -10,7 +10,8 @@ import {
   CheckCircleOutlined,
   CloseCircleOutlined,
   QuestionCircleOutlined,
-  EyeOutlined
+  EyeOutlined,
+  TruckOutlined
 } from "@ant-design/icons";
 
 import { GetListOrderHistory, GetOrderDetail, ConfirmOrderDelivered } from "../../apis/Orders/APIOrder";
@@ -41,7 +42,7 @@ const OrderHistory = () => {
     'packaging': { color: 'purple', icon: <GiftOutlined />, text: 'Đang đóng gói' },
     'delivering': { color: 'blue', icon: <CarOutlined />, text: 'Đang vận chuyển' },
     'delivered': { color: 'cyan', icon: <CheckOutlined />, text: 'Đã giao hàng' },
-    'completed': { color: 'green', icon: <CheckCircleOutlined />, text: 'Đã hoàn thành' },
+    'completed': { color: 'green', icon: <CheckCircleOutlined />, text: 'Đã nhận hàng' },
     'failed': { color: 'red', icon: <CloseCircleOutlined />, text: 'Giao hàng thất bại' },
     'canceled': { color: 'red', icon: <CloseCircleOutlined />, text: 'Đã hủy' }
   };
@@ -49,19 +50,6 @@ const OrderHistory = () => {
   useEffect(() => {
     fetchOrders();
   }, []);
-
-  const fetchShopInfo = async (sellerId) => {
-    try {
-      const res = await GetShopInfoById(sellerId);
-      return res.data;
-    } catch (err) {
-      console.error("Failed to fetch shop info", err);
-      return {
-        full_name: `Shop ${sellerId.slice(0, 4)}...`,
-        avatar_url: "https://source.unsplash.com/40x40/?shop"
-      };
-    }
-  };
 
   const fetchOrders = async () => {
     setLoading(true);
@@ -84,22 +72,37 @@ const OrderHistory = () => {
         const { order, order_items } = item;
         const shopInfo = sellerInfoMap[order.seller_id] || {};
         const status = order.status;
-        const statusInfo = statusConfig[status] || {
-          color: 'default',
-          icon: <ClockCircleOutlined />,
-          text: convertStatus(status)
-        };
 
+        // Xác định status text dựa trên status và is_packaged
+        const statusText = getStatusText(status, order.is_packaged);
+
+        // Xác định icon và màu dựa trên status và is_packaged
+        let statusIcon, statusColor;
+
+        // Nếu đang ở trạng thái đóng gói và is_packaged là true, sử dụng icon và màu khác
+        if (status === 'packaging' && order.is_packaged === true) {
+          statusIcon = <TruckOutlined />;
+          statusColor = 'orange';
+        } else {
+          // Sử dụng config mặc định cho các trường hợp khác
+          const defaultStatusInfo = statusConfig[status] || {
+            color: 'default',
+            icon: <ClockCircleOutlined />
+          };
+          statusIcon = defaultStatusInfo.icon;
+          statusColor = defaultStatusInfo.color;
+        }
         return {
           id: order.id,
           code: order.code,
           shopId: order.seller_id,
-          shopName: shopInfo.shop_name || `Shop ${order.seller_id.slice(0, 4)}...`,
-          shopAvatar: shopInfo.avatar_url,
+          shopName: shopInfo.shopName || `Shop ${order.seller_id.slice(0, 4)}...`,
+          shopAvatar: shopInfo.avatarUrl || '',
           status: status,
-          statusText: statusInfo.text || convertStatus(status),
-          statusColor: statusInfo.color || getStatusColor(status),
-          statusIcon: statusInfo.icon,
+          isPackaged: order.is_packaged,
+          statusText: statusText,
+          statusColor: statusColor,
+          statusIcon: statusIcon,
           subtotal: order.items_subtotal,
           deliveryFee: order.delivery_fee,
           totalAmount: order.total_amount,
@@ -128,13 +131,56 @@ const OrderHistory = () => {
     }
   };
 
+  const fetchShopInfo = async (sellerId) => {
+    try {
+      const res = await GetShopInfoById(sellerId);
+
+      // Lấy thông tin từ cả hai phần của response API
+      if (res.data) {
+        const { user, seller_profile } = res.data;
+
+        // Trả về một đối tượng có cả thông tin shop và avatar từ user
+        return {
+          shopName: seller_profile?.shop_name || `Shop ${sellerId.slice(0, 4)}...`,
+          avatarUrl: user?.avatar_url || "https://source.unsplash.com/40x40/?shop",
+          fullName: user?.full_name || ""
+        };
+      }
+
+      return {
+        shopName: `Shop ${sellerId.slice(0, 4)}...`,
+        avatarUrl: "https://source.unsplash.com/40x40/?shop",
+        fullName: ""
+      };
+    } catch (err) {
+      console.error("Failed to fetch shop info", err);
+      return {
+        shopName: `Shop ${sellerId.slice(0, 4)}...`,
+        avatarUrl: "https://source.unsplash.com/40x40/?shop",
+        fullName: ""
+      };
+    }
+  };
+
+  // Hàm mới để xác định status text dựa trên status và is_packaged
+  const getStatusText = (status, isPackaged) => {
+    // Nếu là trạng thái "packaging" (đang đóng gói)
+    if (status === 'packaging') {
+      // Kiểm tra giá trị is_packaged
+      return isPackaged === true ? "Đang bàn giao" : "Đang đóng gói";
+    }
+
+    // Các trạng thái khác vẫn giữ nguyên như cũ
+    return convertStatus(status);
+  };
+
   const convertStatus = (status) => {
     const map = {
       pending: "Chờ xác nhận",
       packaging: "Đang đóng gói",
       delivering: "Đang giao hàng",
-      delivered: "Đã giao",
-      completed: "Hoàn tất",
+      delivered: "Đã giao hàng",
+      completed: "Đã nhận hàng",
       cancelled: "Đã hủy",
       failed: "Thất bại",
     };
@@ -190,14 +236,13 @@ const OrderHistory = () => {
       );
     });
 
-
   const showConfirmDeliveredModal = (id) => {
     // Chỉ cho phép xác nhận nếu trạng thái đơn hàng là "delivered"
     const order = orders.find(order => order.id === id);
     if (order && order.status !== 'delivered') {
       notification.warning({
         message: 'Không thể xác nhận',
-        description: 'Chỉ đơn hàng đang giao mới có thể xác nhận đã giao.'
+        description: 'Chỉ đơn hàng đã giao mới có thể xác nhận đã nhận.'
       });
       return;
     }
@@ -240,7 +285,7 @@ const OrderHistory = () => {
     } catch (error) {
       console.error('Error confirming delivery:', error);
       notification.error({
-        message: 'Không thể xác nhận đã giao hàng',
+        message: 'Không thể xác nhận đã nhận hàng',
         description: 'Đã xảy ra lỗi khi xác nhận. Vui lòng thử lại sau.'
       });
     } finally {
@@ -422,7 +467,6 @@ const OrderHistory = () => {
           </p>
         </div>
       </Modal>
-
 
       {/* Modal chi tiết đơn hàng */}
       {selectedOrder && (

@@ -8,6 +8,11 @@ const ShopInfoTab = ({ shopInfo, originalShopName, onUpdateShopInfo }) => {
     const [isEditing, setIsEditing] = useState(false);
     const [loading, setLoading] = useState(false);
 
+    // console.log("shopInfo", shopInfo);
+    // console.log("originalShopName", originalShopName);
+
+
+
     // Update form when shopInfo changes
     useEffect(() => {
         if (Object.keys(shopInfo).length > 0) {
@@ -38,7 +43,7 @@ const ShopInfoTab = ({ shopInfo, originalShopName, onUpdateShopInfo }) => {
 
     // Handle form values change
     const handleFormValuesChange = (changedValues, allValues) => {
-        
+
         // Kiểm tra thay đổi của shop_name với originalShopName (chuỗi)
         const isShopNameChanged = allValues.shop_name !== originalShopName;
         setIsEditing(isShopNameChanged);

@@ -5,7 +5,7 @@ import {
   InboxOutlined,
 } from '@ant-design/icons';
 import { useDispatch, useSelector } from 'react-redux';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import { Menu, Layout, Card, Avatar, Tag } from 'antd';
 
@@ -15,51 +15,64 @@ import { updateShopInfo, updateSellerPlan } from '../../features/user/userSlice'
 
 const { Sider, Content } = Layout;
 
-const items = [
-  {
-    key: "1",
-    icon: <ShopOutlined />,
-    label: <Link to="/shop/dashboard">Quản Lý Shop</Link>,
-  },
-  {
-    key: '2',
-    icon: <InboxOutlined />,
-    label: <Link to="/shop/management">Quản Lý Sản Phẩm</Link>,
-  },
-  {
-    key: '3',
-    icon: <ShoppingOutlined />,
-    label: <Link to="/shop/order-management">Quản Lý Đơn Hàng</Link>,
-  },
-  {
-    key: '4',
-    icon: <BankOutlined />,
-    label: <Link to="/shop/auction-management">Quản Lý Đấu Giá</Link>
-  },
-];
+// Define the mapping of paths to menu keys
+const pathToKeyMap = {
+  '/shop/dashboard': '1',
+  '/shop/management': '2',
+  '/shop/order-management': '3',
+  '/shop/auction-management': '4'
+};
 
 export default function ShopPage() {
   const location = useLocation();
   const dispatch = useDispatch();
+  const [selectedKey, setSelectedKey] = useState('1');
 
   const user = useSelector((state) => state.auth.user);
   const shopInfo = useSelector((state) => state.user.shop);
   const sellerPlan = useSelector((state) => state.user.sellerPlan);
 
-  // const allState = useSelector((state) => state);
-  // console.log("allState", allState);
-  
+  // Set the selected menu key based on current path
+  useEffect(() => {
+    // Find which path prefix matches the current location
+    for (const path in pathToKeyMap) {
+      if (location.pathname.startsWith(path)) {
+        setSelectedKey(pathToKeyMap[path]);
+        break;
+      }
+    }
+  }, [location.pathname]);
 
-  // console.log("shopInfo", shopInfo);
-  // console.log("sellerPlan", sellerPlan);
+  // Menu items with keys matching the paths
+  const items = [
+    {
+      key: "1",
+      icon: <ShopOutlined />,
+      label: <Link to="/shop/dashboard">Quản Lý Shop</Link>,
+    },
+    {
+      key: '2',
+      icon: <InboxOutlined />,
+      label: <Link to="/shop/management">Quản Lý Sản Phẩm</Link>,
+    },
+    {
+      key: '3',
+      icon: <ShoppingOutlined />,
+      label: <Link to="/shop/order-management">Quản Lý Đơn Hàng</Link>,
+    },
+    {
+      key: '4',
+      icon: <BankOutlined />,
+      label: <Link to="/shop/auction-management">Quản Lý Đấu Giá</Link>
+    },
+  ];
 
   useEffect(() => {
     // Fetch shop info từ API và cập nhật vào Redux
     const fetchShopInfo = async () => {
       try {
         const response = await GetShopInfoById(user.id);
-        const shopData = response.data;
-        // Cập nhật vào Redux
+        const shopData = response.data?.seller_profile;
         dispatch(updateShopInfo(shopData));
       } catch (error) {
         console.error("Error fetching shop info:", error);
@@ -71,9 +84,6 @@ export default function ShopPage() {
       try {
         const response = await GetSellerStatus(user.id);
         const statusData = response.data;
-        // console.log("statusData", statusData);
-
-        // Cập nhật vào Redux
         dispatch(updateSellerPlan(statusData));
       } catch (error) {
         console.error("Error fetching seller status:", error);
@@ -96,7 +106,7 @@ export default function ShopPage() {
   return (
     <>
       <Layout className="flex container">
-        <Sider width={300} className="bg-white shadow-md h-fit rounded-lg p-4 mt-36">
+        <Sider width={300} className="bg-white shadow-md h-fit rounded-lg p-4 mt-36 mb-4">
           <Card className="mb-4">
             {/* Shop Info */}
             <div className="flex items-center justify-between">
@@ -126,8 +136,9 @@ export default function ShopPage() {
 
           <Menu
             mode="inline"
-            selectedKeys={[location.pathname]} // Highlight menu dựa trên đường dẫn hiện tại
-            items={items} />
+            selectedKeys={[selectedKey]}
+            items={items}
+          />
         </Sider>
 
         <Layout className="flex-1 py-4 ml-6 mt-32">

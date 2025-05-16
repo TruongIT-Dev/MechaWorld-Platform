@@ -28,9 +28,6 @@ const ImagesAndPriceStep = ({
                         setSecondaryImages={setSecondaryImages}
                     />
                 </div>
-                {!primaryImage && (
-                    <div className="text-red-500 text-sm mt-1">Vui lòng tải lên ảnh chính của sản phẩm!</div>
-                )}
                 {primaryImage && secondaryImages.length === 0 && (
                     <div className="text-yellow-500 text-sm mt-1">Nên thêm ít nhất một ảnh phụ để người mua có thể xem sản phẩm từ nhiều góc độ</div>
                 )}
