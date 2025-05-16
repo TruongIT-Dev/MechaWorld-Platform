@@ -1,10 +1,12 @@
 import { useSelector } from "react-redux";
 import { useEffect, useState } from "react";
-import { Table, Row, Tag, Button, Dropdown, Modal, message, Upload, Space, Tooltip, Input, Select } from "antd";
-import { StopOutlined, EllipsisOutlined, DollarOutlined, WalletOutlined, BankOutlined, MobileOutlined, CreditCardOutlined, ClockCircleOutlined, CheckCircleOutlined, GiftOutlined, CarOutlined, FileTextOutlined, CheckOutlined, CloseCircleOutlined, QuestionCircleOutlined, MessageOutlined, EyeOutlined } from "@ant-design/icons";
+import { Table, Row, Tag, Button, Dropdown, Modal, message, Upload, Space, Tooltip, Input, Select, notification } from "antd";
+import { StopOutlined, EllipsisOutlined, DollarOutlined, WalletOutlined, BankOutlined, MobileOutlined, CreditCardOutlined, ClockCircleOutlined, CheckCircleOutlined, GiftOutlined, CarOutlined, FileTextOutlined, CheckOutlined, CloseCircleOutlined, QuestionCircleOutlined, MessageOutlined, EyeOutlined, TruckOutlined } from "@ant-design/icons";
 
 import { GetOrder, ConfirmOrder } from "../../apis/Sellers/APISeller";
-import { PackagingOrder } from '../../apis/Orders/APIOrder';
+import { PackagingOrder, GetOrderDetail } from '../../apis/Orders/APIOrder';
+
+import OrderHistoryDetail from '../Profile/OrderHistoryDetail';
 
 // Trạng thái đơn hàng với màu sắc tương ứng
 const orderStatusColors = {
@@ -33,6 +35,11 @@ function ShopOrderManagement() {
   const [packagingImages, setPackagingImages] = useState([]);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [selectedOrderImage, setSelectedOrderImage] = useState([]);
+
+  // State cho modal chi tiết đơn hàng
+  const [detailModalVisible, setDetailModalVisible] = useState(false);
+  const [orderDetail, setOrderDetail] = useState(null);
+  const [loadingOrderDetail, setLoadingOrderDetail] = useState(false);
 
   // Xử lý thay đổi trạng thái đơn hàng
   const handleAction = async (record, actionKey) => {
@@ -64,6 +71,8 @@ function ShopOrderManagement() {
           // Implement API call to cancel order
         }
       });
+    } else if (actionKey === "detail") {
+      handleViewOrderDetail(record.id);
     }
   };
 
@@ -76,6 +85,41 @@ function ShopOrderManagement() {
   const handleModalCheck = (record) => {
     setSelectedOrderImage(record.packaging_image_urls || []);
     setIsModalPackageCheckVisible(true);
+  };
+
+  // Xử lý xem chi tiết đơn hàng
+  const handleViewOrderDetail = async (orderId) => {
+    try {
+      setLoadingOrderDetail(true);
+      // Hiển thị thông báo đang tải
+      const loadingMessage = message.loading({
+        content: "Đang tải thông tin chi tiết...",
+        duration: 0,
+      });
+
+      // Fetch chi tiết đơn hàng từ API
+      const response = await GetOrderDetail(orderId);
+
+      // Đóng thông báo đang tải
+      loadingMessage();
+
+      // Cập nhật dữ liệu và hiển thị modal
+      setOrderDetail(response.data);
+      setDetailModalVisible(true);
+    } catch (error) {
+      console.error('Error fetching order details:', error);
+      notification.error({
+        message: 'Không thể tải thông tin đơn hàng',
+        description: 'Đã xảy ra lỗi khi tải chi tiết đơn hàng.'
+      });
+    } finally {
+      setLoadingOrderDetail(false);
+    }
+  };
+
+  // Xử lý đóng modal chi tiết đơn hàng
+  const handleCloseDetailModal = () => {
+    setDetailModalVisible(false);
   };
 
   const fetchOrders = async () => {
@@ -115,6 +159,7 @@ function ShopOrderManagement() {
     fetchOrders();
   }, [userId]);
 
+
   const handlePackagingConfirm = async () => {
     if (!selectedOrder || packagingImages.length === 0) {
       message.warning("Vui lòng tải lên ít nhất một hình ảnh đóng gói!");
@@ -129,7 +174,7 @@ function ShopOrderManagement() {
         formData.append("package_images", file.originFileObj);
       });
 
-      const response = await PackagingOrder(selectedOrder.seller_id, selectedOrder.id, formData);
+      const response = await PackagingOrder(selectedOrder.id, formData);
 
       if (response.status === 200) {
         message.success("Xác nhận đóng gói thành công!");
@@ -159,6 +204,7 @@ function ShopOrderManagement() {
   const filteredOrders = orders.filter(order => {
     const codeMatch = order.code.toLowerCase().includes(searchTerm.toLowerCase());
     const statusMatch = statusFilter ? order.status === statusFilter : true;
+
     return codeMatch && statusMatch;
   });
 
@@ -170,17 +216,6 @@ function ShopOrderManagement() {
       width: 150,
       render: (code) => <span className="font-semibold">{code}</span>,
     },
-    // {
-    //   title: "Khách hàng",
-    //   dataIndex: "buyer_name",
-    //   width: 150,
-    //   render: (buyerName) => (
-    //     <div className="flex items-center">
-    //       <UserOutlined className="mr-2 text-blue-500" />
-    //       <span>{buyerName}</span>
-    //     </div>
-    //   ),
-    // },
     {
       title: "Sản phẩm",
       dataIndex: "items",
@@ -214,7 +249,7 @@ function ShopOrderManagement() {
       render: (total) => <span className="text-red-500 font-semibold">{formatCurrency(total)} đ</span>,
     },
     {
-      title: "Ngày đặt",
+      title: "Ngày tạo",
       dataIndex: "created_at",
       width: 130,
       render: (date) => {
@@ -261,18 +296,29 @@ function ShopOrderManagement() {
       title: "Trạng thái",
       dataIndex: "status",
       width: 150,
-      render: (status) => {
+      render: (_, record) => {
+        const { status, is_packaged } = record;
+
         const statusConfig = {
-          'pending': { color: 'orange', icon: <ClockCircleOutlined />, text: 'Chờ xử lý' },
-          'packaging': { color: 'purple', icon: <GiftOutlined />, text: 'Đang đóng gói' },
+          'pending': { color: 'orange', icon: <ClockCircleOutlined />, text: 'Chờ xác nhận' },
+
+          // Xử lý 'packaging' dựa trên is_packaged
+          'packaging': is_packaged
+            ? { color: 'magenta', icon: <TruckOutlined />, text: 'Chờ bàn giao' }
+            : { color: 'purple', icon: <GiftOutlined />, text: 'Đang đóng gói' },
+
           'delivering': { color: 'blue', icon: <CarOutlined />, text: 'Đang vận chuyển' },
           'delivered': { color: 'cyan', icon: <CheckOutlined />, text: 'Đã giao hàng' },
-          'completed': { color: 'green', icon: <CheckCircleOutlined />, text: 'Đã hoàn thành' },
+          'completed': { color: 'green', icon: <CheckCircleOutlined />, text: 'Đã nhận hàng' },
           'failed': { color: 'red', icon: <CloseCircleOutlined />, text: 'Giao hàng thất bại' },
           'canceled': { color: 'red', icon: <CloseCircleOutlined />, text: 'Đã hủy' }
         };
 
-        const config = statusConfig[status] || { color: 'default', icon: <QuestionCircleOutlined />, text: status };
+        const config = statusConfig[status] || {
+          color: 'default',
+          icon: <QuestionCircleOutlined />,
+          text: status
+        };
 
         return (
           <Tag color={config.color} icon={config.icon} className="px-2 py-1">
@@ -301,13 +347,14 @@ function ShopOrderManagement() {
       key: "action",
       fixed: 'right',
       width: 100,
+      align: "center",
       render: (_, record) => {
         const menuItems = [];
 
         if (record.status === "pending") {
           menuItems.push({
             key: "accept",
-            label: "Xác nhận đơn",
+            label: "Xác nhận đơn hàng",
             icon: <CheckOutlined className="text-green-500" />,
             onClick: () => handleAction(record, "accept")
           });
@@ -316,7 +363,7 @@ function ShopOrderManagement() {
         if (record.is_packaged) {
           menuItems.push({
             key: "viewPackage",
-            label: "Xem đóng gói",
+            label: "Ảnh đã đóng gói",
             icon: <EyeOutlined className="text-blue-500" />,
             onClick: () => handleModalCheck(record)
           });
@@ -325,7 +372,7 @@ function ShopOrderManagement() {
         if (record.status === "packaging" && !record.is_packaged) {
           menuItems.push({
             key: "packaged",
-            label: "Đã đóng gói",
+            label: "Đóng gói đơn hàng",
             icon: <GiftOutlined className="text-purple-500" />,
             onClick: () => handleModal(record)
           });
@@ -333,8 +380,9 @@ function ShopOrderManagement() {
 
         menuItems.push({
           key: "detail",
-          label: "Chi tiết",
-          icon: <FileTextOutlined className="text-blue-500" />
+          label: "Chi tiết đơn hàng",
+          icon: <FileTextOutlined className="text-blue-500" />,
+          onClick: () => handleAction(record, "detail")
         });
 
         if (["pending", "confirmed", "packaging"].includes(record.status)) {
@@ -391,7 +439,7 @@ function ShopOrderManagement() {
                   'packaging': 'Đang đóng gói',
                   'delivering': 'Đang vận chuyển',
                   'delivered': 'Đã giao hàng',
-                  'completed': 'Đã hoàn thành',
+                  'completed': 'Đã nhận hàng',
                   'failed': 'Giao hàng thất bại',
                   'canceled': 'Đã hủy'
                 };
@@ -417,7 +465,7 @@ function ShopOrderManagement() {
         columns={columns}
         dataSource={filteredOrders}
         pagination={{ defaultPageSize: 10 }}
-        scroll={{ x: 1300, y: 550 }}
+        scroll={{ x: 1400, y: 550 }}
         loading={loading}
         locale={{ emptyText: "Không có đơn hàng nào" }}
       />
@@ -452,13 +500,15 @@ function ShopOrderManagement() {
           <label className="font-medium">
             <span className="text-red-500">*</span> Gửi ảnh xác minh (tối đa 5 ảnh)
           </label>
+
           <br />
+
           <Upload
             multiple
             listType="picture-card"
             fileList={packagingImages}
             onChange={handleImageUpload}
-            beforeUpload={() => false} // Không tự động upload lên server
+            beforeUpload={() => false}
             maxCount={5}
           >
             {packagingImages.length < 5 && "+ Thêm ảnh"}
@@ -497,6 +547,15 @@ function ShopOrderManagement() {
           <p className="text-center text-gray-500">Không có hình ảnh đóng gói nào</p>
         )}
       </Modal>
+
+      {/* Modal chi tiết đơn hàng */}
+      {orderDetail && (
+        <OrderHistoryDetail
+          visible={detailModalVisible}
+          onClose={handleCloseDetailModal}
+          orderData={orderDetail}
+        />
+      )}
     </div>
   );
 }

@@ -6,9 +6,9 @@ import { UserOutlined, MessageOutlined } from "@ant-design/icons";
 import { GetShopInfoById } from "../../apis/Seller Profile/APISellerProfile";
 
 const ShopInfo = ({ shopID }) => {
-    
-    const [shopInfo, setShopInfo] = useState(null);
 
+    const [shopInfo, setShopInfo] = useState(null);
+    const [userInfo, setuserInfo] = useState(null);
 
     // Fetch Shop Info
     useEffect(() => {
@@ -16,9 +16,10 @@ const ShopInfo = ({ shopID }) => {
 
         const fetchShopInfo = async () => {
             try {
-                console.log("Fetching shop info for ID:", shopID);
                 const response = await GetShopInfoById(shopID);
-                setShopInfo(response?.data || null);
+                setShopInfo(response?.data?.seller_profile || null);
+                setuserInfo(response.data?.user);
+                // console.log("shopInfo:", shopInfo);
             } catch (error) {
                 console.error("Lỗi khi fetch shop info:", error);
             }
@@ -33,7 +34,7 @@ const ShopInfo = ({ shopID }) => {
             <div className="w-full flex items-center space-x-3">
                 <Avatar
                     size={50}
-                    src={shopInfo?.avatar_url}
+                    src={userInfo?.avatar_url}
                     icon={<UserOutlined />}
                     className="border border-gray-300"
                 />

@@ -25,6 +25,7 @@ const ShopDashboard = () => {
   const user = useSelector((state) => state.auth.user);
   const dispatch = useDispatch()
 
+
   // Mock shop data for charts
   const shopData = [
     { city: 'Hcm', type: 'Card', value: 14500 },
@@ -54,8 +55,9 @@ const ShopDashboard = () => {
     // Get InfoShop
     GetShopInfoById(user.id)
       .then((res) => {
-        setShopInfo(res.data);
-        setOriginalShopName(res.data.shop_name);
+        setShopInfo(res.data.seller_profile.shop_name);
+        setOriginalShopName(res.data.seller_profile.shop_name);
+        // console.log("res info", res);
 
       })
       .catch((error) => {
@@ -103,12 +105,17 @@ const ShopDashboard = () => {
 
       // Gọi API để cập nhật tên shop
       await UpdateShopName(newShopName, user.id);
+      // console.log("res update shop_name", res);
+
+      // console.log("shopInfo trigger", shopInfo);
 
       // Cập nhật state shopInfo
       const updatedShopInfo = {
         ...shopInfo,
         shop_name: newShopName
       };
+
+      // console.log("Update ShopInfo into state", updatedShopInfo);
 
       // Cập nhật state và Redux
       setShopInfo(updatedShopInfo);

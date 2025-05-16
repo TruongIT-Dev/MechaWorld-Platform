@@ -12,10 +12,6 @@ const ImagesAndPriceStep = ({
     setSecondaryImages
 }) => {
     
-    // const handlePriceChange = (value) => {
-    //     form.setFieldsValue({ price: value });
-    // };
-
     return (
         <div className="space-y-6 container mx-auto py-4">
             <h3 className="text-lg font-medium text-gray-700 mb-4">Hình ảnh và giá bán</h3>
@@ -29,9 +25,6 @@ const ImagesAndPriceStep = ({
                         setSecondaryImages={setSecondaryImages}
                     />
                 </div>
-                {!primaryImage && (
-                    <div className="text-red-500 text-sm mt-1">Vui lòng tải lên ảnh chính của sản phẩm!</div>
-                )}
                 {primaryImage && secondaryImages.length === 0 && (
                     <div className="text-yellow-500 text-sm mt-1">Nên thêm ít nhất một ảnh phụ để người mua có thể xem sản phẩm từ nhiều góc độ</div>
                 )}

@@ -123,7 +123,7 @@ function App() {
               <Route path="list" element={<CollectionContainer />} />
               <Route path="add" element={<AddCollection />} />
             </Route>
-            
+
             {/* Cart route */}
             <Route path="cart" element={<CartPage1 />} />
 

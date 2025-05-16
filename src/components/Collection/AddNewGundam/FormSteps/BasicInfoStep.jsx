@@ -3,19 +3,8 @@ import { Form, Input, Select, InputNumber } from 'antd';
 
 const { Option } = Select;
 
-const BasicInfoStep = ({ form, grades }) => {
-    // Danh sách series
-    const series = [
-        { id: "Mobile Suit Gundam", name: "Mobile Suit Gundam" },
-        { id: "Mobile Suit Zeta Gundam", name: "Mobile Suit Zeta Gundam" },
-        { id: "Mobile Suit Gundam ZZ", name: "Mobile Suit Gundam ZZ" },
-        { id: "Mobile Suit Victory Gundam", name: "Mobile Suit Victory Gundam" },
-        { id: "Mobile Fighter G Gundam", name: "Mobile Fighter G Gundam" },
-        { id: "Mobile Suit Gundam Wing", name: "Mobile Suit Gundam Wing" },
-        { id: "After War Gundam X", name: "After War Gundam X" },
-        // ... thêm các series khác
-    ];
-
+const BasicInfoStep = ({ form, grades, series }) => {
+    
     // Danh sách phân khúc Gundam
     const scaleOptions = ["1/144", "1/100", "1/60", "1/48"];
 
