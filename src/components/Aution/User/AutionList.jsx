@@ -11,6 +11,7 @@ const { Search } = Input;
 const { Option } = Select;
 
 const AuctionCard = ({ auction }) => {
+  const [hasParticipated, setHasParticipated] = useState(false);
   const getAuctionStatus = () => {
     const now = new Date();
     const startTime = new Date(auction.start_time);
@@ -19,7 +20,7 @@ const AuctionCard = ({ auction }) => {
     if (now < startTime) {
       return "Scheduled";
     } else if (now >= startTime && now <= endTime) {
-      return "Live";
+      return "active";
     } else {
       return "Ended";
     }
@@ -28,7 +29,7 @@ const AuctionCard = ({ auction }) => {
   
 
   const status = getAuctionStatus();
-  const statusColor = status === "Live" ? "green" : status === "Ended" ? "red" : "blue";
+  const statusColor = status === "active" ? "green" : status === "ended" ? "red" : "blue";
 
     // Hàm chuyển tới trang Chi tiết Gundam
     const handleClickedDetailAution = (id) => {
@@ -46,13 +47,13 @@ const AuctionCard = ({ auction }) => {
               alt={auction.gundam_snapshot?.name || "No Name"}
             />
           </div>
-        <div className="absolute top-0 left-0 p-2 w-full">
+        <div className="absolute top-0 left-0 py-2 w-full">
           <div className="flex items-center justify-between">
-            <Caption className={`text-${statusColor}-500 bg-${statusColor}-100 px-3 py-1 text-sm rounded-full`}>
+            <Caption className={`text-${statusColor}-500 bg-${statusColor}-100 px-3 py-1 text-sm`}>
               {status}
             </Caption>
-            <Caption className="text-green-500 bg-green-100 px-3 py-1 text-sm rounded-full">
-              {auction.bid_count || 0} Bids
+            <Caption className="text-green-500 bg-green-100 px-3 py-1 text-sm">
+              {auction.total_participants || 0} Người tham gia
             </Caption>
           </div>
         </div>
@@ -85,14 +86,20 @@ const AuctionCard = ({ auction }) => {
           </div>
         </div>
         <hr className="mb-3" />
-        <div className="flex items-center justify-between mt-3">
-          <NavLink to={`/auction/${auction.id}`}>
-            <PrimaryButton className="rounded-lg text-sm bg-blue-500 text-white hover:bg-blue-600">
-              {status === "Ended" ? "Xem kết quả" : "Đấu Giá"}
-            </PrimaryButton>
-          </NavLink>
-          <PrimaryButton className="rounded-lg px-4 py-3 bg-red-500 text-white hover:bg-red-600">
-            <MdOutlineFavorite size={20} className="text-white" />
+        <div className="flex items-center justify-between mt-3 gap-2">
+          <PrimaryButton
+            onClick={() => handleClickedDetailAution(auction.id)}
+            className="flex-1 text-sm px-3 py-2 rounded-md bg-blue-500 text-white hover:bg-blue-600"
+          >
+            {status === "Ended" ? "Xem kết quả" : "Đấu Giá"}
+          </PrimaryButton>
+
+          <PrimaryButton
+            onClick={() => handleJoinAuction(auction.id)}
+            disabled={hasParticipated}
+            className={`flex-1 text-sm px-3 py-2 rounded-md  bg-red-500 hover:bg-red-600 text-white`}
+          >
+            { "Tham gia"}
           </PrimaryButton>
         </div>
       </div>
@@ -112,9 +119,9 @@ const AuctionList = () => {
         console.log("Dữ liệu từ API:", response.data); // Kiểm tra dữ liệu từ API
 
         const validAuctions = response.data.filter(auction => 
-          auction.status === "scheduled" && 
-          auction.gundam_snapshot && 
-          auction.start_time && 
+          ["scheduled", "active", "ended"].includes(auction.status) &&
+          auction.gundam_snapshot &&
+          auction.start_time &&
           auction.end_time
         );
         console.log("Dữ liệu hợp lệ sau khi lọc:", validAuctions); // Kiểm tra dữ liệu sau khi lọc

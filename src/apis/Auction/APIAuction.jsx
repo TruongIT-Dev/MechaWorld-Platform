@@ -77,3 +77,30 @@ export const GetListAuction = () => {
 export const GetListAuctionDetial = (auctionID) => {
     return axios.get(`/auctions/${auctionID}`);
 }
+
+// GET List user participated auctions
+export const GetUserParticipatedAuctions = () => {
+    return axios.get(`/users/me/auctions`);
+}
+
+// GET List user bids
+export const GetUserBids = () => {
+    return axios.get(`/users/me/auctions/bids`);
+}
+
+// POST Place a bid in an auction
+export const PlaceBid = (auctionID, bidAmount) => {
+    return axios.post(`/users/me/auctions/${auctionID}/bids`, {
+        amount: bidAmount
+    });
+}
+
+// POST Participate in an auction
+export const ParticipateInAuction = (auctionID) => {
+    return axios.post(`/users/me/auctions/${auctionID}/participate`);
+}
+
+// POST Pay for winning auction bid
+export const PayForWinningBid = (auctionID, paymentData) => {
+    return axios.post(`/users/me/auctions/${auctionID}/payment`, paymentData);
+}

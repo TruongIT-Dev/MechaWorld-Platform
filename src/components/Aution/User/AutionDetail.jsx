@@ -3,9 +3,9 @@ import { Body, Caption, Container, Title } from "../Design";
 import { IoIosStar, IoIosStarHalf, IoIosStarOutline } from "react-icons/io";
 import { commonClassNameOfInput } from "../Design";
 import { AiOutlinePlus } from "react-icons/ai";
-import { GetListAuctionDetial } from "../../../apis/Auction/APIAuction";
+import { GetListAuctionDetial, PlaceBid } from "../../../apis/Auction/APIAuction";
 import { useParams } from "react-router-dom";
-import { message } from "antd"; // Ant Design message
+import { message } from "antd";
 
 const useCountdown = (targetDate) => {
   const [countdown, setCountdown] = useState({
@@ -49,23 +49,22 @@ const AutionDetail = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [participants, setParticipants] = useState([]);
 
-  useEffect(() => {
-    const fetchAuctionDetail = async () => {
-      try {
-        setLoading(true);
-        const response = await GetListAuctionDetial(auctionID);
-        setAuctionDetail(response.data);
-      } catch (error) {
-        console.error("Lỗi khi tải chi tiết đấu giá:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const fetchAuctionDetail = async () => {
+    try {
+      setLoading(true);
+      const response = await GetListAuctionDetial(auctionID);
+      setAuctionDetail(response.data);
+    } catch (error) {
+      console.error("Lỗi khi tải chi tiết đấu giá:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchAuctionDetail();
   }, [auctionID]);
 
-  // SSE: Lắng nghe sự kiện từ backend
   useEffect(() => {
     if (!auctionID) return;
 
@@ -113,23 +112,30 @@ const AutionDetail = () => {
   };
 
   const handleSubmitBid = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    if (bidError || !bidPrice || isAuctionEnded) return;
+  if (bidError || !bidPrice || isAuctionEnded) return;
 
-    try {
-      setIsSubmitting(true);
-      // Gọi API đấu giá thật ở đây
-      // await SubmitBid(auctionID, bidPrice);
-      alert('Đấu giá thành công!');
-      setBidPrice('');
-    } catch (error) {
-      console.error('Lỗi khi đấu giá:', error);
-      alert('Đã có lỗi xảy ra khi đấu giá');
-    } finally {
-      setIsSubmitting(false);
+  try {
+    setIsSubmitting(true);
+    await PlaceBid(auctionID, Number(bidPrice));
+
+    message.success("Đặt giá thành công!");
+    setBidPrice('');
+  } catch (error) {
+    const apiError = error?.response?.data?.error || error?.response?.data?.message;
+
+    if (apiError === "user has not participated in this auction yet") {
+      message.error("Bạn chưa cọc tiền để tham gia phiên đấu giá này.");
+    } else {
+      message.error("Đã có lỗi xảy ra khi đặt giá. Vui lòng thử lại.");
     }
-  };
+
+    console.error("Lỗi khi đặt giá:", error);
+  } finally {
+    setIsSubmitting(false);
+  }
+};
 
   if (loading) return <div>Đang tải dữ liệu...</div>;
   if (!auctionDetail) return <div>Không tìm thấy chi tiết đấu giá.</div>;
@@ -263,7 +269,6 @@ const AutionDetail = () => {
 
 export default AutionDetail;
 
-// Component hiển thị danh sách người tham gia
 export const AuctionHistory = ({ participants }) => {
   return (
     <div className="shadow-s1 p-8 rounded-lg">
