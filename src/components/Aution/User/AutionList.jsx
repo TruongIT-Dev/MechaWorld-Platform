@@ -4,52 +4,84 @@ import { RiAuctionFill } from "react-icons/ri";
 import { GiTakeMyMoney } from "react-icons/gi";
 import { MdOutlineFavorite } from "react-icons/md";
 import { Caption, PrimaryButton, Title } from "../Design";
-import { Input, Select, Card } from "antd";
-import { GetListAuction } from "../../../apis/Auction/APIAuction";
+import { Input, Select, Card, Modal, message } from "antd";
+import { GetListAuction, ParticipateInAuction } from "../../../apis/Auction/APIAuction";
 
 const { Search } = Input;
 const { Option } = Select;
 
 const AuctionCard = ({ auction }) => {
   const [hasParticipated, setHasParticipated] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [depositAmount, setDepositAmount] = useState(0);
+
   const getAuctionStatus = () => {
     const now = new Date();
     const startTime = new Date(auction.start_time);
     const endTime = new Date(auction.end_time);
-    
-    if (now < startTime) {
-      return "Scheduled";
-    } else if (now >= startTime && now <= endTime) {
-      return "active";
-    } else {
-      return "Ended";
-    }
+
+    if (now < startTime) return auction.status;
+    if (now >= startTime && now <= endTime) return auction.status;
+    return auction.status;
   };
 
-  
-
   const status = getAuctionStatus();
-  const statusColor = status === "active" ? "green" : status === "ended" ? "red" : "blue";
+  const statusStyles = {
+    active: { text: "text-green-500", bg: "bg-green-100" },
+    ended: { text: "text-red-500", bg: "bg-red-100" },
+    scheduled: { text: "text-blue-500", bg: "bg-blue-100" }
+  };
 
-    // Hàm chuyển tới trang Chi tiết Gundam
-    const handleClickedDetailAution = (id) => {
-        window.location.assign(`/auction/${id}`);
-    };
+  const handleClickedDetailAution = (id) => {
+    window.location.assign(`/auction/${id}`);
+  };
+
+  const handleJoinAuction = () => {
+    const deposit = Math.floor(auction.start_price * 0.15);
+    setDepositAmount(deposit);
+    setIsModalOpen(true);
+    console.log("Modal opened");
+  };
+
+const confirmParticipation = async () => {
+  try {
+    await ParticipateInAuction(auction.id);
+    message.success("Tham gia đấu giá thành công!");
+    setHasParticipated(true);
+  } catch (err) {
+    console.error("Chi tiết lỗi:", err);
+
+    const errorMsg =
+      err?.response?.data?.message ||
+      err?.response?.data?.error ||
+      err?.message ||
+      "Lỗi không xác định";
+
+    if (errorMsg.toLowerCase().includes("insufficient balance")) {
+      message.error("Vui lòng nạp tiền. Số dư không đủ để đặt cọc.");
+    } else {
+      message.error("Không thể tham gia đấu giá. Vui lòng thử lại!");
+    }
+  } finally {
+    setIsModalOpen(false);
+  }
+};
+
+
 
   return (
     <div className="bg-white shadow-s1 rounded-xl p-4 w-full sm:w-[300px] mx-auto mt-4">
       <div className="h-40 sm:h-56 relative overflow-hidden">
-          <div
-            onClick={() => handleClickedDetailAution(auction.id)}
-          >
-            <img
-              src={auction.gundam_snapshot?.image_url || "default-image.jpg"}
-              alt={auction.gundam_snapshot?.name || "No Name"}
-            />
-          </div>
+        <div onClick={() => handleClickedDetailAution(auction.id)}>
+          <img
+            src={auction.gundam_snapshot?.image_url || "default-image.jpg"}
+            alt={auction.gundam_snapshot?.name || "No Name"}
+            className="w-full h-full object-cover"
+          />
+        </div>
         <div className="absolute top-0 left-0 py-2 w-full">
           <div className="flex items-center justify-between">
-            <Caption className={`text-${statusColor}-500 bg-${statusColor}-100 px-3 py-1 text-sm`}>
+            <Caption className={`${statusStyles[status]?.text} ${statusStyles[status]?.bg} px-3 py-1 text-sm`}>
               {status}
             </Caption>
             <Caption className="text-green-500 bg-green-100 px-3 py-1 text-sm">
@@ -58,19 +90,21 @@ const AuctionCard = ({ auction }) => {
           </div>
         </div>
       </div>
+
       <div className="details mt-4">
         <Title className="uppercase text-sm sm:text-base">{auction.gundam_snapshot.name}</Title>
         <div className="text-xs text-gray-500 mt-1">
           {auction.gundam_snapshot.grade} - {auction.gundam_snapshot.scale}
         </div>
+
         <hr className="mt-3" />
         <div className="flex items-center justify-between py-4">
           <div className="flex items-center gap-3 sm:gap-5">
             <RiAuctionFill size={30} className="text-green-500" />
             <div>
-              <Caption className="text-green-500">Giá hiện tại</Caption>
+              <Caption className="text-green-500">Giá khởi điểm</Caption>
               <Title className="text-sm sm:text-base">
-                {auction.current_price.toLocaleString()} VNĐ
+                {auction.starting_price.toLocaleString()} VNĐ
               </Title>
             </div>
           </div>
@@ -85,24 +119,40 @@ const AuctionCard = ({ auction }) => {
             </div>
           </div>
         </div>
+
         <hr className="mb-3" />
         <div className="flex items-center justify-between mt-3 gap-2">
-          <PrimaryButton
+          <button
             onClick={() => handleClickedDetailAution(auction.id)}
             className="flex-1 text-sm px-3 py-2 rounded-md bg-blue-500 text-white hover:bg-blue-600"
           >
             {status === "Ended" ? "Xem kết quả" : "Đấu Giá"}
-          </PrimaryButton>
+          </button>
 
-          <PrimaryButton
-            onClick={() => handleJoinAuction(auction.id)}
+          <button
+            onClick={handleJoinAuction}
             disabled={hasParticipated}
-            className={`flex-1 text-sm px-3 py-2 rounded-md  bg-red-500 hover:bg-red-600 text-white`}
+            className={`flex-1 text-sm px-3 py-2 rounded-md ${hasParticipated ? 'bg-gray-400' : 'bg-red-500 hover:bg-red-600'} text-white`}
           >
-            { "Tham gia"}
-          </PrimaryButton>
+            {hasParticipated ? "Đã tham gia" : "Tham gia"}
+          </button>
         </div>
       </div>
+
+      <Modal
+        title="Xác nhận tham gia"
+        open={isModalOpen}
+        onOk={confirmParticipation}
+        onCancel={() => setIsModalOpen(false)}
+        okText="Xác nhận"
+        cancelText="Hủy"
+        okButtonProps={{ className: "bg-blue-500 hover:bg-blue-600" }}
+      >
+        <p>
+          Số tiền cọc là <strong>{auction.starting_price.toLocaleString()} VNĐ</strong> (15% giá khởi điểm). <br />
+          Bạn có chắc chắn muốn tham gia đấu giá?
+        </p>
+      </Modal>
     </div>
   );
 };
@@ -116,7 +166,7 @@ const AuctionList = () => {
       try {
         setLoading(true);
         const response = await GetListAuction();
-        console.log("Dữ liệu từ API:", response.data); // Kiểm tra dữ liệu từ API
+        console.log("Dữ liệu từ API:", response.data);
 
         const validAuctions = response.data.filter(auction => 
           ["scheduled", "active", "ended"].includes(auction.status) &&
@@ -124,7 +174,7 @@ const AuctionList = () => {
           auction.start_time &&
           auction.end_time
         );
-        console.log("Dữ liệu hợp lệ sau khi lọc:", validAuctions); // Kiểm tra dữ liệu sau khi lọc
+        console.log("Dữ liệu hợp lệ sau khi lọc:", validAuctions);
 
         validAuctions.sort((a, b) => new Date(b.start_time) - new Date(a.start_time));
         setAuctionData(validAuctions);
@@ -148,7 +198,7 @@ const AuctionList = () => {
 
   return (
     <div className="container mx-auto p-4 min-h-screen mt-24">
-      <div className="rounded-xl w-full  mt-10">
+      <div className="rounded-xl w-full mt-10">
         <h1 className="text-3xl font-bold">Sàn Đấu Giá GunDam</h1>
         <p className="text-gray-400">Tham gia đấu giá các Gundam phiên bản giới hạn.</p>
       </div>
