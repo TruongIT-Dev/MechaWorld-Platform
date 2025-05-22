@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState,useRef } from "react";
 import { Body, Caption, Container, Title } from "../Design";
 import { IoIosStar, IoIosStarHalf, IoIosStarOutline } from "react-icons/io";
 import { commonClassNameOfInput } from "../Design";
@@ -6,9 +6,8 @@ import { AiOutlinePlus } from "react-icons/ai";
 import { GetListAuctionDetial, PlaceBid, PayForWinningBid } from "../../../apis/Auction/APIAuction";
 import { useParams } from "react-router-dom";
 import { message } from "antd";
-import { useCountdownFromDuration } from "./useCountdownFromDuration";
 
-const AutionDetail = () => {
+const AuctionDetail = () => {
   const { auctionID } = useParams();
   const [auctionDetail, setAuctionDetail] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -20,12 +19,8 @@ const AutionDetail = () => {
   const [isAuctionEnded, setIsAuctionEnded] = useState(false);
   const [bidHistory, setBidHistory] = useState([]);
   const [paymentProcessing, setPaymentProcessing] = useState(false);
-
-  const startTime = new Date(auctionDetail?.start_time);
-  const endTime = new Date(auctionDetail?.end_time);
-
-  const duration = endTime.getTime() - startTime.getTime();
-  const countdowns = useCountdownFromDuration(duration);
+  const [winnerInfo, setWinnerInfo] = useState(null);
+  const [connectionStatus, setConnectionStatus] = useState('disconnected');
 
   const useCountdown = (targetDate) => {
     const [countdown, setCountdown] = useState({
@@ -63,8 +58,9 @@ const AutionDetail = () => {
     try {
       setLoading(true);
       const response = await GetListAuctionDetial(auctionID);
-      setAuctionDetail(response.data);
-      setIsAuctionEnded(response.data.status === "ended" || new Date(response.data.end_time).getTime() < new Date().getTime());
+      const data = response.data;
+      setAuctionDetail(data);
+      setIsAuctionEnded(data.status === "ended" || new Date(data.end_time).getTime() < Date.now());
     } catch (error) {
       console.error("Lỗi khi tải chi tiết đấu giá:", error);
     } finally {
@@ -76,62 +72,69 @@ const AutionDetail = () => {
     fetchAuctionDetail();
   }, [auctionID]);
 
+// SSE connection
+  const eventSourceRef = useRef(null);
   useEffect(() => {
     if (!auctionID) return;
 
-    const source = new EventSource(`/v1/auctions/${auctionID}/stream`);
-
-    source.onopen = () => {
-      console.log("🔗 SSE connected");
-    };
-
-    source.onerror = (e) => {
-      console.error("❌ SSE connection error", e);
-      message.error("Mất kết nối đến máy chủ!");
-      source.close();
-    };
-
-    source.addEventListener("new_participant", (event) => {
-      const data = JSON.parse(event.data);
-      setParticipants((prev) => {
-        const exists = prev.find(p => p.id === data.user.id);
-        if (exists) return prev;
-        return [...prev, data.user];
+    const connectSSE = () => {
+      setConnectionStatus('connecting');
+      eventSourceRef.current = new EventSource(`http://localhost:8080/v1/auctions/${auctionID}/stream`, {
+        withCredentials: true,
       });
-      message.success(`${data.user.full_name} vừa tham gia đấu giá!`);
-    });
+      console.log('🔗 SSE Connected:', eventSourceRef.current);
 
-    source.addEventListener("new_bid", (event) => {
-      const data = JSON.parse(event.data);
-      setAuctionDetail(prev => ({
-        ...prev,
-        current_price: data.new_price
-      }));
-      setBidHistory(prev => [{
-        user: data.user,
-        price: data.new_price,
-        timestamp: new Date().toISOString()
-      }, ...prev]);
-      message.info(`${data.user.full_name} đã đặt giá ${data.new_price.toLocaleString()} VNĐ`);
-    });
+      eventSourceRef.current.onopen = () => {
+        console.log('[SSE] Kết nối mở');
+        setConnectionStatus('connected');
+      };
 
-    source.addEventListener("auction_end", (event) => {
-      const data = JSON.parse(event.data);
-      setIsAuctionEnded(true);
-      setAuctionDetail(prev => ({ ...prev, status: "ended" }));
-      if (data.winner) {
-        message.success(`Phiên đấu giá kết thúc! Người thắng cuộc: ${data.winner.full_name}`);
-      } else {
-        message.warning("Phiên đấu giá kết thúc mà không có người thắng cuộc");
-      }
-    });
+      eventSourceRef.current.onerror = (e) => {
+        console.error('[SSE] Lỗi kết nối', e);
+        if (eventSourceRef.current?.readyState === EventSource.CLOSED) {
+          attemptReconnect();
+        }
+      };
+
+      // Xử lý event riêng theo event.type
+      eventSourceRef.current.addEventListener('auction_new_bid', (e) => {
+        const data = JSON.parse(e.data);
+        console.log('Nhận sự kiện new_bid:', data);
+        // Cập nhật state
+        setAuctionDetail(prev => ({
+          ...prev,
+          current_price: data.current_price,
+          total_bids: data.total_bids,
+        }));
+      });
+
+      eventSourceRef.current.addEventListener('auction_ended', (e) => {
+        const data = JSON.parse(e.data);
+        console.log('Nhận sự kiện auction_ended:', data);
+        setIsAuctionEnded(true);
+        setWinnerInfo({
+          winner: data.winner,
+          finalPrice: data.final_price,
+          reason: data.reason,
+        });
+      });
+
+      eventSourceRef.current.addEventListener('new_participant', (e) => {
+        const data = JSON.parse(e.data);
+        console.log('[SSE] new_participant:', data);
+        setParticipants(data.total_participants);
+      });
+
+    };
+
+    connectSSE();
 
     return () => {
-      source.close();
-      console.log("❌ SSE closed");
+      if (eventSourceRef) eventSourceRef.current.close();
+      setConnectionStatus('disconnected');
     };
   }, [auctionID]);
-  
+
   const countdown = useCountdown(auctionDetail?.end_time);
 
   const handleTabClick = (tab) => setActiveTab(tab);
@@ -155,19 +158,15 @@ const AutionDetail = () => {
     try {
       setIsSubmitting(true);
       await PlaceBid(auctionID, Number(bidPrice));
-
       message.success("Đặt giá thành công!");
       setBidPrice('');
     } catch (error) {
-      const apiError = error?.response?.data?.error || error?.response?.data?.message;
-
+      const apiError = error?.response?.data?.message;
       if (apiError === "user has not participated in this auction yet") {
-        message.error("Bạn chưa cọc tiền để tham gia phiên đấu giá này.");
+        message.error("Bạn chưa cọc tiền để tham gia phiên đấu giá.");
       } else {
-        message.error("Đã có lỗi xảy ra khi đặt giá. Vui lòng thử lại.");
+        message.error("Đặt giá thất bại.");
       }
-
-      console.error("Lỗi khi đặt giá:", error);
     } finally {
       setIsSubmitting(false);
     }
@@ -176,13 +175,11 @@ const AutionDetail = () => {
   const handlePayment = async () => {
     try {
       setPaymentProcessing(true);
-      const response = await PayForWinningBid(auctionID);
+      await PayForWinningBid(auctionID);
       message.success("Thanh toán thành công!");
-      // Optionally refresh auction details
       fetchAuctionDetail();
     } catch (error) {
-      message.error("Thanh toán thất bại. Vui lòng thử lại.");
-      console.error("Lỗi khi thanh toán:", error);
+      message.error("Thanh toán thất bại.");
     } finally {
       setPaymentProcessing(false);
     }
@@ -192,8 +189,16 @@ const AutionDetail = () => {
   if (!auctionDetail) return <div>Không tìm thấy chi tiết đấu giá.</div>;
 
   return (
+    
     <section className="mt-10 pt-24 px-8">
+      
       <Container>
+        {connectionStatus === 'reconnecting' && (
+          <div className="bg-yellow-100 p-2 mb-4 text-center rounded">
+            Đang kết nối lại với máy chủ...
+          </div>
+        )}
+
         <div className="flex justify-between gap-8">
           <div className="w-1/2">
             <div className="h-[70vh]">
@@ -208,7 +213,7 @@ const AutionDetail = () => {
           <div className="w-1/2">
             <Title level={2} className="capitalize">{auctionDetail.gundam_snapshot.name}</Title>
             <div className="flex gap-5">
-              <div className="flex text-green ">
+              <div className="flex text-green">
                 <IoIosStar size={20} />
                 <IoIosStar size={20} />
                 <IoIosStar size={20} />
@@ -227,7 +232,7 @@ const AutionDetail = () => {
             <div className="flex gap-8 text-center">
               {['days', 'hours', 'minutes', 'seconds'].map((unit, i) => (
                 <div className="p-5 px-10 shadow-s1" key={i}>
-                  <Title level={4}>{countdowns[unit]}</Title>
+                  <Title level={4}>{countdown[unit]}</Title>
                   <Caption>{unit === 'days' ? 'Ngày' : unit === 'hours' ? 'Tiếng' : unit === 'minutes' ? 'Phút' : 'Giây'}</Caption>
                 </div>
               ))}
@@ -251,26 +256,29 @@ const AutionDetail = () => {
               <Caption className="text-3xl">{auctionDetail.current_price.toLocaleString()} VNĐ</Caption>
             </Title>
 
-            {auctionDetail.status === "ended" ? (
+            {isAuctionEnded ? (
               <div className="p-5 px-10 shadow-2xl py-8">
                 <div className="p-5 rounded-lg bg-gray-50">
                   <Title level={4} className="mb-4">Phiên đấu giá đã kết thúc</Title>
-                  {auctionDetail.winner ? (
+                  {winnerInfo?.winner ? (
                     <>
-                      <p className="mb-4">Người thắng cuộc: {auctionDetail.winner.full_name}</p>
-                      <p className="mb-4">Giá thắng: {auctionDetail.current_price.toLocaleString()} VNĐ</p>
-                      <button
-                        onClick={handlePayment}
-                        disabled={paymentProcessing}
-                        className={`py-3 px-8 rounded-lg ${
-                          paymentProcessing ? 'bg-gray-400' : 'bg-blue-500 hover:bg-blue-600'
-                        } text-white shadow-md`}
-                      >
-                        {paymentProcessing ? 'Đang xử lý thanh toán...' : 'Thanh toán ngay'}
-                      </button>
+                      <p className="mb-4">Người thắng cuộc: {winnerInfo.winner.full_name}</p>
+                      <p className="mb-4">Giá thắng: {winnerInfo.finalPrice.toLocaleString()} VNĐ</p>
+                      <p className="mb-4">Lý do: {winnerInfo.reason === 'buy_now_price_reached' ? 'Đạt giá mua ngay' : 'Hết thời gian'}</p>
+                      {auctionDetail.winner?.is_current_user && (
+                        <button
+                          onClick={handlePayment}
+                          disabled={paymentProcessing}
+                          className={`py-3 px-8 rounded-lg ${
+                            paymentProcessing ? 'bg-gray-400' : 'bg-blue-500 hover:bg-blue-600'
+                          } text-white shadow-md`}
+                        >
+                          {paymentProcessing ? 'Đang xử lý...' : 'Thanh toán ngay'}
+                        </button>
+                      )}
                     </>
                   ) : (
-                    <p>Không có người thắng cuộc trong phiên đấu giá này.</p>
+                    <p>Không có người thắng cuộc</p>
                   )}
                 </div>
               </div>
@@ -300,7 +308,7 @@ const AutionDetail = () => {
                         : 'bg-green-500 text-white hover:bg-green-600'
                     } shadow-md`}
                   >
-                    {isAuctionEnded ? 'Đấu giá đã kết thúc' : isSubmitting ? 'Đang xử lý...' : 'Submit'}
+                    {isAuctionEnded ? 'Đã kết thúc' : isSubmitting ? 'Đang xử lý...' : 'Đặt giá'}
                   </button>
                 </form>
               </div>
@@ -312,7 +320,7 @@ const AutionDetail = () => {
           <div className="flex items-center gap-5">
             <button
               className={`rounded-md px-10 py-4 text-black shadow-s3 ${
-                activeTab === "description" ? " bg-black text-white" : "bg-white"
+                activeTab === "description" ? "bg-black text-white" : "bg-white"
               }`}
               onClick={() => handleTabClick("description")}
             >
@@ -345,9 +353,9 @@ const AutionDetail = () => {
   );
 };
 
-export default AutionDetail;
+export default AuctionDetail;
 
-export const AuctionHistory = ({ participants, bidHistory = [] }) => {
+const AuctionHistory = ({ participants, bidHistory = [] }) => {
   return (
     <div className="shadow-s1 p-8 rounded-lg">
       <div className="flex gap-8">

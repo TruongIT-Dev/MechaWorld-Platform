@@ -33,15 +33,23 @@ const AuctionCard = ({ auction }) => {
   };
 
   const handleClickedDetailAution = (id) => {
-    window.location.assign(`/auction/${id}`);
-  };
+  if (!hasParticipated) {
+    message.warning("Vui lòng nhấn 'Tham gia' để đăng ký trước khi xem chi tiết phiên đấu giá.");
+    return;
+  }
+  window.location.assign(`/auction/${id}`);
+};
 
   const handleJoinAuction = () => {
-    const deposit = Math.floor(auction.start_price * 0.15);
-    setDepositAmount(deposit);
-    setIsModalOpen(true);
-    console.log("Modal opened");
-  };
+  if (status === "scheduled") {
+    message.warning("Hiện tại phiên chưa bắt đầu nên chưa thể tham gia.");
+    return;
+  }
+
+  const deposit = Math.floor(auction.start_price * 0.15);
+  setDepositAmount(deposit);
+  setIsModalOpen(true);
+};
 
 const confirmParticipation = async () => {
   try {
@@ -59,6 +67,10 @@ const confirmParticipation = async () => {
 
     if (errorMsg.toLowerCase().includes("insufficient balance")) {
       message.error("Vui lòng nạp tiền. Số dư không đủ để đặt cọc.");
+    } else if (errorMsg.toLowerCase().includes("already participated")) {
+      // Khi backend trả lỗi đã tham gia rồi thì cũng set hasParticipated = true
+      message.info("Bạn đã tham gia phiên đấu giá này.");
+      setHasParticipated(true);
     } else {
       message.error("Không thể tham gia đấu giá. Vui lòng thử lại!");
     }
@@ -66,6 +78,7 @@ const confirmParticipation = async () => {
     setIsModalOpen(false);
   }
 };
+
 
 
 
@@ -149,9 +162,10 @@ const confirmParticipation = async () => {
         okButtonProps={{ className: "bg-blue-500 hover:bg-blue-600" }}
       >
         <p>
-          Số tiền cọc là <strong>{auction.starting_price.toLocaleString()} VNĐ</strong> (15% giá khởi điểm). <br />
+          Số tiền cọc là <strong>{Math.floor(auction.starting_price * 0.15).toLocaleString()} VNĐ</strong> (15% giá khởi điểm). <br />
           Bạn có chắc chắn muốn tham gia đấu giá?
         </p>
+
       </Modal>
     </div>
   );
