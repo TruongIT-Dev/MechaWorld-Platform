@@ -6,26 +6,129 @@ import { MdOutlineFavorite } from "react-icons/md";
 import { Caption, PrimaryButton, Title } from "../Design";
 import { Input, Select, Card, Modal, message } from "antd";
 import { GetListAuction, ParticipateInAuction } from "../../../apis/Auction/APIAuction";
+import Cookies from 'js-cookie';
 
 const { Search } = Input;
 const { Option } = Select;
 
-const AuctionCard = ({ auction }) => {
+// Hàm parse cookie mạnh mẽ
+const parseUserCookie = (cookieString) => {
+  try {
+    if (!cookieString) return null;
+    
+    const cookieMatch = cookieString.match(/user=([^;]+)/);
+    if (!cookieMatch) return null;
+    
+    const encodedValue = cookieMatch[1];
+    let decodedValue;
+    
+    try {
+      decodedValue = decodeURIComponent(encodedValue);
+    } catch {
+      decodedValue = encodedValue
+        .replace(/%22/g, '"')
+        .replace(/%2C/g, ',')
+        .replace(/%3A/g, ':')
+        .replace(/%7B/g, '{')
+        .replace(/%7D/g, '}');
+    }
+
+    let cleanJson = decodedValue
+      .replace(/\\"/g, '"')
+      .replace(/"\s*\+\s*"/g, '')
+      .replace(/\n/g, '')
+      .replace(/\r/g, '');
+
+    const firstBrace = cleanJson.indexOf('{');
+    const lastBrace = cleanJson.lastIndexOf('}');
+    
+    if (firstBrace === -1 || lastBrace === -1) return null;
+    
+    cleanJson = cleanJson.substring(firstBrace, lastBrace + 1);
+
+    cleanJson = cleanJson
+      .replace(/([{,]\s*)([a-zA-Z0-9_]+)\s*:/g, '$1"$2":')
+      .replace(/:\s*([a-zA-Z0-9_]+)(\s*[},])/g, ':"$1"$2')
+      .replace(/:true([^"])/g, ':true$1')
+      .replace(/:false([^"])/g, ':false$1')
+      .replace(/:null([^"])/g, ':null$1');
+
+    return JSON.parse(cleanJson);
+  } catch (e) {
+    console.error("Failed to parse user cookie:", e);
+    return null;
+  }
+};
+
+const getCurrentUserFromCookies = () => {
+  try {
+    if (typeof Cookies !== 'undefined') {
+      const userCookie = Cookies.get('user');
+      if (userCookie) {
+        try {
+          return JSON.parse(userCookie);
+        } catch {
+          // Nếu không được thì chuyển sang parse thủ công
+        }
+      }
+    }
+    
+    return parseUserCookie(document.cookie);
+  } catch (e) {
+    console.error("Error getting user from cookies:", e);
+    return null;
+  }
+};
+
+const AuctionCard = ({ auctionData }) => {
   const [hasParticipated, setHasParticipated] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [depositAmount, setDepositAmount] = useState(0);
+  const [currentUser, setCurrentUser] = useState(null);
+  const [cookieError, setCookieError] = useState(false);
+
+  // Destructure data correctly
+  const { 
+    auction, 
+    auction_participants: participants = [], 
+    auction_bids: bids = [] 
+  } = auctionData;
+
+  useEffect(() => {
+    console.log("Participants data:", participants);
+    console.log("Auction data:", auction);
+  }, [participants, auction]);
+
+  useEffect(() => {
+    try {
+      const user = getCurrentUserFromCookies();
+      if (user) {
+        setCurrentUser(user);
+        
+        // Kiểm tra xem user hiện tại đã tham gia chưa
+        const userParticipated = participants.some(
+          participant => participant.user_id === user.id
+        );
+        setHasParticipated(userParticipated);
+      }
+    } catch (e) {
+      console.error("Error processing user cookie:", e);
+      setCookieError(true);
+    }
+  }, [participants]);
 
   const getAuctionStatus = () => {
     const now = new Date();
     const startTime = new Date(auction.start_time);
     const endTime = new Date(auction.end_time);
 
-    if (now < startTime) return auction.status;
-    if (now >= startTime && now <= endTime) return auction.status;
-    return auction.status;
+    if (now < startTime) return "scheduled";
+    if (now >= startTime && now <= endTime) return "active";
+    return "ended";
   };
 
   const status = getAuctionStatus();
+  
   const statusStyles = {
     active: { text: "text-green-500", bg: "bg-green-100" },
     ended: { text: "text-red-500", bg: "bg-red-100" },
@@ -33,54 +136,71 @@ const AuctionCard = ({ auction }) => {
   };
 
   const handleClickedDetailAution = (id) => {
-  if (!hasParticipated) {
-    message.warning("Vui lòng nhấn 'Tham gia' để đăng ký trước khi xem chi tiết phiên đấu giá.");
-    return;
-  }
-  window.location.assign(`/auction/${id}`);
-};
+    if (status === "ended" || hasParticipated || currentUser?.id === auction.seller_id) {
+      window.location.assign(`/auction/${id}`);
+      return;
+    }
+    
+    message.warning("Vui lòng nhấn 'Tham gia' để đăng ký trước khi xem chi tiết");
+  };
 
   const handleJoinAuction = () => {
-  if (status === "scheduled") {
-    message.warning("Hiện tại phiên chưa bắt đầu nên chưa thể tham gia.");
-    return;
-  }
-
-  const deposit = Math.floor(auction.start_price * 0.15);
-  setDepositAmount(deposit);
-  setIsModalOpen(true);
-};
-
-const confirmParticipation = async () => {
-  try {
-    await ParticipateInAuction(auction.id);
-    message.success("Tham gia đấu giá thành công!");
-    setHasParticipated(true);
-  } catch (err) {
-    console.error("Chi tiết lỗi:", err);
-
-    const errorMsg =
-      err?.response?.data?.message ||
-      err?.response?.data?.error ||
-      err?.message ||
-      "Lỗi không xác định";
-
-    if (errorMsg.toLowerCase().includes("insufficient balance")) {
-      message.error("Vui lòng nạp tiền. Số dư không đủ để đặt cọc.");
-    } else if (errorMsg.toLowerCase().includes("already participated")) {
-      // Khi backend trả lỗi đã tham gia rồi thì cũng set hasParticipated = true
-      message.info("Bạn đã tham gia phiên đấu giá này.");
-      setHasParticipated(true);
-    } else {
-      message.error("Không thể tham gia đấu giá. Vui lòng thử lại!");
+    if (!currentUser) {
+      message.warning("Vui lòng đăng nhập để tham gia đấu giá.");
+      return;
     }
-  } finally {
-    setIsModalOpen(false);
+
+    if (status === "scheduled") {
+      message.warning("Hiện tại phiên chưa bắt đầu nên chưa thể tham gia.");
+      return;
+    }
+
+    if (currentUser.id === auction.seller_id) {
+      message.warning("Bạn không thể tham gia phiên đấu giá của chính mình.");
+      return;
+    }
+
+    const deposit = auction.deposit_amount || Math.floor(auction.starting_price * 0.15);
+    setDepositAmount(deposit);
+    setIsModalOpen(true);
+  };
+
+  const confirmParticipation = async () => {
+    try {
+      await ParticipateInAuction(auction.id);
+      message.success("Tham gia đấu giá thành công!");
+      setHasParticipated(true);
+    } catch (err) {
+      console.error("Chi tiết lỗi:", err);
+
+      const errorMsg =
+        err?.response?.data?.message ||
+        err?.response?.data?.error ||
+        err?.message ||
+        "Lỗi không xác định";
+
+      if (errorMsg.toLowerCase().includes("insufficient balance")) {
+        message.error("Vui lòng nạp tiền. Số dư không đủ để đặt cọc.");
+      } else if (errorMsg.toLowerCase().includes("already participated")) {
+        message.info("Bạn đã tham gia phiên đấu giá này.");
+        setHasParticipated(true);
+      } else {
+        message.error("Không thể tham gia đấu giá. Vui lòng thử lại!");
+      }
+    } finally {
+      setIsModalOpen(false);
+    }
+  };
+
+  if (cookieError) {
+    return (
+      <div className="bg-white shadow-s1 rounded-xl p-4 w-full sm:w-[300px] mx-auto mt-4">
+        <div className="text-red-500 text-center py-4">
+          Lỗi khi xác thực thông tin người dùng. Vui lòng đăng nhập lại.
+        </div>
+      </div>
+    );
   }
-};
-
-
-
 
   return (
     <div className="bg-white shadow-s1 rounded-xl p-4 w-full sm:w-[300px] mx-auto mt-4">
@@ -98,7 +218,7 @@ const confirmParticipation = async () => {
               {status}
             </Caption>
             <Caption className="text-green-500 bg-green-100 px-3 py-1 text-sm">
-              {auction.total_participants || 0} Người tham gia
+              {participants.length || 0} Người tham gia
             </Caption>
           </div>
         </div>
@@ -137,18 +257,31 @@ const confirmParticipation = async () => {
         <div className="flex items-center justify-between mt-3 gap-2">
           <button
             onClick={() => handleClickedDetailAution(auction.id)}
-            className="flex-1 text-sm px-3 py-2 rounded-md bg-blue-500 text-white hover:bg-blue-600"
+            className={`flex-1 text-sm px-3 py-2 rounded-md ${
+              status === "ended" ? "bg-gray-500 hover:bg-gray-600" : "bg-blue-500 hover:bg-blue-600"
+            } text-white`}
           >
-            {status === "Ended" ? "Xem kết quả" : "Đấu Giá"}
+            {status === "ended" ? "Xem kết quả" : "Xem chi tiết"}
           </button>
 
-          <button
-            onClick={handleJoinAuction}
-            disabled={hasParticipated}
-            className={`flex-1 text-sm px-3 py-2 rounded-md ${hasParticipated ? 'bg-gray-400' : 'bg-red-500 hover:bg-red-600'} text-white`}
-          >
-            {hasParticipated ? "Đã tham gia" : "Tham gia"}
-          </button>
+          {currentUser?.id === auction.seller_id ? (
+            <button
+              className="flex-1 text-sm px-3 py-2 rounded-md bg-gray-400 text-white cursor-not-allowed"
+              disabled
+            >
+              Phiên của bạn
+            </button>
+          ) : (
+            <button
+              onClick={handleJoinAuction}
+              disabled={hasParticipated}
+              className={`flex-1 text-sm px-3 py-2 rounded-md ${
+                hasParticipated ? 'bg-gray-400' : 'bg-red-500 hover:bg-red-600'
+              } text-white`}
+            >
+              {hasParticipated ? "Đã tham gia" : "Tham gia"}
+            </button>
+          )}
         </div>
       </div>
 
@@ -162,17 +295,21 @@ const confirmParticipation = async () => {
         okButtonProps={{ className: "bg-blue-500 hover:bg-blue-600" }}
       >
         <p>
-          Số tiền cọc là <strong>{Math.floor(auction.starting_price * 0.15).toLocaleString()} VNĐ</strong> (15% giá khởi điểm). <br />
+          Số tiền cọc là <strong>{depositAmount.toLocaleString()} VNĐ</strong> (15% giá khởi điểm). <br />
           Bạn có chắc chắn muốn tham gia đấu giá?
         </p>
-
+        {currentUser && (
+          <p className="mt-2 text-sm">
+            Tham gia với tư cách: <strong>{currentUser.full_name}</strong> ({currentUser.email})
+          </p>
+        )}
       </Modal>
     </div>
   );
 };
 
 const AuctionList = () => {
-  const [auctionData, setAuctionData] = useState([]);
+  const [auctions, setAuctions] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -180,18 +317,20 @@ const AuctionList = () => {
       try {
         setLoading(true);
         const response = await GetListAuction();
-        console.log("Dữ liệu từ API:", response.data);
-
-        const validAuctions = response.data.filter(auction => 
-          ["scheduled", "active", "ended"].includes(auction.status) &&
-          auction.gundam_snapshot &&
-          auction.start_time &&
-          auction.end_time
+        
+        // Giữ nguyên toàn bộ dữ liệu trả về (bao gồm auction, participants, bids)
+        const validAuctions = response.data.filter(item => 
+          ["scheduled", "active", "ended"].includes(item.auction?.status) &&
+          item.auction?.gundam_snapshot &&
+          item.auction?.start_time &&
+          item.auction?.end_time
         );
-        console.log("Dữ liệu hợp lệ sau khi lọc:", validAuctions);
-
-        validAuctions.sort((a, b) => new Date(b.start_time) - new Date(a.start_time));
-        setAuctionData(validAuctions);
+        
+        validAuctions.sort((a, b) => 
+          new Date(b.auction.start_time) - new Date(a.auction.start_time)
+        );
+        
+        setAuctions(validAuctions);
       } catch (error) {
         console.error("Error fetching auction data:", error);
       } finally {
@@ -220,8 +359,10 @@ const AuctionList = () => {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
         <div className="col-span-3">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {auctionData.length > 0 ? (
-              auctionData.map((auction) => <AuctionCard key={auction.id} auction={auction} />)
+            {auctions.length > 0 ? (
+              auctions.map((auctionData) => (
+                <AuctionCard key={auctionData.auction.id} auctionData={auctionData} />
+              ))
             ) : (
               <div>No auctions available</div>
             )}
@@ -248,18 +389,18 @@ const AuctionList = () => {
 
           <Card>
             <h3 className="text-lg font-bold mb-4">Sản phẩm sắp kết thúc</h3>
-            {auctionData
-              .filter(auction => new Date(auction.end_time) > new Date())
-              .sort((a, b) => new Date(a.end_time) - new Date(b.end_time))
+            {auctions
+              .filter(auctionData => new Date(auctionData.auction.end_time) > new Date())
+              .sort((a, b) => new Date(a.auction.end_time) - new Date(b.auction.end_time))
               .slice(0, 3)
-              .map((auction) => (
-                <div key={auction.id} className="mb-4">
-                  <div className="text-md font-semibold">{auction.gundam_snapshot.name}</div>
+              .map((auctionData) => (
+                <div key={auctionData.auction.id} className="mb-4">
+                  <div className="text-md font-semibold">{auctionData.auction.gundam_snapshot.name}</div>
                   <div className="text-sm text-gray-500">
-                    Giá khởi điểm: {auction.current_price.toLocaleString()} VNĐ
+                    Giá khởi điểm: {auctionData.auction.starting_price.toLocaleString()} VNĐ
                   </div>
                   <div className="text-xs text-gray-400">
-                    Kết thúc: {new Date(auction.end_time).toLocaleString()}
+                    Kết thúc: {new Date(auctionData.auction.end_time).toLocaleString()}
                   </div>
                 </div>
               ))}
