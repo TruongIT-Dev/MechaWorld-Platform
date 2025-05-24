@@ -208,10 +208,9 @@ const fetchUserAddresses = async () => {
       const values = await paymentForm.validateFields();
       
       // Đảm bảo expected_delivery_time có định dạng chuẩn
-      const formattedDeliveryTime = expectedDeliveryTime 
-        ? formatToISOTime(expectedDeliveryTime)
-        : new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString();
-
+      const formattedDeliveryTime = expectedDeliveryTime
+        ? new Date(expectedDeliveryTime).toISOString()
+        : new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString(); 
       const paymentData = {
         delivery_fee: shippingFee,
         expected_delivery_time: formattedDeliveryTime,
