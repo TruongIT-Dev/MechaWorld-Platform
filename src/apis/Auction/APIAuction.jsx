@@ -102,12 +102,14 @@ export const ParticipateInAuction = (auctionID) => {
 
 // POST Pay for winning auction bid
 export const PayForWinningBid = (auctionID, paymentData) => {
-    return axios.post(`/users/me/auctions/${auctionID}/payment`, paymentData);
-}
-
-// ************ REAL-TIME (Polling) **************
-
-// GET latest bid of a specific auction (dùng để lấy giá mới nhất, thay thế WebSocket nếu chưa dùng)
-export const GetLatestBid = (auctionID) => {
-    return axios.get(`/auctions/${auctionID}/latest-bid`);
-}
+  return axios.post(`/users/me/auctions/${auctionID}/payment`, {
+    delivery_fee: paymentData.delivery_fee,
+    expected_delivery_time: paymentData.expected_delivery_time,
+    note: paymentData.note || '',
+    user_address_id: paymentData.user_address_id
+  }, {
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+};

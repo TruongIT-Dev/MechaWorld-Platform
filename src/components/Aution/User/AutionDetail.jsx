@@ -1,11 +1,23 @@
-import React, { useEffect, useState, useRef } from "react";
-import { Body, Caption, Container, Title } from "../Design";
-import { IoIosStar, IoIosStarHalf, IoIosStarOutline } from "react-icons/io";
-import { commonClassNameOfInput } from "../Design";
-import { AiOutlinePlus } from "react-icons/ai";
-import { GetListAuctionDetial, PlaceBid, PayForWinningBid } from "../../../apis/Auction/APIAuction";
-import { useParams } from "react-router-dom";
-import { message } from "antd";
+import React, { useEffect, useState, useRef } from 'react';
+import { Body, Caption, Container, Title } from '../Design';
+import { IoIosStar, IoIosStarHalf, IoIosStarOutline } from 'react-icons/io';
+import { commonClassNameOfInput } from '../Design';
+import { AiOutlinePlus } from 'react-icons/ai';
+import { GetListAuctionDetial, PlaceBid, PayForWinningBid } from '../../../apis/Auction/APIAuction';
+import { getUserAddresses } from '../../../apis/User/APIUser';
+import { getUser } from '../../../apis/User/APIUser';
+import { useParams, useNavigate } from 'react-router-dom';
+import { Button, message, Modal, Form, Input, Radio, Divider } from 'antd';
+import { InfoCircleOutlined } from '@ant-design/icons';
+import Cookies from 'js-cookie';
+import axios from 'axios';
+
+// Hàm format thời gian chuẩn ISO 8601
+const deliveryDate = expectedDeliveryTime 
+  ? new Date(expectedDeliveryTime) 
+  : new Date(Date.now() + 3 * 24 * 60 * 60 * 1000);
+
+const formatToISOTime = deliveryDate.toISOString();
 
 const AuctionDetail = () => {
   const { auctionID } = useParams();
@@ -16,12 +28,16 @@ const AuctionDetail = () => {
   const [bidError, setBidError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isAuctionEnded, setIsAuctionEnded] = useState(false);
-  const [bidHistory, setBidHistory] = useState([]);
   const [paymentProcessing, setPaymentProcessing] = useState(false);
   const [connectionStatus, setConnectionStatus] = useState('disconnected');
-  const [participants, setParticipants] = useState(0);
   const [winnerInfo, setWinnerInfo] = useState(null);
   const eventSourceRef = useRef(null);
+  const [paymentModalVisible, setPaymentModalVisible] = useState(false);
+  const [paymentForm] = Form.useForm();
+  const [userAddresses, setUserAddresses] = useState([]);
+  const [selectedAddress, setSelectedAddress] = useState(null);
+  const [shippingFee, setShippingFee] = useState(0);
+  const [expectedDeliveryTime, setExpectedDeliveryTime] = useState('');
 
   const useCountdown = (targetDate) => {
     const [countdown, setCountdown] = useState({
@@ -32,12 +48,21 @@ const AuctionDetail = () => {
     });
 
     useEffect(() => {
+      if (!targetDate) return;
+
+      const formattedDate = formatToISOTime(targetDate);
+      if (isNaN(new Date(formattedDate).getTime())) {
+        console.error('Invalid targetDate:', targetDate);
+        return;
+      }
+
       const interval = setInterval(() => {
         const now = new Date().getTime();
-        const distance = new Date(targetDate).getTime() - now;
+        const distance = new Date(formattedDate).getTime() - now;
 
         if (distance < 0) {
           clearInterval(interval);
+          setIsAuctionEnded(true);
           return;
         }
 
@@ -55,6 +80,8 @@ const AuctionDetail = () => {
     return countdown;
   };
 
+  const countdown = useCountdown(auctionDetail?.auction?.end_time);
+  
   const fetchAuctionDetail = async () => {
     try {
       setLoading(true);
@@ -62,143 +89,211 @@ const AuctionDetail = () => {
       const data = response.data;
 
       if (!data.auction?.gundam_snapshot) {
-        console.error('Missing gundam_snapshot in response:', data);
         message.warning('Thông tin sản phẩm chưa có sẵn');
       }
 
+      // Xử lý thời gian kết thúc
+      const endTime = data.auction?.end_time;
+      const isValidEndTime = endTime && !isNaN(new Date(formatToISOTime(endTime)).getTime());
+
       setAuctionDetail(data);
-      setIsAuctionEnded(data.auction?.status === "ended" || 
-                       new Date(data.auction?.end_time).getTime() < Date.now());
+      setIsAuctionEnded(
+        data.auction?.status === 'ended' ||
+          (isValidEndTime && new Date(formatToISOTime(endTime)).getTime() < Date.now())
+      );
 
-      // Nếu có thông tin người thắng từ SSE, không ghi đè bằng API
-      if (!winnerInfo && data.auction?.winner) {
-        setWinnerInfo({
-          winner: data.auction.winner,
-          finalPrice: data.auction.current_price,
-          reason: data.auction.status === 'ended' ? 'time_ended' : 'unknown'
-        });
+      if (data.auction?.winning_bid_id) {
+        const winningBid = data.auction_bids?.find((bid) => bid.id === data.auction.winning_bid_id);
+        if (winningBid) {
+          try {
+            const userResponse = await getUser(winningBid.bidder_id);
+            setWinnerInfo({
+              winner: userResponse.data,
+              finalPrice: winningBid.amount,
+              reason: data.auction.status
+            });
+          } catch (error) {
+            setWinnerInfo({
+              winner: { full_name: 'Người dùng ẩn danh' },
+              finalPrice: winningBid.amount,
+              reason: data.auction.status
+            });
+          }
+        }
       }
-
     } catch (error) {
-      console.error("Lỗi khi tải chi tiết đấu giá:", error);
-      message.error("Không thể tải thông tin đấu giá");
+      console.error('Lỗi khi tải chi tiết đấu giá:', error);
+      message.error('Không thể tải thông tin đấu giá');
     } finally {
       setLoading(false);
     }
   };
 
+  
   useEffect(() => {
     fetchAuctionDetail();
   }, [auctionID]);
+
+const fetchUserAddresses = async () => {
+    try {
+      const userId = JSON.parse(decodeURIComponent(Cookies.get('user'))).id;
+      const response = await getUserAddresses(userId);
+      setUserAddresses(response.data);
+      const primaryAddress = response.data.find(addr => addr.is_primary);
+      setSelectedAddress(primaryAddress || response.data[0]);
+    } catch (error) {
+      console.error("Failed to fetch user addresses:", error);
+    }
+  };
+
+  // Calculate shipping fee với fallback
+  const calculateShippingFee = async () => {
+    if (!selectedAddress) return;
+
+    try {
+      const shopAddress = {
+        district_id: 1454,
+        ward_code: '21012'
+      };
+
+      const response = await axios.post(
+        'https://dev-online-gateway.ghn.vn/shiip/public-api/v2/shipping-order/fee',
+        {
+          from_district_id: shopAddress.district_id,
+          from_ward_code: shopAddress.ward_code,
+          to_district_id: selectedAddress.ghn_district_id,
+          to_ward_code: selectedAddress.ghn_ward_code,
+          service_id: 0,
+          service_type_id: 2,
+          weight: 200,
+          insurance_value: winnerInfo?.finalPrice || 0,
+          coupon: null
+        },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            token: import.meta.env.VITE_GHN_TOKEN_API,
+            shop_id: import.meta.env.VITE_GHN_SHOP_ID
+          }
+        }
+      );
+
+      const feeData = response.data.data;
+      setShippingFee(feeData.total);
+
+      // Set thời gian dự kiến với định dạng chuẩn
+      const deliveryDate = new Date();
+      deliveryDate.setDate(deliveryDate.getDate() + 3);
+      setExpectedDeliveryTime(deliveryDate.toISOString());
+    } catch (error) {
+      console.error('Lỗi khi tính phí vận chuyển:', error);
+      // Fallback với định dạng chuẩn
+      const fallbackDate = new Date();
+      fallbackDate.setDate(fallbackDate.getDate() + 3);
+      setExpectedDeliveryTime(fallbackDate.toISOString());
+      setShippingFee(30000);
+    }
+  };
+
+  // Handle payment submission
+  const handlePaymentSubmit = async () => {
+    try {
+      setPaymentProcessing(true);
+
+      if (!selectedAddress?.id) {
+        message.error('Vui lòng chọn địa chỉ nhận hàng!');
+        return;
+      }
+
+      const values = await paymentForm.validateFields();
+      
+      // Đảm bảo expected_delivery_time có định dạng chuẩn
+      const formattedDeliveryTime = expectedDeliveryTime 
+        ? formatToISOTime(expectedDeliveryTime)
+        : new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString();
+
+      const paymentData = {
+        delivery_fee: shippingFee,
+        expected_delivery_time: formattedDeliveryTime,
+        note: values.note,
+        user_address_id: selectedAddress.id
+      };
+
+      await PayForWinningBid(auctionID, paymentData);
+      message.success('Thanh toán thành công!');
+      setPaymentModalVisible(false);
+      fetchAuctionDetail();
+    } catch (error) {
+      console.error('Payment error:', error);
+      message.error(error.response?.data?.message || 'Lỗi khi thanh toán');
+    } finally {
+      setPaymentProcessing(false);
+    }
+  };
 
   // SSE connection
   useEffect(() => {
     if (!auctionID || isAuctionEnded) return;
 
-    let retryCount = 0;
-    const maxRetries = 5;
-    let retryDelay = 1000;
-    let eventSource;
-
     const connect = () => {
       setConnectionStatus('connecting');
-      
       try {
         const url = `/v1/auctions/${auctionID}/stream`;
-        eventSource = new EventSource(url);
+        const eventSource = new EventSource(url);
         eventSourceRef.current = eventSource;
 
         eventSource.onopen = () => {
-          console.log('SSE connected');
           setConnectionStatus('connected');
-          retryCount = 0;
         };
 
-        eventSource.onerror = (e) => {
-          console.error('SSE error:', e);
+        eventSource.onerror = () => {
           setConnectionStatus('error');
-          
           eventSource.close();
-          
-          if (retryCount < maxRetries) {
-            retryCount++;
-            retryDelay = Math.min(retryDelay * 2, 30000);
-            setTimeout(connect, retryDelay);
-          } else {
-            setConnectionStatus('failed');
-          }
         };
 
-        // Xử lý sự kiện người tham gia mới
-        eventSource.addEventListener('new_participant', (event) => {
-          const data = JSON.parse(event.data);
-          setParticipants(data.total_participants);
-          setBidHistory(prev => [...prev, {
-            type: 'participant_joined',
-            user: data.user,
-            timestamp: new Date().toISOString()
-          }]);
-        });
-
-        // Xử lý sự kiện đấu giá mới
         eventSource.addEventListener('new_bid', (event) => {
-          const data = JSON.parse(event.data);
-          setAuctionDetail(prev => ({
-            ...prev,
-            auction: {
-              ...prev.auction,
-              current_price: data.current_price
+          try {
+            const data = JSON.parse(event.data);
+            if (data?.current_price) {
+              setAuctionDetail(prev => ({
+                ...prev,
+                auction: {
+                  ...prev.auction,
+                  current_price: data.current_price
+                }
+              }));
             }
-          }));
-          setBidHistory(prev => [...prev, {
-            type: 'bid',
-            user: data.user,
-            price: data.current_price,
-            timestamp: data.timestamp || new Date().toISOString()
-          }]);
-        });
-
-        // Xử lý sự kiện kết thúc đấu giá
-        eventSource.addEventListener('auction_ended', (event) => {
-          const data = JSON.parse(event.data);
-          setIsAuctionEnded(true);
-          setWinnerInfo({
-            winner: data.winner,
-            finalPrice: data.final_price,
-            reason: data.reason
-          });
-          
-          if (data.reason === 'buy_now_price_reached' && data.bid_details) {
-            setAuctionDetail(prev => ({
-              ...prev,
-              auction: {
-                ...prev.auction,
-                current_price: data.bid_details.bid_amount
-              }
-            }));
+          } catch (e) {
+            console.error("Error parsing bid data:", e);
           }
-          
-          eventSource.close();
-          setConnectionStatus('ended');
         });
 
+        eventSource.addEventListener('auction_ended', (event) => {
+          try {
+            const data = JSON.parse(event.data);
+            setIsAuctionEnded(true);
+            setWinnerInfo({
+              winner: data.winner || { full_name: "Người dùng ẩn danh" },
+              finalPrice: data.final_price,
+              reason: data.reason
+            });
+            eventSource.close();
+          } catch (e) {
+            console.error("Error parsing end event:", e);
+          }
+        });
+
+        return () => eventSource.close();
       } catch (error) {
-        console.error('Error creating SSE connection:', error);
+        console.error('SSE connection error:', error);
         setConnectionStatus('failed');
       }
     };
 
     connect();
-
-    return () => {
-      if (eventSource) {
-        eventSource.close();
-        console.log('SSE connection closed');
-      }
-    };
   }, [auctionID, isAuctionEnded]);
 
-  const countdown = useCountdown(auctionDetail?.auction?.end_time || null);
+  
 
   const handleTabClick = (tab) => setActiveTab(tab);
 
@@ -245,6 +340,19 @@ const AuctionDetail = () => {
       setPaymentProcessing(false);
     }
   };
+
+  // Tính phí vận chuyển khi mở modal thanh toán, đổi địa chỉ hoặc winnerInfo thay đổi
+  useEffect(() => {
+    if (winnerInfo && paymentModalVisible) {
+      fetchUserAddresses();
+    }
+  }, [paymentModalVisible]);
+
+  useEffect(() => {
+    if (selectedAddress && winnerInfo) {
+      calculateShippingFee();
+    }
+  }, [selectedAddress, winnerInfo]);
 
   if (loading) return <div className="text-center py-10">Đang tải dữ liệu...</div>;
   if (!auctionDetail || !auctionDetail.auction.gundam_snapshot) {
@@ -361,27 +469,143 @@ const AuctionDetail = () => {
             {/* Bid Form or Winner Info */}
             {isAuctionEnded ? (
               <div className="p-5 bg-gray-50 rounded-lg shadow-md mt-6">
-                <Title level={4} className="mb-4">Phiên đấu giá đã kết thúc</Title>
-                {winnerInfo?.winner ? (
+            <Title level={4} className="mb-4">Phiên đấu giá đã kết thúc</Title>
+            {winnerInfo?.winner ? (
+              <>
+                <p className="mb-2">Người thắng: {winnerInfo.winner.full_name}</p>
+                <p className="mb-2">Giá cuối: {winnerInfo.finalPrice?.toLocaleString() || '0'} VNĐ</p>
+                
+                {/* Sửa lại điều kiện kiểm tra người thắng là người dùng hiện tại */}
+                {Cookies.get('user') && JSON.parse(decodeURIComponent(Cookies.get('user'))).id === winnerInfo.winner.id && (
                   <>
-                    <p className="mb-2">Người thắng: {winnerInfo.winner.full_name}</p>
-                    <p className="mb-2">Giá cuối: {winnerInfo.finalPrice?.toLocaleString() || '0'} VNĐ</p>
-                    {auctionDetail.auction.winner?.is_current_user && (
-                      <button
-                        onClick={handlePayment}
-                        disabled={paymentProcessing}
-                        className={`mt-4 py-2 px-6 rounded-lg ${
-                          paymentProcessing ? 'bg-gray-400' : 'bg-blue-500 hover:bg-blue-600'
-                        } text-white`}
+                    <button
+                      onClick={() => {
+                        fetchUserAddresses();
+                        setPaymentModalVisible(true);
+                      }}
+                      disabled={paymentProcessing}
+                      className={`mt-4 py-2 px-6 rounded-lg ${
+                        paymentProcessing ? 'bg-gray-400' : 'bg-blue-500 hover:bg-blue-600'
+                      } text-white`}
+                    >
+                      {paymentProcessing ? 'Đang xử lý...' : 'Thanh toán ngay'}
+                    </button>
+                          {/* Payment Modal */}
+              <Modal
+                  title="Thanh toán đấu giá"
+                  visible={paymentModalVisible}
+                  onCancel={() => setPaymentModalVisible(false)}
+                  onOk={handlePaymentSubmit}
+                  confirmLoading={paymentProcessing}
+                  width={800}
+                >
+                  <Form form={paymentForm} layout="vertical">
+                  <div className="grid grid-cols-2 gap-6">
+                    <div>
+                      <h3 className="font-semibold mb-4">Thông tin sản phẩm</h3>
+                      <div className="flex items-center gap-4 mb-4">
+                        <img 
+                          src={auctionDetail.auction.gundam_snapshot.image_url} 
+                          alt={auctionDetail.auction.gundam_snapshot.name}
+                          className="w-20 h-20 object-cover rounded"
+                        />
+                        <div>
+                          <p className="font-medium">{auctionDetail.auction.gundam_snapshot.name}</p>
+                          <p>Giá thắng: {winnerInfo.finalPrice.toLocaleString()} VNĐ</p>
+                        </div>
+                      </div>
+
+                      <h3 className="font-semibold mb-4 mt-6">Địa chỉ nhận hàng</h3>
+                      {userAddresses.length > 0 ? (
+                        <Radio.Group
+                          value={selectedAddress?.id}
+                          onChange={(e) => {
+                            const addr = userAddresses.find(a => a.id === e.target.value);
+                            setSelectedAddress(addr);
+                          }}
+                          className="w-full"
+                        >
+                          <div className="space-y-3">
+                            {userAddresses.map(address => (
+                              <Radio key={address.id} value={address.id} className="w-full">
+                                <div className={`p-3 border rounded-lg ml-2 ${selectedAddress?.id === address.id ? 'border-blue-500 bg-blue-50' : 'border-gray-200'}`}>
+                                  <div className="flex justify-between">
+                                    <div>
+                                      <p className="font-medium">{address.full_name} ({address.phone_number})</p>
+                                      <p className="text-sm">
+                                        {address.detail}, {address.ward_name}, {address.district_name}, {address.province_name}
+                                      </p>
+                                    </div>
+                                    {address.is_primary && (
+                                      <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">Mặc định</span>
+                                    )}
+                                  </div>
+                                </div>
+                              </Radio>
+                            ))}
+                          </div>
+                        </Radio.Group>
+                      ) : (
+                        <div className="text-center py-4 text-gray-500">
+                          Bạn chưa có địa chỉ nào. Vui lòng thêm địa chỉ trong trang cá nhân.
+                        </div>
+                      )}
+
+                      <Button
+                        type="link"
+                        className="mt-2"
+                        onClick={() => navigate('/member/profile/address')}
                       >
-                        {paymentProcessing ? 'Đang xử lý...' : 'Thanh toán ngay'}
-                      </button>
-                    )}
+                        + Thêm địa chỉ mới
+                      </Button>
+                    </div>
+
+                    <div>
+                      <h3 className="font-semibold mb-4">Thông tin thanh toán</h3>
+                      
+                      <div className="space-y-3 mb-4">
+                        <div className="flex justify-between">
+                          <span>Giá thắng đấu giá:</span>
+                          <span className="font-medium">{winnerInfo.finalPrice.toLocaleString()} VNĐ</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Phí vận chuyển:</span>
+                          <span className="font-medium">
+                            {`${shippingFee.toLocaleString()} VNĐ`}
+                          </span>
+                        </div>
+                        <Divider className="my-2" />
+                        <div className="flex justify-between text-lg">
+                          <span className="font-semibold">Tổng thanh toán:</span>
+                          <span className="font-semibold text-red-600">
+                            { `${(winnerInfo.finalPrice + shippingFee).toLocaleString()} VNĐ`}
+                          </span>
+                        </div>
+                      </div>
+
+                      <Form.Item label="Ghi chú" name="note">
+                        <Input.TextArea rows={3} placeholder="Ghi chú cho người bán..." />
+                      </Form.Item>
+
+                      <div className="mt-4 p-3 bg-yellow-50 rounded-lg">
+                        <p className="text-sm text-yellow-800">
+                          <InfoCircleOutlined className="mr-2" />
+                          Sau khi thanh toán, người bán sẽ liên hệ với bạn để xác nhận đơn hàng.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </Form>
+              </Modal>
                   </>
-                ) : (
-                  <p>Không có người thắng cuộc</p>
+                  
                 )}
-              </div>
+                
+              </>
+            ) : (
+              <p>Không có người thắng cuộc</p>
+            )}
+          </div>
             ) : (
               <form onSubmit={handleSubmitBid} className="mt-6 p-5 bg-white rounded-lg shadow-md">
                 <div className="mb-4">
