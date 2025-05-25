@@ -2,7 +2,7 @@ import PropTypes from "prop-types";
 import { useSelector } from 'react-redux';
 import { useEffect, useState } from 'react';
 
-import { ArrowLeftRight, Check, ChevronDown, FileText, Truck, CreditCard } from 'lucide-react';
+import { Check, ChevronDown, FileText, Truck, CreditCard } from 'lucide-react';
 
 const ProgressSection = (
   {
@@ -24,19 +24,20 @@ const ProgressSection = (
   // Bước hiện tại cho cả hai bên
   const [currentStepLeft, setCurrentStepLeft] = useState(firstCurrentStage);
   const [currentStepRight, setCurrentStepRight] = useState(secondCurrentStage);
+  
   const leftSteps = [
-    { name: "Thông tin giao hàng", icon: <FileText size={20} /> },
-    { name: "Xác nhận giao dịch", icon: <FileText size={20} /> },
+    { name: "Điền thông tin vận chuyển", icon: <FileText size={20} /> },
+    { name: "Xác nhận thông tin vận chuyển", icon: <FileText size={20} /> },
     { name: "Thanh toán", icon: <CreditCard size={20} /> },
-    { name: "Xác nhận giao hàng", icon: <Truck size={20} /> },
+    { name: "Theo dõi đơn hàng", icon: <Truck size={20} /> },
     { name: "Hoàn tất trao đổi", icon: <Check size={20} /> }
   ];
 
   const rightSteps = [
-    { name: "Thông tin giao hàng", icon: <FileText size={20} /> },
-    { name: "Xác nhận giao dịch", icon: <FileText size={20} /> },
+    { name: "Điền thông tin vận chuyển", icon: <FileText size={20} /> },
+    { name: "Xác nhận thông tin vận chuyển", icon: <FileText size={20} /> },
     { name: "Thanh toán", icon: <CreditCard size={20} /> },
-    { name: "Xác nhận giao hàng", icon: <Truck size={20} /> },
+    { name: "Theo dõi đơn hàng", icon: <Truck size={20} /> },
     { name: "Hoàn tất trao đổi", icon: <Check size={20} /> }
   ];
 

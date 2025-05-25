@@ -50,7 +50,7 @@ const OrderHistoryDetail = ({ visible, onClose, orderData }) => {
     const statusConfig = {
         'pending': { color: 'orange', icon: <ClockCircleOutlined />, text: 'Chờ xử lý' },
         'packaging': { color: 'purple', icon: <GiftOutlined />, text: 'Đang đóng gói' },
-        'delivering': { color: 'blue', icon: <CarOutlined />, text: 'Đang vận chuyển' },
+        'delivering': { color: 'blue', icon: <CarOutlined />, text: 'Đang giao hàng' },
         'delivered': { color: 'cyan', icon: <CheckOutlined />, text: 'Đã giao hàng' },
         'completed': { color: 'green', icon: <CheckCircleOutlined />, text: 'Đã nhận hàng' },
         'failed': { color: 'red', icon: <CloseCircleOutlined />, text: 'Giao hàng thất bại' },
@@ -151,7 +151,7 @@ const OrderHistoryDetail = ({ visible, onClose, orderData }) => {
                             <span className="font-semibold">{order.code}</span>
                         </Descriptions.Item>
                         {order_delivery.delivery_tracking_code && (
-                            <Descriptions.Item label="Mã đơn vận chuyển" span={3}>
+                            <Descriptions.Item label="Mã vận đơn" span={3}>
                                 {order_delivery.delivery_tracking_code}
                             </Descriptions.Item>
                         )}

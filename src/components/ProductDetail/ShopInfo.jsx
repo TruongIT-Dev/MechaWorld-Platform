@@ -39,7 +39,7 @@ const ShopInfo = ({ shopID }) => {
                     className="border border-gray-300"
                 />
                 <div>
-                    <p className="text-sm font-semibold text-gray-800 truncate whitespace-nowrap overflow-hidden max-w-[120px]">
+                    <p className="text-sm font-semibold text-gray-800 truncate whitespace-nowrap overflow-hidden max-w-[150px]">
                         {shopInfo?.shop_name || "Shop name"}
                     </p>
                     <p className="text-xs text-gray-500">Đánh giá: ⭐20 like</p>

@@ -1,7 +1,4 @@
 import { Spin } from 'antd';
-import { LoadingOutlined } from '@ant-design/icons';
-
-const antIcon = <LoadingOutlined style={{ fontSize: 48 }} spin />;
 
 const ExchangeLoader = () => {
   return (
@@ -11,10 +8,9 @@ const ExchangeLoader = () => {
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: '#f0f2f5',
       }}
     >
-      <Spin indicator={antIcon} tip="Đang tải trang trao đổi..." size="large" />
+      <Spin tip={<span className='text-blue-600 text-lg'>Đang tải trao đổi...</span>} size="large" />
     </div>
   );
 };

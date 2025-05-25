@@ -1,34 +1,65 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
-import { EnvironmentOutlined, HomeOutlined, PhoneOutlined, SwapOutlined, TruckOutlined, UserOutlined } from '@ant-design/icons';
-import { Card, Button, Empty, Tag, Typography, Alert, Row, Col } from 'antd';
+import { EnvironmentOutlined, HomeOutlined, PhoneOutlined, ArrowRightOutlined, TruckOutlined, UserOutlined, ArrowLeftOutlined } from '@ant-design/icons';
+import { Card, Empty, Tag, Typography, Alert, Row, Col, Divider, Spin } from 'antd';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
 
 const ConfirmExchangeDelivery = ({ exchangeDetail }) => {
-  const [showCurrentUser, setShowCurrentUser] = useState(true);
+  const [isDataReady, setIsDataReady] = useState(false);
+  const [localExchangeDetail, setLocalExchangeDetail] = useState(null);
+
+  // console.log("Check ExchangeDetail in Stage 2", exchangeDetail);
+
+  // Force component to re-render when exchangeDetail changes
+  useEffect(() => {
+    console.log("ExchangeDetail changed:", exchangeDetail);
+    if (exchangeDetail && Object.keys(exchangeDetail).length > 0) {
+      setLocalExchangeDetail(exchangeDetail);
+      setIsDataReady(true);
+    } else {
+      setIsDataReady(false);
+    }
+  }, [exchangeDetail]);
 
   // Initialize AOS
   useEffect(() => {
     AOS.init({
       duration: 800,
-      once: false,
+      once: true,
       mirror: true,
     });
   }, []);
 
-  // Refresh AOS when view toggles
+  // Refresh AOS when data is ready
   useEffect(() => {
-    AOS.refresh();
-  }, [showCurrentUser]);
+    if (isDataReady) {
+      // Small delay to ensure DOM is updated
+      setTimeout(() => {
+        AOS.refresh();
+      }, 100);
+    }
+  }, [isDataReady]);
 
-  // Extract data from exchangeDetail
-  const partner = exchangeDetail?.partner || {};
-  const currentUser = exchangeDetail?.current_user || {};
+  // Extract data from localExchangeDetail with fallback
+  const partner = localExchangeDetail?.partner || exchangeDetail?.partner || {};
+  const currentUser = localExchangeDetail?.current_user || exchangeDetail?.current_user || {};
+
+  // Show loading if data is not ready
+  if (!isDataReady || (!partner.from_address && !currentUser.from_address)) {
+    return (
+      <div className="flex justify-center items-center py-12">
+        <Spin size="large" />
+        <Typography.Text className="ml-3 text-gray-600">
+          Đang tải thông tin trao đổi...
+        </Typography.Text>
+      </div>
+    );
+  }
 
   // Format address function
   const formatAddress = (user) => {
-    if (!user || !user.from_address) {
+    if (!user || !user.from_address || !user.to_address) {
       return null;
     }
 
@@ -52,111 +83,68 @@ const ConfirmExchangeDelivery = ({ exchangeDetail }) => {
   const currentUserAddress = formatAddress(currentUser);
   const partnerAddress = formatAddress(partner);
 
-  // Toggle view function
-  const toggleAddressView = () => {
-    setShowCurrentUser(!showCurrentUser);
-  };
-
   // Render address card
-  const renderAddressCard = (addressData, isCurrentUser) => {
+  const renderAddressCard = (addressData, title, tagColor, tagText, iconColor, isPickup = false) => {
     if (!addressData) {
       return (
-        <div data-aos="fade-up">
-          <Card className="w-full border border-gray-300 rounded-lg shadow-sm">
-            <Empty
-              description={isCurrentUser
-                ? "Bạn chưa gửi địa chỉ vận chuyển"
-                : "Đối tác trao đổi chưa gửi thông tin địa chỉ vận chuyển."
-              }
-              image={Empty.PRESENTED_IMAGE_SIMPLE}
-            />
-          </Card>
-        </div>
+        <Card className="w-full border border-gray-300 rounded-lg shadow-sm h-full">
+          <Empty
+            description={`${title} chưa có thông tin địa chỉ`}
+            image={Empty.PRESENTED_IMAGE_SIMPLE}
+          />
+        </Card>
       );
     }
 
+    const displayData = isPickup ? {
+      full_name: addressData.pickup_full_name,
+      phone_number: addressData.pickup_phone_number,
+      address: addressData.pickup_address
+    } : {
+      full_name: addressData.delivery_full_name,
+      phone_number: addressData.delivery_phone_number,
+      address: addressData.delivery_address
+    };
+
     return (
-      <Row gutter={24}>
-        <Col span={12}>
-          {/* THÔNG TIN ĐỊA CHỈ GIAO HÀNG */}
-          <div data-aos="fade-right" data-aos-delay="100" data-aos-duration="1000">
-            <Card
-              className="w-full rounded-2xl border border-gray-200 shadow-md"
-              title={
-                <div className="flex items-center gap-3">
-                  <HomeOutlined className="text-blue-500 text-xl" />
-                  <span className="text-base font-semibold uppercase">
-                    {isCurrentUser ? "Thông tin giao hàng" : "Thông tin giao hàng"}
-                  </span>
-                  {isCurrentUser ? (<Tag color="blue">CỦA BẠN</Tag>) : (<Tag color="cyan">CỦA ĐỐI TÁC</Tag>)}
-                </div>
-              }
-            >
-              <div className="flex gap-4">
-                {/* Cột icon bên trái */}
-                <div className="flex flex-col items-start gap-6 pt-1 text-gray-500">
-                  <UserOutlined />
-                  <PhoneOutlined />
-                  <EnvironmentOutlined />
-                </div>
-
-                {/* Cột thông tin bên phải */}
-                <div className="flex flex-col gap-4 text-[15px]">
-                  <Typography.Text className="text-gray-800 font-medium">
-                    {addressData.delivery_full_name}
-                  </Typography.Text>
-                  <Typography.Text className="text-gray-700">
-                    {addressData.delivery_phone_number}
-                  </Typography.Text>
-                  <Typography.Text className="text-gray-700">
-                    {addressData.delivery_address}
-                  </Typography.Text>
-                </div>
-              </div>
-            </Card>
+      <Card
+        className="w-full rounded-2xl border border-gray-200 shadow-md h-full"
+        title={
+          <div className="flex items-center gap-3">
+            {isPickup ? (
+              <TruckOutlined className={`${iconColor} text-xl`} />
+            ) : (
+              <HomeOutlined className={`${iconColor} text-xl`} />
+            )}
+            <span className="text-base font-semibold uppercase">
+              {title}
+            </span>
+            <Tag color={tagColor}>{tagText}</Tag>
           </div>
-        </Col>
-
-        <Col span={12}>
-          {/* THÔNG TIN ĐỊA CHỈ LẤY HÀNG */}
-          <div data-aos="fade-left" data-aos-delay="200" data-aos-duration="1000">
-            <Card
-              className="w-full rounded-2xl border border-gray-200 shadow-md"
-              title={
-                <div className="flex items-center gap-3">
-                  <TruckOutlined className="text-orange-500 text-xl" />
-                  <span className="text-base font-semibold uppercase">
-                    {isCurrentUser ? "Thông tin lấy hàng" : "Thông tin lấy hàng"}
-                  </span>
-                  {isCurrentUser ? (<Tag color="blue">CỦA BẠN</Tag>) : (<Tag color="cyan">CỦA ĐỐI TÁC</Tag>)}
-                </div>
-              }
-            >
-              <div className="flex gap-4">
-                {/* Cột icon bên trái */}
-                <div className="flex flex-col items-start gap-6 pt-1 text-gray-500">
-                  <UserOutlined />
-                  <PhoneOutlined />
-                  <EnvironmentOutlined />
-                </div>
-
-                {/* Cột thông tin bên phải */}
-                <div className="flex flex-col gap-4 text-[15px]">
-                  <Typography.Text className="text-gray-800 font-medium">
-                    {addressData.pickup_full_name}
-                  </Typography.Text>
-                  <Typography.Text className="text-gray-700">
-                    {addressData.pickup_phone_number}
-                  </Typography.Text>
-                  <Typography.Text className="text-gray-700">
-                    {addressData.pickup_address}
-                  </Typography.Text>
-                </div>
-              </div>
-            </Card>
+        }
+      >
+        <div className="flex gap-4">
+          {/* Cột icon bên trái */}
+          <div className="flex flex-col items-start gap-6 pt-1 text-gray-500">
+            <UserOutlined />
+            <PhoneOutlined />
+            <EnvironmentOutlined />
           </div>
-        </Col>
-      </Row>
+
+          {/* Cột thông tin bên phải */}
+          <div className="flex flex-col gap-4 text-sm">
+            <Typography.Text className="text-gray-800 font-medium">
+              {displayData.full_name}
+            </Typography.Text>
+            <Typography.Text className="text-gray-700">
+              {displayData.phone_number}
+            </Typography.Text>
+            <Typography.Text className="text-gray-700">
+              {displayData.address}
+            </Typography.Text>
+          </div>
+        </div>
+      </Card>
     );
   };
 
@@ -166,15 +154,15 @@ const ConfirmExchangeDelivery = ({ exchangeDetail }) => {
         <Alert
           type="info"
           showIcon
-          message="Vui lòng kiểm tra kỹ thông tin vận chuyển"
+          message="Vui lòng kiểm tra và xác nhận thông tin vận chuyển"
           description={
             <div className="text-gray-700 text-sm space-y-3 mt-2">
               <ul className="list-disc list-inside space-y-1">
                 <li>
-                  <strong>Địa chỉ giao hàng:</strong> là nơi người nhận sẽ nhận được đơn hàng. Đây là địa điểm mà khách hàng mong muốn nhận hàng.
+                  <strong>Thông tin giao hàng:</strong> là nơi người nhận sẽ nhận được đơn hàng. Đây là địa điểm mà khách hàng mong muốn nhận hàng.
                 </li>
                 <li>
-                  <strong>Địa chỉ lấy hàng:</strong> là nơi bạn muốn đơn vị vận chuyển đến để nhận hàng từ bạn. Đây là địa điểm để đơn vị vận chuyển đến lấy hàng.
+                  <strong>Thông tin lấy hàng:</strong> là nơi bạn muốn đơn vị vận chuyển đến để nhận hàng từ bạn. Đây là địa điểm để đơn vị vận chuyển đến lấy hàng.
                 </li>
                 <li>
                   <strong>Lưu ý:</strong> Hãy đảm bảo bạn đã cung cấp thông tin địa chỉ đầy đủ và chính xác để tránh sai sót khi vận chuyển.
@@ -185,25 +173,80 @@ const ConfirmExchangeDelivery = ({ exchangeDetail }) => {
         />
       </div>
 
-      <div data-aos="fade-up" data-aos-duration="600" className="flex items-center justify-end gap-2 my-4">
-        <Typography.Text className='text-sm font-medium'>Xem thông tin vận chuyển:</Typography.Text>
-        <Button
-          type="primary"
-          icon={<SwapOutlined className='mt-1 text-base text-white' />}
-          onClick={toggleAddressView}
-          className="bg-blue-500"
-        >
-          {showCurrentUser
-            ? "Thông tin địa chỉ của đối tác"
-            : "Thông tin địa chỉ của bạn"}
-        </Button>
+      {/* LUỒNG TRAO ĐỒI CỦA BẠN */}
+      <div data-aos="fade-up" data-aos-delay="200" className="mt-6">
+
+        <Row gutter={[24, 16]} align="middle">
+          <Col span={11}>
+            {renderAddressCard(
+              currentUserAddress,
+              "Thông tin lấy hàng",
+              "blue",
+              "CỦA BẠN",
+              "text-orange-500",
+              true
+            )}
+          </Col>
+
+          <Col span={2} className="text-center">
+            <div className="flex flex-col items-center gap-2">
+              <ArrowRightOutlined className="text-2xl text-blue-500" />
+              <Typography.Text className="text-xs text-gray-500 font-medium">
+                GIAO TỚI
+              </Typography.Text>
+            </div>
+          </Col>
+
+          <Col span={11}>
+            {renderAddressCard(
+              partnerAddress,
+              "Thông tin giao hàng",
+              "cyan",
+              "CỦA ĐỐI TÁC",
+              "text-green-500",
+              false
+            )}
+          </Col>
+        </Row>
       </div>
 
-      <div className="transition-all duration-500 ease-in-out">
-        {showCurrentUser
-          ? renderAddressCard(currentUserAddress, true)
-          : renderAddressCard(partnerAddress, false)
-        }
+      <Divider className="" />
+
+      {/* LUỒNG TRAO ĐỒI CỦA ĐỐI TÁC */}
+      <div data-aos="fade-up" data-aos-delay="400" className="">
+
+        <Row gutter={[24, 16]} align="middle">
+          <Col span={11}>
+            {renderAddressCard(
+              currentUserAddress,
+              "Thông tin giao hàng",
+              "blue",
+              "CỦA BẠN",
+              "text-green-500",
+              false
+            )}
+          </Col>
+
+          <Col span={2} className="text-center">
+            <div className="flex flex-col items-center">
+              <ArrowLeftOutlined className="text-2xl text-cyan-500" />
+              <Typography.Text className="text-xs text-gray-500 font-medium">
+                GIAO TỚI
+              </Typography.Text>
+            </div>
+          </Col>
+
+          <Col span={11}>
+            {renderAddressCard(
+              partnerAddress,
+              "Thông tin lấy hàng",
+              "cyan",
+              "CỦA ĐỐI TÁC",
+              "text-orange-500",
+              true
+            )}
+          </Col>
+        </Row>
       </div>
     </>
   );

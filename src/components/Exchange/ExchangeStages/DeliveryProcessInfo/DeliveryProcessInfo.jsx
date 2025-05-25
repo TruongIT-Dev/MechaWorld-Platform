@@ -62,14 +62,14 @@ const DeliveryProcessInfo = ({
   useEffect(() => {
     AOS.init({
       duration: 800,
-      once: false,
+      once: true,
       mirror: true,
       easing: 'ease-in-out',
     });
   }, []);
 
   // State management
-  const [isShowingSendOrder, setIsShowingSendOrder] = useState(false);
+  const [isShowingSendOrder, setIsShowingSendOrder] = useState(true);
   const [packagingModalVisible, setPackagingModalVisible] = useState(false);
   const [complaintModalVisible, setComplaintModalVisible] = useState(false);
   const [fileList, setFileList] = useState([]);
@@ -80,7 +80,7 @@ const DeliveryProcessInfo = ({
   const [imagePreviewVisible, setImagePreviewVisible] = useState(false);
   const [currentImage, setCurrentImage] = useState('');
 
-  console.log("orderDetail", orderDetail);
+  // console.log("orderDetail", orderDetail);
 
 
   // Determine which orders to display based on current view
@@ -95,7 +95,7 @@ const DeliveryProcessInfo = ({
 
   // Fetch delivery status from GHN
   const fetchDeliveryStatus = async (trackingCode) => {
-    console.log("Fetching delivery status for:", trackingCode);
+    // console.log("Fetching delivery status for:", trackingCode);
     await checkDeliverySatus(trackingCode).then((res) => {
       if (res.status === 200) {
         setghnDetail(res.data.data);
@@ -107,21 +107,21 @@ const DeliveryProcessInfo = ({
   // Fetch order details
   const fetchOrderDetail = async (orderId) => {
     try {
-      console.log("Fetching order detail for:", orderId);
+      // console.log("Fetching order detail for:", orderId);
 
       const res = await GetOrderDetail(orderId);
-      console.log("Res GetOrderDetail", res);
+      // console.log("Res GetOrderDetail", res);
 
       if (res.status === 200) {
         // Kiểm tra cấu trúc response để lấy đúng dữ liệu
         if (res.data) {
           // Nếu dữ liệu nằm trong res.data
           setOrderDetail(res.data);
-          console.log("Order detail data:", res.data);
+          // console.log("Order detail data:", res.data);
         } else {
           // Nếu dữ liệu nằm trực tiếp trong res
           setOrderDetail(res);
-          console.log("Order detail data:", res);
+          // console.log("Order detail data:", res);
         }
 
         return res.data || res; // Trả về dữ liệu để có thể sử dụng ngay
@@ -136,8 +136,8 @@ const DeliveryProcessInfo = ({
   };
 
   useEffect(() => {
-    console.log("exchangeDetails", exchangeDetails);
-    console.log('current order', currentOrder);
+    // console.log("exchangeDetails", exchangeDetails);
+    // console.log('current order', currentOrder);
 
     if (currentOrder?.id) {
       fetchOrderDetail(currentOrder.id);
@@ -170,7 +170,7 @@ const DeliveryProcessInfo = ({
     }
 
     setIsLoading(true);
-    console.log("Submitting packaging confirmation with images:", fileList);
+    // console.log("Submitting packaging confirmation with images:", fileList);
     const formData = new FormData();
 
     fileList.forEach((file) => {
@@ -197,7 +197,7 @@ const DeliveryProcessInfo = ({
     setIsLoading(true);
 
     // In a real implementation, this would be an API call
-    console.log("Submitting complaint:", values);
+    // console.log("Submitting complaint:", values);
 
     // Simulate API call with timeout
     setTimeout(() => {

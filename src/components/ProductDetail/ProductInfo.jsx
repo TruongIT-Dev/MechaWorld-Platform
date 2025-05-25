@@ -126,13 +126,13 @@ const ProductInfo = ({ info, assessories = [] }) => {
                                                                 padding: '4px 16px',
                                                                 textAlign: 'left',
                                                             }}>
-                                                                <Text className="text-gray-400">+ {item.name}</Text>
+                                                                <Text className="text-gray-600">+ {item.name}</Text>
                                                             </td>
                                                             <td style={{
                                                                 padding: '4px 0',
                                                                 textAlign: 'right',
                                                             }}>
-                                                                <Text className="text-gray-400">x {item.quantity}</Text>
+                                                                <Text className="text-gray-600">x {item.quantity}</Text>
                                                             </td>
                                                         </tr>
                                                     ))}

@@ -2,7 +2,7 @@ import Cookies from "js-cookie";
 import PropTypes from "prop-types";
 import { useEffect, useState } from "react";
 import { Form, message, notification, Steps, Card, Button, Space } from "antd";
-import { ArrowLeftOutlined, ArrowRightOutlined, CheckOutlined } from '@ant-design/icons';
+import { ArrowLeftOutlined, ArrowRightOutlined, CheckCircleOutlined, CheckOutlined } from '@ant-design/icons';
 
 import { GetGrades } from '../../../apis/Gundams/APIGundam';
 import { PostGundam } from "../../../apis/User/APIUser";
@@ -423,11 +423,11 @@ const AddCollection = ({ setIsCreating }) => {
                   type="primary"
                   onClick={handleFinish}
                   className="bg-green-600 hover:bg-green-500"
-                  icon={<CheckOutlined />}
+                  icon={<CheckCircleOutlined />}
                   disabled={isUploading}
                   loading={isUploading}
                 >
-                  {isUploading ? "Đang tải dữ liệu..." : "Hoàn tất đăng ký"}
+                  {isUploading ? "Đang tiến hàng thêm..." : "Thêm sản phẩm"}
                 </Button>
               </Space>
             )}

@@ -91,7 +91,7 @@ export default function PlaceDeposit({
     // Initialize AOS
     AOS.init({
       duration: 800,
-      once: false,
+      once: true,
     });
     fetchDeliveryFeeAndDeliveryTime();
   }, [note]);
@@ -142,33 +142,34 @@ export default function PlaceDeposit({
             </div>
 
             <Row gutter={24}>
+              
               {/* Người gửi */}
-              <Col span={12} className="border-r">
-                <div data-aos="fade-right" className="mb-4">
+              <Col span={12}>
+                <div data-aos="fade-left" className="mb-4">
                   <div className="flex items-center mb-3">
                     <SendOutlined className="mr-2 text-blue-600 text-lg" />
                     <Text strong className="text-lg">Người gửi</Text>
                   </div>
                   <Descriptions column={1} bordered size="small" className="ml-6">
-                    <Descriptions.Item label="Họ tên">{secondUser?.full_name}</Descriptions.Item>
+                    <Descriptions.Item label="Họ tên">{firstUser?.full_name}</Descriptions.Item>
                     <Descriptions.Item label="Địa chỉ">
-                      {exchange.partner.from_address?.detail}, {exchange.partner.from_address?.ward_name}, {exchange.partner.from_address?.district_name}
+                      {exchange.current_user.to_address?.detail}, {exchange.current_user.to_address?.ward_name}, {exchange.current_user.to_address?.district_name}
                     </Descriptions.Item>
                   </Descriptions>
                 </div>
               </Col>
-
+              
               {/* Người nhận */}
-              <Col span={12}>
-                <div data-aos="fade-left" className="mb-4">
+              <Col span={12} className="border-r">
+                <div data-aos="fade-right" className="mb-4">
                   <div className="flex items-center mb-3">
                     <HomeOutlined className="mr-2 text-green-600 text-lg" />
                     <Text strong className="text-lg">Người nhận</Text>
                   </div>
                   <Descriptions column={1} bordered size="small" className="ml-6">
-                    <Descriptions.Item label="Họ tên">{firstUser?.full_name}</Descriptions.Item>
+                    <Descriptions.Item label="Họ tên">{secondUser?.full_name}</Descriptions.Item>
                     <Descriptions.Item label="Địa chỉ">
-                      {exchange.current_user.to_address?.detail}, {exchange.current_user.to_address?.ward_name}, {exchange.current_user.to_address?.district_name}
+                      {exchange.partner.from_address?.detail}, {exchange.partner.from_address?.ward_name}, {exchange.partner.from_address?.district_name}
                     </Descriptions.Item>
                   </Descriptions>
                 </div>

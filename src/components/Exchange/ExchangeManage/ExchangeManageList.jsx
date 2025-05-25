@@ -22,6 +22,10 @@ export default function ExchangeManageList() {
 
     const [exchangeData, setExchangeData] = useState([]);
     const [filteredData, setFilteredData] = useState(exchangeData);
+
+    // console.log("filteredData", filteredData);
+
+
     // Filter functionality
     const filterData = (filter) => {
         setActiveFilter(filter);
@@ -65,16 +69,21 @@ export default function ExchangeManageList() {
             dataIndex: "partner",
             key: "partner",
             width: 160,
-            render: (user) => (
-                <Space>
-                    <Avatar
-                        src={user.avatar_url}
-                        icon={<UserOutlined />}
-                        className="border-2 border-blue-500"
-                    />
-                    <span className="font-medium">{user.full_name}</span>
-                </Space>
-            ),
+            render: (user) => {
+                // console.log("user", user);
+                return (
+                    <Space>
+                        <Avatar
+                            src={user.avatar_url}
+                            icon={<UserOutlined />}
+                            className="border-2 border-blue-500"
+                        />
+                        <span className="font-medium">{user.full_name}</span>
+                    </Space>
+
+                )
+
+            },
         },
         {
             title: "Tiền bù trừ",
@@ -205,7 +214,6 @@ export default function ExchangeManageList() {
 
             <Table
                 columns={columns}
-                // dataSource={filteredData}
                 dataSource={filteredData}
                 pagination={{
                     pageSize: 3,

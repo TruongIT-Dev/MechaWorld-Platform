@@ -151,7 +151,7 @@ const ConditionVersionStep = ({
             </Form.Item>
 
             <div className="border p-4 rounded-md bg-gray-50 mt-4">
-                <div className="text-base font-medium mb-2">Phụ kiện (không bắt buộc)</div>
+                <div className="text-base font-medium mb-2">Phụ kiện thêm(nếu có)</div>
                 {accessories.length === 0 && (
                     <div className="text-gray-500 text-sm mb-2">Chưa có phụ kiện nào được thêm</div>
                 )}

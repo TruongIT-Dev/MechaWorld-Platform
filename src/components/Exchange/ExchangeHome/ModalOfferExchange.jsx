@@ -13,10 +13,6 @@ export default function ModalOfferExchange({ isOpen, onClose, requestData, gunda
     const [compensationType, setCompensationType] = useState('none');
     const [compensationID, setCompensationID] = useState(null);
 
-    // console.log(requestData);
-
-    // Giả lập dữ liệu của bài đăng/request mà người dùng muốn trao đổi
-
 
     // Dữ liệu người hiện tại
     const currentUser = useSelector((state) => state.auth.user);
@@ -44,12 +40,12 @@ export default function ModalOfferExchange({ isOpen, onClose, requestData, gunda
         setSelectedYourGundam(gundamId);
     };
 
-    const handleCompensationTypeChange = (e) => {
-        setCompensationType(e.target.value);
-        if (e.target.value === 'none') {
-            form.setFieldsValue({ compensationAmount: 0 });
-        }
-    };
+    // const handleCompensationTypeChange = (e) => {
+    //     setCompensationType(e.target.value);
+    //     if (e.target.value === 'none') {
+    //         form.setFieldsValue({ compensationAmount: 0 });
+    //     }
+    // };
 
     const handleSubmit = () => {
         if (!selectedGundam) {
@@ -74,14 +70,6 @@ export default function ModalOfferExchange({ isOpen, onClose, requestData, gunda
                         postID: requestPost?.id
 
                     };
-                    // if (offerData.compensationAmount == 0 ) {
-                    //     const fixOfferData = {
-                    //         ...offerData,
-                    //         compensationAmount: null
-                    //     }
-                    //     createExchangeOffer(fixOfferData)
-                    // }
-                    // console.log('Submitting exchange offer:', offerData);
 
                     // API Gửi Yêu cầu trao đổi
                     createExchangeOffer(offerData)
@@ -134,7 +122,7 @@ export default function ModalOfferExchange({ isOpen, onClose, requestData, gunda
                             <span className="font-semibold">{requestData?.full_name}</span>
                         </p>
                         <p className="text-sm text-gray-600">
-                            Vui lòng điền thông tin trao đổi và chọn Gundam bạn muốn trao đổi.
+                            - Vui lòng điền thông tin trao đổi và chọn Gundam mà bạn muốn trao đổi.
                         </p>
                     </div>
                 </div>
@@ -274,11 +262,11 @@ export default function ModalOfferExchange({ isOpen, onClose, requestData, gunda
                         ),
                         children: (
                             <div className="pt-2">
-                                <p className="mb-4 text-red-500">
-                                    *Lưu ý: Chọn một trong những Gundam đang có trong kho của bạn để trao đổi.
-                                </p>
+                                <span className='mt-2 text-red-500'>
+                                    <>*Chọn một trong những Gundam đang có trong Bộ Sưu Tập của bạn để trao đổi.</>
+                                </span>
 
-                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6 max-h-96 overflow-y-auto">
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6 max-h-96 overflow-y-auto mt-5">
                                     {yourGundamList?.map((gundam) => (
                                         <Card
                                             key={gundam.gundam_id}
@@ -351,7 +339,7 @@ export default function ModalOfferExchange({ isOpen, onClose, requestData, gunda
                         children: (
                             <div className="pt-2">
                                 <p className="mb-4 text-red-500">
-                                    *Lưu ý: Chọn một trong những Gundam của {requestData?.full_name} để trao đổi.
+                                    *Chọn một trong những Gundam của {requestData?.full_name} để trao đổi.
                                 </p>
 
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6 max-h-96 overflow-y-auto">
@@ -407,8 +395,9 @@ export default function ModalOfferExchange({ isOpen, onClose, requestData, gunda
                                         type="primary"
                                         onClick={handleSubmit}
                                         loading={isSubmitting}
+                                        icon={<UploadOutlined />}
                                         disabled={!selectedGundam}>
-                                        < UploadOutlined /> Gửi đề xuất trao đổi
+                                        {isSubmitting ? "Đang gửi đề xuất..." : "Gửi đề xuất trao đổi"}
                                     </Button>
                                 </div>
                             </div>

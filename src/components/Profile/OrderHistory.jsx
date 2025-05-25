@@ -442,7 +442,6 @@ const OrderHistory = () => {
         open={confirmModalVisible}
         onCancel={handleCancelConfirm}
         confirmLoading={confirmLoading}
-        centered
         footer={[
           <Button key="cancel" onClick={handleCancelConfirm}>
             Hủy
@@ -451,6 +450,7 @@ const OrderHistory = () => {
             key="confirm"
             type="primary"
             danger
+            icon={<CheckCircleOutlined />}
             onClick={handleConfirmDelivery}
             loading={confirmLoading}
           >

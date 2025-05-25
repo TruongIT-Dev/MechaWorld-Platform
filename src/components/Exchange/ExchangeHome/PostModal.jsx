@@ -80,7 +80,7 @@ export default function PostModal({ onClose, onSuccess, currentUser }) {
 
         try {
             // Get form values
-            const formValues = form.getFieldsValue();
+            // const formValues = form.getFieldsValue();
 
             // Tìm kiếm trong gundamList (dữ liệu từ API) thay vì userGundams (mock data)
             const postData = {
@@ -306,15 +306,17 @@ export default function PostModal({ onClose, onSuccess, currentUser }) {
                             </Button>
                         )}
 
+
                         {currentStep === steps.length - 1 && (
                             <Button
                                 className="bg-blue-500"
                                 type="primary"
                                 htmlType="submit"
                                 loading={isSubmitting}
+                                icon={<UploadOutlined />}
                                 disabled={selectedGundams.length === 0}
                             >
-                                <UploadOutlined /> Đăng bài
+                                {isSubmitting ? "Đang đăng bài..." : "Đăng bài viết trao đổi"}
                             </Button>
                         )}
                     </div>

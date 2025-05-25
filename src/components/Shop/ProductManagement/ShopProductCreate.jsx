@@ -2,7 +2,7 @@ import Cookies from "js-cookie";
 import PropTypes from "prop-types";
 import { useEffect, useState } from "react";
 import { Form, message, notification, Steps, Card, Button, Space, Breadcrumb } from "antd";
-import { ArrowLeftOutlined, ArrowRightOutlined, CheckOutlined, PlusOutlined } from '@ant-design/icons';
+import { ArrowLeftOutlined, ArrowRightOutlined, CheckCircleOutlined, CheckOutlined, PlusOutlined } from '@ant-design/icons';
 
 import { GetGrades } from '../../../apis/Gundams/APIGundam';
 import { PostGundam } from "../../../apis/User/APIUser";
@@ -121,7 +121,7 @@ const ShopProductCreate = ({ setIsCreating }) => {
     const values = form.getFieldsValue(true);
     setIsUploading(true);
 
-    const hideLoading = message.loading("Đang xử lý...", 0);
+    // const hideLoading = message.loading("Đang xử lý...", 0);
     const formData = new FormData();
 
     // Thêm các trường cơ bản
@@ -165,7 +165,7 @@ const ShopProductCreate = ({ setIsCreating }) => {
 
     PostGundam(user.id, formData)
       .then((response) => {
-        hideLoading();
+        // hideLoading();
         if (response.status === 201) {
           notification.success({
             message: "Thêm thành công Gundam!",
@@ -179,7 +179,7 @@ const ShopProductCreate = ({ setIsCreating }) => {
         }
       })
       .catch((error) => {
-        hideLoading();
+        // hideLoading();
         console.error("Error details:", error);
         message.error("Lỗi khi đăng ký sản phẩm! Vui lòng thử lại.");
       })
@@ -287,7 +287,7 @@ const ShopProductCreate = ({ setIsCreating }) => {
                   type="primary"
                   onClick={handleFinish}
                   className="bg-green-600 hover:bg-green-500"
-                  icon={<PlusOutlined />}
+                  icon={<CheckCircleOutlined />}
                   disabled={isUploading}
                   loading={isUploading}
                 >

@@ -20,16 +20,27 @@ export default function PostsTable({ onViewOffers, onViewGunplas, onDeletePost, 
     // Delete post confirmation
     const showDeleteConfirm = (postId) => {
         confirm({
-            title: 'Bạn có chắc chắn muốn xóa bài viết này?',
+            title: 'Xóa bài viết Trao đổi?',
             icon: <ExclamationCircleOutlined />,
-            content: 'Bài viết sẽ bị xóa vĩnh viễn và không thể khôi phục.',
-            okText: 'Xóa',
+            content: (
+                <div className="text-red-600 space-y-2 text-base">
+                    <p>
+                        - Bài viết sẽ bị <strong>xóa vĩnh viễn</strong> khỏi nền tảng.
+                    </p>
+                    <p>
+                        - Mọi đề xuất trao đổi cũng sẽ bị <strong>hủy bỏ.</strong>
+                    </p>
+                    <p>
+                        - <strong>Hành động này không thể hoàn tác.</strong>
+                    </p>
+                </div>
+            ),
+            okText: 'Xóa bài viết',
             okType: 'danger',
             cancelText: 'Hủy',
             onOk() {
-                // console.log(postId);
                 onDeletePost(postId);
-            }
+            },
         });
     };
 
@@ -67,7 +78,7 @@ export default function PostsTable({ onViewOffers, onViewGunplas, onDeletePost, 
                     {exchange_post?.content}
                 </Typography.Paragraph>
             ),
-          },
+        },
         {
             title: "Đề xuất",
             key: "offers",

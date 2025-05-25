@@ -143,7 +143,7 @@ const ConditionVersionStep = ({
                 rules={[{ required: true, message: "Vui lòng nhập mô tả sản phẩm!" }]}
             >
                 <TextArea
-                    rows={4}
+                    autoSize={{ minRows: 4, maxRows: 8 }}
                     placeholder="Mô tả chi tiết về sản phẩm, đặc điểm nổi bật..."
                     maxLength={2000}
                     showCount

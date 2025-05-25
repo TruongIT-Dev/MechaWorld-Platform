@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
-import { Layout, Card, Tabs, Typography, message } from "antd";
+import { Layout, Card, Tabs, Typography, message, notification } from "antd";
+import { useSelector } from "react-redux";
 
 import PostsTable from "./PostsTable";
 import OffersDrawer from "./OffersDrawer";
 import ListGundamModal from "./ListGundamModal";
 import OfferDetailModal from "./OfferDetailModal";
-import { deleteExchangePost, getAllUserExchangePost } from "../../../apis/Exchange/APIExchange";
+import { deleteExchangePost, getAllUserExchangePost, acceptOffer, rejectOffer } from "../../../apis/Exchange/APIExchange";
+import { checkWallet } from "../../../apis/User/APIUser";
 
 const { Content } = Layout;
 const { TabPane } = Tabs;
@@ -19,53 +21,190 @@ export default function ExchangeMyPost() {
     const [selectedOffer, setSelectedOffer] = useState(null);
     const [postOffers, setPostOffers] = useState([]);
     const [gunplasModalVisible, setGunplasModalVisible] = useState(false);
-    const [userPost,setUserPost] = useState([]);
+    const [userPost, setUserPost] = useState([]);
+
+    const user = useSelector((state) => state.auth.user);
+    const userId = useSelector((state) => state.auth.user?.id);
 
     // View post offers
     const viewOffers = (post) => {
         setPostOffers(post.offers);
-        // setSelectedPost(post);
-        // console.log(post.offers);
+        setSelectedPost(post);
         setOffersDrawerVisible(true);
     };
 
     // View gunplas in the post
     const viewGunplas = (post) => {
         setSelectedPost(post);
-        // setGunplasModalVisible(true);
-        // console.log(post);
+        setGunplasModalVisible(true);
     };
 
     // View offer details
-    const viewOfferDetail = (offer) => {
-        setSelectedOffer(offer);
+    const viewOfferDetail = (offer, originalOffer = null) => {
+        console.log("Selected offer:", offer);
+        console.log("Original offer:", originalOffer);
+        setSelectedOffer({
+            ...offer,
+            originalOffer: originalOffer // Lưu data gốc để dùng cho API
+        });
         setOfferDetailModalVisible(true);
-        // console.log(offer);
     };
 
     // Handle offer actions (accept/reject)
-    const handleOfferAction = (offerId, action) => {
+    const handleOfferAction = async (offerId, action) => {
         console.log(`Offer ${offerId} ${action}`);
-        // In a real app, you would update the offer status in your database
+
+        if (action === "accept") {
+            // Xử lý chấp nhận đề xuất
+            await handleAcceptOffer(offerId);
+        } else if (action === "reject") {
+            // Xử lý từ chối đề xuất
+            await handleRejectOffer(offerId);
+        }
+    };
+
+    // Hàm xử lý chấp nhận đề xuất
+    const handleAcceptOffer = async (offerId) => {
+        try {
+            // Tìm offer từ selectedOffer.originalOffer hoặc postOffers (data gốc)
+            let currentOffer = null;
+
+            if (selectedOffer?.originalOffer) {
+                currentOffer = selectedOffer.originalOffer;
+            } else {
+                currentOffer = postOffers.find(offer => offer.id === offerId);
+            }
+
+            if (!currentOffer) {
+                throw new Error("Không tìm thấy thông tin đề xuất");
+            }
+
+            // Kiểm tra số dư ví hiện tại nếu user phải bù trừ tiền
+            if (currentOffer.payer_id === userId && currentOffer.compensation_amount > 0) {
+                const walletResponse = await checkWallet(userId);
+                const currentBalance = walletResponse?.data?.balance || 0;
+                const requiredAmount = currentOffer.compensation_amount;
+
+                if (currentBalance < requiredAmount) {
+                    notification.error({
+                        message: 'BẠN KHÔNG ĐỦ SỐ DƯ',
+                        description: (
+                            <div>
+                                <div>Số dư hiện tại: <strong>{currentBalance.toLocaleString()}đ</strong></div>
+                                <div>Số tiền cần thanh toán: <strong>{requiredAmount.toLocaleString()}đ</strong></div>
+                            </div>
+                        ),
+                        duration: 5,
+                    });
+                    return;
+                }
+            }
+
+            // Gọi API chấp nhận đề xuất với post_id và offer_id từ data gốc
+            const res = await acceptOffer(currentOffer.post_id, currentOffer.id);
+
+            if (res.status === 200) {
+                notification.success({
+                    message: 'CHẤP NHẬN ĐỀ XUẤT THÀNH CÔNG',
+                    description: 'Đề xuất trao đổi đã được chấp nhận',
+                });
+
+                // Đóng modal
+                setOfferDetailModalVisible(false);
+                setOffersDrawerVisible(false);
+
+                // Refresh danh sách bài viết
+                await refreshUserPosts();
+
+                // Chuyển hướng sau 1.5 giây
+                setTimeout(() => {
+                    window.location.href = `/exchange/detail/${res.data.id}`;
+                }, 1500);
+            }
+        } catch (error) {
+            console.error('Error accepting offer:', error);
+            notification.error({
+                message: 'LỖI KHI CHẤP NHẬN ĐỀ XUẤT',
+                description: error.response?.data?.message || error.message || 'Có lỗi xảy ra, vui lòng thử lại',
+            });
+        }
+    };
+
+    // Hàm xử lý từ chối đề xuất
+    const handleRejectOffer = async (offerId) => {
+        try {
+            // Tìm offer từ selectedOffer.originalOffer hoặc postOffers (data gốc)
+            let currentOffer = null;
+
+            if (selectedOffer?.originalOffer) {
+                currentOffer = selectedOffer.originalOffer;
+            } else {
+                currentOffer = postOffers.find(offer => offer.id === offerId);
+            }
+
+            if (!currentOffer) {
+                throw new Error("Không tìm thấy thông tin đề xuất");
+            }
+
+            // Gọi API từ chối đề xuất với post_id và offer_id từ data gốc
+            const res = await rejectOffer(currentOffer.id);
+
+            if (res.status === 200) {
+                notification.success({
+                    message: 'TỪ CHỐI ĐỀ XUẤT THÀNH CÔNG',
+                    description: 'Đề xuất trao đổi đã được từ chối',
+                });
+
+                // Đóng modal
+                setOfferDetailModalVisible(false);
+
+                // Refresh danh sách offers trong drawer nếu đang mở
+                if (offersDrawerVisible && selectedPost) {
+                    const updatedOffers = postOffers.filter(offer => offer.id !== currentOffer.id);
+                    setPostOffers(updatedOffers);
+                }
+
+                // Refresh danh sách bài viết
+                await refreshUserPosts();
+            }
+        } catch (error) {
+            console.error('Error rejecting offer:', error);
+            notification.error({
+                message: 'LỖI KHI TỪ CHỐI ĐỀ XUẤT',
+                description: 'Có lỗi xảy ra, vui lòng thử lại',
+            });
+        }
+    };
+
+    // Hàm refresh danh sách bài viết
+    const refreshUserPosts = async () => {
+        try {
+            const res = await getAllUserExchangePost();
+            setUserPost(res.data);
+        } catch (error) {
+            console.error("Error refreshing user posts:", error);
+        }
     };
 
     // Delete post
-    const handleDeletePost = (postId) => {
-        console.log(`Post ${postId} deleted`);
-        deleteExchangePost(postId).then((res) => {
-            if ( res.sttatus === 200) {
+    const handleDeletePost = async (postId) => {
+        try {
+            console.log(`Post ${postId} deleted`);
+            const res = await deleteExchangePost(postId);
+
+            if (res.status === 200) {
                 message.success(`Đã xóa bài viết!`);
-                getAllUserExchangePost().then((res) => {
-                    setUserPost(res.data);
-                })
+                await refreshUserPosts();
             }
-        })
+        } catch (error) {
+            console.error("Error deleting post:", error);
+            message.error("Có lỗi xảy ra khi xóa bài viết");
+        }
     };
-    useEffect(()=> {
-        getAllUserExchangePost().then((res) => {
-            setUserPost(res.data);
-        })
-    },[])
+
+    useEffect(() => {
+        refreshUserPosts();
+    }, []);
 
     return (
         <Layout className="min-h-screen bg-gray-100 mt-5">
@@ -101,7 +240,7 @@ export default function ExchangeMyPost() {
                 />
 
                 <OfferDetailModal
-                    visible={offerDetailModalVisible}
+                    open={offerDetailModalVisible}
                     offer={selectedOffer}
                     post={selectedPost}
                     onClose={() => setOfferDetailModalVisible(false)}

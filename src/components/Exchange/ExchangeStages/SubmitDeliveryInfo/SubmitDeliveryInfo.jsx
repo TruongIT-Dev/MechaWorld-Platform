@@ -2,8 +2,8 @@ import axios from "axios";
 import PropTypes from "prop-types";
 import { useSelector } from "react-redux";
 import { useEffect, useState } from "react";
-import { EditOutlined, EnvironmentOutlined, HomeOutlined, InfoCircleOutlined, PhoneOutlined, PlusOutlined, TruckOutlined, UserOutlined } from '@ant-design/icons';
-import { Alert, Button, Card, Checkbox, Descriptions, Empty, Form, Input, message, Modal, Select, Space, Tabs, Typography } from "antd";
+import { EditOutlined, EnvironmentOutlined, HomeOutlined, InboxOutlined, InfoCircleOutlined, PhoneOutlined, PlusCircleOutlined, PlusOutlined, TruckOutlined, UserOutlined } from '@ant-design/icons';
+import { Alert, Button, Card, Checkbox, Descriptions, Divider, Empty, Form, Input, message, Modal, Select, Space, Tabs, Typography } from "antd";
 
 import { deleteAddress, getUserAddresses, postUserAddresses, updateAddress } from "../../../../apis/User/APIUser";
 // Import AOS
@@ -54,7 +54,7 @@ const SubmitDeliveryInfo = ({
   useEffect(() => {
     AOS.init({
       duration: 800,
-      once: false,
+      once: true,
       mirror: true,
       easing: 'ease-in-out',
     });
@@ -83,18 +83,20 @@ const SubmitDeliveryInfo = ({
       setIsPickupAddress(newPickup);
     }
   }, [addresses, selectedAddress, selectedPickupAddress, setIsPrimary, setIsPickupAddress]);
-  const fetchAddress = async () => {
-        // Chỉ gọi API khi component mount hoặc khi dependency thay đổi
-        if (addresses.length === 0) {  // Chỉ fetch khi không có địa chỉ
-          const response = await fetchUserAddresses();
-          if (response) {
-            setAddresses(response);
-          }
-        }
-  };
-  useEffect(() => {
-    
 
+
+  const fetchAddress = async () => {
+    // Chỉ gọi API khi component mount hoặc khi dependency thay đổi
+    if (addresses.length === 0) {  // Chỉ fetch khi không có địa chỉ
+      const response = await fetchUserAddresses();
+      if (response) {
+        setAddresses(response);
+      }
+    }
+  };
+
+
+  useEffect(() => {
     fetchProvinces();
     // fetchAddress();
   }, [addresses]);
@@ -441,10 +443,10 @@ const SubmitDeliveryInfo = ({
             <div className="text-gray-700 text-sm space-y-3 mt-2">
               <ul className="list-disc list-inside space-y-1">
                 <li>
-                  <strong>Địa chỉ giao hàng:</strong> là nơi người nhận sẽ nhận được đơn hàng. Đây là địa điểm mà khách hàng mong muốn nhận hàng.
+                  <strong>Thông tin giao hàng:</strong> là nơi người nhận sẽ nhận được đơn hàng. Đây là địa điểm mà khách hàng mong muốn nhận hàng.
                 </li>
                 <li>
-                  <strong>Địa chỉ lấy hàng:</strong> là nơi bạn muốn đơn vị vận chuyển đến để nhận hàng từ bạn. Đây là địa điểm để đơn vị vận chuyển đến lấy hàng.
+                  <strong>Thông tin lấy hàng:</strong> là nơi bạn muốn đơn vị vận chuyển đến để nhận hàng từ bạn. Đây là địa điểm để đơn vị vận chuyển đến lấy hàng.
                 </li>
                 <li>
                   <strong>Lưu ý:</strong> Hãy đảm bảo bạn đã cung cấp thông tin địa chỉ đầy đủ và chính xác để tránh sai sót khi vận chuyển.
@@ -460,86 +462,13 @@ const SubmitDeliveryInfo = ({
           <div className="mt-4">
 
             {/* THÔNG TIN GIAO HÀNG */}
-            <div data-aos="fade-right" data-aos-delay="100">
-              <Card className="shadow-md border-blue-200 overflow-hidden">
-                <div className="flex justify-between items-center mb-4">
-                  <Typography.Title level={4} className="m-0">
-                    <Space>
-                      <HomeOutlined className="text-blue-500 animate-pulse" />
-                      THÔNG TIN GIAO HÀNG
-                    </Space>
-                  </Typography.Title>
-                  <Button
-                    type="primary"
-                    ghost
-                    size="small"
-                    icon={<EditOutlined />}
-                    onClick={() => setIsModalVisible(true)}
-                    className="hover:scale-105 transition-transform"
-                  >
-                    Thay đổi
-                  </Button>
-                </div>
-
-                <Descriptions bordered size="small" column={1} className="bg-green-50 rounded-md">
-                  {/* Tên người nhận hàng */}
-                  <Descriptions.Item
-                    label={
-                      <Space>
-                        <UserOutlined className="text-green-600" />
-                        <span>Người nhận hàng</span>
-                      </Space>
-                    }
-                  >
-                    <Typography.Text>{selectedPickupAddress?.full_name}</Typography.Text>
-                  </Descriptions.Item>
-
-                  {/* Số điện thoại người nhận */}
-                  <Descriptions.Item
-                    label={
-                      <Space>
-                        <PhoneOutlined className="text-green-600" />
-                        <span>Số điện thoại</span>
-                      </Space>
-                    }
-                  >
-                    <Typography.Text>{PhoneSplitter(selectedPickupAddress?.phone_number)}</Typography.Text>
-                  </Descriptions.Item>
-
-                  <Descriptions.Item
-                    label={
-                      <Space>
-                        <EnvironmentOutlined className="text-green-600" />
-                        <span>Địa chỉ</span>
-                      </Space>
-                    }
-                  >
-                    <Typography.Text>
-                      {selectedPickupAddress?.detail}, {selectedPickupAddress?.ward_name}, {selectedPickupAddress?.district_name}, {selectedPickupAddress?.province_name}
-                    </Typography.Text>
-                  </Descriptions.Item>
-                </Descriptions>
-              </Card>
-            </div>
-
-            {/* Animation giữa 2 cards - Truck Movement */}
-            <div data-aos="zoom-in" data-aos-delay="300" className="flex justify-center py-4">
-              <div className="delivery-animation">
-                <div className="truck-container">
-                  <TruckOutlined className="text-3xl text-blue-600 truck-icon" />
-                  <div className="road"></div>
-                </div>
-              </div>
-            </div>
-
-            {/* THÔNG TIN LẤY HÀNG */}
             <div data-aos="fade-left" data-aos-delay="200">
-              <Card className="mb-4 shadow-md border-orange-200 overflow-hidden">
+              <Card className="mb-4 shadow-md overflow-hidden">
                 <div className="flex justify-between items-center mb-4">
                   <Typography.Title level={4} className="m-0">
                     <Space>
-                      <TruckOutlined className="text-orange-500" />
-                      THÔNG TIN LẤY HÀNG
+                      <HomeOutlined className="text-blue-500" />
+                      THÔNG TIN GIAO HÀNG
                     </Space>
                   </Typography.Title>
                   <Button
@@ -594,6 +523,71 @@ const SubmitDeliveryInfo = ({
                 </Descriptions>
               </Card>
             </div>
+
+            <Divider />
+
+            {/* THÔNG TIN LẤY HÀNG */}
+            <div data-aos="fade-right" data-aos-delay="100">
+              <Card className="shadow-mdoverflow-hidden">
+                <div className="flex justify-between items-center mb-4">
+                  <Typography.Title level={4} className="m-0">
+                    <Space>
+                      <InboxOutlined className="text-orange-500" />
+                      THÔNG TIN LẤY HÀNG
+                    </Space>
+                  </Typography.Title>
+                  <Button
+                    type="primary"
+                    ghost
+                    size="small"
+                    icon={<EditOutlined />}
+                    onClick={() => setIsModalVisible(true)}
+                    className="hover:scale-105 transition-transform"
+                  >
+                    Thay đổi
+                  </Button>
+                </div>
+
+                <Descriptions bordered size="small" column={1} className="bg-green-50 rounded-md">
+                  {/* Tên người nhận hàng */}
+                  <Descriptions.Item
+                    label={
+                      <Space>
+                        <UserOutlined className="text-green-600" />
+                        <span>Người nhận hàng</span>
+                      </Space>
+                    }
+                  >
+                    <Typography.Text>{selectedPickupAddress?.full_name}</Typography.Text>
+                  </Descriptions.Item>
+
+                  {/* Số điện thoại người nhận */}
+                  <Descriptions.Item
+                    label={
+                      <Space>
+                        <PhoneOutlined className="text-green-600" />
+                        <span>Số điện thoại</span>
+                      </Space>
+                    }
+                  >
+                    <Typography.Text>{PhoneSplitter(selectedPickupAddress?.phone_number)}</Typography.Text>
+                  </Descriptions.Item>
+
+                  <Descriptions.Item
+                    label={
+                      <Space>
+                        <EnvironmentOutlined className="text-green-600" />
+                        <span>Địa chỉ</span>
+                      </Space>
+                    }
+                  >
+                    <Typography.Text>
+                      {selectedPickupAddress?.detail}, {selectedPickupAddress?.ward_name}, {selectedPickupAddress?.district_name}, {selectedPickupAddress?.province_name}
+                    </Typography.Text>
+                  </Descriptions.Item>
+                </Descriptions>
+              </Card>
+            </div>
           </div>
         ) : (
           <>
@@ -641,11 +635,9 @@ const SubmitDeliveryInfo = ({
             <Tabs.TabPane tab="Địa chỉ đã lưu" key="1">
               {addresses.length > 0 ? (
                 <div className="grid gap-3">
-                  {addresses.map((addr, index) => (
+                  {addresses.map((addr) => (
                     <div
                       key={addr.id}
-                      data-aos="fade-up"
-                      data-aos-delay={index * 100}
                       onClick={() => {
                         setUserAddress(addr);
 
@@ -658,8 +650,8 @@ const SubmitDeliveryInfo = ({
                         }
                       }}
                       className={`transition-all duration-200 rounded-lg border cursor-pointer p-4 hover:shadow-md ${userAddress?.id === addr.id
-                          ? 'border-blue-500 bg-blue-50'
-                          : 'border-gray-200 bg-white'
+                        ? 'border-blue-500 bg-blue-50'
+                        : 'border-gray-200 bg-white'
                         }`}
                     >
                       <div className="flex justify-between items-start gap-4">
@@ -674,6 +666,7 @@ const SubmitDeliveryInfo = ({
                         <div className="flex flex-col gap-2">
                           <Button
                             size="small"
+                            icon={<EditOutlined className="text-sm mt-1" />}
                             onClick={(e) => {
                               e.stopPropagation();
                               handleEditAddress(addr);
@@ -700,7 +693,7 @@ const SubmitDeliveryInfo = ({
 
                       <div className="mt-2 flex items-center space-x-2">
                         {addr.is_primary ? (
-                          <span className="px-2 py-0.5 text-xs font-medium text-white bg-red-500 rounded shadow animate-pulse">
+                          <span className="px-2 py-0.5 text-xs font-medium text-white bg-red-500 rounded shadow">
                             Địa chỉ giao hàng
                           </span>
                         ) : (
@@ -717,7 +710,7 @@ const SubmitDeliveryInfo = ({
                         )}
 
                         {addr.is_pickup_address ? (
-                          <span className="px-2 py-1 text-xs font-semibold text-white bg-blue-500 rounded animate-pulse">
+                          <span className="px-2 py-1 text-xs font-semibold text-white bg-blue-500 rounded">
                             Địa chỉ lấy hàng
                           </span>
                         ) : (
@@ -737,7 +730,7 @@ const SubmitDeliveryInfo = ({
                   ))}
                 </div>
               ) : (
-                <div data-aos="fade-in" data-aos-duration="800">
+                <div>
                   <Empty
                     description="Bạn chưa có địa chỉ nào"
                     image={Empty.PRESENTED_IMAGE_SIMPLE}
@@ -746,9 +739,10 @@ const SubmitDeliveryInfo = ({
                 </div>
               )}
 
-              <div className="mt-4 text-right" data-aos="fade-up">
+              <div className="mt-4 text-right">
                 <Button
                   type="primary"
+                  icon={<PlusCircleOutlined className="text-lg mt-1" />}
                   onClick={() => handleAdding()}
                   className="bg-blue-500 hover:scale-105 transition-all duration-300"
                 >
@@ -762,9 +756,9 @@ const SubmitDeliveryInfo = ({
                 form={form}
                 layout="vertical"
                 onFinish={handleAdding}
-                className="gap-4 mt-4"
+                className="gap-4"
               >
-                <div data-aos="fade-right" data-aos-duration="600">
+                <div>
                   <Form.Item
                     label="Thành phố"
                     name="city"
@@ -781,7 +775,7 @@ const SubmitDeliveryInfo = ({
                   </Form.Item>
                 </div>
 
-                <div data-aos="fade-right" data-aos-duration="600" data-aos-delay="100">
+                <div>
                   <Form.Item
                     label="Quận/Huyện"
                     name="district"
@@ -803,7 +797,7 @@ const SubmitDeliveryInfo = ({
                   </Form.Item>
                 </div>
 
-                <div data-aos="fade-right" data-aos-duration="600" data-aos-delay="200">
+                <div>
                   <Form.Item
                     label="Phường/Xã"
                     name="ward"
@@ -824,7 +818,7 @@ const SubmitDeliveryInfo = ({
                   </Form.Item>
                 </div>
 
-                <div data-aos="fade-left" data-aos-duration="600" data-aos-delay="100">
+                <div>
                   <Form.Item
                     label="Địa chỉ cụ thể"
                     name="detail"
@@ -835,7 +829,7 @@ const SubmitDeliveryInfo = ({
                   </Form.Item>
                 </div>
 
-                <div data-aos="fade-left" data-aos-duration="600" data-aos-delay="200">
+                <div>
                   <Form.Item
                     label="Số điện thoại"
                     name="phone_number"
@@ -849,7 +843,7 @@ const SubmitDeliveryInfo = ({
                   </Form.Item>
                 </div>
 
-                <div data-aos="fade-left" data-aos-duration="600" data-aos-delay="300">
+                <div>
                   <Form.Item
                     label="Người nhận"
                     name="full_name"
@@ -862,7 +856,7 @@ const SubmitDeliveryInfo = ({
                   </Form.Item>
                 </div>
 
-                <div data-aos="zoom-in" data-aos-duration="600" data-aos-delay="400">
+                <div>
                   <Form.Item className="col-span-2 -mt-2">
                     <Checkbox
                       checked={isPrimary}
@@ -883,7 +877,7 @@ const SubmitDeliveryInfo = ({
                   </Form.Item>
                 </div>
 
-                <Form.Item className="col-span-full flex justify-end gap-2" data-aos="fade-up" data-aos-duration="800">
+                <Form.Item className="col-span-full flex justify-end gap-5">
                   <Button
                     onClick={() => {
                       setActiveTab("1");
@@ -891,7 +885,8 @@ const SubmitDeliveryInfo = ({
                       setCurrentAddressId(null);
                       form.resetFields();
                     }}
-                    className="hover:bg-gray-100 transition-colors"
+                    className="hover:bg-gray-100 transition-colors mr-4"
+                    danger
                   >
                     Hủy
                   </Button>
@@ -901,7 +896,7 @@ const SubmitDeliveryInfo = ({
                     className="bg-blue-500 hover:bg-blue-600 hover:scale-105 transition-all duration-300"
                     loading={loading}
                   >
-                    {isUpdate ? "Cập nhật" : "Lưu địa chỉ"}
+                    {isUpdate ? "Cập nhật địa chỉ" : "Lưu địa chỉ"}
                   </Button>
                 </Form.Item>
               </Form>

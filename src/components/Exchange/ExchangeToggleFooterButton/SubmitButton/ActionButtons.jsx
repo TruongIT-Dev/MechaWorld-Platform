@@ -87,7 +87,7 @@ const ActionButtons = ({
   // Handle Stage 1
   // Handle Gửi Submit Thông tin vận chuyển của user
   const handleAddressConfirmation = () => {
-    console.log("Confirming delivery address:", selectedAddress);
+    // console.log("Confirming delivery address:", selectedAddress);
     setIsLoading(true);
 
     // Simulate API call
@@ -96,10 +96,10 @@ const ActionButtons = ({
       addressExchange(exchangeDetail.id, selectedPickupAddress.id, selectedAddress.id).then((res) => {
         if (res.status === 200) {
           moveToNextStage();
-          notification.success({
-            message: "Xác nhận địa chỉ thành công",
-            description: "Vui lòng tiến hành thanh toán để hoàn tất giao dịch"
-          });
+          // notification.success({
+          //   message: "Xác nhận địa chỉ thành công",
+          //   description: "Vui lòng tiến hành thanh toán để hoàn tất giao dịch"
+          // });
         }
       })
       setIsAddressModalVisible(false);
@@ -345,28 +345,32 @@ const ActionButtons = ({
       {/* MODAL SUBMIT ADDRESS FOR STAGE 1 */}
       <Modal
         title={
-          <div className="text-lg font-semibold text-gray-800">
-            Bạn có chắc muốn sử dụng địa chỉ này để giao và lấy hàng?
+          <div className="text-lg font-semibold uppercase">
+            Gửi thông tin giao hàng và nhận hàng
           </div>
         }
         open={isAddressModalVisible}
         onCancel={() => setIsAddressModalVisible(false)}
         footer={null}
-        centered
         className="rounded-xl"
       >
         <div className="py-2 px-1">
           <Alert
-            type="info"
+            type="warning"
             showIcon
             message="Lưu ý"
-            description="Bạn không thể chỉnh sửa lại thông tin vận chuyển sau khi đã gửi. Vui lòng kiểm tra kỹ thông tin trước khi tiếp tục!"
+            description={
+              <span className='text-base'>
+                Bạn <strong className='text-red-500'>không thể chỉnh sửa lại thông tin vận chuyển</strong> sau khi đã gửi.
+                Vui lòng kiểm tra kỹ thông tin trước khi tiếp tục!
+              </span>
+            }
             className="mb-6"
           />
 
           <div className="flex justify-end gap-3">
             <Button onClick={() => setIsAddressModalVisible(false)}>
-              Quay lại
+              Hủy
             </Button>
             <Button
               type="primary"
@@ -375,7 +379,7 @@ const ActionButtons = ({
               loading={isLoading}
               className="bg-blue-500"
             >
-              Xác nhận
+              Gửi thông tin vận chuyển
             </Button>
           </div>
         </div>

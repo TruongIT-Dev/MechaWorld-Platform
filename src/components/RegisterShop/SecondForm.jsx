@@ -2,7 +2,7 @@ import axios from 'axios';
 import { useEffect, useState } from 'react';
 import { Button, Form, Input, message, Modal, Select, Spin, Typography } from 'antd';
 
-import { PlusOutlined } from '@ant-design/icons';
+import { EditOutlined, PlusOutlined } from '@ant-design/icons';
 import { useSelector } from 'react-redux';
 
 import { getUserAddresses, postUserAddresses, updateAddress } from '../../apis/User/APIUser';
@@ -49,7 +49,7 @@ const SecondForm = ({ user, setUser, setHasAddress }) => {
         }
     }, [addresses, setHasAddress]);
 
-    
+
 
     // Fetch user addresses on component mount
     useEffect(() => {
@@ -144,13 +144,13 @@ const SecondForm = ({ user, setUser, setHasAddress }) => {
             is_primary: isPrimary
         };
         try {
-          await updateAddress(user.id, addresses[0].id, addressData);
-          message.success("Cập nhật địa chỉ thành công!");
-          setModalVisible(false);
-          fetchUserAddresses();
+            await updateAddress(user.id, addresses[0].id, addressData);
+            message.success("Cập nhật địa chỉ thành công!");
+            setModalVisible(false);
+            fetchUserAddresses();
         } catch (error) {
-          message.error("Lỗi khi cập nhật địa chỉ!");
-          console.error(error);
+            message.error("Lỗi khi cập nhật địa chỉ!");
+            console.error(error);
         }
     };
     // Handle form submission for new address
@@ -202,47 +202,47 @@ const SecondForm = ({ user, setUser, setHasAddress }) => {
         try {
             const filteredCities = cities.filter((city) => city.ProvinceName === address.province_name);
             if (filteredCities.length > 0) {
-              const selectedCityId = filteredCities[0].ProvinceID;
-              setSelectedCity(selectedCityId);
-            //   console.log("Data city: ",filteredCities);
-                
-              const districtRes = await api.post(`district`, { province_id: selectedCityId });
-              const districtsData = districtRes.data.data;
-              setDistricts(districtsData);
-              
-                
-              const foundDistrict = districtsData.find((d) => d.DistrictName === address.district_name);
-            //   console.log("Data district: ",foundDistrict);
-              if (foundDistrict) {
-                const selectedDistrictId = foundDistrict.DistrictID;
-                setSelectedDistrict(selectedDistrictId);
-                
-                const wardRes = await api.post(`ward`, { district_id: selectedDistrictId });
-                const wardsData = wardRes.data.data;
-                setWards(wardsData);
-                
-        
-                const foundWard = wardsData.find((w) => w.WardName === address.ward_name);
-                // console.log("Data ward: ", foundWard);
-                form.setFieldsValue({
-                  province_name: filteredCities ? filteredCities.ProvinceName : undefined,
-                  city: selectedCityId,
-                  district_name: foundDistrict ? foundDistrict.DistrictName : undefined,                    
-                  district: selectedDistrictId,
-                  ward_name: foundWard ? foundWard.WardName : undefined,
-                  ward: foundWard ? foundWard.WardCode : undefined,
-                });
-                
-              } else {
-                console.warn("⚠️ Không tìm thấy quận/huyện phù hợp.");
-              }
+                const selectedCityId = filteredCities[0].ProvinceID;
+                setSelectedCity(selectedCityId);
+                //   console.log("Data city: ",filteredCities);
+
+                const districtRes = await api.post(`district`, { province_id: selectedCityId });
+                const districtsData = districtRes.data.data;
+                setDistricts(districtsData);
+
+
+                const foundDistrict = districtsData.find((d) => d.DistrictName === address.district_name);
+                //   console.log("Data district: ",foundDistrict);
+                if (foundDistrict) {
+                    const selectedDistrictId = foundDistrict.DistrictID;
+                    setSelectedDistrict(selectedDistrictId);
+
+                    const wardRes = await api.post(`ward`, { district_id: selectedDistrictId });
+                    const wardsData = wardRes.data.data;
+                    setWards(wardsData);
+
+
+                    const foundWard = wardsData.find((w) => w.WardName === address.ward_name);
+                    // console.log("Data ward: ", foundWard);
+                    form.setFieldsValue({
+                        province_name: filteredCities ? filteredCities.ProvinceName : undefined,
+                        city: selectedCityId,
+                        district_name: foundDistrict ? foundDistrict.DistrictName : undefined,
+                        district: selectedDistrictId,
+                        ward_name: foundWard ? foundWard.WardName : undefined,
+                        ward: foundWard ? foundWard.WardCode : undefined,
+                    });
+
+                } else {
+                    console.warn("⚠️ Không tìm thấy quận/huyện phù hợp.");
+                }
             } else {
-              console.warn("⚠️ Không tìm thấy thành phố phù hợp.");
+                console.warn("⚠️ Không tìm thấy thành phố phù hợp.");
             }
-          } catch (error) {
+        } catch (error) {
             console.error("❌ Lỗi khi load địa chỉ:", error);
-          }
-        
+        }
+
     };
 
     return (
@@ -254,9 +254,9 @@ const SecondForm = ({ user, setUser, setHasAddress }) => {
                 className="address-form"
             >
                 <div className="mb-4">
-                    <h2 className="text-xl font-bold">NHẬP THÔNG TIN CỦA SHOP</h2>
+                    <h2 className="text-xl font-bold">NHẬP ĐỊA CHỈ CỦA SHOP</h2>
                     <Paragraph className="text-gray-500">
-                        Chúng tôi có địa chỉ lấy hàng của bạn để thực hiện việc vận chuyển dễ dàng hơn.
+                        Chúng tôi có thu thập địa chỉ lấy hàng của shop để thực hiện việc vận chuyển dễ dàng hơn.
                     </Paragraph>
                     <Text className="text-red-500 italic text-sm" italic>
                         Lưu ý: Chỉ ghi nhận 1 địa chỉ lấy hàng duy nhất.
@@ -307,11 +307,12 @@ const SecondForm = ({ user, setUser, setHasAddress }) => {
                         <div className="flex items-start justify-end">
                             <Form.Item>
                                 <Button
+                                    icon={<EditOutlined className='mt-[6px]'/>}
                                     type="primary"
                                     onClick={() => handleEdit(addresses[0])}
                                     className="bg-blue-500"
                                 >
-                                    Cập nhật địa chỉ
+                                    Chỉnh sửa
                                 </Button>
                             </Form.Item>
                         </div>
@@ -324,7 +325,7 @@ const SecondForm = ({ user, setUser, setHasAddress }) => {
                                 {/* Thay bằng icon từ thư viện bạn đang dùng nếu không dùng Font Awesome */}
                             </div>
                             <Text className="text-lg font-medium mb-2">Bạn chưa có địa chỉ lấy hàng</Text>
-                            <Text className="text-gray-500 mb-6">Vui lòng thêm địa chỉ lấy hàng để thuận tiện cho việc giao hàng</Text>
+                            <Text className="text-gray-500 mb-6">Vui lòng cung cấp địa chỉ lấy hàng để thuận tiện cho việc vận chuyển.</Text>
                             <Button
                                 type="primary"
                                 onClick={() => setModalVisible(true)}
@@ -362,7 +363,7 @@ const SecondForm = ({ user, setUser, setHasAddress }) => {
                         onClick={async () => {
                             try {
                                 const values = await form.validateFields();
-                                if (addresses.length > 0 ) {
+                                if (addresses.length > 0) {
                                     console.log("Dữ liệu address ht: ", addresses);
                                     console.log("Dữ liệu form: ", values);
                                     handleUpdateAddress(values, addresses);
@@ -370,13 +371,13 @@ const SecondForm = ({ user, setUser, setHasAddress }) => {
                                     console.log("Dữ liệu form: ", values);
                                     handleAddNewAddress(values);
                                 }
-                                
+
                             } catch (error) {
                                 console.error("Validation Error:", error);
                             }
                         }}
                     >
-                        {addresses && addresses.length > 0 ? "Cập nhật" : "Lưu"}
+                        {addresses && addresses.length > 0 ? "Cập nhật" : "Thêm địa chỉ"}
                     </Button>,
                 ]}
             >

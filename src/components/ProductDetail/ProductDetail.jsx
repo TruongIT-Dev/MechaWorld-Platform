@@ -171,8 +171,8 @@ const GundamProductPage = () => {
     }, [imageGundam]);
 
     return (
-        <div className="container mt-32 p-6 bg-gray-100">
-            <div className="wrapper mx-40">
+        <div className="mt-32 p-6 bg-gray-100">
+            <div className="wrapper mx-20">
                 {/* Main Section */}
                 <div className="top-section">
                     <Row gutter={24}>
@@ -184,7 +184,7 @@ const GundamProductPage = () => {
                                 <div className="flex justify-center items-center bg-white shadow-md rounded-md">
                                     <img
                                         src={selectedImage}
-                                        className="w-full h-[700px] max-w-full max-h-80 object-contain"
+                                        className="w-full h-[500px] max-w-full max-h-70 object-contain"
                                     />
                                 </div>
 

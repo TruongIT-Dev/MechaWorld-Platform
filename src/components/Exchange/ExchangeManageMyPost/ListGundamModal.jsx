@@ -4,7 +4,11 @@ import TextArea from "antd/es/input/TextArea";
 const { Text } = Typography;
 
 export default function ListGundamModal({ visible, post, onClose }) {
+
     if (!post) return null;
+
+    // console.log("Post", post);
+
 
     return (
         <Modal
@@ -28,7 +32,7 @@ export default function ListGundamModal({ visible, post, onClose }) {
 
             <Divider orientation="left">
                 <Space>
-                    <Badge count={post.gunplas.length}>
+                    <Badge>
                         <Text strong>Mô hình Gundam</Text>
                     </Badge>
                 </Space>
@@ -36,7 +40,7 @@ export default function ListGundamModal({ visible, post, onClose }) {
 
             <List
                 grid={{ gutter: 16, xs: 1, sm: 2, md: 3, lg: 3, xl: 3, xxl: 3 }}
-                dataSource={post.gunplas}
+                dataSource={post}
                 renderItem={(gunpla) => (
                     <List.Item>
                         <Card

@@ -11,7 +11,7 @@ const ThirdForm = ({ formData, setFormData, setCanProceed }) => {
     return (
         <>
             <Card
-                title={<span className="font-bold">NHỮNG QUY ĐỊNH KHI TRỞ THÀNH NHÀ BÁN HÀNG TẠI MECHAWORLD</span>}
+                title={<span className="font-bold text-2xl flex justify-center">NHỮNG QUY ĐỊNH KHI TRỞ THÀNH NHÀ BÁN HÀNG TẠI MECHAWORLD</span>}
                 bordered={false}
                 className="shadow rounded-xl"
             >

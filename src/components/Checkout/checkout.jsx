@@ -1,7 +1,7 @@
 import { useSelector } from 'react-redux';
 import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { EnvironmentOutlined, ShopOutlined, MoneyCollectOutlined, InfoCircleOutlined } from '@ant-design/icons';
+import { EnvironmentOutlined, ShopOutlined, MoneyCollectOutlined, InfoCircleOutlined, PlusCircleFilled, PlusCircleOutlined } from '@ant-design/icons';
 import { Card, Button, Radio, Divider, message, Table, Modal, Form, Select, Input, Checkbox, Empty, Tabs, notification } from 'antd';
 
 import { useCart } from '../../context/CartContext';
@@ -26,8 +26,12 @@ const groupByShop = (items) => {
 };
 
 const Checkout = () => {
-  const location = useLocation();
+
   const user = useSelector((state) => state.auth.user);
+  const userCookie = Cookies.get('user');
+
+  const [form] = Form.useForm();
+  const location = useLocation();
   const navigate = useNavigate();
 
   const { cartItems } = useCart();
@@ -37,14 +41,17 @@ const Checkout = () => {
   const [loading, setLoading] = useState(true);
   const [note, setNote] = useState('');
   const [isAddressModalVisible, setIsAddressModalVisible] = useState(false);
+  const [tabPannel, setTabPannel] = useState("1");
+
   const [cities, setCities] = useState([]);
   const [districts, setDistricts] = useState([]);
   const [wards, setWards] = useState([]);
   const [selectedCity, setSelectedCity] = useState(null);
   const [selectedDistrict, setSelectedDistrict] = useState(null);
+
   const [isPrimary, setIsPrimary] = useState(true);
+
   const [addresses, setAddresses] = useState([]);
-  const [form] = Form.useForm();
   const [shippingFee, setShippingFee] = useState(0);
   const [userBalance, setUserBalance] = useState(0);
   const [rawExpectedDeliveryDate, setRawExpectedDeliveryDate] = useState('');
@@ -52,7 +59,6 @@ const Checkout = () => {
 
   const [isCalculatingShipping, setIsCalculatingShipping] = useState(false);
 
-  const userCookie = Cookies.get('user');
   const userData = JSON.parse(decodeURIComponent(userCookie));
   const selectedItems = location.state?.selectedItems || cartItems;
 
@@ -261,7 +267,8 @@ const Checkout = () => {
         setUserAddress(newAddress);
       }
       message.success("Thêm địa chỉ thành công!");
-      setIsAddressModalVisible(false);
+      // setIsAddressModalVisible(false);
+      setTabPannel("1");
       form.resetFields();
     } catch (error) {
       message.error("Lỗi khi thêm địa chỉ!");
@@ -371,10 +378,12 @@ const Checkout = () => {
             ) : <p className="text-base text-gray-400">Chưa có địa chỉ nhận hàng</p>}
             <Button
               type="link"
-              className="ml-auto text-blue-500 text-base"
+              danger
+              icon={<PlusCircleOutlined className='mt-1 text-lg' />}
+              className="ml-auto text-red-400 text-base"
               onClick={() => setIsAddressModalVisible(true)}
             >
-              Cập nhật
+             Cập nhật
             </Button>
           </div>
         </Card>
@@ -385,9 +394,8 @@ const Checkout = () => {
           onCancel={() => setIsAddressModalVisible(false)}
           footer={null}
           width={600}
-          centered
         >
-          <Tabs defaultActiveKey="1">
+          <Tabs defaultActiveKey={tabPannel}>
             <Tabs.TabPane tab="Địa chỉ đã lưu" key="1">
               {addresses.length > 0 ? (
                 <div className="grid gap-3">
@@ -446,7 +454,7 @@ const Checkout = () => {
                 form={form}
                 layout="vertical"
                 onFinish={onFinishAddress}
-              className="gap-4 mt-4"
+                className="gap-4 mt-4"
               >
                 <Form.Item
                   label="Thành phố"
