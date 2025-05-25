@@ -1,5 +1,6 @@
 import axios from '../../utils/axios-custome';
 import Cookies from 'js-cookie';
+import { normalizeDeliveryTime } from '../../components/Aution/User/dateFormat';
 
 // Axios request interceptor
 axios.interceptors.request.use((config) => {
@@ -101,15 +102,27 @@ export const ParticipateInAuction = (auctionID) => {
 }
 
 // POST Pay for winning auction bid
+
+
+/**
+ * Thanh toán cho phiên đấu giá thắng
+ * @param {string} auctionID - ID phiên đấu giá
+ * @param {object} paymentData - Dữ liệu thanh toán
+ * @returns {Promise} Promise từ axios
+ */
 export const PayForWinningBid = (auctionID, paymentData) => {
-  return axios.post(`/users/me/auctions/${auctionID}/payment`, {
-    delivery_fee: paymentData.delivery_fee,
-    expected_delivery_time: paymentData.expected_delivery_time,
-    note: paymentData.note || '',
-    user_address_id: paymentData.user_address_id
-  }, {
+  // Chuẩn hóa thời gian giao hàng dự kiến
+  const payload = {
+    ...paymentData,
+    expected_delivery_time: normalizeDeliveryTime(paymentData.expected_delivery_time)
+  };
+
+  console.log('Payment payload:', payload); // Debug log
+
+  return axios.post(`/users/me/auctions/${auctionID}/payment`, payload, {
     headers: {
       'Content-Type': 'application/json',
+      'Authorization': `Bearer ${localStorage.getItem('token')}`
     },
   });
 };

@@ -121,11 +121,17 @@ const AuctionCard = ({ auctionData }) => {
     const now = new Date();
     const startTime = new Date(auction.start_time);
     const endTime = new Date(auction.end_time);
-
+    
+    // If actual_end_time exists, the auction has definitely ended
+    if (auction.actual_end_time != null) {
+        return "ended";
+    }
+    
+    // Otherwise, check the normal time-based status
     if (now < startTime) return "scheduled";
     if (now >= startTime && now <= endTime) return "active";
     return "ended";
-  };
+};
 
   const status = getAuctionStatus();
   

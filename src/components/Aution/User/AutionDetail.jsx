@@ -11,13 +11,13 @@ import { Button, message, Modal, Form, Input, Radio, Divider } from 'antd';
 import { InfoCircleOutlined } from '@ant-design/icons';
 import Cookies from 'js-cookie';
 import axios from 'axios';
+import { formatToCustomTime, formatDisplayTime } from './dateFormat';
+import AuctionHistory from './AuctionHistory';
+import AuctionPaymentModal from './AuctionPaymentModal';
 
-// Hàm format thời gian chuẩn ISO 8601
-const formatToISOTime = (date) => {
-  if (!date) return new Date().toISOString();
-  const dateObj = date instanceof Date ? date : new Date(date);
-  return dateObj.toISOString();
-};
+
+
+
 
 const AuctionDetail = () => {
   const { auctionID } = useParams();
@@ -39,6 +39,8 @@ const AuctionDetail = () => {
   const [shippingFee, setShippingFee] = useState(0);
   const [expectedDeliveryTime, setExpectedDeliveryTime] = useState('');
   const [bidHistory, setBidHistory] = useState([]);
+  const navigate = useNavigate();
+  
 
   const useCountdown = (targetDate) => {
     const [countdown, setCountdown] = useState({
@@ -51,15 +53,17 @@ const AuctionDetail = () => {
     useEffect(() => {
       if (!targetDate) return;
 
-      const formattedDate = formatToISOTime(targetDate);
-      if (isNaN(new Date(formattedDate).getTime())) {
+      const formattedDate = formatToCustomTime(targetDate);
+      const targetTime = new Date(formattedDate).getTime();
+
+      if (isNaN(targetTime)) {
         console.error('Invalid targetDate:', targetDate);
         return;
       }
 
       const interval = setInterval(() => {
         const now = new Date().getTime();
-        const distance = new Date(formattedDate).getTime() - now;
+        const distance = targetTime - now;
 
         if (distance < 0) {
           clearInterval(interval);
@@ -81,7 +85,13 @@ const AuctionDetail = () => {
     return countdown;
   };
 
-  const countdown = useCountdown(auctionDetail?.auction?.end_time);
+  const countdown = useCountdown(
+  auctionDetail?.auction?.status === 'ended' 
+    ? auctionDetail?.auction?.actual_end_time 
+    : auctionDetail?.auction?.end_time
+);
+  
+  
   
   const fetchAuctionDetail = async () => {
     try {
@@ -93,14 +103,15 @@ const AuctionDetail = () => {
         message.warning('Thông tin sản phẩm chưa có sẵn');
       }
 
-      // Xử lý thời gian kết thúc
+      // Xử lý thời gian kết thúc với định dạng mới
       const endTime = data.auction?.end_time;
-      const isValidEndTime = endTime && !isNaN(new Date(formatToISOTime(endTime)).getTime());
+      const formattedEndTime = formatToCustomTime(endTime);
+      const isValidEndTime = endTime && !isNaN(new Date(formattedEndTime).getTime());
 
       setAuctionDetail(data);
       setIsAuctionEnded(
         data.auction?.status === 'ended' ||
-          (isValidEndTime && new Date(formatToISOTime(endTime)).getTime() < Date.now())
+          (isValidEndTime && new Date(formattedEndTime).getTime() < Date.now())
       );
 
       if (data.auction?.winning_bid_id) {
@@ -197,39 +208,39 @@ const fetchUserAddresses = async () => {
   };
 
   // Handle payment submission
-  const handlePaymentSubmit = async () => {
-    try {
-      setPaymentProcessing(true);
+const handlePaymentSubmit = async () => {
+  try {
+    setPaymentProcessing(true);
 
-      if (!selectedAddress?.id) {
-        message.error('Vui lòng chọn địa chỉ nhận hàng!');
-        return;
-      }
-
-      const values = await paymentForm.validateFields();
-      
-      // Đảm bảo expected_delivery_time có định dạng chuẩn
-      const formattedDeliveryTime = expectedDeliveryTime
-        ? new Date(expectedDeliveryTime).toISOString()
-        : new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString(); 
-      const paymentData = {
-        delivery_fee: shippingFee,
-        expected_delivery_time: formattedDeliveryTime,
-        note: values.note,
-        user_address_id: selectedAddress.id
-      };
-
-      await PayForWinningBid(auctionID, paymentData);
-      message.success('Thanh toán thành công!');
-      setPaymentModalVisible(false);
-      fetchAuctionDetail();
-    } catch (error) {
-      console.error('Payment error:', error);
-      message.error(error.response?.data?.message || 'Lỗi khi thanh toán');
-    } finally {
-      setPaymentProcessing(false);
+    if (!selectedAddress?.id) {
+      message.error('Vui lòng chọn địa chỉ nhận hàng!');
+      return;
     }
-  };
+
+    const values = await paymentForm.validateFields();
+
+    const paymentData = {
+      delivery_fee: shippingFee,
+      expected_delivery_time: formatToCustomTime(expectedDeliveryTime), // ✅ dùng format chuẩn
+      note: values.note,
+      user_address_id: selectedAddress.id
+    };
+
+    console.log('Sending payment data:', paymentData);
+
+
+    await PayForWinningBid(auctionID, paymentData);
+    message.success('Thanh toán thành công!');
+    setPaymentModalVisible(false);
+    fetchAuctionDetail();
+  } catch (error) {
+    console.error('Payment error:', error);
+    message.error(error.response?.data?.message || 'Lỗi khi thanh toán');
+  } finally {
+    setPaymentProcessing(false);
+  }
+};
+
 
   // SSE connection
   useEffect(() => {
@@ -385,7 +396,6 @@ const fetchUserAddresses = async () => {
             </div>
           )}
         </div>
-
         <div className="flex justify-between gap-8">
           {/* Product Image Section */}
           <div className="w-1/2">
@@ -491,112 +501,19 @@ const fetchUserAddresses = async () => {
                       {paymentProcessing ? 'Đang xử lý...' : 'Thanh toán ngay'}
                     </button>
                           {/* Payment Modal */}
-              <Modal
-                  title="Thanh toán đấu giá"
-                  visible={paymentModalVisible}
-                  onCancel={() => setPaymentModalVisible(false)}
-                  onOk={handlePaymentSubmit}
-                  confirmLoading={paymentProcessing}
-                  width={800}
-                >
-                  <Form form={paymentForm} layout="vertical">
-                  <div className="grid grid-cols-2 gap-6">
-                    <div>
-                      <h3 className="font-semibold mb-4">Thông tin sản phẩm</h3>
-                      <div className="flex items-center gap-4 mb-4">
-                        <img 
-                          src={auctionDetail.auction.gundam_snapshot.image_url} 
-                          alt={auctionDetail.auction.gundam_snapshot.name}
-                          className="w-20 h-20 object-cover rounded"
-                        />
-                        <div>
-                          <p className="font-medium">{auctionDetail.auction.gundam_snapshot.name}</p>
-                          <p>Giá thắng: {winnerInfo.finalPrice.toLocaleString()} VNĐ</p>
-                        </div>
-                      </div>
-
-                      <h3 className="font-semibold mb-4 mt-6">Địa chỉ nhận hàng</h3>
-                      {userAddresses.length > 0 ? (
-                        <Radio.Group
-                          value={selectedAddress?.id}
-                          onChange={(e) => {
-                            const addr = userAddresses.find(a => a.id === e.target.value);
-                            setSelectedAddress(addr);
-                          }}
-                          className="w-full"
-                        >
-                          <div className="space-y-3">
-                            {userAddresses.map(address => (
-                              <Radio key={address.id} value={address.id} className="w-full">
-                                <div className={`p-3 border rounded-lg ml-2 ${selectedAddress?.id === address.id ? 'border-blue-500 bg-blue-50' : 'border-gray-200'}`}>
-                                  <div className="flex justify-between">
-                                    <div>
-                                      <p className="font-medium">{address.full_name} ({address.phone_number})</p>
-                                      <p className="text-sm">
-                                        {address.detail}, {address.ward_name}, {address.district_name}, {address.province_name}
-                                      </p>
-                                    </div>
-                                    {address.is_primary && (
-                                      <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">Mặc định</span>
-                                    )}
-                                  </div>
-                                </div>
-                              </Radio>
-                            ))}
-                          </div>
-                        </Radio.Group>
-                      ) : (
-                        <div className="text-center py-4 text-gray-500">
-                          Bạn chưa có địa chỉ nào. Vui lòng thêm địa chỉ trong trang cá nhân.
-                        </div>
-                      )}
-
-                      <Button
-                        type="link"
-                        className="mt-2"
-                        onClick={() => navigate('/member/profile/address')}
-                      >
-                        + Thêm địa chỉ mới
-                      </Button>
-                    </div>
-
-                    <div>
-                      <h3 className="font-semibold mb-4">Thông tin thanh toán</h3>
-                      
-                      <div className="space-y-3 mb-4">
-                        <div className="flex justify-between">
-                          <span>Giá thắng đấu giá:</span>
-                          <span className="font-medium">{winnerInfo.finalPrice.toLocaleString()} VNĐ</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>Phí vận chuyển:</span>
-                          <span className="font-medium">
-                            {`${shippingFee.toLocaleString()} VNĐ`}
-                          </span>
-                        </div>
-                        <Divider className="my-2" />
-                        <div className="flex justify-between text-lg">
-                          <span className="font-semibold">Tổng thanh toán:</span>
-                          <span className="font-semibold text-red-600">
-                            { `${(winnerInfo.finalPrice + shippingFee).toLocaleString()} VNĐ`}
-                          </span>
-                        </div>
-                      </div>
-
-                      <Form.Item label="Ghi chú" name="note">
-                        <Input.TextArea rows={3} placeholder="Ghi chú cho người bán..." />
-                      </Form.Item>
-
-                      <div className="mt-4 p-3 bg-yellow-50 rounded-lg">
-                        <p className="text-sm text-yellow-800">
-                          <InfoCircleOutlined className="mr-2" />
-                          Sau khi thanh toán, người bán sẽ liên hệ với bạn để xác nhận đơn hàng.
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </Form>
-              </Modal>
+<AuctionPaymentModal
+          visible={paymentModalVisible}
+          onCancel={() => setPaymentModalVisible(false)}
+          onOk={handlePaymentSubmit}
+          confirmLoading={paymentProcessing}
+          auctionDetail={auctionDetail}
+          winnerInfo={winnerInfo}
+          userAddresses={userAddresses}
+          selectedAddress={selectedAddress}
+          setSelectedAddress={setSelectedAddress}
+          shippingFee={shippingFee}
+          navigate={navigate}
+        />
                   </>
                   
                 )}
@@ -673,83 +590,6 @@ const fetchUserAddresses = async () => {
   );
 };
 
-const AuctionHistory = ({ participants = [], bidHistory = [] }) => {
-  return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-      {/* Bid History */}
-      <div className="bg-white p-6 rounded-lg shadow-sm">
-        <Title level={5} className="mb-4">Lịch sử đấu giá ({bidHistory.length})</Title>
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-4 py-2 text-left">Thời gian</th>
-                <th className="px-4 py-2 text-left">Người đấu</th>
-                <th className="px-4 py-2 text-left">Giá</th>
-              </tr>
-            </thead>
-            <tbody>
-              {bidHistory.length > 0 ? (
-                bidHistory.map((bid, index) => (
-                  <tr key={index} className="border-t">
-                    <td className="px-4 py-3">{new Date(bid.timestamp).toLocaleString()}</td>
-                    <td className="px-4 py-3">{bid.user?.full_name || 'Ẩn danh'}</td>
-                    <td className="px-4 py-3 font-medium">{bid.price?.toLocaleString() || '0'} VNĐ</td>
-                  </tr>
-                ))
-              ) : (
-                <tr className="border-t">
-                  <td colSpan={3} className="px-4 py-6 text-center text-gray-500">
-                    Chưa có lịch sử đấu giá
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
 
-      {/* Participants */}
-      <div className="bg-white p-6 rounded-lg shadow-sm">
-        <Title level={5} className="mb-4">Người tham gia ({participants.length})</Title>
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-4 py-2 text-left">Người đấu</th>
-                <th className="px-4 py-2 text-left">Tham gia lúc</th>
-              </tr>
-            </thead>
-            <tbody>
-              {participants.length > 0 ? (
-                participants.map((user, index) => (
-                  <tr key={index} className="border-t">
-                    <td className="px-4 py-3 flex items-center gap-2">
-                      {user.avatar_url ? (
-                        <img src={user.avatar_url} alt="Avatar" className="w-8 h-8 rounded-full" />
-                      ) : (
-                        <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">
-                          <AiOutlinePlus />
-                        </div>
-                      )}
-                      {user.full_name || 'Ẩn danh'}
-                    </td>
-                    <td className="px-4 py-3">{new Date().toLocaleString()}</td>
-                  </tr>
-                ))
-              ) : (
-                <tr className="border-t">
-                  <td colSpan={2} className="px-4 py-6 text-center text-gray-500">
-                    Chưa có người tham gia
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-  );
-};
 
 export default AuctionDetail;
