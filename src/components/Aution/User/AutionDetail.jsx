@@ -13,11 +13,11 @@ import Cookies from 'js-cookie';
 import axios from 'axios';
 
 // Hàm format thời gian chuẩn ISO 8601
-const deliveryDate = expectedDeliveryTime 
-  ? new Date(expectedDeliveryTime) 
-  : new Date(Date.now() + 3 * 24 * 60 * 60 * 1000);
-
-const formatToISOTime = deliveryDate.toISOString();
+const formatToISOTime = (date) => {
+  if (!date) return new Date().toISOString();
+  const dateObj = date instanceof Date ? date : new Date(date);
+  return dateObj.toISOString();
+};
 
 const AuctionDetail = () => {
   const { auctionID } = useParams();
@@ -38,6 +38,7 @@ const AuctionDetail = () => {
   const [selectedAddress, setSelectedAddress] = useState(null);
   const [shippingFee, setShippingFee] = useState(0);
   const [expectedDeliveryTime, setExpectedDeliveryTime] = useState('');
+  const [bidHistory, setBidHistory] = useState([]);
 
   const useCountdown = (targetDate) => {
     const [countdown, setCountdown] = useState({
