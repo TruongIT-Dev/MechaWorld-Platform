@@ -11,7 +11,7 @@ import Cookies from 'js-cookie';
 const { Search } = Input;
 const { Option } = Select;
 
-// Hàm parse cookie mạnh mẽ
+
 const parseUserCookie = (cookieString) => {
   try {
     if (!cookieString) return null;

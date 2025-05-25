@@ -28,9 +28,6 @@ import {
   RegisterShopLayout,
   AutionList,
   AutionDetail,
-  AddProductToAution,
-  ListProductToAution,
-  CensorProductToAution,
   ModeratorLayout,
   SignUp,
   ModFeedbacks,
@@ -113,7 +110,6 @@ function App() {
             <Route path="auction" element={<AutionList />} />
             <Route path="auction/:auctionID" element={<AutionDetail />} />
 
-            <Route path="admin/aution" element={<CensorProductToAution />} />
 
 
             {/* Exchange Main Route */}
@@ -149,8 +145,6 @@ function App() {
               <Route path="orderhistory" element={<OrderHistory />} />
               <Route path="wallet" element={<WalletPage />} />
               <Route path="address-setting" element={<SettingAddress />} />
-              <Route path="addProductAution" element={<AddProductToAution />} />
-              <Route path="listProductAution" element={<ListProductToAution />} />
             </Route>
 
 
