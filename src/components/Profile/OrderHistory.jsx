@@ -401,7 +401,7 @@ const OrderHistory = () => {
               <p>Mã đơn hàng: {order.code} | Ngày đặt: {order.createdAt}</p>
             </div>
 
-            <div className="flex justify-between items-center mt-3">
+            <div className="flex justify-between items-center">
               <div>
                 <p className="text-gray-500">Phí vận chuyển: {formatCurrency(order.deliveryFee)}</p>
                 <p className="text-lg font-semibold text-red-500">Thành tiền: {order.formattedTotal}</p>

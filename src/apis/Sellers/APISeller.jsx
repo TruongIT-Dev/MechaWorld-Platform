@@ -1,5 +1,4 @@
 import axios from '../../utils/axios-custome';
-import Cookies from 'js-cookie';
 
 
 // ************ GET - POST - PUT - PATCH - DELETE **************

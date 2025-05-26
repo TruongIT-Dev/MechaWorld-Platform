@@ -1,4 +1,4 @@
-import { Col, message, Row } from 'antd';
+import { Carousel, Col, message, Row } from 'antd';
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
@@ -29,6 +29,9 @@ const GundamProductPage = () => {
     const [disableBuy, setDisableBuy] = useState(false);
     const [selectedImage, setSelectedImage] = useState(imageGundam[0]);
     const { cartItems, addToCart, loading } = useCart();
+
+
+    const [currentSlideImg, setCurrentSlideImg] = useState(0);
 
 
 
@@ -180,12 +183,27 @@ const GundamProductPage = () => {
                         {/* Image */}
                         <Col span={7}>
                             <div className="image-section sticky top-16">
-                                {/* Main Display Image */}
-                                <div className="flex justify-center items-center bg-white shadow-md rounded-md">
-                                    <img
-                                        src={selectedImage}
-                                        className="w-full h-[500px] max-w-full max-h-70 object-contain"
-                                    />
+                                {/* Main Carousel */}
+                                <div className="bg-white shadow-md rounded-md overflow-hidden">
+                                    <Carousel
+                                        autoplay
+                                        dots={false}
+                                        arrows={true}
+                                        autoplaySpeed={3000}
+                                        effect="scrollx"
+                                        afterChange={(current) => setCurrentSlideImg(current)}
+                                        className="h-[500px]"
+                                    >
+                                        {imageGundam.map((image, index) => (
+                                            <div key={index}>
+                                                <img
+                                                    src={image}
+                                                    className="w-full h-[500px] object-contain bg-gray-50"
+                                                    alt={`Product ${index + 1}`}
+                                                />
+                                            </div>
+                                        ))}
+                                    </Carousel>
                                 </div>
 
                                 {/* Thumbnail List */}
@@ -195,9 +213,12 @@ const GundamProductPage = () => {
                                             <img
                                                 key={index}
                                                 src={image}
-                                                className={`w-20 h-20 object-cover cursor-pointer rounded-lg border 
-                                                ${selectedImage === image ? 'border-red-500' : 'border-gray-200'}`}
-                                                onClick={() => setSelectedImage(image)}
+                                                className={`w-20 h-20 object-cover cursor-pointer rounded-lg border transition-all duration-300 ${currentSlideImg === index ? 'border-red-500' : 'border-gray-200'
+                                                    }`}
+                                                onClick={() => {
+                                                    // Carousel không có goTo method dễ dàng, nên giữ như cũ
+                                                    setSelectedImage(image);
+                                                }}
                                             />
                                         ))}
                                     </div>

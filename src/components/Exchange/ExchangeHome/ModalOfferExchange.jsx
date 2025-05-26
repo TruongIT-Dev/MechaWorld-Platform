@@ -1,21 +1,42 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Modal, Tabs, Form, Input, InputNumber, Button, Card, Tag, Checkbox, message } from 'antd';
 import { DollarOutlined, FileTextOutlined, SwapOutlined, InfoCircleOutlined, ArrowRightOutlined, UploadOutlined } from '@ant-design/icons';
 import { useSelector } from 'react-redux';
 import { createExchangeOffer } from '../../../apis/Exchange/APIExchange';
+import { checkWallet } from '../../../apis/User/APIUser';
+
 
 export default function ModalOfferExchange({ isOpen, onClose, requestData, gundamList, yourGundamList, requestPost }) {
     const [form] = Form.useForm();
     const [activeTab, setActiveTab] = useState('1');
-    const [selectedGundam, setSelectedGundam] = useState(null);
-    const [selectedYourGundam, setSelectedYourGundam] = useState(null);
+
+    // Thay đổi từ single selection sang multiple selection
+    const [selectedGundams, setSelectedGundams] = useState([]); // Gundam của poster
+    const [selectedYourGundams, setSelectedYourGundams] = useState([]); // Gundam của offerer
+
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [compensationType, setCompensationType] = useState('none');
     const [compensationID, setCompensationID] = useState(null);
 
+    const [balance, setBalance] = useState(0);
 
     // Dữ liệu người hiện tại
     const currentUser = useSelector((state) => state.auth.user);
+
+    // Gọi Api xem số dư ví
+    useEffect(() => {
+        checkWallet(currentUser.id).then((response) => {
+            // console.log('API Response:', response.data);
+            setBalance(response.data.balance);
+        }).catch((error) => {
+            console.error('Lỗi API:', {
+                message: error.message,
+                response: error.response?.data,
+                config: error.config
+            });
+        });
+
+    }, []);
 
     const handleTabChange = (key) => {
         // Validate form trước khi chuyển sang tab khác
@@ -32,70 +53,190 @@ export default function ModalOfferExchange({ isOpen, onClose, requestData, gunda
         }
     };
 
+    // Handle multiple gundam selection cho poster
     const handleGundamSelect = (gundamId) => {
-        setSelectedGundam(gundamId);
-        console.log(selectedGundam);
+        setSelectedGundams(prev => {
+            if (prev.includes(gundamId)) {
+                return prev.filter(id => id !== gundamId);
+            } else {
+                return [...prev, gundamId];
+            }
+        });
     };
+
+    // Handle multiple gundam selection cho offerer
     const handleYourGundamSelect = (gundamId) => {
-        setSelectedYourGundam(gundamId);
+        setSelectedYourGundams(prev => {
+            if (prev.includes(gundamId)) {
+                return prev.filter(id => id !== gundamId);
+            } else {
+                return [...prev, gundamId];
+            }
+        });
     };
 
-    // const handleCompensationTypeChange = (e) => {
-    //     setCompensationType(e.target.value);
-    //     if (e.target.value === 'none') {
-    //         form.setFieldsValue({ compensationAmount: 0 });
-    //     }
-    // };
+    // Business rule validation
+    const validateBusinessRules = async (values) => {
+        const errors = [];
 
-    const handleSubmit = () => {
-        if (!selectedGundam) {
-            message.error('Vui lòng chọn một Gundam để trao đổi');
+        // 1. Không thể tạo offer cho bài đăng của chính mình
+        if (requestPost?.user_id === currentUser.id) {
+            errors.push('Không thể tạo đề xuất trao đổi cho bài đăng của chính mình');
+        }
+
+        // 2. Kiểm tra status gundam của poster (phải là "for exchange")
+        const posterGundamsWithWrongStatus = gundamList?.filter(g =>
+            selectedGundams.includes(g.gundam_id) && g.status !== 'for exchange'
+        );
+        if (posterGundamsWithWrongStatus?.length > 0) {
+            errors.push('Một số Gundam của chủ bài đăng không có sẵn để trao đổi');
+        }
+
+        // 3. Kiểm tra status gundam của offerer (phải là "in store")
+        const offererGundamsWithWrongStatus = yourGundamList?.filter(g =>
+            selectedYourGundams.includes(g.gundam_id) && g.status !== 'in store'
+        );
+        if (offererGundamsWithWrongStatus?.length > 0) {
+            errors.push('Một số Gundam của bạn không có sẵn để trao đổi (phải ở trạng thái "in store")');
+        }
+
+        // 4. Kiểm tra số dư nếu người đề xuất là người trả compensation
+        if (compensationType === 'sender' && values.compensationAmount > 0) {
+            const userBalance = balance || 0;
+            if (userBalance < values.compensationAmount) {
+                errors.push(`Số dư không đủ. Bạn cần ${values.compensationAmount.toLocaleString()} VND nhưng chỉ có ${userBalance.toLocaleString()} VND`);
+            }
+        }
+
+        // 5. Kiểm tra đã có offer cho bài đăng này chưa (cần gọi API check)
+        try {
+            // Giả sử có API checkExistingOffer
+            // const existingOffer = await checkExistingOffer(requestPost.id, currentUser.id);
+            // if (existingOffer) {
+            //     errors.push('Bạn đã có đề xuất trao đổi cho bài đăng này');
+            // }
+        } catch (error) {
+            console.warn('Could not check existing offer:', error);
+        }
+
+        return errors;
+    };
+
+    const handleSubmit = async () => {
+        // Validation kiểm tra Gundam được chọn
+        if (selectedGundams.length === 0) {
+            message.error('Vui lòng chọn ít nhất một Gundam của chủ bài đăng để trao đổi');
             setActiveTab('3');
             return;
         }
 
-        form.validateFields()
-            .then((values) => {
-                setIsSubmitting(true);
+        if (selectedYourGundams.length === 0) {
+            message.error('Vui lòng chọn ít nhất một Gundam của bạn để trao đổi');
+            setActiveTab('2');
+            return;
+        }
 
-                // Giả lập gửi request API
-                setTimeout(() => {
+        try {
+            // Validate form fields chỉ khi cần thiết
+            let values = { note: '' };
+            if (compensationType !== 'none') {
+                values = await form.validateFields();
+            } else {
+                // Chỉ validate note
+                values = await form.validateFields(['note']);
+            }
 
-                    const offerData = {
-                        ...values,
-                        poster_gundam_id: selectedGundam,
-                        requestId: requestData?.id || 'default-request-id',
-                        offerer_gundam_id: selectedYourGundam,
-                        compensationID: compensationID,
-                        postID: requestPost?.id
+            // Lấy compensation amount từ form hoặc set 0
+            const compensationAmount = compensationType !== 'none' ?
+                (form.getFieldValue('compensationAmount') || 0) : 0;
 
-                    };
+            // Debug logging - Kiểm tra từng giá trị
+            console.log('=== DEBUG PAYLOAD CREATION ===');
+            console.log('selectedGundams:', selectedGundams);
+            console.log('selectedYourGundams:', selectedYourGundams);
+            console.log('requestPost:', requestPost);
+            console.log('currentUser:', currentUser);
+            console.log('requestData:', requestData);
+            console.log('compensationType:', compensationType);
+            console.log('compensationAmount:', compensationAmount);
+            console.log('form values:', values);
 
-                    // API Gửi Yêu cầu trao đổi
-                    createExchangeOffer(offerData)
-                    message.success('Đã gửi yêu cầu trao đổi thành công!');
-                    setIsSubmitting(false);
+            // Validate business rules
+            const businessRuleErrors = await validateBusinessRules({ ...values, compensationAmount });
+            if (businessRuleErrors.length > 0) {
+                businessRuleErrors.forEach(error => message.error(error));
+                return;
+            }
 
-                    // Reset form và đóng modal
-                    form.resetFields();
-                    setSelectedGundam(null);
-                    setSelectedYourGundam(null);
-                    setCompensationID(null);
-                    setActiveTab('1');
-                    setCompensationType('none');
-                    onClose();
-                }, 1000);
-            })
-            .catch((errorInfo) => {
-                console.log('Form validation error:', errorInfo);
+            setIsSubmitting(true);
+
+            // Chuẩn bị dữ liệu theo format API mới - KIỂM TRA TỪNG FIELD
+            const offerData = {
+                exchange_post_id: requestPost?.id,
+                note: values.note || '',
+                poster_gundam_ids: [...selectedGundams], // Ensure array copy
+                offerer_gundam_ids: [...selectedYourGundams], // Ensure array copy
+                compensation_amount: Number(compensationAmount) || 0, // Ensure number
+                payer_id: compensationType === 'sender' ? currentUser.id :
+                    compensationType === 'receiver' ? requestData?.id : null
+            };
+
+            // Detailed logging
+            console.log('=== FINAL OFFER DATA ===');
+            console.log('offerData object:', offerData);
+            console.log('JSON.stringify(offerData):', JSON.stringify(offerData, null, 2));
+
+            // Kiểm tra từng property
+            Object.keys(offerData).forEach(key => {
+                console.log(`${key}:`, offerData[key], `(type: ${typeof offerData[key]})`);
             });
+
+            // Gọi API tạo yêu cầu trao đổi
+            const responseCreateExchangeOffer = await createExchangeOffer(offerData);
+            console.log("responseCreateExchangeOffer", responseCreateExchangeOffer);
+
+            // Xử lý response thành công
+            message.success('Đã gửi yêu cầu trao đổi thành công!');
+
+            // Reset form và state
+            resetFormAndState();
+
+            // Đóng modal
+            onClose();
+
+        } catch (error) {
+            console.error('Error create exchange offer:', error);
+
+            // Xử lý các loại lỗi khác nhau
+            if (error.errorFields) {
+                // Lỗi validation form
+                message.error('Vui lòng kiểm tra lại thông tin đã nhập');
+            } else if (error.response) {
+                // Lỗi từ API
+                const errorMessage = error.response.data?.message || 'Có lỗi xảy ra khi gửi yêu cầu trao đổi';
+                message.error(errorMessage);
+            } else {
+                // Lỗi network hoặc lỗi khác
+                message.error('Không thể kết nối đến server. Vui lòng thử lại sau.');
+            }
+        } finally {
+            // Đảm bảo luôn tắt loading state
+            setIsSubmitting(false);
+        }
+    };
+
+    // Helper function để reset form và state
+    const resetFormAndState = () => {
+        form.resetFields();
+        setSelectedGundams([]);
+        setSelectedYourGundams([]);
+        setCompensationID(null);
+        setActiveTab('1');
+        setCompensationType('none');
     };
 
     const handleCancel = () => {
-        form.resetFields();
-        setSelectedGundam(null);
-        setActiveTab('1');
-        setCompensationType('none');
+        resetFormAndState();
         onClose();
     };
 
@@ -104,7 +245,7 @@ export default function ModalOfferExchange({ isOpen, onClose, requestData, gunda
             title={
                 <div className="flex items-center gap-2">
                     <SwapOutlined className="text-blue-500" />
-                    <span className="text-lg font-bold">TẠO YÊU CẦU TRAO ĐỔI</span>
+                    <span className="text-lg font-bold">TẠO YÊU CẦU TRAO ĐỔI NHIỀU-NHIỀU</span>
                 </div>
             }
             open={isOpen}
@@ -118,11 +259,11 @@ export default function ModalOfferExchange({ isOpen, onClose, requestData, gunda
                     <InfoCircleOutlined className="text-blue-500 mt-1" />
                     <div>
                         <p className="mb-1">
-                            Bạn đang tạo đề nghị trao đổi với{' '}
+                            Bạn đang tạo đề nghị trao đổi nhiều-nhiều với{' '}
                             <span className="font-semibold">{requestData?.full_name}</span>
                         </p>
                         <p className="text-sm text-gray-600">
-                            - Vui lòng điền thông tin trao đổi và chọn Gundam mà bạn muốn trao đổi.
+                            - Có thể chọn nhiều Gundam để trao đổi với nhau
                         </p>
                     </div>
                 </div>
@@ -132,7 +273,6 @@ export default function ModalOfferExchange({ isOpen, onClose, requestData, gunda
                 activeKey={activeTab}
                 onChange={handleTabChange}
                 items={[
-
                     // Tab 1: THÔNG TIN BÙ TRỪ TIỀN
                     {
                         key: '1',
@@ -194,10 +334,7 @@ export default function ModalOfferExchange({ isOpen, onClose, requestData, gunda
                                             Bạn sẽ bù tiền
                                         </Button>
                                     </div>
-                                    <Form.Item
-                                        name="compensationType"
-                                        hidden
-                                    >
+                                    <Form.Item name="compensationType" hidden>
                                         <Input />
                                     </Form.Item>
                                 </Form.Item>
@@ -243,7 +380,7 @@ export default function ModalOfferExchange({ isOpen, onClose, requestData, gunda
                                             className='bg-blue-500'
                                             type="primary"
                                             onClick={() => handleTabChange('2')}>
-                                            Tiếp theo < ArrowRightOutlined />
+                                            Tiếp theo <ArrowRightOutlined />
                                         </Button>
                                     </div>
                                 </Form.Item>
@@ -257,21 +394,30 @@ export default function ModalOfferExchange({ isOpen, onClose, requestData, gunda
                         label: (
                             <span className="flex items-center gap-1">
                                 <SwapOutlined />
-                                GUNDAM TRAO ĐỔI CỦA BẠN
+                                GUNDAM CỦA BẠN ({selectedYourGundams.length})
                             </span>
                         ),
                         children: (
                             <div className="pt-2">
-                                <span className='mt-2 text-red-500'>
-                                    <>*Chọn một trong những Gundam đang có trong Bộ Sưu Tập của bạn để trao đổi.</>
-                                </span>
+                                <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-md">
+                                    <span className='text-green-700 font-medium'>
+                                        *Chọn một hoặc nhiều Gundam từ Bộ Sưu Tập của bạn để trao đổi.
+                                        <br />
+                                        Đã chọn: {selectedYourGundams.length} Gundam
+                                    </span>
+                                </div>
 
-                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6 max-h-96 overflow-y-auto mt-5">
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6 max-h-96 overflow-y-auto">
                                     {yourGundamList?.map((gundam) => (
                                         <Card
                                             key={gundam.gundam_id}
                                             hoverable
-                                            className={`border-2 transition-all ${selectedYourGundam === gundam.gundam_id ? 'border-blue-500 shadow-md' : 'border-gray-200'}`}
+                                            className={`border-2 transition-all ${selectedYourGundams.includes(gundam.gundam_id)
+                                                ? 'border-blue-500 shadow-md bg-blue-50'
+                                                : gundam.status !== 'in store'
+                                                    ? 'border-red-300 opacity-60'
+                                                    : 'border-gray-200'
+                                                }`}
                                             cover={
                                                 <div className="relative">
                                                     <img
@@ -285,9 +431,15 @@ export default function ModalOfferExchange({ isOpen, onClose, requestData, gunda
                                                     >
                                                         {gundam.condition}
                                                     </Tag>
+                                                    <Tag
+                                                        color={gundam.status === 'in store' ? 'green' : 'red'}
+                                                        className="absolute top-2 left-2"
+                                                    >
+                                                        {gundam.status}
+                                                    </Tag>
                                                 </div>
                                             }
-                                            onClick={() => handleYourGundamSelect(gundam.gundam_id)}
+                                            onClick={() => gundam.status === 'in store' && handleYourGundamSelect(gundam.gundam_id)}
                                         >
                                             <div className="flex justify-between items-center">
                                                 <div>
@@ -295,16 +447,17 @@ export default function ModalOfferExchange({ isOpen, onClose, requestData, gunda
                                                     <Tag color="blue">{gundam.scale}</Tag>
                                                 </div>
                                                 <Checkbox
-                                                    checked={selectedYourGundam === gundam.gundam_id}
-                                                    onChange={() => handleYourGundamSelect(gundam.gundam_id)}
+                                                    checked={selectedYourGundams.includes(gundam.gundam_id)}
+                                                    onChange={() => gundam.status === 'in store' && handleYourGundamSelect(gundam.gundam_id)}
                                                     className="scale-125"
+                                                    disabled={gundam.status !== 'in store'}
                                                 />
                                             </div>
                                         </Card>
                                     ))}
 
-                                    {gundamList?.length === 0 && (
-                                        <div className="col-span-2 text-center py-8 bg-gray-100 rounded-lg">
+                                    {yourGundamList?.length === 0 && (
+                                        <div className="col-span-3 text-center py-8 bg-gray-100 rounded-lg">
                                             <p className="text-gray-500">Bạn chưa có Gundam nào để trao đổi</p>
                                         </div>
                                     )}
@@ -318,9 +471,9 @@ export default function ModalOfferExchange({ isOpen, onClose, requestData, gunda
                                         className='bg-blue-500'
                                         type="primary"
                                         onClick={() => handleTabChange('3')}
-                                        loading={isSubmitting}
-                                        disabled={!selectedYourGundam}
-                                    > Tiếp theo < ArrowRightOutlined />
+                                        disabled={selectedYourGundams.length === 0}
+                                    >
+                                        Tiếp theo <ArrowRightOutlined />
                                     </Button>
                                 </div>
                             </div>
@@ -333,21 +486,30 @@ export default function ModalOfferExchange({ isOpen, onClose, requestData, gunda
                         label: (
                             <span className="flex items-center gap-1">
                                 <SwapOutlined />
-                                GUNDAM TRAO ĐỔI CỦA ...
+                                GUNDAM CỦA {requestData?.full_name?.toUpperCase()} ({selectedGundams.length})
                             </span>
                         ),
                         children: (
                             <div className="pt-2">
-                                <p className="mb-4 text-red-500">
-                                    *Chọn một trong những Gundam của {requestData?.full_name} để trao đổi.
-                                </p>
+                                <div className="mb-4 p-3 bg-orange-50 border border-orange-200 rounded-md">
+                                    <span className="text-orange-700 font-medium">
+                                        *Chọn một hoặc nhiều Gundam của {requestData?.full_name} để trao đổi.
+                                        <br />
+                                        Đã chọn: {selectedGundams.length} Gundam
+                                    </span>
+                                </div>
 
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6 max-h-96 overflow-y-auto">
                                     {gundamList?.map((gundam) => (
                                         <Card
                                             key={gundam.gundam_id}
                                             hoverable
-                                            className={`border-2 transition-all ${selectedGundam === gundam.gundam_id ? 'border-blue-500 shadow-md' : 'border-gray-200'}`}
+                                            className={`border-2 transition-all ${selectedGundams.includes(gundam.gundam_id)
+                                                ? 'border-blue-500 shadow-md bg-blue-50'
+                                                : gundam.status !== 'for exchange'
+                                                    ? 'border-red-300 opacity-60'
+                                                    : 'border-gray-200'
+                                                }`}
                                             cover={
                                                 <div className="relative">
                                                     <img
@@ -361,9 +523,15 @@ export default function ModalOfferExchange({ isOpen, onClose, requestData, gunda
                                                     >
                                                         {gundam.condition}
                                                     </Tag>
+                                                    <Tag
+                                                        color={gundam.status === 'for exchange' ? 'green' : 'red'}
+                                                        className="absolute top-2 left-2"
+                                                    >
+                                                        {gundam.status}
+                                                    </Tag>
                                                 </div>
                                             }
-                                            onClick={() => handleGundamSelect(gundam.gundam_id)}
+                                            onClick={() => gundam.status === 'for exchange' && handleGundamSelect(gundam.gundam_id)}
                                         >
                                             <div className="flex justify-between items-center">
                                                 <div>
@@ -371,23 +539,24 @@ export default function ModalOfferExchange({ isOpen, onClose, requestData, gunda
                                                     <Tag color="blue">{gundam.scale}</Tag>
                                                 </div>
                                                 <Checkbox
-                                                    checked={selectedGundam === gundam.gundam_id}
-                                                    onChange={() => handleGundamSelect(gundam.gundam_id)}
+                                                    checked={selectedGundams.includes(gundam.gundam_id)}
+                                                    onChange={() => gundam.status === 'for exchange' && handleGundamSelect(gundam.gundam_id)}
                                                     className="scale-125"
+                                                    disabled={gundam.status !== 'for exchange'}
                                                 />
                                             </div>
                                         </Card>
                                     ))}
 
-                                    {selectedGundam?.length === 0 && (
-                                        <div className="col-span-2 text-center py-8 bg-gray-100 rounded-lg">
-                                            <p className="text-gray-500">[...] chưa thêm Gundam nào để trao đổi</p>
+                                    {gundamList?.length === 0 && (
+                                        <div className="col-span-3 text-center py-8 bg-gray-100 rounded-lg">
+                                            <p className="text-gray-500">{requestData?.full_name} chưa thêm Gundam nào để trao đổi</p>
                                         </div>
                                     )}
                                 </div>
 
                                 <div className="flex justify-between">
-                                    <Button onClick={() => handleTabChange('1')}>
+                                    <Button onClick={() => handleTabChange('2')}>
                                         Quay lại
                                     </Button>
                                     <Button
@@ -396,7 +565,8 @@ export default function ModalOfferExchange({ isOpen, onClose, requestData, gunda
                                         onClick={handleSubmit}
                                         loading={isSubmitting}
                                         icon={<UploadOutlined />}
-                                        disabled={!selectedGundam}>
+                                        disabled={selectedGundams.length === 0}
+                                    >
                                         {isSubmitting ? "Đang gửi đề xuất..." : "Gửi đề xuất trao đổi"}
                                     </Button>
                                 </div>

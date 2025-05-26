@@ -23,7 +23,7 @@ export default function ExchangeManageList() {
     const [exchangeData, setExchangeData] = useState([]);
     const [filteredData, setFilteredData] = useState(exchangeData);
 
-    // console.log("filteredData", filteredData);
+    console.log("filteredData", filteredData);
 
 
     // Filter functionality
@@ -42,7 +42,7 @@ export default function ExchangeManageList() {
         { label: "Đang đóng gói", value: "packaging" },
         { label: "Đang vận chuyển", value: "delivering" },
         { label: "Đã được giao", value: "delivered" },
-        { label: "Thành công", value: "completed" },
+        { label: "Hoàn thành", value: "completed" },
         { label: "Bị hủy", value: "canceled" },
         { label: "Trao đổi thất bại", value: "failed" }
     ];

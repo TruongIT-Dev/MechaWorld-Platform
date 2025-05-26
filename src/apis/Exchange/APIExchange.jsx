@@ -15,13 +15,16 @@ export const createExchangePost = (postData) => {
         },
     });
 }
+
 export const createExchangeOffer = (offerData) => {
+    console.log('API function received:', offerData); // Debug log
+
     return axios.post('/users/me/exchange-offers', {
-        compensation_amount: offerData.compensationAmount === 0 ? null : offerData.compensationAmount,
-        exchange_post_id: offerData.postID,
-        offerer_gundam_id: offerData.offerer_gundam_id,
-        payer_id: offerData.compensationID,
-        poster_gundam_id: offerData.poster_gundam_id,
+        compensation_amount: offerData.compensation_amount === 0 ? null : offerData.compensation_amount,
+        exchange_post_id: offerData.exchange_post_id,
+        offerer_gundam_ids: offerData.offerer_gundam_ids,  // Sử dụng array cho multiple selection
+        payer_id: offerData.payer_id,
+        poster_gundam_ids: offerData.poster_gundam_ids,    // Sử dụng array cho multiple selection  
         note: offerData.note
     })
 }

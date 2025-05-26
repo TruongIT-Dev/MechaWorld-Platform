@@ -165,7 +165,7 @@ export default function ExchangeList() {
                                         {/* List ảnh Gundam đăng Trao đổi - Chỉ hiển thị ảnh đại diện */}
                                         {/* List ảnh Gundam đăng Trao đổi - Hiển thị carousel ảnh */}
                                         <div className="relative mr-4 w-48">
-                                            <Carousel autoplay={false} className="rounded-md overflow-hidden">
+                                            <Carousel autoplay={false} dots={false} arrows={true} className="rounded-md overflow-hidden">
                                                 {item.exchange_post.post_image_urls.map((imageUrl, index) => (
                                                     <div key={index}>
                                                         <Image

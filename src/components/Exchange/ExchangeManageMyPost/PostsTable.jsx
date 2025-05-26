@@ -3,7 +3,6 @@ import {
     MessageOutlined,
     DeleteOutlined,
     ExclamationCircleOutlined,
-    EyeOutlined,
     SwapOutlined
 } from "@ant-design/icons";
 
@@ -73,7 +72,7 @@ export default function PostsTable({ onViewOffers, onViewGunplas, onDeletePost, 
             render: (exchange_post) => (
                 <Typography.Paragraph
                     ellipsis={{ rows: 4, expandable: true, symbol: 'Xem thêm' }}
-                    style={{ margin: 0, maxWidth: 400 }} // có thể giới hạn chiều ngang nếu cần
+                    style={{ margin: 0, maxWidth: 400, textAlign: 'left' }} // có thể giới hạn chiều ngang nếu cần
                 >
                     {exchange_post?.content}
                 </Typography.Paragraph>
@@ -93,21 +92,21 @@ export default function PostsTable({ onViewOffers, onViewGunplas, onDeletePost, 
                 </div>
             ),
         },
-        {
-            title: "Gundam trao đổi",
-            dataIndex: "exchange_post_items",
-            key: "gunplasCount",
-            width: 140,
-            align: 'center',
-            render: (exchange_post_items) => (
-                <Button
-                    icon={<EyeOutlined />}
-                    onClick={() => onViewGunplas(exchange_post_items)}
-                >
-                    {exchange_post_items?.length} mô hình
-                </Button>
-            ),
-        },
+        // {
+        //     title: "Gundam trao đổi",
+        //     dataIndex: "exchange_post_items",
+        //     key: "gunplasCount",
+        //     width: 140,
+        //     align: 'center',
+        //     render: (exchange_post_items) => (
+        //         <Button
+        //             icon={<EyeOutlined />}
+        //             onClick={() => onViewGunplas(exchange_post_items)}
+        //         >
+        //             {exchange_post_items?.length} mô hình
+        //         </Button>
+        //     ),
+        // },
         {
             title: "Trạng thái",
             dataIndex: "exchange_post",

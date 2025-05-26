@@ -6,6 +6,7 @@ import PostsTable from "./PostsTable";
 import OffersDrawer from "./OffersDrawer";
 import ListGundamModal from "./ListGundamModal";
 import OfferDetailModal from "./OfferDetailModal";
+
 import { deleteExchangePost, getAllUserExchangePost, acceptOffer, rejectOffer } from "../../../apis/Exchange/APIExchange";
 import { checkWallet } from "../../../apis/User/APIUser";
 
@@ -41,8 +42,8 @@ export default function ExchangeMyPost() {
 
     // View offer details
     const viewOfferDetail = (offer, originalOffer = null) => {
-        console.log("Selected offer:", offer);
-        console.log("Original offer:", originalOffer);
+        // console.log("Selected offer:", offer);
+        // console.log("Original offer:", originalOffer);
         setSelectedOffer({
             ...offer,
             originalOffer: originalOffer // Lưu data gốc để dùng cho API
@@ -52,7 +53,7 @@ export default function ExchangeMyPost() {
 
     // Handle offer actions (accept/reject)
     const handleOfferAction = async (offerId, action) => {
-        console.log(`Offer ${offerId} ${action}`);
+        // console.log(`Offer ${offerId} ${action}`);
 
         if (action === "accept") {
             // Xử lý chấp nhận đề xuất
@@ -189,7 +190,7 @@ export default function ExchangeMyPost() {
     // Delete post
     const handleDeletePost = async (postId) => {
         try {
-            console.log(`Post ${postId} deleted`);
+            // console.log(`Post ${postId} deleted`);
             const res = await deleteExchangePost(postId);
 
             if (res.status === 200) {

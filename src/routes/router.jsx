@@ -52,7 +52,7 @@ export const ShopProductManagement = React.lazy(() => import("../components/Shop
 export const ShopPage = React.lazy(() => import("../components/Shop/ShopPage"));
 export const ShopTransaction = React.lazy(() => import("../components/Shop/ShopTransaction"));
 export const ShopAuctionManagement = React.lazy(() => import("../components/Shop/ShopAuctionManagement"));
-export const ShopOrderManagement = React.lazy(() => import("../components/Shop/ShopOrderManagement"));
+export const ShopOrderManagement = React.lazy(() => import("../components/Shop/OrderManagement/ShopOrderManagement"));
 export const ShopReportManagement = React.lazy(() => import("../components/Shop/ShopReportManagement"));
 
 

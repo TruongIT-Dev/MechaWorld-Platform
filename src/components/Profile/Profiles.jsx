@@ -13,7 +13,7 @@ export default function Profile() {
   const { Sider, Content } = Layout;
   const location = useLocation();
 
-  const { isLoggedIn, user } = useSelector(state => state.auth);
+  const { user } = useSelector(state => state.auth);
 
   // Danh sách Menu
   const items = [
@@ -27,7 +27,7 @@ export default function Profile() {
       ],
     },
     {
-      key: "/member/profile/orderhistory",
+      key: "/member/profile/orderHistory",
       icon: <ShoppingOutlined className="text-lg text-red-500" />,
       label: <Link to="/member/profile/orderhistory">Đơn mua</Link>,
     },

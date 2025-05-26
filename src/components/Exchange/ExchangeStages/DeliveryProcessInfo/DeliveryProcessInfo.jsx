@@ -137,7 +137,7 @@ const DeliveryProcessInfo = ({
 
   useEffect(() => {
     // console.log("exchangeDetails", exchangeDetails);
-    // console.log('current order', currentOrder);
+    console.log('current order', currentOrder);
 
     if (currentOrder?.id) {
       fetchOrderDetail(currentOrder.id);
@@ -146,8 +146,9 @@ const DeliveryProcessInfo = ({
   }, [currentOrder, isShowingSendOrder]);
 
   useEffect(() => {
-    if (orderDetail?.order_delivery?.delivery_tracking_code) {
-      fetchDeliveryStatus(orderDetail.order_delivery.delivery_tracking_code);
+    const status_order = orderDetail?.order_delivery?.delivery_tracking_code
+    if (status_order) {
+      fetchDeliveryStatus(status_order);
     }
   }, [orderDetail]);
 
@@ -503,7 +504,7 @@ const DeliveryProcessInfo = ({
                     Xác nhận đã nhận hàng
                   </Button>
                 </Tooltip>
-               )}
+              )}
 
               {!isShowingSendOrder && ghnDetail?.status === "delivered" && (
                 <Tooltip title="Gửi khiếu nại nếu có vấn đề với đơn hàng">
@@ -629,6 +630,9 @@ const DeliveryProcessInfo = ({
                 </li>
                 <li>
                   <strong>Lưu ý:</strong> Hãy đảm bảo bạn đã cung cấp thông tin địa chỉ đầy đủ và chính xác để tránh sai sót khi vận chuyển.
+                </li>
+                <li className="text-blue-600">
+                  <strong>💡 Lưu ý kỹ thuật:</strong> Nếu dữ liệu tải quá lâu hay chờ reload lâu, vui lòng ấn nút Tải lại trang trên góc cùng bên tay phải.
                 </li>
               </ul>
             </div>

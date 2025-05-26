@@ -13,7 +13,7 @@ const ConfirmExchangeDelivery = ({ exchangeDetail }) => {
 
   // Force component to re-render when exchangeDetail changes
   useEffect(() => {
-    console.log("ExchangeDetail changed:", exchangeDetail);
+    // console.log("ExchangeDetail changed:", exchangeDetail);
     if (exchangeDetail && Object.keys(exchangeDetail).length > 0) {
       setLocalExchangeDetail(exchangeDetail);
       setIsDataReady(true);
@@ -154,18 +154,21 @@ const ConfirmExchangeDelivery = ({ exchangeDetail }) => {
         <Alert
           type="info"
           showIcon
-          message="Vui lòng kiểm tra và xác nhận thông tin vận chuyển"
+          message="Vui lòng kiểm tra kỹ thông tin vận chuyển"
           description={
             <div className="text-gray-700 text-sm space-y-3 mt-2">
               <ul className="list-disc list-inside space-y-1">
                 <li>
-                  <strong>Thông tin giao hàng:</strong> là nơi người nhận sẽ nhận được đơn hàng. Đây là địa điểm mà khách hàng mong muốn nhận hàng.
+                  <strong>Địa chỉ giao hàng:</strong> là nơi người nhận sẽ nhận được đơn hàng. Đây là địa điểm mà khách hàng mong muốn nhận hàng.
                 </li>
                 <li>
-                  <strong>Thông tin lấy hàng:</strong> là nơi bạn muốn đơn vị vận chuyển đến để nhận hàng từ bạn. Đây là địa điểm để đơn vị vận chuyển đến lấy hàng.
+                  <strong>Địa chỉ lấy hàng:</strong> là nơi bạn muốn đơn vị vận chuyển đến để nhận hàng từ bạn. Đây là địa điểm để đơn vị vận chuyển đến lấy hàng.
                 </li>
                 <li>
                   <strong>Lưu ý:</strong> Hãy đảm bảo bạn đã cung cấp thông tin địa chỉ đầy đủ và chính xác để tránh sai sót khi vận chuyển.
+                </li>
+                <li className="text-blue-600">
+                  <strong>💡 Lưu ý kỹ thuật:</strong> Nếu dữ liệu tải quá lâu hay chờ reload lâu, vui lòng ấn nút Tải lại trang trên góc cùng bên tay phải.
                 </li>
               </ul>
             </div>

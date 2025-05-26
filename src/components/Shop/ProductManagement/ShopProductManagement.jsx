@@ -13,10 +13,8 @@ export default function ShopProductManagement() {
         <ShopProductCreate setIsCreating={setIsCreating} />
       ) : (
         <>
-          <div className="container mx-auto px-4">
-            {/* Hiển thị bảng sản phẩm */}
-            <ShopProduct setIsCreating={setIsCreating} isCreating={isCreating} />
-          </div>
+          {/* Hiển thị bảng sản phẩm */}
+          <ShopProduct setIsCreating={setIsCreating} isCreating={isCreating} />
         </>
       )}
     </div>

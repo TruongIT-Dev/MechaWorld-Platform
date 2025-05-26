@@ -443,13 +443,16 @@ const SubmitDeliveryInfo = ({
             <div className="text-gray-700 text-sm space-y-3 mt-2">
               <ul className="list-disc list-inside space-y-1">
                 <li>
-                  <strong>Thông tin giao hàng:</strong> là nơi người nhận sẽ nhận được đơn hàng. Đây là địa điểm mà khách hàng mong muốn nhận hàng.
+                  <strong>Địa chỉ giao hàng:</strong> là nơi người nhận sẽ nhận được đơn hàng. Đây là địa điểm mà khách hàng mong muốn nhận hàng.
                 </li>
                 <li>
-                  <strong>Thông tin lấy hàng:</strong> là nơi bạn muốn đơn vị vận chuyển đến để nhận hàng từ bạn. Đây là địa điểm để đơn vị vận chuyển đến lấy hàng.
+                  <strong>Địa chỉ lấy hàng:</strong> là nơi bạn muốn đơn vị vận chuyển đến để nhận hàng từ bạn. Đây là địa điểm để đơn vị vận chuyển đến lấy hàng.
                 </li>
                 <li>
                   <strong>Lưu ý:</strong> Hãy đảm bảo bạn đã cung cấp thông tin địa chỉ đầy đủ và chính xác để tránh sai sót khi vận chuyển.
+                </li>
+                <li className="text-blue-600">
+                  <strong>💡 Lưu ý kỹ thuật:</strong> Nếu dữ liệu tải quá lâu hay chờ reload lâu, vui lòng ấn nút Tải lại trang trên góc cùng bên tay phải.
                 </li>
               </ul>
             </div>
@@ -833,13 +836,26 @@ const SubmitDeliveryInfo = ({
                   <Form.Item
                     label="Số điện thoại"
                     name="phone_number"
-                    rules={[{ required: true, message: 'Vui lòng nhập số điện thoại' }]}
+                    rules={[
+                      { required: true, message: 'Vui lòng nhập số điện thoại' },
+                      {
+                        pattern: /^[0-9]{10}$/,
+                        message: 'Số điện thoại không hợp lệ!'
+                      }
+                    ]}
                     tooltip={{
                       title: 'Số điện thoại dùng để xác nhận bên vận chuyển khi giao hàng. Để trống sẽ mặc định lấy sđt của người dùng.',
                       icon: <InfoCircleOutlined />,
                     }}
                   >
-                    <Input placeholder="Nhập số điện thoại" />
+                    <Input
+                      placeholder="Nhập số điện thoại"
+                      maxLength={10}
+                      onInput={(e) => {
+                        // Chỉ cho phép nhập số
+                        e.target.value = e.target.value.replace(/\D/g, '');
+                      }}
+                    />
                   </Form.Item>
                 </div>
 

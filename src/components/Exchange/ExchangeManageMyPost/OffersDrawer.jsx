@@ -121,27 +121,8 @@ export default function OffersDrawer({ visible, offers, onClose, onViewOfferDeta
     }
 
     const viewOfferDetail = (offer) => {
-        // Transform the offer data to match what OfferDetailModal expects
-        const formattedOffer = {
-            id: offer.id,
-            post_id: offer.post_id,
-            user: offer.offerer?.full_name,
-            avatar: offer.offerer?.avatar_url,
-            createdAt: new Date(offer.created_at).toLocaleString(),
-            status: offer.negotiation_requested ? "negotiating" : "pending",
-            paymentAmount: offer.compensation_amount || 0,
-            paymentDirection: offer.payer_id === userId ? 'you' : 'them',
-            note: offer.note || "Không có ghi chú",
-            offerModel: {
-                image: offer.offerer_exchange_items?.[0]?.primary_image_url,
-                title: offer.offerer_exchange_items?.[0]?.name,
-                grade: `${offer.offerer_exchange_items?.[0]?.grade}`,
-                series: `${offer.offerer_exchange_items?.[0]?.series}`,
-                condition: offer.offerer_exchange_items?.[0]?.condition || "Chưa rõ"
-            }
-        };
 
-        onViewOfferDetail(formattedOffer);
+        onViewOfferDetail(offer);
     };
 
     return (

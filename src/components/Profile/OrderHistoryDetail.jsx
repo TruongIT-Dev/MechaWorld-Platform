@@ -15,8 +15,6 @@ const OrderHistoryDetail = ({ visible, onClose, orderData }) => {
 
     if (!orderData) return null;
 
-    // console.log("orderData", orderData);
-
     const {
         sender,
         buyer_info,
@@ -26,6 +24,7 @@ const OrderHistoryDetail = ({ visible, onClose, orderData }) => {
         order_transaction,
         to_delivery_information
     } = orderData;
+
 
     // Format currency
     const formatCurrency = (amount) => {
@@ -57,10 +56,20 @@ const OrderHistoryDetail = ({ visible, onClose, orderData }) => {
         'canceled': { color: 'red', icon: <CloseCircleOutlined />, text: 'Đã hủy' }
     };
 
+    const typeConfig = {
+        'regular': { color: "green", label: "Mua bán" },
+        'exchange': { color: "blue", label: "Trao đổi" },
+        'auction': { color: "volcano", label: "Đấu giá" },
+    }
+
     // Map status to color - giống OrderHistory
     const getStatusColor = (status) => {
         return statusConfig[status]?.color || 'default';
     };
+
+    const getTypeColor = (type) => {
+        return typeConfig[type]?.color || 'default';
+    }
 
     // Map status to text - giống OrderHistory
     const getStatusText = (status, isPackaged) => {
@@ -73,6 +82,10 @@ const OrderHistoryDetail = ({ visible, onClose, orderData }) => {
         // Các trạng thái khác
         return statusConfig[status]?.text || "Không xác định";
     };
+
+    const getTypeText = (type) => {
+        return typeConfig[type]?.label || "Không xác định";
+    }
 
     // Controlled onChange handler
     const handleTabChange = (key) => {
@@ -174,6 +187,11 @@ const OrderHistoryDetail = ({ visible, onClose, orderData }) => {
                                     {getStatusText(order.status, order.is_packaged)}
                                 </Tag>
                             )}
+                        </Descriptions.Item>
+                        <Descriptions.Item label="Loại đơn hàng" span={3}>
+                            <Tag color={getTypeColor(order.type)}>
+                                {getTypeText(order.type)}
+                            </Tag>
                         </Descriptions.Item>
                         {order.note ? (
                             <Descriptions.Item label="Ghi chú" span={3}>

@@ -101,22 +101,10 @@ const ExchangeInformationSection = ({
       case 5:
         return {
           title: "Hoàn tất quá trình trao đổi",
-          subTitle: (
-            <p className="leading-relaxed max-w-1/2">
-              Quá trình hoàn cọc và chuyển giao tiền bù sẽ tự động diễn ra sau
-              khi hệ thống ghi nhận xác nhận nhận hàng thành công từ hai bên.
-            </p>
-          ),
         };
       case 6:
         return {
           title: "Trao đổi thành công",
-          subTitle: (
-            <p className="leading-relaxed max-w-1/2">
-              Hệ thống đã hoàn trả cọc và thanh toán tiền bù cho cuộc trao đổi
-              này.
-            </p>
-          ),
         };
       default:
         return {};

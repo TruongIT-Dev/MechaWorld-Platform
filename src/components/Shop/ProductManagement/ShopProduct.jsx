@@ -3,7 +3,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { useEffect, useState } from "react";
 import { CheckCircleOutlined, MoreOutlined, PlusOutlined } from "@ant-design/icons";
 import { ExclamationCircleOutlined } from '@ant-design/icons';
-import { Table, Row, Button, Select, Input, Modal, Dropdown, Form, Tag, Col, Typography } from "antd";
+import { Table, Row, Button, Select, Input, Modal, Dropdown, Form, Tag, Col, Typography, message, Alert, Card } from "antd";
 
 import { SellingGundam, RestoreGundam } from "../../../apis/Sellers/APISeller";
 import { GetGundamByID } from '../../../apis/User/APIUser';
@@ -17,12 +17,13 @@ function ShopProduct({ isCreating, setIsCreating }) {
 
 
   const dispatch = useDispatch();
+  const [form] = Form.useForm();
   const user = useSelector((state) => state.auth.user);
+
   const [gundamList, setGundamList] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
   const [sellModalVisible, setSellModalVisible] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
-  const [form] = Form.useForm();
   const [selectedCondition, setSelectedCondition] = useState(null);
   const [selectedGrade, setSelectedGrade] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -30,6 +31,17 @@ function ShopProduct({ isCreating, setIsCreating }) {
   // Modal Xác nhận Đăng bán Sản phẩm
   const [confirmSell, setConfirmSell] = useState(false);
   const [isConfirmedSell, setIsConfirmedSell] = useState(false);
+
+  // Modal Xác nhận Hủy Đăng bán - Trao đổi - Đấu giá 1 sản phẩm
+  const [confirmInActiveProduct, setConfirmInActiveProduct] = useState({
+    visible: false,
+    type: '',
+    record: null,
+    title: '',
+    content: '',
+    okText: '',
+    cancelText: 'Hủy'
+  });
 
   // Hàm để cập nhật seller status từ API
   const updateSellerStatus = async () => {
@@ -48,7 +60,7 @@ function ShopProduct({ isCreating, setIsCreating }) {
       const response = await GetGundamByID(user.id, searchTerm);
       setGundamList(response.data);
       setFilteredData(response.data);
-      console.log("Dử liệu gundam: ", response.data);
+      // console.log("Dử liệu gundam: ", response.data);
       return response.data;
     } catch (error) {
       console.error("Lỗi khi lấy danh sách sản phẩm:", error);
@@ -129,27 +141,75 @@ function ShopProduct({ isCreating, setIsCreating }) {
     setSellModalVisible(true);
   };
 
+  // Hàm xử lý menu click với modal cảnh báo
   const handleMenuClick = async (key, record) => {
     switch (key) {
       case "edit":
         console.log("📝 Chỉnh sửa sản phẩm:", record);
-        break;
-
-      case "preview":
-        console.log("👁️ Xem trước sản phẩm:", record);
+        // Không cần modal cảnh báo cho edit
         break;
 
       case "delete":
-        console.log("❌ Xóa sản phẩm:", record);
+        setConfirmInActiveProduct({
+          visible: true,
+          type: 'delete',
+          record: record,
+          title: 'Xác nhận xóa sản phẩm',
+          content: `Bạn có chắc chắn muốn xóa sản phẩm "${record.name}"? Hành động này không thể hoàn tác.`,
+          okText: 'Xóa sản phẩm',
+          cancelText: 'Hủy'
+        });
         break;
 
       case "unsell":
-        console.log("🚫 Hủy bán sản phẩm:", record);
-        await handleRestoreProduct(record);
+        setConfirmInActiveProduct({
+          visible: true,
+          type: 'unsell',
+          record: record,
+          title: 'Xác nhận hủy bán sản phẩm',
+          content: `Bạn có chắc chắn muốn hủy bán sản phẩm "${record.name}"? Sản phẩm sẽ không còn hiển thị trên cửa hàng.`,
+          okText: 'Hủy bán',
+          cancelText: 'Không'
+        });
         break;
 
       default:
         console.log("⚠️ Không có hành động nào được chọn!");
+    }
+  };
+
+
+  // Hàm xử lý xác nhận modal
+  const handleConfirmAction = async () => {
+    const { type, record } = confirmInActiveProduct;
+
+    try {
+      switch (type) {
+        case 'delete':
+          console.log("❌ Xóa sản phẩm:", record);
+          // Thực hiện xóa sản phẩm
+          // await deleteProduct(record);
+          message.success('Đã xóa sản phẩm thành công!');
+          break;
+
+        case 'unsell':
+          console.log("🚫 Hủy bán sản phẩm:", record);
+          await handleRestoreProduct(record);
+          message.success('Đã hủy bán sản phẩm thành công!');
+          break;
+      }
+    } catch (error) {
+      message.error('Có lỗi xảy ra, vui lòng thử lại!');
+    } finally {
+      setConfirmInActiveProduct({
+        visible: false,
+        type: '',
+        record: null,
+        title: '',
+        content: '',
+        okText: '',
+        cancelText: 'Hủy'
+      });
     }
   };
 
@@ -233,7 +293,7 @@ function ShopProduct({ isCreating, setIsCreating }) {
     {
       title: "Trạng Thái",
       key: "status",
-      width: 100,
+      width: 180,
       render: (_, value) => {
         const { status } = value;
         const { Text } = Typography;
@@ -286,32 +346,44 @@ function ShopProduct({ isCreating, setIsCreating }) {
 
               {/* Modal Confirm Đăng bán Sản phẩm */}
               <Modal
-                width={500}
-                title="XÁC NHẬN ĐĂNG BÁN SẢN PHẨM"
+                title="Xác nhận đăng bán sản phẩm"
                 open={confirmSell}
                 onCancel={() => setConfirmSell(false)}
-                footer={[
-                  <Button key="cancel" onClick={() => setConfirmSell(false)} disabled={isConfirmedSell}>
-                    Hủy
-                  </Button>,
-                  <Button
-                    key="submit"
-                    type="primary"
-                    onClick={handleConfirmSellProduct}
-                    loading={isConfirmedSell}
-                    icon={<CheckCircleOutlined className='mt-1 text-base'/>}
-                    danger
-                  >
-                    Xác nhận đăng bán
-                  </Button>
-                ]}
+                onOk={handleConfirmSellProduct}
+                okText="Xác nhận đăng bán"
+                cancelText="Hủy"
+                okType="primary"
+                confirmLoading={isConfirmedSell}
+                width={540}
+                className="sell-product-modal"
+                okButtonProps={{
+                  icon: <CheckCircleOutlined />,
+                  disabled: isConfirmedSell,
+                  className: 'bg-blue-500'
+                }}
+                cancelButtonProps={{
+                  disabled: isConfirmedSell
+                }}
               >
-                <div className="flex flex-col items-center text-center py-4">
-                  <ExclamationCircleOutlined className="text-yellow-500 text-5xl mb-4" />
-                  <Text>
-                    Bạn chắc chắn muốn đăng bán sản phẩm này chứ? <br />
-                    Sản phẩm sẽ được bày bán và người mua có thể xem & đặt hàng.
-                  </Text>
+                <div className="space-y-4">
+                  <Alert
+                    message={
+                      <div className="font-bold uppercase">
+                        đăng bán sản phẩm
+                      </div>
+                    }
+                    description={
+                      <div className="mt-2">
+                        <Text className="text-gray-700">
+                          Bạn chắc chắn muốn đăng bán sản phẩm này? <br />
+                          Sản phẩm sẽ được bày bán và người mua có thể xem & đặt hàng.
+                        </Text>
+                      </div>
+                    }
+                    type="info"
+                    showIcon
+                    className="border-0 bg-opacity-10"
+                  />
                 </div>
               </Modal>
             </>
@@ -320,21 +392,22 @@ function ShopProduct({ isCreating, setIsCreating }) {
 
         // Trạng thái khác -> render tag tương ứng
         const statusMap = {
-          auctioning: { text: "Đang đấu giá", color: "blue" },
-          published: { text: "Đang bán", color: "green" },
-          exchange: { text: "Đang trao đổi", color: "cyan" },
-          processing: { text: "Đang xử lý", color: "yellow" },
+          published: { text: "Đang đăng bán", color: "green" },
+          processing: { text: "Đang xử lý đơn hàng", color: "orange" },
           "pending auction approval": { text: "Chờ duyệt đấu giá", color: "yellow" },
+          auctioning: { text: "Đang đấu giá", color: "blue" },
+          // "for exchange": { text: "", color: "" },
+          exchanging: { text: "Đang trao đổi", color: "cyan" },
         };
 
         const statusTag = statusMap[status];
 
         return statusTag ? (
-          <Tag color={statusTag.color} className="w-full text-sm font-semibold text-center">
-            {statusTag.text.toUpperCase()}
+          <Tag color={statusTag.color} className="w-full text-sm uppercase font-bold text-center">
+            {statusTag.text}
           </Tag>
         ) : (
-          <Tag color="default">Không rõ</Tag>
+          <Tag color="red">Không rõ</Tag>
         );
       },
     },
@@ -346,7 +419,6 @@ function ShopProduct({ isCreating, setIsCreating }) {
       render: (_, record) => {
         const menuItems = [
           { key: "edit", label: "✏️ Chỉnh sửa sản phẩm", },
-          { key: "preview", label: "👁️ Xem trước ", },
         ];
         if (record.status === "in store") {
           menuItems.push({ key: "delete", label: "❌ xóa sản phẩm" });
@@ -356,16 +428,55 @@ function ShopProduct({ isCreating, setIsCreating }) {
         }
 
         return (
-          <div className="flex items-center justify-center">
-            <Dropdown
-              menu={{
-                items: menuItems,
-                onClick: ({ key }) => handleMenuClick(key, record),
+          <>
+            <div className="flex items-center justify-center">
+              <Dropdown
+                menu={{
+                  items: menuItems,
+                  onClick: ({ key }) => handleMenuClick(key, record),
+                }}
+              >
+                <Button icon={<MoreOutlined />} loading={loading && selectedProduct?.gundam_id === record.gundam_id} />
+              </Dropdown>
+            </div>
+
+
+            <Modal
+              title={confirmInActiveProduct.title}
+              open={confirmInActiveProduct.visible}
+              onOk={handleConfirmAction}
+              onCancel={() => setConfirmInActiveProduct({ ...confirmInActiveProduct, visible: false })}
+              okText={confirmInActiveProduct.okText}
+              cancelText={confirmInActiveProduct.cancelText}
+              okType={confirmInActiveProduct.type === 'delete' ? 'danger' : 'primary'}
+              confirmLoading={loading}
+              width={500}
+              okButtonProps={{
+                icon: <CheckCircleOutlined />,
+                className: 'bg-red-500 hover:bg-red-300'
               }}
+              className="confirm-action-modal"
             >
-              <Button icon={<MoreOutlined />} loading={loading && selectedProduct?.gundam_id === record.gundam_id} />
-            </Dropdown>
-          </div>
+              <div className="space-y-4">
+                <Alert
+                  message={
+                    <div className="text-red-500 font-bold text-base">
+                      {confirmInActiveProduct.type === 'delete' && 'XÓA SẢN PHẨM'}
+                      {confirmInActiveProduct.type === 'unsell' && 'HỦY BÁN SẢN PHẨM'}
+                    </div>
+                  }
+                  description={
+                    <div className="mt-2">
+                      <Typography.Text className="text-gray-700">{confirmInActiveProduct.content}</Typography.Text>
+                    </div>
+                  }
+                  type={confirmInActiveProduct.type === 'delete' ? 'error' : 'warning'}
+                  showIcon
+                  className="border-0 bg-opacity-10"
+                />
+              </div>
+            </Modal>
+          </>
         );
       },
     },

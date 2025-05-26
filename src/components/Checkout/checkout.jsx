@@ -1,7 +1,7 @@
 import { useSelector } from 'react-redux';
 import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { EnvironmentOutlined, ShopOutlined, MoneyCollectOutlined, InfoCircleOutlined, PlusCircleFilled, PlusCircleOutlined } from '@ant-design/icons';
+import { EnvironmentOutlined, ShopOutlined, MoneyCollectOutlined, InfoCircleOutlined, PlusCircleOutlined } from '@ant-design/icons';
 import { Card, Button, Radio, Divider, message, Table, Modal, Form, Select, Input, Checkbox, Empty, Tabs, notification } from 'antd';
 
 import { useCart } from '../../context/CartContext';
