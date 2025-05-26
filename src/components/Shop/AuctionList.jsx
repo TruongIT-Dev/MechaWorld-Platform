@@ -1,67 +1,113 @@
-import moment from "moment";
-import { Table, Tag, Image } from "antd";
-import { NavLink } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { Table, Tag, Image, message } from "antd";
 import { TiEyeOutline } from "react-icons/ti";
+import { NavLink } from "react-router-dom";
+import moment from "moment";
+import { GetListAuctionRequests } from "../../apis/Auction/APIAuction";
+import { useSelector } from "react-redux";
 
 const AuctionList = () => {
+  const user = useSelector((state) => state.auth.user);
   const [auctionData, setAuctionData] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    // Giả lập API - Thay thế bằng fetch("/api/auctions")
-    setAuctionData([
-      {
-        key: "1",
-        image: "https://via.placeholder.com/100",
-        name: "Gundam HG Strike Freedom Bandai",
-        startTime: "2025-03-05T12:00:00Z",
-        endTime: "2025-03-06T12:00:00Z",
-        startPrice: 50000,
-        minBidStep: 5000,
-        currentPrice: 75000,
-        status: "Đang diễn ra",
-      },
-      {
-        key: "2",
-        image: "https://via.placeholder.com/100",
-        name: "Gundam HG GN-005 Virtue",
-        startTime: "2025-03-07T14:00:00Z",
-        endTime: "2025-03-08T14:00:00Z",
-        startPrice: 60000,
-        minBidStep: 7000,
-        currentPrice: 95000,
-        status: "Đã kết thúc",
-      },
-    ]);
-  }, []);
+    const fetchAuctions = async () => {
+      setLoading(true);
+      try {
+        const response = await GetListAuctionRequests(user.id);
+        const dataWithKeys = response.data.map((item) => ({
+          ...item,
+          key: item.id,
+        }));
+        setAuctionData(dataWithKeys);
+      } catch (error) {
+        message.error("Lỗi khi tải danh sách yêu cầu đấu giá.");
+        console.error(error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAuctions();
+  }, [user.id]);
+
+  const formatCurrency = (value) =>
+    new Intl.NumberFormat("vi-VN", {
+      style: "currency",
+      currency: "VND",
+      maximumFractionDigits: 0,
+    }).format(value);
+
+  const statusColors = {
+    pending: "blue",
+    approved: "green",
+    rejected: "red",
+  };
 
   const columns = [
-    { title: "Ảnh ", dataIndex: "image", render: (text) => <Image width={100} src={text} /> },
-    { title: "Tên Gundam", dataIndex: "name" },
-    { title: "Thời Gian Bắt Đầu", dataIndex: "startTime", render: (text) => moment(text).format("DD/MM/YYYY HH:mm") },
-    { title: "Thời Gian Kết Thúc", dataIndex: "endTime", render: (text) => moment(text).format("DD/MM/YYYY HH:mm") },
-    { title: "Giá Khởi Điểm", dataIndex: "startPrice", render: (text) => `${text.toLocaleString()} Đ` },
-    { title: "Bước Giá Tối Thiểu", dataIndex: "minBidStep", render: (text) => `${text.toLocaleString()} Đ` },
-    { title: "Giá Hiện Tại", dataIndex: "currentPrice", render: (text) => `${text.toLocaleString()} Đ` },
     {
-      title: "Trạng Thái",
+      title: "Ảnh",
+      dataIndex: ["gundam_snapshot", "image_url"],
+      render: (url) => <Image width={100} src={url} />,
+    },
+    {
+      title: "Tên Gundam",
+      dataIndex: ["gundam_snapshot", "name"],
+    },
+    {
+      title: "Giá Khởi Điểm",
+      dataIndex: "starting_price",
+      render: (price) => formatCurrency(price),
+    },
+    {
+      title: "Bước Giá",
+      dataIndex: "bid_increment",
+      render: (price) => formatCurrency(price),
+    },
+    {
+      title: "Thời gian bắt đầu",
+      dataIndex: "start_time",
+      render: (time) => moment(time).format("DD/MM/YYYY HH:mm"),
+    },
+    {
+      title: "Thời gian kết thúc",
+      dataIndex: "end_time",
+      render: (time) => moment(time).format("DD/MM/YYYY HH:mm"),
+    },
+    {
+      title: "Trạng thái",
       dataIndex: "status",
-      render: (text) => <Tag color={text === "Đang diễn ra" ? "green" : "red"}>{text}</Tag>,
+      render: (status) => (
+        <Tag color={statusColors[status] || "default"} className="capitalize">
+          {status}
+        </Tag>
+      ),
     },
     {
       title: "",
       key: "action",
-      render: () => (
-        <div className="flex gap-2 items-center">
-          <NavLink to="#" className="font-medium text-indigo-500">
-            <TiEyeOutline size={25} />
-          </NavLink>
-        </div>
-      )
-    }
+      render: (_, record) => (
+        <NavLink to={`/auctions/${record.id}`} className="text-indigo-500">
+          <TiEyeOutline size={22} />
+        </NavLink>
+      ),
+    },
   ];
 
-  return <Table columns={columns} dataSource={auctionData} pagination={{ pageSize: 5 }} />;
+  // Lọc dữ liệu chỉ lấy các sản phẩm có status là "approved" hoặc "rejected"
+  const filteredData = auctionData.filter(
+    (item) => item.status === "approved" || item.status === "rejected"
+  );
+
+  return (
+    <Table
+      columns={columns}
+      dataSource={filteredData} // Sử dụng dữ liệu đã lọc
+      loading={loading}
+      pagination={{ pageSize: 5 }}
+    />
+  );
 };
 
 export default AuctionList;

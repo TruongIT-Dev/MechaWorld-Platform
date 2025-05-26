@@ -1,5 +1,8 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import { Suspense, useEffect } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import Cookies from "js-cookie";
+
 // import router
 import {
   HomePage,
@@ -9,6 +12,7 @@ import {
   UserProfile,
   TradeHistory,
   OrderHistory,
+  AuctionHistory,
   UserLayout,
   ProductDetailPage,
   ShopDashboard, ShopPage,
@@ -25,9 +29,6 @@ import {
   RegisterShopLayout,
   AutionList,
   AutionDetail,
-  AddProductToAution,
-  ListProductToAution,
-  CensorProductToAution,
   ModeratorLayout,
   SignUp,
   ModFeedbacks,
@@ -51,9 +52,6 @@ import {
 
 } from "./routes/router";
 
-import Cookies from "js-cookie";
-import { useDispatch } from "react-redux";
-
 import { verifyToken } from "./apis/Authentication/APIAuth";
 import { logout, updateUser } from "./features/auth/authSlice";
 
@@ -66,13 +64,13 @@ import { restoreDeliveryFees } from "./features/exchange/middleware/deliveryFeeP
 function App() {
 
   const dispatch = useDispatch();
+  const user = useSelector((state) => state.auth.user); // Lấy thông tin người dùng từ Redux
 
   useEffect(() => {
     const accessToken = Cookies.get("access_token");
     if (accessToken) {
       verifyToken(accessToken).then((userData) => {
         if (userData) {
-          // console.log(userData)
           dispatch(updateUser(userData.data));
           dispatch(restoreDeliveryFees());
         } else {
@@ -84,25 +82,39 @@ function App() {
     }
   }, [dispatch]);
 
+  // Phân quyền dựa trên vai trò
+  const ProtectedRoute = ({ children }) => {
+    if (user?.role === "moderator" || user?.role === "admin") {
+      return <Navigate to="/moderator" replace />;
+    }
+    return children; // Nếu không phải moderator/admin, hiển thị nội dung bình thường
+  };
+
   return (
     <>
       <PageLoading /> {/* Hiệu ứng loading khi chuyển trang */}
       <Suspense fallback={<Spinner />}> {/* Loading khi tải component */}
         <Routes>
           {/* Route màn hình role Member & Shop */}
-          <Route path="/" element={<UserLayout />} >
+          <Route
+            path="/"
+            element={
+              <ProtectedRoute>
+                <UserLayout />
+              </ProtectedRoute>
+            }
+          >
             <Route index element={<HomePage />} />
 
             {/* Product Route */}
             <Route path="product" element={<ProductPage />} />
             <Route path="product/:slug" element={<ProductDetailPage />} />
-
+            
 
             {/* Aution Route */}
-            <Route path="aution" element={<AutionList />} />
-            <Route path="aution/detail" element={<AutionDetail />} />
+            <Route path="auction" element={<AutionList />} />
+            <Route path="auction/:auctionID" element={<AutionDetail />} />
 
-            <Route path="admin/aution" element={<CensorProductToAution />} />
 
 
             {/* Exchange Main Route */}
@@ -136,10 +148,9 @@ function App() {
               <Route path="account" element={<UserProfile />} />
               <Route path="tradehistory" element={<TradeHistory />} />
               <Route path="orderhistory" element={<OrderHistory />} />
+              <Route path="auctionHistory" element={<AuctionHistory />} />
               <Route path="wallet" element={<WalletPage />} />
               <Route path="address-setting" element={<SettingAddress />} />
-              <Route path="addProductAution" element={<AddProductToAution />} />
-              <Route path="listProductAution" element={<ListProductToAution />} />
             </Route>
 
 

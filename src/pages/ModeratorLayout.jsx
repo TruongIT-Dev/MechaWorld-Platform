@@ -1,17 +1,33 @@
 import { Layout, Menu } from 'antd';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { logout } from "../features/auth/authSlice";
+import { useDispatch } from 'react-redux';
+import Cookies from 'js-cookie';
+
 
 const { Content, Sider } = Layout;
 
 const ModeratorLayout = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+
 
   // Lấy key đang chọn dựa trên pathname
   const selectedKey = location.pathname.startsWith('/moderator/mod-')
     ? location.pathname.replace('/moderator/', '')
     : 'mod-users'; // Mặc định vào 'mod-users'
 
+      const handleLogout = () => {
+          dispatch(logout());
+          Cookies.remove("access_token");
+          Cookies.remove("user");
+  
+          setTimeout(() => {
+              // navigate('/');
+              window.location.href = "/";
+          }, 50);
+      };
   return (
     <Layout style={{ minHeight: '100vh', backgroundColor: '#f5f5f5' }}>
       {/* Sidebar Menu */}
@@ -33,11 +49,12 @@ const ModeratorLayout = () => {
           style={{ borderRadius: 10, overflow: 'hidden', border: 'none',background: '#1abfe8' }}
           onClick={(e) => {
             if (e.key === 'logout') {
-              console.log("Đăng xuất...");
+              handleLogout(); // Thực hiện logout
             } else {
               navigate(`/moderator/${e.key}`);
             }
           }}
+          
         >
           <Menu.Item key="mod-users">👤 Quản lý Người dùng</Menu.Item>
           <Menu.Item key="mod-feedbacks">📩 Quản lý Phản hồi</Menu.Item>

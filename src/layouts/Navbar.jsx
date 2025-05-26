@@ -15,7 +15,7 @@ const Menu = [
   {
     id: 2,
     name: "Đấu giá",
-    link: "/aution",
+    link: "/auction",
   },
   {
     id: 3,

@@ -37,6 +37,7 @@ export const WalletPage = React.lazy(() => import('../components/Wallet/WalletUs
 export const ProfilePage = React.lazy(() => import("../components/Profile/Profiles"));
 export const UserProfile = React.lazy(() => import("../components/Profile/UserProfile"));
 export const OrderHistory = React.lazy(() => import("../components/Profile/OrderHistory"));
+export const AuctionHistory = React.lazy(() => import("../components/Profile/Auction"));
 export const TradeHistory = React.lazy(() => import("../components/Profile/TradeHistory"));
 export const SettingAddress = React.lazy(() => import("../components/Profile/SettingAddress"));
 
@@ -67,9 +68,6 @@ export const ExchangeGundamManagement = React.lazy(() => import("../components/E
 // Aution route
 export const AutionList = React.lazy(() => import("../components/Aution/User/AutionList"));
 export const AutionDetail = React.lazy(() => import("../components/Aution/User/AutionDetail"));
-export const AddProductToAution = React.lazy(() => import("../components/Aution/shop/AddProductToAution"));
-export const ListProductToAution = React.lazy(() => import("../components/Aution/shop/ListProductToAution"));
-export const CensorProductToAution = React.lazy(() => import("../components/Aution/Moderator/CensorAution"));
 
 // Collection route
 export const GundamCollectionApp = React.lazy(() => import("../components/Collection/Collection"));
