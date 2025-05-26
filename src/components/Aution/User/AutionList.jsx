@@ -11,6 +11,48 @@ import Cookies from 'js-cookie';
 const { Search } = Input;
 const { Option } = Select;
 
+const formatDate = (dateString) => {
+  const date = new Date(dateString);
+  return date.toLocaleDateString('vi-VN', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+};
+
+const useCountdown = (endTime) => {
+  const [timeLeft, setTimeLeft] = useState('');
+
+  useEffect(() => {
+    if (!endTime) return;
+
+    const interval = setInterval(() => {
+      const now = new Date();
+      const end = new Date(endTime);
+      const diff = end - now;
+
+      if (diff <= 0) {
+        clearInterval(interval);
+        setTimeLeft('Đã kết thúc');
+        return;
+      }
+
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+      setTimeLeft(`${days}d ${hours}h ${minutes}m ${seconds}s`);
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [endTime]);
+
+  return timeLeft;
+};
+
 
 const parseUserCookie = (cookieString) => {
   try {
@@ -117,28 +159,67 @@ const AuctionCard = ({ auctionData }) => {
     }
   }, [participants]);
 
+  
+  const countdown = useCountdown(auction.end_time);
+
   const getAuctionStatus = () => {
     const now = new Date();
     const startTime = new Date(auction.start_time);
     const endTime = new Date(auction.end_time);
     
-    // If actual_end_time exists, the auction has definitely ended
-    if (auction.actual_end_time != null) {
-        return "ended";
+    // Nếu có actual_end_time và auction đã hoàn thành (có người thắng)
+    if (auction.actual_end_time != null && auction.order_id != null) {
+      return "completed";
     }
     
-    // Otherwise, check the normal time-based status
+    // Nếu có actual_end_time nhưng không có người thắng
+    if (auction.actual_end_time != null) {
+      return "ended";
+    }
+    
+    // Kiểm tra trạng thái theo thời gian
     if (now < startTime) return "scheduled";
     if (now >= startTime && now <= endTime) return "active";
     return "ended";
-};
-
+  };
   const status = getAuctionStatus();
-  
+
   const statusStyles = {
     active: { text: "text-green-500", bg: "bg-green-100" },
     ended: { text: "text-red-500", bg: "bg-red-100" },
-    scheduled: { text: "text-blue-500", bg: "bg-blue-100" }
+    scheduled: { text: "text-blue-500", bg: "bg-blue-100" },
+    completed: { text: "text-purple-500", bg: "bg-purple-100" }
+  };
+  const dateOnly = new Date(auction.actual_end_time).toISOString().split('T')[0];
+  const renderStatusInfo = () => {
+    switch (status) {
+      case 'scheduled':
+        return (
+          <div className="text-[19px] text-gray-500 mt-1">
+            Bắt đầu: {formatDate(auction.start_time)}
+          </div>
+        );
+      case 'active':
+        return (
+          <div className="text-[19px] text-green-500 mt-1">
+            Kết thúc trong: {countdown}
+          </div>
+        );
+      case 'ended':
+        return (
+          <div className="text-[19px] text-green-500 mt-1">
+            Kết thúc vào: {dateOnly}
+          </div>
+        );
+      case 'completed':
+        return (
+          <div className="text-[19px] text-green-500 mt-1">
+            Kết thúc vào: {dateOnly}
+          </div>
+        );
+      default:
+        return null;
+    }
   };
 
   const handleClickedDetailAution = (id) => {
@@ -230,11 +311,15 @@ const AuctionCard = ({ auctionData }) => {
         </div>
       </div>
 
-      <div className="details mt-4">
+      <div className="details">
+
+        {renderStatusInfo()}
         <Title className="uppercase text-sm sm:text-base">{auction.gundam_snapshot.name}</Title>
         <div className="text-xs text-gray-500 mt-1">
           {auction.gundam_snapshot.grade} - {auction.gundam_snapshot.scale}
         </div>
+
+        
 
         <hr className="mt-3" />
         <div className="flex items-center justify-between py-4">
@@ -326,7 +411,7 @@ const AuctionList = () => {
         
         // Giữ nguyên toàn bộ dữ liệu trả về (bao gồm auction, participants, bids)
         const validAuctions = response.data.filter(item => 
-          ["scheduled", "active", "ended"].includes(item.auction?.status) &&
+          ["scheduled", "active", "ended","completed"].includes(item.auction?.status) &&
           item.auction?.gundam_snapshot &&
           item.auction?.start_time &&
           item.auction?.end_time

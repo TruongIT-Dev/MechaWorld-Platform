@@ -12,6 +12,7 @@ import {
   UserProfile,
   TradeHistory,
   OrderHistory,
+  AuctionHistory,
   UserLayout,
   ProductDetailPage,
   ShopDashboard, ShopPage,
@@ -143,6 +144,7 @@ function App() {
               <Route path="account" element={<UserProfile />} />
               <Route path="tradehistory" element={<TradeHistory />} />
               <Route path="orderhistory" element={<OrderHistory />} />
+              <Route path="auctionHistory" element={<AuctionHistory />} />
               <Route path="wallet" element={<WalletPage />} />
               <Route path="address-setting" element={<SettingAddress />} />
             </Route>

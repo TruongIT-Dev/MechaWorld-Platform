@@ -14,7 +14,7 @@ import axios from 'axios';
 import { formatToCustomTime, formatDisplayTime } from './dateFormat';
 import AuctionHistory from './AuctionHistory';
 import AuctionPaymentModal from './AuctionPaymentModal';
-
+import ParticipantsTable from './ParticipantsTable';  
 
 
 
@@ -23,7 +23,7 @@ const AuctionDetail = () => {
   const { auctionID } = useParams();
   const [auctionDetail, setAuctionDetail] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState("description");
+  const [activeTab, setActiveTab] = useState("auctionHistory");
   const [bidPrice, setBidPrice] = useState('');
   const [bidError, setBidError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -39,7 +39,12 @@ const AuctionDetail = () => {
   const [shippingFee, setShippingFee] = useState(0);
   const [expectedDeliveryTime, setExpectedDeliveryTime] = useState('');
   const [bidHistory, setBidHistory] = useState([]);
+  const [participantsCount, setParticipantsCount] = useState(0);
+  const [participants, setParticipants] = useState([]);
+  const [newParticipantPulse, setNewParticipantPulse] = useState(false);
   const navigate = useNavigate();
+  
+
   
 
   const useCountdown = (targetDate) => {
@@ -109,6 +114,7 @@ const AuctionDetail = () => {
       const isValidEndTime = endTime && !isNaN(new Date(formattedEndTime).getTime());
 
       setAuctionDetail(data);
+      setParticipants(data.auction_participants || []);
       setIsAuctionEnded(
         data.auction?.status === 'ended' ||
           (isValidEndTime && new Date(formattedEndTime).getTime() < Date.now())
@@ -145,6 +151,21 @@ const AuctionDetail = () => {
   useEffect(() => {
     fetchAuctionDetail();
   }, [auctionID]);
+
+useEffect(() => {
+  if (auctionDetail?.auction_bids) {
+    const mappedBids = auctionDetail.auction_bids.map(bid => ({
+      type: 'bid',
+      timestamp: bid.created_at,
+      price: bid.amount,
+      user: participants.find(p => p.user_id === bid.bidder_id) || {}, // nếu đã có participants
+    }));
+    setBidHistory(mappedBids);
+    console.log('Bid history updated:', mappedBids);
+  }
+}, [auctionDetail, participants]);
+
+
 
 const fetchUserAddresses = async () => {
     try {
@@ -244,65 +265,120 @@ const handlePaymentSubmit = async () => {
 
   // SSE connection
   useEffect(() => {
-    if (!auctionID || isAuctionEnded) return;
+  if (!auctionID || isAuctionEnded) return;
 
-    const connect = () => {
-      setConnectionStatus('connecting');
-      try {
-        const url = `/v1/auctions/${auctionID}/stream`;
-        const eventSource = new EventSource(url);
-        eventSourceRef.current = eventSource;
+  const eventSourceRef = { current: null };
 
-        eventSource.onopen = () => {
-          setConnectionStatus('connected');
-        };
+  const connect = () => {
+    setConnectionStatus('connecting');
+    try {
+      const url = `/v1/auctions/${auctionID}/stream`;
+      const eventSource = new EventSource(url);
+      eventSourceRef.current = eventSource;
 
-        eventSource.onerror = () => {
-          setConnectionStatus('error');
-          eventSource.close();
-        };
+      eventSource.onopen = () => {
+        setConnectionStatus('connected');
+      };
 
-        eventSource.addEventListener('new_bid', (event) => {
-          try {
-            const data = JSON.parse(event.data);
-            if (data?.current_price) {
-              setAuctionDetail(prev => ({
-                ...prev,
-                auction: {
-                  ...prev.auction,
-                  current_price: data.current_price
-                }
-              }));
-            }
-          } catch (e) {
-            console.error("Error parsing bid data:", e);
-          }
-        });
+      eventSource.onerror = () => {
+        setConnectionStatus('error');
+        eventSource.close();
+      };
 
-        eventSource.addEventListener('auction_ended', (event) => {
-          try {
-            const data = JSON.parse(event.data);
-            setIsAuctionEnded(true);
-            setWinnerInfo({
-              winner: data.winner || { full_name: "Người dùng ẩn danh" },
-              finalPrice: data.final_price,
-              reason: data.reason
-            });
-            eventSource.close();
-          } catch (e) {
-            console.error("Error parsing end event:", e);
-          }
-        });
+      // Lắng nghe sự kiện new_participant
+eventSource.addEventListener('new_participant', (event) => {
+  try {
+    const data = JSON.parse(event.data);
+    console.log('New participant event:', data);
 
-        return () => eventSource.close();
-      } catch (error) {
-        console.error('SSE connection error:', error);
-        setConnectionStatus('failed');
-      }
+    const newParticipantRaw = data.new_participant;
+
+    // Tạo object theo đúng cấu trúc participants
+    const newParticipant = {
+      id: newParticipantRaw.id,
+      user_id: newParticipantRaw.id, // dùng id làm user_id
+      created_at: newParticipantRaw.created_at || new Date().toISOString(),
+      is_refunded: false,
     };
 
-    connect();
-  }, [auctionID, isAuctionEnded]);
+    // Cập nhật danh sách người tham gia
+    setParticipants(prev => [...prev, newParticipant]);
+
+    // Cập nhật tổng số
+    setAuctionDetail(prev => ({
+      ...prev,
+      auction: {
+        ...prev.auction,
+        total_participants: data.total_participants
+      }
+    }));
+
+    // Thêm vào lịch sử (nếu cần)
+    setBidHistory(prev => [
+      ...prev,
+      {
+        type: 'participant_joined',
+        timestamp: new Date().toISOString(),
+        user: { id: newParticipant.user_id }
+      }
+    ]);
+
+  } catch (e) {
+    console.error("Error parsing new_participant event:", e);
+  }
+});
+
+
+
+     eventSource.addEventListener('new_bid', (event) => {
+  try {
+    const data = JSON.parse(event.data);
+
+    const newBid = {
+      type: 'bid',
+      timestamp: data.timestamp,
+      price: data.amount,
+      user: participants.find(p => p.user_id === data.bidder_id) || {},
+    };
+
+    setBidHistory(prev => [...prev, newBid]);
+  } catch (e) {
+    console.error('Error parsing new_bid:', e);
+  }
+});
+
+
+      eventSource.addEventListener('auction_ended', (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          setIsAuctionEnded(true);
+          setWinnerInfo({
+            winner: data.winner || { full_name: "Người dùng ẩn danh" },
+            finalPrice: data.final_price,
+            reason: data.reason
+          });
+          eventSource.close();
+        } catch (e) {
+          console.error("Error parsing end event:", e);
+        }
+      });
+
+      return () => eventSource.close();
+    } catch (error) {
+      console.error('SSE connection error:', error);
+      setConnectionStatus('failed');
+    }
+  };
+
+  const cleanup = connect();
+
+  return () => {
+    if (cleanup && typeof cleanup === 'function') cleanup();
+    if (eventSourceRef.current) {
+      eventSourceRef.current.close();
+    }
+  };
+}, [auctionID, isAuctionEnded]);
 
   
 
@@ -339,18 +415,6 @@ const handlePaymentSubmit = async () => {
     }
   };
 
-  const handlePayment = async () => {
-    try {
-      setPaymentProcessing(true);
-      await PayForWinningBid(auctionID);
-      message.success("Thanh toán thành công!");
-      fetchAuctionDetail(); // Cần fetch lại để cập nhật trạng thái thanh toán
-    } catch (error) {
-      message.error("Thanh toán thất bại.");
-    } finally {
-      setPaymentProcessing(false);
-    }
-  };
 
   // Tính phí vận chuyển khi mở modal thanh toán, đổi địa chỉ hoặc winnerInfo thay đổi
   useEffect(() => {
@@ -369,6 +433,13 @@ const handlePaymentSubmit = async () => {
   if (!auctionDetail || !auctionDetail.auction.gundam_snapshot) {
     return <div className="text-center py-10 text-red-500">Không tìm thấy thông tin đấu giá hoặc sản phẩm</div>;
   }
+
+  const isAuctionTrulyEnded = isAuctionEnded || ['ended', 'completed'].includes(auctionDetail.auction.status);
+  const currentUserId = Cookies.get('user') ? JSON.parse(decodeURIComponent(Cookies.get('user'))).id : null;
+  const isCurrentUserWinner = currentUserId === winnerInfo?.winner?.id;
+  const sortedBidHistory = [...bidHistory].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+
 
   return (
     <section className="mt-10 pt-24 px-8">
@@ -396,6 +467,7 @@ const handlePaymentSubmit = async () => {
             </div>
           )}
         </div>
+
         <div className="flex justify-between gap-8">
           {/* Product Image Section */}
           <div className="w-1/2">
@@ -412,176 +484,180 @@ const handlePaymentSubmit = async () => {
             </div>
           </div>
 
-          {/* Auction Info Section */}
+          {/* Right Section */}
           <div className="w-1/2">
-            <Title level={2} className="capitalize">
-              {auctionDetail.auction.gundam_snapshot?.name || 'Tên sản phẩm không có'}
-            </Title>
-            
-            <div className="flex gap-5 items-center my-4">
-              <div className="flex text-yellow-400">
-                <IoIosStar size={20} />
-                <IoIosStar size={20} />
-                <IoIosStar size={20} />
-                <IoIosStarHalf size={20} />
-                <IoIosStarOutline size={20} />
-              </div>
-              <Caption>(2 đánh giá)</Caption>
-            </div>
+            {isAuctionTrulyEnded ? (
+              <div className="p-6 bg-gray-50 rounded-xl shadow-md">
+                <Title level={3} className="mb-4">Phiên đấu giá đã kết thúc</Title>
+                {winnerInfo?.winner ? (
+                  <div className="flex items-center gap-4">
+                    <img
+                      src={winnerInfo.winner.avatar_url || '/default-avatar.png'}
+                      alt="Avatar"
+                      className="w-16 h-16 rounded-full object-cover"
+                    />
+                    <div>
+                      <p className="text-lg font-semibold">{winnerInfo.winner.full_name}</p>
+                      <p className="text-gray-600">Giá cuối: {winnerInfo.finalPrice?.toLocaleString() || '0'} VNĐ</p>
 
-            <div className="space-y-3 my-6">
-              <Caption>
-                <span className="font-medium">Tình trạng:</span> {auctionDetail.auction.gundam_snapshot?.condition || 'Không xác định'}
-              </Caption>
-              <Caption>
-                <span className="font-medium">Xác minh:</span> {auctionDetail.is_verified ? "Đã xác minh" : "Chưa xác minh"}
-              </Caption>
-            </div>
+                      {isCurrentUserWinner && (
+                        <>
+                          {auctionDetail?.auction?.status === 'completed' ? (
+                            <p className="mt-2 text-green-600 font-semibold">Đã thanh toán thành công</p>
+                          ) : (
+                            <button
+                              onClick={() => {
+                                fetchUserAddresses();
+                                setPaymentModalVisible(true);
+                              }}
+                              disabled={paymentProcessing}
+                              className={`mt-2 py-2 px-6 rounded-lg ${
+                                paymentProcessing ? 'bg-gray-400' : 'bg-blue-500 hover:bg-blue-600'
+                              } text-white`}
+                            >
+                              {paymentProcessing ? 'Đang xử lý...' : 'Thanh toán ngay'}
+                            </button>
+                          )}
+                        </>
+                      )}
+                    </div>
 
-            {/* Countdown Timer */}
-            <div className="my-6">
-              <Caption>Thời gian còn lại:</Caption>
-              <div className="flex gap-4 text-center mt-3">
-                {['days', 'hours', 'minutes', 'seconds'].map((unit) => (
-                  <div key={unit} className="p-4 px-6 shadow-md rounded-lg">
-                    <Title level={4}>{countdown[unit]}</Title>
-                    <Caption>
-                      {unit === 'days' ? 'Ngày' : 
-                       unit === 'hours' ? 'Giờ' : 
-                       unit === 'minutes' ? 'Phút' : 'Giây'}
-                    </Caption>
+                    {/* Modal thanh toán */}
+                    <AuctionPaymentModal
+                      visible={paymentModalVisible}
+                      onCancel={() => setPaymentModalVisible(false)}
+                      onOk={handlePaymentSubmit}
+                      confirmLoading={paymentProcessing}
+                      auctionDetail={auctionDetail}
+                      winnerInfo={winnerInfo}
+                      userAddresses={userAddresses}
+                      selectedAddress={selectedAddress}
+                      setSelectedAddress={setSelectedAddress}
+                      shippingFee={shippingFee}
+                      navigate={navigate}
+                    />
                   </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Auction Details */}
-            <div className="space-y-3 my-6">
-              <Title level={6} className="flex items-center gap-2">
-                Kết thúc lúc: <Caption>{new Date(auctionDetail.auction.end_time).toLocaleString()}</Caption>
-              </Title>
-              <Title level={6} className="flex items-center gap-2">
-                Giá khởi điểm: <Caption>{auctionDetail.auction.starting_price?.toLocaleString() || '0'} VNĐ</Caption>
-              </Title>
-              <Title level={6} className="flex items-center gap-2">
-                Bước giá: <Caption>{auctionDetail.auction.bid_increment?.toLocaleString() || '0'} VNĐ</Caption>
-              </Title>
-              <Title level={6} className="flex items-center gap-2">
-                Giá hiện tại: <Caption className="text-2xl text-green-600">
-                  {auctionDetail.auction.current_price?.toLocaleString() || '0'} VNĐ
-                </Caption>
-              </Title>
-              <Title level={6} className="flex items-center gap-2">
-                Số người tham gia: <Caption>{auctionDetail.auction.total_participants}</Caption>
-              </Title>
-            </div>
-
-            {/* Bid Form or Winner Info */}
-            {isAuctionEnded ? (
-              <div className="p-5 bg-gray-50 rounded-lg shadow-md mt-6">
-            <Title level={4} className="mb-4">Phiên đấu giá đã kết thúc</Title>
-            {winnerInfo?.winner ? (
-              <>
-                <p className="mb-2">Người thắng: {winnerInfo.winner.full_name}</p>
-                <p className="mb-2">Giá cuối: {winnerInfo.finalPrice?.toLocaleString() || '0'} VNĐ</p>
-                
-                {/* Sửa lại điều kiện kiểm tra người thắng là người dùng hiện tại */}
-                {Cookies.get('user') && JSON.parse(decodeURIComponent(Cookies.get('user'))).id === winnerInfo.winner.id && (
-                  <>
-                    <button
-                      onClick={() => {
-                        fetchUserAddresses();
-                        setPaymentModalVisible(true);
-                      }}
-                      disabled={paymentProcessing}
-                      className={`mt-4 py-2 px-6 rounded-lg ${
-                        paymentProcessing ? 'bg-gray-400' : 'bg-blue-500 hover:bg-blue-600'
-                      } text-white`}
-                    >
-                      {paymentProcessing ? 'Đang xử lý...' : 'Thanh toán ngay'}
-                    </button>
-                          {/* Payment Modal */}
-<AuctionPaymentModal
-          visible={paymentModalVisible}
-          onCancel={() => setPaymentModalVisible(false)}
-          onOk={handlePaymentSubmit}
-          confirmLoading={paymentProcessing}
-          auctionDetail={auctionDetail}
-          winnerInfo={winnerInfo}
-          userAddresses={userAddresses}
-          selectedAddress={selectedAddress}
-          setSelectedAddress={setSelectedAddress}
-          shippingFee={shippingFee}
-          navigate={navigate}
-        />
-                  </>
-                  
+                ) : (
+                  <p>Phiên đấu giá đã kết thúc nhưng không có người thắng cuộc</p>
                 )}
-                
-              </>
+
+              </div>
             ) : (
-              <p>Không có người thắng cuộc</p>
-            )}
-          </div>
-            ) : (
-              <form onSubmit={handleSubmitBid} className="mt-6 p-5 bg-white rounded-lg shadow-md">
-                <div className="mb-4">
-                  <input
-                    className={`${commonClassNameOfInput} ${bidError ? 'border-red-500' : ''} w-full`}
-                    type="number"
-                    placeholder={`Tối thiểu ${((auctionDetail.auction.current_price || 0) + (auctionDetail.auction.bid_increment || 0)).toLocaleString()} VNĐ`}
-                    value={bidPrice}
-                    onChange={handleBidChange}
-                    min={(auctionDetail?.auction?.current_price || 0) + (auctionDetail?.auction?.bid_increment || 0)}
-                  />
-                  {bidError && <p className="text-red-500 text-sm mt-1">{bidError}</p>}
+              // --- Giữ nguyên layout khi đấu giá đang diễn ra ---
+              <>
+                <Title level={2} className="capitalize">
+                  {auctionDetail.auction.gundam_snapshot?.name || 'Tên sản phẩm không có'}
+                </Title>
+
+                <div className="flex gap-5 items-center my-4">
+                  <div className="flex text-yellow-400">
+                    <IoIosStar size={20} />
+                    <IoIosStar size={20} />
+                    <IoIosStar size={20} />
+                    <IoIosStarHalf size={20} />
+                    <IoIosStarOutline size={20} />
+                  </div>
+                  <Caption>(2 đánh giá)</Caption>
                 </div>
-                <button
-                  type="submit"
-                  disabled={!!bidError || !bidPrice || isSubmitting}
-                  className={`w-full py-3 rounded-lg ${
-                    bidError || !bidPrice ? 'bg-gray-300' : 'bg-green-500 hover:bg-green-600'
-                  } text-white`}
-                >
-                  {isSubmitting ? 'Đang đặt giá...' : 'Đặt giá'}
-                </button>
-              </form>
+
+                <div className="space-y-3 my-6">
+                  <Caption>
+                    <span className="font-medium">Tình trạng:</span> {auctionDetail.auction.gundam_snapshot?.condition || 'Không xác định'}
+                  </Caption>
+                  <Caption>
+                    <span className="font-medium">Xác minh:</span> {auctionDetail.is_verified ? "Đã xác minh" : "Chưa xác minh"}
+                  </Caption>
+                </div>
+
+                <div className="my-6">
+                  <Caption>Thời gian còn lại:</Caption>
+                  <div className="flex gap-4 text-center mt-3">
+                    {['days', 'hours', 'minutes', 'seconds'].map((unit) => (
+                      <div key={unit} className="p-4 px-6 shadow-md rounded-lg">
+                        <Title level={4}>{countdown[unit]}</Title>
+                        <Caption>
+                          {unit === 'days' ? 'Ngày' : 
+                          unit === 'hours' ? 'Giờ' : 
+                          unit === 'minutes' ? 'Phút' : 'Giây'}
+                        </Caption>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="space-y-3 my-6">
+                  <Title level={6} className="flex items-center gap-2">
+                    Kết thúc lúc: <Caption>{new Date(auctionDetail.auction.end_time).toLocaleString()}</Caption>
+                  </Title>
+                  <Title level={6} className="flex items-center gap-2">
+                    Giá khởi điểm: <Caption>{auctionDetail.auction.starting_price?.toLocaleString() || '0'} VNĐ</Caption>
+                  </Title>
+                  <Title level={6} className="flex items-center gap-2">
+                    Bước giá: <Caption>{auctionDetail.auction.bid_increment?.toLocaleString() || '0'} VNĐ</Caption>
+                  </Title>
+                  <Title level={6} className="flex items-center gap-2">
+                    Giá hiện tại: <Caption className="text-2xl text-green-600">
+                      {auctionDetail.auction.current_price?.toLocaleString() || '0'} VNĐ
+                    </Caption>
+                  </Title>
+                </div>
+
+                {/* Form đặt giá */}
+                <form onSubmit={handleSubmitBid} className="mt-6 p-5 bg-white rounded-lg shadow-md">
+                  <div className="mb-4">
+                    <input
+                      className={`${commonClassNameOfInput} ${bidError ? 'border-red-500' : ''} w-full`}
+                      type="number"
+                      placeholder={`Tối thiểu ${((auctionDetail.auction.current_price || 0) + (auctionDetail.auction.bid_increment || 0)).toLocaleString()} VNĐ`}
+                      value={bidPrice}
+                      onChange={handleBidChange}
+                      min={(auctionDetail?.auction?.current_price || 0) + (auctionDetail?.auction?.bid_increment || 0)}
+                    />
+                    {bidError && <p className="text-red-500 text-sm mt-1">{bidError}</p>}
+                  </div>
+                  <button
+                    type="submit"
+                    disabled={!!bidError || !bidPrice || isSubmitting}
+                    className={`w-full py-3 rounded-lg ${
+                      bidError || !bidPrice ? 'bg-gray-300' : 'bg-green-500 hover:bg-green-600'
+                    } text-white`}
+                  >
+                    {isSubmitting ? 'Đang đặt giá...' : 'Đặt giá'}
+                  </button>
+                </form>
+              </>
             )}
           </div>
         </div>
 
+
         {/* Tabs Section */}
         <div className="mt-12">
           <div className="flex border-b">
-            <button
-              className={`px-6 py-3 ${activeTab === 'description' ? 'border-b-2 border-black font-medium' : 'text-gray-500'}`}
-              onClick={() => handleTabClick('description')}
-            >
-              Mô tả sản phẩm
-            </button>
             <button
               className={`px-6 py-3 ${activeTab === 'auctionHistory' ? 'border-b-2 border-black font-medium' : 'text-gray-500'}`}
               onClick={() => handleTabClick('auctionHistory')}
             >
               Lịch sử đấu giá
             </button>
+            <button
+              className={`px-6 py-3 ${activeTab === 'participants' ? 'border-b-2 border-black font-medium' : 'text-gray-500'}`}
+              onClick={() => handleTabClick('participants')}
+            >
+              Người tham gia ({participants.length})
+            </button>
           </div>
 
           <div className="mt-6">
-            {activeTab === 'description' && (
-              <div className="p-6 bg-white rounded-lg shadow-sm">
-                <Title level={4} className="mb-4">Mô tả chi tiết</Title>
-                <Body>
-                  {auctionDetail.gundam_snapshot?.description || 'Không có mô tả sản phẩm'}
-                </Body>
-              </div>
-            )}
-
             {activeTab === 'auctionHistory' && (
               <AuctionHistory 
-                participants={bidHistory.filter(b => b.type === 'participant_joined').map(b => b.user)} 
-                bidHistory={bidHistory.filter(b => b.type === 'bid')} 
-              />
+  participants={participants}
+  bidHistory={sortedBidHistory}
+/>
+
+            )}
+            {activeTab === 'participants' && (
+              <ParticipantsTable participants={participants} />
             )}
           </div>
         </div>

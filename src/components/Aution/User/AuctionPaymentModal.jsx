@@ -83,7 +83,7 @@ const AuctionPaymentModal = ({
             <Button
               type="link"
               className="mt-2"
-              onClick={() => navigate('/member/profile/address')}
+              onClick={() => navigate('/member/profile/address-setting')}
             >
               + Thêm địa chỉ mới
             </Button>

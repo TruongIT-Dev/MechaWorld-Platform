@@ -32,9 +32,9 @@ export default function Profile() {
       label: <Link to="/member/profile/orderhistory">Đơn mua</Link>,
     },
     {
-      key: "/member/profile/auction-history",
+      key: "/member/profile/auctionHistory",
       icon: <BankOutlined className="text-lg text-red-500" />,
-      label: <Link to="#">Lịch sử đấu giá</Link>,
+      label: <Link to="/member/profile/auctionHistory">Lịch sử đấu giá</Link>,
     },
     {
       key: "/member/profile/wallet",
