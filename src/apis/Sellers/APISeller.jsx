@@ -3,8 +3,7 @@ import axios from '../../utils/axios-custome';
 
 // ************ GET - POST - PUT - PATCH - DELETE **************
 
-
-// GET LIST ALL SALE ORDERS FOR A SPECIFIC SELLER
+// 1. Get all sales orders that belong to the specified seller ID
 export const GetOrder = (orderId) => {
     return axios.get(`/sellers/${orderId}/orders`, {
         headers: {
@@ -14,46 +13,10 @@ export const GetOrder = (orderId) => {
     });
 }
 
-
-// GET Sales Order Detail
-
-
-// GET SELLER CURRENT ACTIVE SUBSCRIPTION
-export const GetSellerStatus = (id) => {
-    return axios.get(`/sellers/${id}/subscriptions/active`);
-}
+// 2. Get details of a specific sales order for the seller (excluding exchange order)
 
 
-
-
-
-
-
-// POST ...
-// export const PostGundam = (id, gundamData) => {
-//     const accessToken = Cookies.get('access_token');
-//     return axios.post(`/sellers/${id}/gundams`, gundamData, {
-//         headers: {
-//             "Content-Type": "multipart/form-data",
-//             "Authorization": `Bearer ${accessToken}`
-//         },
-//     });
-// }
-
-
-// POST SELLER PUBLISH A GUNDAM FOR SALE
-export const SellingGundam = (id, gundamId) => {
-    return axios.patch(`/sellers/${id}/gundams/${gundamId}/publish`);
-}
-
-
-// POST SELLER UNPUBLISH A GUNDAM
-export const RestoreGundam = (id, gundamId) => {
-    return axios.patch(`/sellers/${id}/gundams/${gundamId}/unpublish`);
-}
-
-
-// PATCH SELLER CONFIRM AN ORDER
+// 3. Confirm an order for the specified seller.
 export const ConfirmOrder = (sellerId, orderId) => {
     return axios.patch(`/sellers/${sellerId}/orders/${orderId}/confirm`, {}, {
         headers: {
@@ -63,7 +26,26 @@ export const ConfirmOrder = (sellerId, orderId) => {
     });
 }
 
+// 4. Get the current active subscription details for the specified seller
+export const GetSellerStatus = (id) => {
+    return axios.get(`/sellers/${id}/subscriptions/active`);
+}
+
+// 5. Publish a gundam for sale for the specified seller.
+export const SellingGundam = (id, gundamId) => {
+    return axios.patch(`/sellers/${id}/gundams/${gundamId}/publish`);
+}
+
+// 6. Unpublish a gundam for the specified seller. 
+export const RestoreGundam = (id, gundamId) => {
+    return axios.patch(`/sellers/${id}/gundams/${gundamId}/unpublish`);
+}
+
+// 7. Cancel a pending order by the seller
 
 
+// 8. Upgrade seller's subscription to a higher tier plan.
 
-// PATCH SELLER CANCEL AN ORDER
+
+// 9. Get a list of all available subscription plans.
+

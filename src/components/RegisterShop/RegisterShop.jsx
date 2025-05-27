@@ -10,9 +10,10 @@ import SecondForm from "./SecondForm";
 import ThirdForm from "./ThirdForm";
 import FourthForm from "./FourthForm";
 
-import { verifyToken, createShop } from '../../apis/Authentication/APIAuth';
+import { verifyToken } from '../../apis/Authentication/APIAuth';
+
 import { BecomeSeller } from "../../apis/User/APIUser";
-import { GetShopInfoById, UpdateShopName } from '../../apis/Seller Profile/APISellerProfile';
+import { CreateShop, GetShopInfoById, UpdateShopName } from '../../apis/Seller Profile/APISellerProfile';
 
 const { Step } = Steps;
 
@@ -117,7 +118,7 @@ export default function RegisterShop() {
           console.log("Shop name updated");
         } else {
           // Tạo mới nếu chưa tồn tại
-          await createShop(values.shop_name, user?.id);
+          await CreateShop(values.shop_name, user?.id);
           console.log("New shop created");
         }
 

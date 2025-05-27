@@ -44,18 +44,17 @@ axios.interceptors.response.use((response) => {
 
 // ************ GET - POST - PUT - PATCH - DELETE **************
 
-
-// GET List all auction requests for moderator
+// 1. GET List all auction requests for moderator
 export const GetListAuctionRequestsForModerator = () => {
     return axios.get('/mod/auction-requests');
 }
 
-// PATCH Approve an auction request by moderator
+// 2. PATCH Approve an auction request by moderator
 export const ApproveAuctionRequest = (requestID) => {
     return axios.patch(`/mod/auction-requests/${requestID}/approve`);
 }
 
-// PATCH Reject an auction request by moderator
+// 3. PATCH Reject an auction request by moderator
 export const RejectAuctionRequest = (requestID, reason) => {
     return axios.patch(`/mod/auction-requests/${requestID}/reject`, {
       reason: reason,

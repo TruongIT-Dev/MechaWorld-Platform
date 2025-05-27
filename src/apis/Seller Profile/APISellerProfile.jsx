@@ -4,17 +4,23 @@ import axios from '../../utils/axios-custome';
 // ************ GET - POST - PUT - PATCH - DELETE **************
 
 
-// GET Seller Profile by ID
+// 1. Get detailed information about a specific seller
 export const GetShopInfoById = (id) => {
     return axios.get(`seller/profile?user_id=${id}`)
 }
 
 
 
-// POST Create seller profile (ShopName)
+// 2. Creates a new seller profile
+export const CreateShop = (shopName, userId) => {
+    return axios.post('/seller/profile', {
+        shop_name: shopName,
+        user_id: userId
+    });
+  }
 
 
-// PATCH Update seller profile (ShopName)
+// 3. Update the seller's profile information (ShopName)
 export const UpdateShopName = (shop_name, id) => {
     return axios.patch(`seller/profile`, {
         shop_name: shop_name,
