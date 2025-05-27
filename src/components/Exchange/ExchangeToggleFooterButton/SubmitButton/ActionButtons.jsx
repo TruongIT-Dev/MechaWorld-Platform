@@ -6,7 +6,7 @@ import { Button, Modal, Alert, notification, Typography } from 'antd';
 import { CreditCardIcon, PackageCheck } from 'lucide-react';
 
 import { checkDeliveryFee } from '../../../../apis/GHN/APIGHN';
-import { saveDeliveryFee } from '../../../../utils/exchangeUtils';
+import { getDeliveryFee, saveDeliveryFee } from '../../../../utils/exchangeUtils';
 import { addressExchange, payDeliveryfee } from '../../../../apis/Exchange/APIExchange';
 import { updateDeliveryFee, updateExchangeData } from '../../../../features/exchange/exchangeSlice';
 
@@ -19,6 +19,9 @@ const ActionButtons = ({
   setFirstCurrentStage,
   selectedAddress,
   selectedPickupAddress,
+  fetchExchangeData,
+  fetchUserAddress,
+  deliverData
 }) => {
 
   const dispatch = useDispatch();
@@ -100,6 +103,8 @@ const ActionButtons = ({
           //   message: "Xác nhận địa chỉ thành công",
           //   description: "Vui lòng tiến hành thanh toán để hoàn tất giao dịch"
           // });
+          fetchExchangeData();
+          fetchUserAddress();
         }
       })
       setIsAddressModalVisible(false);
@@ -118,7 +123,6 @@ const ActionButtons = ({
   // Gọi API tính phí vận chuyển
   const handleDeliverFee = () => {
     // console.log("111");
-    // dispatch(updateExchangeData(exchangeDetail))
     setIsConfirmedModalVisible(false);
 
     const deliverData = {
@@ -145,6 +149,13 @@ const ActionButtons = ({
         };
         dispatch(updateDeliveryFee(deliveryData));
         // console.log("nhập phí vận chuyển", res.data.data);
+        if (res.data.data.total === 0) {
+          notification.warning({
+            message: "Lỗi khi lấy phí vận chuyển ",
+            description: "Check lại response từ GHN."
+          });
+                  // saveDeliveryFee(exchangeDetail.current_user.id, exchangeDetail.id, res.data.data);
+        }
         saveDeliveryFee(exchangeDetail.current_user.id, exchangeDetail.id, res.data.data);
         moveToNextStage();
         setIsAddressModalVisible(false);
@@ -156,6 +167,26 @@ const ActionButtons = ({
 
   // Lấy key data từ LocalStorage
   const getCachedDeliveryFee = (userId, exchangeId) => {
+    try {
+      const key = `${userId}_${exchangeId}_deliverFee`;
+      // console.log("Fetching from localStorage with key:", key);
+
+      const raw = localStorage.getItem(key);
+      if (!raw) {
+        console.warn("No data found in localStorage for key:", key);
+        return null;
+      }
+
+      const parsedData = JSON.parse(raw);
+      console.log("Parsed data from localStorage:", parsedData);
+
+      return parsedData;
+    } catch (error) {
+      console.error("Error reading from localStorage:", error);
+      return null;
+    }
+  };
+  const getCachedDeliveryDate = (userId, exchangeId) => {
     try {
       const key = `${userId}_${exchangeId}_deliverDate`;
       // console.log("Fetching from localStorage with key:", key);
@@ -184,11 +215,11 @@ const ActionButtons = ({
 
     try {
       // Lấy thông tin delivery fee từ cache
-      const raw = getCachedDeliveryFee(exchangeDetail.current_user.id, exchangeDetail.id);
-
-      if (!raw) {
+      // const raw = getCachedDeliveryFee(exchangeDetail.current_user.id, exchangeDetail.id);
+      const raw = getCachedDeliveryDate(exchangeDetail.current_user.id, exchangeDetail.id);
+        if (!raw) {
         throw new Error("Không tìm thấy thông tin phí vận chuyển");
-      }
+        }
 
       const data = {
         expected_delivery_time: raw.to_estimate_date || new Date().toISOString(),
@@ -444,6 +475,9 @@ ActionButtons.propTypes = {
     district_name: PropTypes.string,
     province_name: PropTypes.string
   }),
+  fetchExchangeData: PropTypes.func.isRequired,
+  fetchUserAddress: PropTypes.func.isRequired,
+  deliverData: PropTypes.object.isRequired,
 };
 
 export default ActionButtons;

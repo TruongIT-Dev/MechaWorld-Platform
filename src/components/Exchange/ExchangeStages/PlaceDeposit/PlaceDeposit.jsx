@@ -20,12 +20,13 @@ export default function PlaceDeposit({
   exchangeDetails,
   firstUser,
   secondUser,
+  deliverData,
   deliverPartnerData,
   setDeliverPartnerData,
   setDeliverData,
   setIsLoading,
 }) {
-  const [deliveryDetails] = useState(deliverPartnerData);
+  const [deliveryDetails] = useState(deliverData);
   const [total, setTotal] = useState(0);
   const [note, setNote] = useState(null);
   const [deliverDate, setDeliverDate] = useState(null);
@@ -57,7 +58,7 @@ export default function PlaceDeposit({
           console.error("Error fetching delivery fee:", error);
         });
 
-      const deliverData = {
+      const deliverDataCheck = {
         from_district_id: exchange.partner.from_address.ghn_district_id,
         from_ward_code: exchange.partner.from_address.ghn_ward_code,
         to_district_id: exchange.current_user.to_address.ghn_district_id,
@@ -65,9 +66,9 @@ export default function PlaceDeposit({
         service_id: 53321
       };
 
-      setTotal(deliverPartnerData?.total || 0);
+      setTotal(deliverData?.total || 0);
 
-      await checkTimeDeliver(deliverData).then((res) => {
+      await checkTimeDeliver(deliverDataCheck).then((res) => {
         setDeliverDate(res.data);
         const key = `${firstUser.id}_${exchange.id}_deliverDate`;
 
