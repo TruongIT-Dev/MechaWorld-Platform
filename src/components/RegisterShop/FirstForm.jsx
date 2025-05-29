@@ -5,8 +5,8 @@ import { Form, Input, Button, message, Modal } from "antd";
 import { PhoneOutlined, LockOutlined } from "@ant-design/icons";
 
 import { updateUser } from "../../features/auth/authSlice";
-import { verifyToken, verifyOtp, verifyPhone, createShop } from '../../apis/Authentication/APIAuth';
-import { GetShopInfoById, UpdateShopName } from '../../apis/Seller Profile/APISellerProfile';
+import { verifyToken, verifyOtp, verifyPhone } from '../../apis/Authentication/APIAuth';
+import { GetShopInfoById } from '../../apis/Seller Profile/APISellerProfile';
 
 const FirstForm = ({ form, setIsPhoneVerified }) => {
 

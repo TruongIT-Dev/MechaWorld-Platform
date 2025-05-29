@@ -45,13 +45,13 @@ axios.interceptors.response.use((response) => {
 // ************ GET - POST - PUT - PATCH - DELETE **************
 
 
-// GET List Cart Items
+// 1. GET List Cart Items
 export const GetCart = () => {
     return axios.get('/cart/items');
 }
 
 
-// POST Add Items into Cart
+// 2. POST Add Items into Cart
 export const AddToCart = (id) => {
     return axios.post(`/cart/items`, {
         gundam_id: id,
@@ -59,7 +59,7 @@ export const AddToCart = (id) => {
 }
 
 
-// DELETE Remove Cart Item
+// 3. DELETE Remove Cart Item
 export const DeleteCart = (id) => {
     return axios.delete(`/cart/items/${id}`);
 }

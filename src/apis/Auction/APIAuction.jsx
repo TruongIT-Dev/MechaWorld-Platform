@@ -45,14 +45,27 @@ axios.interceptors.response.use((response) => {
 
 // ************ GET - POST - PUT - PATCH - DELETE **************
 
-// ************ SELLER **************
+// ************ USER **************
 
-// GET List auction requests of a seller
+// 1. Retrieves upcoming and ongoing auctions from the platform.
+export const GetListAuction = () => {
+    return axios.get(`/auctions`);
+}
+
+// 2. Retrieves details of a specific auction by its ID.
+export const GetListAuctionDetial = (auctionID) => {
+    return axios.get(`/auctions/${auctionID}`);
+}
+
+// 3. Establishes an SSE connection to receive real-time updates about an auction
+
+
+// 4. GET List auction requests of a seller
 export const GetListAuctionRequests = (sellerID) => {
     return axios.get(`/sellers/${sellerID}/auction-requests`);
 }
 
-// POST Create a new auction request by seller
+// 5. POST Create a new auction request by seller
 export const CreateAuctionRequest = (sellerID, requestData) => {
     return axios.post(`/sellers/${sellerID}/auction-requests`, {
         bid_increment: requestData.bid_increment,
@@ -64,44 +77,41 @@ export const CreateAuctionRequest = (sellerID, requestData) => {
     });
 };
 
-// DELETE Delete an auction request by seller
+// 6. List all auctions that belong to the specified seller, optionally filtered by status (List all auction of a seller)
+
+
+
+// 7. DELETE Delete an auction request by seller
 export const DeleteAuctionRequest = (sellerID, requestID) => {
     return axios.delete(`/sellers/${sellerID}/auction-requests/${requestID}`);
 }
 
-// ************ USER **************
+// 8. Get details of a specific auction for the seller (Get auction detail by seller)
 
-export const GetListAuction = () => {
-    return axios.get(`/auctions`);
-}
 
-export const GetListAuctionDetial = (auctionID) => {
-    return axios.get(`/auctions/${auctionID}`);
-}
 
-// GET List user participated auctions
+// 9. GET List user participated auctions
 export const GetUserParticipatedAuctions = () => {
     return axios.get(`/users/me/auctions`);
 }
 
-// GET List user bids
+// 10. GET List user bids "/users/me/auctions/:auction/bids ??"
 export const GetUserBids = () => {
     return axios.get(`/users/me/auctions/bids`);
 }
 
-// POST Place a bid in an auction
+// 11. POST Place a bid in an auction
 export const PlaceBid = (auctionID, bidAmount) => {
     return axios.post(`/users/me/auctions/${auctionID}/bids`, {
         amount: bidAmount
     });
 }
 
-// POST Participate in an auction
+// 12. POST Participate in an auction
 export const ParticipateInAuction = (auctionID) => {
     return axios.post(`/users/me/auctions/${auctionID}/participate`);
 }
 
-// POST Pay for winning auction bid
 
 
 /**
@@ -110,6 +120,8 @@ export const ParticipateInAuction = (auctionID) => {
  * @param {object} paymentData - Dữ liệu thanh toán
  * @returns {Promise} Promise từ axios
  */
+
+// 13. Pay the remaining amount after deposit for a winning auction.
 export const PayForWinningBid = (auctionID, paymentData) => {
   // Chuẩn hóa thời gian giao hàng dự kiến
   const payload = {
@@ -126,3 +138,11 @@ export const PayForWinningBid = (auctionID, paymentData) => {
     },
   });
 };
+
+
+
+
+
+
+
+

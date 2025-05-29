@@ -4,43 +4,12 @@ import Cookies from 'js-cookie';
 
 // ************ GET - POST - PUT - PATCH - DELETE **************
 
-
-// GET Retrieve a user by ID
-export const getUser = (id) => {
-    return axios.get(`/users/${id}`)
-}
-
-
-// GET Retreive user address
-export const getUserAddresses = (id) => {
-    return axios.get(`/users/${id}/addresses`)
-}
-
-
-// GET Check user wallet amount
-export const checkWallet = (id) => {
-    return axios.get(`/users/${id}/wallet`)
-}
-
-
-// GET Gundams of a user by ID
+// 1. Get all gundams that belong to the specified user ID
 export const GetGundamByID = (id, gundamName) => {
     return axios.get(`/users/${id}/gundams?name=${gundamName}`)
 }
 
-// POST Create a new user address
-export const postUserAddresses = (id, addressData) => {
-    return axios.post(`/users/${id}/addresses`, addressData)
-}
-
-
-// POST Memeber become Seller
-export const BecomeSeller = () => {
-    return axios.post('/users/become-seller');
-}
-
-
-// POST Create a new Gundam model by user
+// 2. Create a new Gundam model with images and accessories (Create Gundam model)
 export const PostGundam = (id, gundamData) => {
     const accessToken = Cookies.get('access_token');
     return axios.post(`/users/${id}/gundams`, gundamData, {
@@ -51,20 +20,48 @@ export const PostGundam = (id, gundamData) => {
     });
 }
 
+// 3. Upgrade the user's role to seller and create the trial subscription (Become Seller)
+export const BecomeSeller = () => {
+    return axios.post('/users/become-seller');
+}
 
-// PUT Update user information (fullName) 
+// 4. Get user details using a phone_number number as a query parameter (Get user by Phone)
+
+
+// 5. Get detailed information about a specific user (Get user by Id)
+export const getUser = (id) => {
+    return axios.get(`/users/${id}`)
+}
+
+// 6. Update specific user details by user ID (Update user's info)
 export const updateUserData = (id, fullname) => {
     return axios.put(`/users/${id}`, { full_name: fullname })
 }
 
+// 7. Get all addresses for a specific user
+export const getUserAddresses = (id) => {
+    return axios.get(`/users/${id}/addresses`)
+}
 
-// PUT Update user address
+// 8. Add a new address for a specific user
+export const postUserAddresses = (id, addressData) => {
+    return axios.post(`/users/${id}/addresses`, addressData)
+}
+
+// 9. Get the pickup address of a specific user (Get Pickup addresss)
+
+
+// 10. Update an existing address information for a specific user (Update user address)
 export const updateAddress = (id, addressId, addressData) => {
     return axios.put(`/users/${id}/addresses/${addressId}`, addressData)
 }
 
+// 11. Delete an address of a user (Delete user address)
+export const deleteAddress = (id, addressID) => {
+    return axios.delete(`/users/${id}/addresses/${addressID}`)
+}
 
-// PATCH Update usre avatar
+// 12. Upload and update a user's profile avatar (Upload user avatar)
 export const uploadAvatar = (id, file) => {
     const formData = new FormData();
     formData.append("avatar", file); // Đính kèm file vào FormData
@@ -76,15 +73,8 @@ export const uploadAvatar = (id, file) => {
     });
 }
 
-
-// Delete Remove user address
-export const deleteAddress = (id, addressID) => {
-    return axios.delete(`/users/${id}/addresses/${addressID}`)
+// GET Check user wallet amount
+export const checkWallet = (id) => {
+    return axios.get(`/users/${id}/wallet`)
 }
 
-
-
-// GET List all gundams for a specific user
-
-
-// GET Retrieve a user by phone_number number
