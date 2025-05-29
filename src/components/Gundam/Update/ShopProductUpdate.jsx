@@ -1,10 +1,10 @@
 import Cookies from "js-cookie";
 import PropTypes from "prop-types";
 import { useEffect, useState } from "react";
-import { Form, message, notification, Steps, Card, Button, Space, Breadcrumb } from "antd";
-import { ArrowLeftOutlined, ArrowRightOutlined, CheckCircleOutlined, CheckOutlined, PlusOutlined } from '@ant-design/icons';
+import { Form, message, notification, Steps, Card, Button, Space } from "antd";
+import { ArrowLeftOutlined, ArrowRightOutlined, CheckCircleOutlined,   } from '@ant-design/icons';
 
-import { GetGrades } from '../../../apis/Gundams/APIGundam';
+import { AddSecondaryImages, GetGrades, UpdateGundam, UpdateGundamAccessories, UpdatePrimaryImage } from '../../../apis/Gundams/APIGundam';
 import { PostGundam } from "../../../apis/User/APIUser";
 
 // Import các components con
@@ -14,7 +14,7 @@ import ImagesAndPriceStep from "./FormSteps/ImagesAndPriceStep";
 
 const { Step } = Steps;
 
-const ShopProductCreate = ({ setIsCreating, gundamData}) => {
+const ShopProductUpdate = ({ setIsUpdating, gundamData}) => {
   const [form] = Form.useForm();
   const user = JSON.parse(Cookies.get("user"));
   const [condition, setCondition] = useState("");
@@ -30,6 +30,9 @@ const ShopProductCreate = ({ setIsCreating, gundamData}) => {
   const currentYear = new Date().getFullYear();
   const releaseYearOptions = Array.from({ length: currentYear - 1979 }, (_, i) => currentYear - i);
 
+
+  
+
   useEffect(() => {
     GetGrades()
       .then((response) => {
@@ -39,7 +42,37 @@ const ShopProductCreate = ({ setIsCreating, gundamData}) => {
         console.error("Lỗi khi lấy danh sách phân khúc:", error);
       });
   }, []);
-
+  useEffect(() => {
+  if (gundamData && grades.length > 0) {
+    // Tìm grade_id dựa trên display_name nếu cần
+    let grade_id = gundamData.grade_id;
+    if (!grade_id && gundamData.grade) {
+      const found = grades.find(g => g.display_name === gundamData.grade);
+      grade_id = found ? found.id : undefined;
+    }
+    form.setFieldsValue({
+      ...gundamData,
+      grade_id: grade_id,
+    });
+    if (gundamData.primary_image_url) {
+      setPrimaryImage({ url: gundamData.primary_image_url });
+    }
+    
+    if (Array.isArray(gundamData.secondary_image_urls)) {
+      setSecondaryImages(
+        gundamData.secondary_image_urls.map((url, idx) => ({
+          uid: `init-url-${idx}`,
+          url,
+          name: `Ảnh phụ ${idx + 1}`,
+          status: "done"
+        }))
+      );
+    }
+    if (gundamData.accessories) setAccessories(gundamData.accessories);
+    if (gundamData.condition) setCondition(gundamData.condition);
+    if (gundamData.version) setSelectedVersion(gundamData.version);
+  }
+}, [gundamData, grades]);
   const handleAddAccessory = () => {
     setAccessories([...accessories, { name: "", quantity: 1 }]);
   };
@@ -113,79 +146,74 @@ const ShopProductCreate = ({ setIsCreating, gundamData}) => {
   };
 
   const handleFinish = async () => {
-    const isValid = await validateStep();
-    if (!isValid) {
-      return;
-    }
+  const isValid = await validateStep();
+  if (!isValid) return;
 
-    const values = form.getFieldsValue(true);
-    setIsUploading(true);
+  const values = form.getFieldsValue(true);
+  setIsUploading(true);
 
-    // const hideLoading = message.loading("Đang xử lý...", 0);
-    const formData = new FormData();
-
-    // Thêm các trường cơ bản
-    formData.append("name", values.name?.trim() || '');
-    formData.append("grade_id", values.grade_id);
-    formData.append("series", values.series);
-    formData.append("condition", values.condition);
-    formData.append("manufacturer", values.manufacturer?.trim() || '');
-    formData.append("parts_total", values.parts_total);
-    formData.append("material", values.material?.trim() || '');
-    formData.append("scale", values.scale);
-    formData.append("version", values.version);
-    formData.append("release_year", values.release_year || "");
-    formData.append("weight", values.weight);
-    formData.append("description", values.description?.trim() || '');
-    formData.append("price", values.price);
-
+  try {
+    // 1. Update thông tin cơ bản
+    const basicInfo = {
+      name: values.name?.trim() || '',
+      grade_id: values.grade_id,
+      series: values.series,
+      condition: values.condition,
+      manufacturer: values.manufacturer?.trim() || '',
+      parts_total: values.parts_total,
+      material: values.material?.trim() || '',
+      scale: values.scale,
+      version: values.version,
+      release_year: values.release_year || "",
+      weight: values.weight,
+      description: values.description?.trim() || '',
+      price: values.price,
+      status: gundamData.status || "published",
+    };
     if (values.condition_description && values.condition_description.trim() !== "") {
-      formData.append("condition_description", values.condition_description.trim());
+      basicInfo.condition_description = values.condition_description.trim();
     }
 
-    // Thêm ảnh chính
-    formData.append("primary_image", primaryImage.file);
+    await UpdateGundam(gundamData.gundam_id, user.id, basicInfo);
 
-    // Thêm các ảnh phụ
-    secondaryImages.forEach((file) => {
-      formData.append("secondary_images", file.originFileObj);
-    });
-
-    // Thêm phụ kiện
+    // 2. Update phụ kiện
     const validAccessories = accessories.filter(
       (item) => item.name.trim() !== "" && item.quantity > 0
     );
-    validAccessories.forEach((item) => {
-      const accessoryData = JSON.stringify({
-        name: item.name.trim(),
-        quantity: item.quantity
-      });
-      formData.append("accessory", accessoryData);
-    });
+    await UpdateGundamAccessories(gundamData.gundam_id, user.id, validAccessories);
 
-    PostGundam(user.id, formData)
-      .then((response) => {
-        // hideLoading();
-        if (response.status === 201) {
-          notification.success({
-            message: "Thêm thành công Gundam!",
-            description: "Sản phẩm đã được thêm vào kho của bạn.",
-            duration: 2
-          });
-          form.resetFields();
-          setPrimaryImage(null);
-          setSecondaryImages([]);
-          setTimeout(() => setIsCreating(false), 800);
-        }
-      })
-      .catch((error) => {
-        // hideLoading();
-        console.error("Error details:", error);
-        message.error("Lỗi khi đăng ký sản phẩm! Vui lòng thử lại.");
-      })
-      .finally(() => {
-        setIsUploading(false);
+    // 3. Update ảnh chính (nếu có file mới)
+    if (primaryImage && primaryImage.file) {
+      const formData = new FormData();
+      formData.append("primary_image", primaryImage.file);
+      await UpdatePrimaryImage(gundamData.gundam_id, user.id, formData);
+    }
+
+    // 4. Update ảnh phụ (chỉ gửi file mới)
+    const newSecondaryFiles = secondaryImages.filter(img => img.originFileObj);
+    if (newSecondaryFiles.length > 0) {
+      const formData = new FormData();
+      newSecondaryFiles.forEach(file => {
+        formData.append("images", file.originFileObj);
       });
+      await AddSecondaryImages(gundamData.gundam_id, user.id, formData);
+    }
+
+    notification.success({
+      message: "Cập nhật thành công Gundam!",
+      description: "Sản phẩm đã được cập nhật.",
+      duration: 2
+    });
+    form.resetFields();
+    setPrimaryImage(null);
+    setSecondaryImages([]);
+    setTimeout(() => setIsUpdating(false), 800);
+  } catch (error) {
+    console.error("Error details:", error);
+    message.error("Lỗi khi cập nhật sản phẩm! Vui lòng thử lại.");
+  } finally {
+    setIsUploading(false);
+  }
   };
 
   // Nội dung các bước
@@ -233,7 +261,7 @@ const ShopProductCreate = ({ setIsCreating, gundamData}) => {
   return (
     <div className="bg-white p-6 rounded-lg shadow-sm mx-auto">
 
-      <h2 className="text-2xl font-semibold text-gray-800 pb-3 uppercase mb-6 border-b">Thêm Sản Phẩm Gundam Mới</h2>
+      <h2 className="text-2xl font-semibold text-gray-800 pb-3 uppercase mb-6 border-b">Cập Nhập Sản Phẩm Gundam </h2>
 
       <Steps current={currentStep} className="mb-8">
         {steps.map(item => (
@@ -267,7 +295,7 @@ const ShopProductCreate = ({ setIsCreating, gundamData}) => {
             {currentStep < steps.length - 1 && (
               <Space>
                 <Button
-                  onClick={() => setIsCreating(false)}
+                  onClick={() => setIsUpdating(false)}
                   disabled={isUploading}
                 >
                   Hủy thêm sản phẩm
@@ -291,7 +319,7 @@ const ShopProductCreate = ({ setIsCreating, gundamData}) => {
                   disabled={isUploading}
                   loading={isUploading}
                 >
-                  {isUploading ? "Đang tiến hành thêm..." : "Thêm sản phẩm"}
+                  {isUploading ? "Đang tiến hành cập nhật..." : "Cập nhật sản phẩm"}
                 </Button>
               </Space>
             )}
@@ -302,9 +330,9 @@ const ShopProductCreate = ({ setIsCreating, gundamData}) => {
   );
 };
 
-ShopProductCreate.propTypes = {
-  setIsCreating: PropTypes.func.isRequired,
+ShopProductUpdate.propTypes = {
+  setIsUpdating: PropTypes.func.isRequired,
   gundamData: PropTypes.object
 };
 
-export default ShopProductCreate;
+export default ShopProductUpdate;

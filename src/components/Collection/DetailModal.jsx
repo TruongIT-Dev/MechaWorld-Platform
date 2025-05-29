@@ -8,7 +8,7 @@ import {
 } from '@ant-design/icons';
 // import { getGradeColor } from './utils';
 
-const DetailModal = ({ visible, product, onCancel, toggleFavorite, toggleWishlist }) => {
+const DetailModal = ({ visible, product, onCancel, toggleFavorite, toggleWishlist,handleUpdate }) => {
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
     // const [favorited, setFavorited] = useState(product?.is_favorite || false);
@@ -85,7 +85,7 @@ const DetailModal = ({ visible, product, onCancel, toggleFavorite, toggleWishlis
                 <Button key="back" onClick={onCancel}>
                     Đóng
                 </Button>,
-                <Button key="edit" type="primary" className='bg-blue-500' icon={<PlusOutlined />}>
+                <Button key="edit" type="primary" className='bg-blue-500' icon={<PlusOutlined />} onClick={() => {handleUpdate()}}>
                     Chỉnh sửa
                 </Button>
             ]}

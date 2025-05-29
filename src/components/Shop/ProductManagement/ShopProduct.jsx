@@ -11,8 +11,9 @@ import { GetSellerStatus } from "../../../apis/Sellers/APISeller";
 import { incrementListingsUsed, decrementListingsUsed, updateSellerPlan } from '../../../features/user/userSlice';
 import { CreateAuctionRequest } from '../../../apis/Auction/APIAuction';
 import moment from 'moment';
+import { DeleteGundam } from '../../../apis/Gundams/APIGundam';
 
-function ShopProduct({ isCreating, setIsCreating }) {
+function ShopProduct({ isCreating, setIsCreating, isUpdating, setIsUpdating, setGundamData }) {
 
   // console.log("setIsCreating", setIsCreating);
 
@@ -149,7 +150,7 @@ const handleFinish = async (values) => {
         }
         return item;
       });
-
+      
       setGundamList(updatedList);
       applyFilters(updatedList); // Áp dụng lại bộ lọc với danh sách mới
 
@@ -181,7 +182,7 @@ const handleFinish = async (values) => {
         }
         return item;
       });
-
+      
       setGundamList(updatedList);
       applyFilters(updatedList); // Áp dụng lại bộ lọc với danh sách mới
 
@@ -210,6 +211,8 @@ const handleFinish = async (values) => {
     switch (key) {
       case "edit":
         console.log("📝 Chỉnh sửa sản phẩm:", record);
+        setGundamData(record);
+        setIsUpdating(true);
         // Không cần modal cảnh báo cho edit
         break;
 
@@ -252,7 +255,7 @@ const handleFinish = async (values) => {
         case 'delete':
           console.log("❌ Xóa sản phẩm:", record);
           // Thực hiện xóa sản phẩm
-          // await deleteProduct(record);
+          await DeleteGundam(record.gundam_id, user.id);
           message.success('Đã xóa sản phẩm thành công!');
           break;
 
@@ -458,6 +461,7 @@ const handleFinish = async (values) => {
           auctioning: { text: "Đang đấu giá", color: "blue" },
           // "for exchange": { text: "", color: "" },
           exchanging: { text: "Đang trao đổi", color: "cyan" },
+          "for exchange": { text: "Đang trao đổi", color: "cyan" },
         };
 
         const statusTag = statusMap[status];
