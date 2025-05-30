@@ -1,5 +1,5 @@
-// contexts/NotificationsContext.jsx
-import { createContext, useContext, useState, useEffect, useMemo, useCallback, useRef } from 'react'
+// contexts/NotificationsContext.jsx - SIMPLE OPTIMIZED
+import React, { createContext, useContext, useState, useEffect, useMemo, useCallback, useRef } from 'react'
 import {
     collection,
     doc,
@@ -46,12 +46,10 @@ export const NotificationsProvider = ({ children }) => {
     const isInitialLoadRef = useRef(true)
     const isMountedRef = useRef(true)
     const userIDRef = useRef(null)
+    const cacheRef = useRef(new Map()) // Simple cache
+    const lastFetchRef = useRef(0)
 
     const userID = reduxUser?.id
-
-    console.log('=== NOTIFICATIONS CONTEXT ===')
-    console.log('userID:', userID)
-    console.log('notifications count:', notifications.length)
 
     const unreadCount = useMemo(() =>
         notifications.reduce((count, notif) =>
@@ -59,10 +57,9 @@ export const NotificationsProvider = ({ children }) => {
         ), [notifications]
     )
 
-    // Cleanup function an toàn
+    // Cleanup function
     const cleanupListener = useCallback(() => {
         if (unsubscribeRef.current) {
-            console.log('🧹 [CONTEXT] Cleaning up Firestore listener')
             try {
                 unsubscribeRef.current()
             } catch (error) {
@@ -72,57 +69,59 @@ export const NotificationsProvider = ({ children }) => {
         }
     }, [])
 
-    // Setup real-time listener
+    // Setup optimized listener
     const setupListener = useCallback(() => {
-        // Cleanup previous listener first
         cleanupListener()
 
         if (!userID) {
-            console.log('❌ [CONTEXT] No userID, skipping listener setup')
             setNotifications([])
             setIsLoading(false)
             return
         }
 
-        // Prevent setup nếu userID chưa thay đổi
-        if (userIDRef.current === userID && unsubscribeRef.current) {
-            console.log('ℹ️ [CONTEXT] Listener already exists for this userID')
+        // Check cache first (5 phút cache)
+        const cacheKey = `notifications_${userID}`
+        const cachedData = cacheRef.current.get(cacheKey)
+        const now = Date.now()
+
+        if (cachedData && (now - lastFetchRef.current) < 300000) { // 5 phút cache
+            setNotifications(cachedData)
+            setIsLoading(false)
             return
         }
 
-        console.log('🔔 [CONTEXT] Setting up real-time listener for userID:', userID)
+        // Prevent duplicate listeners
+        if (userIDRef.current === userID && unsubscribeRef.current) {
+            return
+        }
+
         userIDRef.current = userID
         setIsLoading(true)
         setError(null)
         isInitialLoadRef.current = true
 
         try {
-            // Query với limit cao để cover tất cả use cases
+            // Optimized query - smaller limit
             const notificationsQuery = query(
                 collection(db, 'notifications'),
                 where('recipientID', '==', userID),
-                limit(100) // Limit cao để cover mọi trường hợp
+                limit(15) // Giảm limit để tiết kiệm
             )
-
-            console.log('🎧 [CONTEXT] Creating onSnapshot listener...')
 
             const unsubscribe = onSnapshot(
                 notificationsQuery,
+                {
+                    includeMetadataChanges: false // Quan trọng: giảm callbacks
+                },
                 (snapshot) => {
-                    // Check nếu component đã unmount
-                    if (!isMountedRef.current) {
-                        console.log('⚠️ [CONTEXT] Component unmounted, ignoring snapshot')
+                    if (!isMountedRef.current) return
+
+                    // Skip nếu từ cache và không phải initial load
+                    if (snapshot.metadata.fromCache && !isInitialLoadRef.current) {
                         return
                     }
 
-                    console.log('📨 [CONTEXT] Snapshot received:', {
-                        size: snapshot.size,
-                        fromCache: snapshot.metadata.fromCache,
-                        hasPendingWrites: snapshot.metadata.hasPendingWrites
-                    })
-
                     try {
-                        // Process notifications
                         let newNotifications = snapshot.docs.map((doc) => ({
                             id: doc.id,
                             ...doc.data(),
@@ -132,41 +131,41 @@ export const NotificationsProvider = ({ children }) => {
                         newNotifications = newNotifications.sort((a, b) => {
                             const aTime = a.createdAt?.toDate?.() || a.createdAt || new Date(0)
                             const bTime = b.createdAt?.toDate?.() || b.createdAt || new Date(0)
-                            return bTime - aTime // Newest first
+                            return bTime - aTime
                         })
 
                         setNotifications(newNotifications)
                         setIsLoading(false)
 
-                        // Show toast cho notifications mới (chỉ sau initial load)
+                        // Update cache
+                        cacheRef.current.set(cacheKey, newNotifications)
+                        lastFetchRef.current = now
+
+                        // Show toast chỉ cho new notifications
                         if (!isInitialLoadRef.current && !snapshot.metadata.fromCache) {
                             const addedDocs = snapshot.docChanges().filter(change =>
                                 change.type === 'added' && !change.doc.metadata.hasPendingWrites
                             )
 
                             if (addedDocs.length > 0) {
-                                console.log('🔔 [CONTEXT] New notifications detected:', addedDocs.length)
-
-                                addedDocs.forEach((change) => {
-                                    const newNotif = change.doc.data()
-                                    notification.success({
-                                        message: 'Thông báo mới!',
-                                        description: `${newNotif.title}: ${newNotif.message}`,
-                                        placement: 'topRight',
-                                        duration: 4
-                                    })
+                                // Chỉ 1 toast tổng hợp
+                                notification.success({
+                                    message: 'Thông báo mới!',
+                                    description: addedDocs.length === 1
+                                        ? addedDocs[0].doc.data().title
+                                        : `Bạn có ${addedDocs.length} thông báo mới`,
+                                    placement: 'topRight',
+                                    duration: 3
                                 })
                             }
                         }
 
-                        // Mark initial load complete
                         if (isInitialLoadRef.current) {
                             isInitialLoadRef.current = false
-                            console.log('✅ [CONTEXT] Initial load completed')
                         }
 
                     } catch (processError) {
-                        console.error('❌ [CONTEXT] Error processing snapshot:', processError)
+                        console.error('Error processing snapshot:', processError)
                         setError(processError)
                         setIsLoading(false)
                     }
@@ -174,60 +173,49 @@ export const NotificationsProvider = ({ children }) => {
                 (err) => {
                     if (!isMountedRef.current) return
 
-                    console.error('❌ [CONTEXT] Listener error:', {
-                        code: err.code,
-                        message: err.message,
-                        name: err.name
-                    })
-
+                    console.error('Listener error:', err.code, err.message)
                     setError(err)
                     setIsLoading(false)
 
-                    // Handle specific error types
-                    if (err.code === 'failed-precondition') {
+                    // Handle quota exceeded
+                    if (err.code === 'resource-exhausted') {
                         notification.error({
-                            message: 'Cần tạo Firestore Index',
-                            description: 'Vui lòng liên hệ admin để cấu hình database',
-                            duration: 0
+                            message: 'Tạm thời không thể tải thông báo',
+                            description: 'Vui lòng thử lại sau ít phút',
+                            placement: 'topRight'
                         })
-                    } else if (err.code === 'permission-denied') {
+                        return // Không retry khi hết quota
+                    }
+
+                    // Handle other errors
+                    if (err.code === 'permission-denied') {
                         notification.error({
                             message: 'Không có quyền truy cập',
                             description: 'Vui lòng đăng nhập lại',
                             placement: 'topRight'
                         })
-                    } else {
-                        notification.error({
-                            message: 'Lỗi kết nối',
-                            description: err.message || 'Không thể tải thông báo',
-                            placement: 'topRight'
-                        })
+                        return
                     }
 
-                    // Auto-retry sau 5 giây nếu không phải permission error
-                    if (err.code !== 'permission-denied') {
-                        console.log('🔄 [CONTEXT] Will retry in 5 seconds...')
-                        setTimeout(() => {
-                            if (isMountedRef.current && userIDRef.current === userID) {
-                                console.log('🔄 [CONTEXT] Retrying listener setup...')
-                                setupListener()
-                            }
-                        }, 5000)
-                    }
+                    // Auto-retry cho errors khác (sau 30 giây)
+                    setTimeout(() => {
+                        if (isMountedRef.current && userIDRef.current === userID) {
+                            setupListener()
+                        }
+                    }, 30000)
                 }
             )
 
             unsubscribeRef.current = unsubscribe
-            console.log('✅ [CONTEXT] Listener setup successful')
 
         } catch (setupError) {
-            console.error('❌ [CONTEXT] Error setting up listener:', setupError)
+            console.error('Error setting up listener:', setupError)
             setError(setupError)
             setIsLoading(false)
         }
     }, [userID, cleanupListener])
 
-    // Effect để setup listener khi userID thay đổi
+    // Setup listener when userID changes
     useEffect(() => {
         isMountedRef.current = true
 
@@ -239,73 +227,63 @@ export const NotificationsProvider = ({ children }) => {
             setIsLoading(false)
         }
 
-        // Cleanup khi component unmount hoặc userID thay đổi
         return () => {
             isMountedRef.current = false
             cleanupListener()
         }
     }, [userID, setupListener, cleanupListener])
 
+    // Optimized markAsRead với optimistic update
     const markAsRead = useCallback(async (notificationId) => {
-        console.log('=== [CONTEXT] MARK AS READ ===')
-        console.log('userID:', userID)
-        console.log('notificationId:', notificationId)
+        if (!userID || !notificationId) return
 
-        if (!userID || !notificationId) {
-            console.log('❌ [CONTEXT] Missing userID or notificationId')
-            return
-        }
+        // Optimistic update ngay lập tức
+        setNotifications(prev =>
+            prev.map(notif =>
+                notif.id === notificationId
+                    ? { ...notif, isRead: true }
+                    : notif
+            )
+        )
 
         try {
-            console.log('🔄 [CONTEXT] Updating notification...')
             const notificationRef = doc(db, 'notifications', notificationId)
-
             await updateDoc(notificationRef, {
                 isRead: true,
                 readAt: new Date()
             })
-
-            console.log('✅ [CONTEXT] Update successful')
-            // Real-time listener sẽ tự động update UI
-
         } catch (err) {
-            console.error('❌ [CONTEXT] Update failed:', err)
+            console.error('Mark as read failed:', err)
 
-            notification.error({
-                message: 'Lỗi đánh dấu đã đọc',
-                description: err.message || 'Không thể đánh dấu thông báo đã đọc',
-                placement: 'topRight'
-            })
-
-            // Optimistic update nếu real-time update fail
+            // Revert optimistic update nếu thất bại
             setNotifications(prev =>
                 prev.map(notif =>
                     notif.id === notificationId
-                        ? { ...notif, isRead: true }
+                        ? { ...notif, isRead: false }
                         : notif
                 )
             )
+
+            notification.error({
+                message: 'Không thể đánh dấu đã đọc',
+                placement: 'topRight'
+            })
         }
     }, [userID])
 
     const markAllAsRead = useCallback(async () => {
-        console.log('=== [CONTEXT] MARK ALL AS READ ===')
-
-        if (!userID) {
-            console.log('❌ [CONTEXT] No userID')
-            return
-        }
+        if (!userID) return
 
         const unreadNotifications = notifications.filter((n) => !n.isRead)
-        if (unreadNotifications.length === 0) {
-            console.log('ℹ️ [CONTEXT] No unread notifications')
-            return
-        }
+        if (unreadNotifications.length === 0) return
 
-        console.log('📝 [CONTEXT] Marking', unreadNotifications.length, 'notifications as read')
+        // Optimistic update
+        setNotifications(prev =>
+            prev.map(notif => ({ ...notif, isRead: true }))
+        )
 
         try {
-            // Update từng notification
+            // Batch update
             const updatePromises = unreadNotifications.map(async (notif) => {
                 const notificationRef = doc(db, 'notifications', notif.id)
                 await updateDoc(notificationRef, {
@@ -315,23 +293,24 @@ export const NotificationsProvider = ({ children }) => {
             })
 
             await Promise.all(updatePromises)
-            console.log('✅ [CONTEXT] All notifications marked as read')
-            // Real-time listener sẽ tự động update UI
-
         } catch (err) {
-            console.error('❌ [CONTEXT] Mark all failed:', err)
+            console.error('Mark all as read failed:', err)
+
+            // Revert nếu thất bại
+            setNotifications(prev =>
+                prev.map(notif =>
+                    unreadNotifications.some(unread => unread.id === notif.id)
+                        ? { ...notif, isRead: false }
+                        : notif
+                )
+            )
+
             notification.error({
-                message: 'Lỗi đánh dấu đã đọc',
-                description: err.message
+                message: 'Không thể đánh dấu tất cả đã đọc',
+                placement: 'topRight'
             })
         }
     }, [userID, notifications])
-
-    // Manual restart listener (for debugging)
-    const restartListener = useCallback(() => {
-        console.log('🔄 [CONTEXT] Manual listener restart')
-        setupListener()
-    }, [setupListener])
 
     const contextValue = {
         notifications,
@@ -340,7 +319,6 @@ export const NotificationsProvider = ({ children }) => {
         error,
         markAsRead,
         markAllAsRead,
-        restartListener,
         userID
     }
 
