@@ -1,44 +1,79 @@
 import React from 'react';
 import { Title } from '../Design';
 
-const AuctionHistory = ({ bidHistory = [] }) => {
-  return (
-    <div className="">
-      {/* Bid History */}
-      <div className="bg-white p-6 rounded-lg shadow-sm mb-[30px]">
-        <Title level={5} className="mb-4">Lịch sử đấu giá ({bidHistory.length})</Title>
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-4 py-2 text-left">Thời gian</th>
-                <th className="px-4 py-2 text-left">Người đấu</th>
-                <th className="px-4 py-2 text-left">Giá</th>
-              </tr>
-            </thead>
-            <tbody>
-              {bidHistory.length > 0 ? (
-                bidHistory.map((bid, index) => (
-                  <tr key={index} className="border-t">
-                    <td className="px-4 py-3">{new Date(bid.timestamp).toLocaleString()}</td>
-                    <td className="px-4 py-3">{bid.user?.full_name || 'Ẩn danh'}</td>
-                    <td className="px-4 py-3 font-medium">{bid.price?.toLocaleString() || '0'} VNĐ</td>
-                  </tr>
-                ))
-              ) : (
-                <tr className="border-t">
-                  <td colSpan={3} className="px-4 py-6 text-center text-gray-500">
-                    Chưa có lịch sử đấu giá
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
+const AuctionHistory = React.memo(({ bidHistory = [], participants = [] }) => {
+  // Tạo map từ participants để dễ tra cứu thông tin user
+  const participantsMap = React.useMemo(() => {
+    const map = {};
+    participants.forEach(participant => {
+      if (participant.user_id) {
+        map[participant.user_id] = {
+          ...participant.user,
+          full_name: participant.user?.full_name || `Người dùng ${participant.user_id.slice(0, 6)}`,
+          avatar_url: participant.user?.avatar_url || '/default-avatar.png'
+        };
+      }
+    });
+    return map;
+  }, [participants]);
 
+  const formatTime = (timestamp) => {
+    try {
+      return new Date(timestamp).toLocaleTimeString('vi-VN');
+    } catch {
+      return '--:--';
+    }
+  };
+
+  // Sắp xếp bidHistory theo thời gian mới nhất trước
+  const sortedBidHistory = React.useMemo(() => {
+    return [...bidHistory].sort((a, b) => 
+      new Date(b.timestamp || b.created_at) - new Date(a.timestamp || a.created_at)
+    );
+  }, [bidHistory]);
+
+  return (
+    <div className="space-y-3">
+      {sortedBidHistory.map((bid) => {
+        // Lấy thông tin user theo thứ tự ưu tiên:
+        // 1. Từ bid.user (nếu có)
+        // 2. Từ participantsMap (nếu có bidder_id)
+        // 3. Fallback mặc định
+        const user = bid.user || 
+                   (bid.bidder_id && participantsMap[bid.bidder_id]) || 
+                   {
+                     full_name: `Người dùng ${bid.bidder_id?.slice(0, 6) || 'ẩn danh'}`,
+                     avatar_url: '/default-avatar.png'
+                   };
+
+        return (
+          <div 
+            key={`${bid.id || bid.bid_id}-${bid.timestamp || bid.created_at}`}
+            className="flex justify-between items-center p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-gray-200 overflow-hidden">
+                <img 
+                  src={user.avatar_url} 
+                  alt={user.full_name}
+                  className="w-full h-full object-cover"
+                  onError={(e) => e.target.src = '/default-avatar.png'}
+                />
+              </div>
+              <div>
+                <p className="font-medium">{user.full_name}</p>
+                <p className="text-xs text-gray-500">
+                  {formatTime(bid.timestamp || bid.created_at)}
+                </p>
+              </div>
+            </div>
+            <div className="text-lg font-semibold text-green-600">
+              {(bid.price || bid.amount)?.toLocaleString('vi-VN')}₫
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
-};
-
+});
 export default AuctionHistory;
