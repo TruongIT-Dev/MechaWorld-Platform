@@ -286,64 +286,109 @@ const handlePaymentSubmit = async () => {
       };
 
       // Lắng nghe sự kiện new_participant
-eventSource.addEventListener('new_participant', (event) => {
+      eventSource.addEventListener('new_participant', (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          console.log('New participant event:', data);
+
+          const newParticipantRaw = data.new_participant;
+
+          // Tạo object theo đúng cấu trúc participants
+          const newParticipant = {
+            id: newParticipantRaw.id,
+            user_id: newParticipantRaw.id, // dùng id làm user_id
+            created_at: newParticipantRaw.created_at || new Date().toISOString(),
+            is_refunded: false,
+          };
+
+          // Cập nhật danh sách người tham gia
+          setParticipants(prev => [...prev, newParticipant]);
+
+          // Cập nhật tổng số
+          setAuctionDetail(prev => ({
+            ...prev,
+            auction: {
+              ...prev.auction,
+              total_participants: data.total_participants
+            }
+          }));
+
+          // Thêm vào lịch sử (nếu cần)
+          setBidHistory(prev => [
+            ...prev,
+            {
+              type: 'participant_joined',
+              timestamp: new Date().toISOString(),
+              user: { id: newParticipant.user_id }
+            }
+          ]);
+
+        } catch (e) {
+          console.error("Error parsing new_participant event:", e);
+        }
+      });
+
+
+
+eventSource.addEventListener('new_bid', (event) => {
   try {
     const data = JSON.parse(event.data);
-    console.log('New participant event:', data);
+    console.log('New bid received:', data);
 
-    const newParticipantRaw = data.new_participant;
-
-    // Tạo object theo đúng cấu trúc participants
-    const newParticipant = {
-      id: newParticipantRaw.id,
-      user_id: newParticipantRaw.id, // dùng id làm user_id
-      created_at: newParticipantRaw.created_at || new Date().toISOString(),
-      is_refunded: false,
+    // Tạo bid object mới với đầy đủ thông tin
+    const newBid = {
+      id: data.bid_id,
+      type: 'bid',
+      timestamp: data.timestamp || new Date().toISOString(),
+      price: data.bid_amount,
+      bidder_id: data.bidder?.id,
+      user: data.bidder || null // Thêm cả thông tin người dùng nếu có
     };
 
-    // Cập nhật danh sách người tham gia
-    setParticipants(prev => [...prev, newParticipant]);
+    // Cập nhật state
+    setBidHistory(prevHistory => {
+      // Kiểm tra trùng lặp
+      const isDuplicate = prevHistory.some(bid => bid.id === newBid.id);
+      if (isDuplicate) return prevHistory;
 
-    // Cập nhật tổng số
+      // Thêm bid mới vào đầu mảng (để hiển thị mới nhất lên trên)
+      return [newBid, ...prevHistory];
+    });
+
+    // Cập nhật current price
     setAuctionDetail(prev => ({
       ...prev,
       auction: {
         ...prev.auction,
-        total_participants: data.total_participants
+        current_price: data.current_price,
+        auction_bids: [...(prev.auction.auction_bids || []), {
+          id: data.bid_id,
+          amount: data.bid_amount,
+          bidder_id: data.bidder?.id,
+          created_at: data.timestamp
+        }]
       }
     }));
 
-    // Thêm vào lịch sử (nếu cần)
-    setBidHistory(prev => [
-      ...prev,
-      {
-        type: 'participant_joined',
-        timestamp: new Date().toISOString(),
-        user: { id: newParticipant.user_id }
-      }
-    ]);
+    // Cập nhật participants nếu là người tham gia mới
+    if (data.bidder?.id) {
+      setParticipants(prev => {
+        const existing = prev.find(p => p.user_id === data.bidder.id);
+        if (!existing) {
+          return [...prev, {
+            user_id: data.bidder.id,
+            id: data.bidder.id,
+            created_at: new Date().toISOString(),
+            is_refunded: false,
+            user: data.bidder
+          }];
+        }
+        return prev;
+      });
+    }
 
   } catch (e) {
-    console.error("Error parsing new_participant event:", e);
-  }
-});
-
-
-
-     eventSource.addEventListener('new_bid', (event) => {
-  try {
-    const data = JSON.parse(event.data);
-
-    const newBid = {
-      type: 'bid',
-      timestamp: data.timestamp,
-      price: data.amount,
-      user: participants.find(p => p.user_id === data.bidder_id) || {},
-    };
-
-    setBidHistory(prev => [...prev, newBid]);
-  } catch (e) {
-    console.error('Error parsing new_bid:', e);
+    console.error('Error processing new_bid event:', e);
   }
 });
 
@@ -651,9 +696,9 @@ eventSource.addEventListener('new_participant', (event) => {
           <div className="mt-6">
             {activeTab === 'auctionHistory' && (
               <AuctionHistory 
-  participants={participants}
-  bidHistory={sortedBidHistory}
-/>
+                bidHistory={bidHistory}
+                participants={participants}
+              />
 
             )}
             {activeTab === 'participants' && (
