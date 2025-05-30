@@ -1,6 +1,5 @@
 import { doc, setDoc, getDoc } from "firebase/firestore";
-import { db } from "../app/firebase"
-
+import { db } from "../features/notification/firebase-config";
 export const hasDeliveryFee = (state, userID, exchangeID) => {
   return !!state.exchange?.deliveryFees?.[userID]?.[exchangeID]?.deliveryFee?.total;
 };

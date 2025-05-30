@@ -111,7 +111,7 @@ const ExchangeInformation = ({
         footer={null}
         width={1000}
         style={{ maxWidth: '1200px' }}
-        bodyStyle={{ height: 'calc(100vh - 200px)', padding: 0, overflow: 'hidden' }}
+        styles={{ body: { height: 'calc(100vh - 200px)', padding: 0, overflow: 'hidden' } }}
         centered
       >
         <div className="h-full flex flex-col">

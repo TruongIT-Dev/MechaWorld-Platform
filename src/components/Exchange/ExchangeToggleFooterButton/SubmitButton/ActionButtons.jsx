@@ -477,7 +477,7 @@ ActionButtons.propTypes = {
   }),
   fetchExchangeData: PropTypes.func.isRequired,
   fetchUserAddress: PropTypes.func.isRequired,
-  deliverData: PropTypes.object.isRequired,
+  deliverData: PropTypes.object,
 };
 
 export default ActionButtons;

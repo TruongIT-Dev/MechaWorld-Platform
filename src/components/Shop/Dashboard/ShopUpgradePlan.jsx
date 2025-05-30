@@ -226,7 +226,7 @@ const ShopUpgradePlan = ({ sellerPlan }) => {
                   className={`h-full transition-all duration-300 hover:shadow-xl hover:-translate-y-2 border-2 ${getPlanTheme(
                     plan
                   )} ${index === 1 ? "transform scale-105" : ""}`}
-                  bodyStyle={{ padding: "32px 24px" }}
+                  styles={{ body: {padding: "32px 24px" }}}
                 >
                   {/* Plan Header */}
                   <div className="text-center mb-6">
@@ -370,7 +370,7 @@ const ShopUpgradePlan = ({ sellerPlan }) => {
           <Card className="max-w-4xl mx-auto border border-gray-200 shadow-sm">
             <Title level={4} className="text-gray-800 mb-4">
               <ExclamationCircleOutlined className="text-yellow-500 mr-2" />
-              Thông tin quan trọng
+              Dịch vụ cung cấp
             </Title>
             <Row gutter={[24, 16]}>
               <Col xs={24} md={8}>
