@@ -78,7 +78,9 @@ export const AddMoney = async (amount, description, redirectUrl) => {
     }
 };
 
-
+export const getWalletTransactions = () => {
+    return axios.get(`/users/me/wallet/entries`);
+}
 // export const GetMoney = async (id) => {
 //     return axios.get(`users/${id}/wallet/`);
 // }

@@ -1,19 +1,40 @@
 import { useSelector } from 'react-redux';
 import { useState, useEffect } from 'react';
-import { Table, Button, Card, Modal, Input, message, Steps, QRCode, Tabs, Tooltip, InputNumber } from 'antd';
+import { Table, Button, Card, Modal, Input, message, Steps, QRCode, Tabs, Tooltip, InputNumber, Tag } from 'antd';
 import { ArrowUpOutlined, ArrowDownOutlined, LoadingOutlined, WalletOutlined, EyeInvisibleOutlined, EyeOutlined } from '@ant-design/icons';
 
 import { checkWallet } from '../../apis/User/APIUser';
-import { AddMoney } from '../../apis/Wallet/APIWallet';
+import { AddMoney,getWalletTransactions } from '../../apis/Wallet/APIWallet';
 
 const { Step } = Steps;
 const { TabPane } = Tabs;
 
-const transactionData = [
-  { key: '1', type: 'Nạp tiền', amount: '+1,000,000 VNĐ', date: '2023-10-01', status: 'Thành công' },
-  { key: '2', type: 'Chuyển tiền', amount: '-500,000 VNĐ', date: '2023-10-02', status: 'Thành công' },
-  { key: '3', type: 'Rút tiền', amount: '-200,000 VNĐ', date: '2023-10-03', status: 'Đang xử lý' },
-];
+// Mapping các loại giao dịch sang tiếng Việt
+const transactionTypeMap = {
+  deposit: { text: 'Nạp tiền', color: 'green' },
+  withdrawal: { text: 'Rút tiền', color: 'red' },
+  payment: { text: 'Thanh toán', color: 'orange' },
+  payment_received: { text: 'Nhận thanh toán', color: 'blue' },
+  refund: { text: 'Hoàn tiền', color: 'purple' },
+  hold_funds: { text: 'Tạm giữ tiền', color: 'gold' },
+  release_funds: { text: 'Giải phóng tiền', color: 'cyan' },
+  exchange_compensation_hold: { text: 'Tạm giữ bồi thường', color: 'volcano' },
+  exchange_compensation_transfer: { text: 'Chuyển bồi thường', color: 'magenta' },
+  exchange_compensation_release: { text: 'Giải phóng bồi thường', color: 'lime' },
+  auction_deposit: { text: 'Đặt cọc đấu giá', color: 'geekblue' },
+  auction_deposit_refund: { text: 'Hoàn tiền đấu giá', color: 'purple' },
+  auction_compensation: { text: 'Bồi thường đấu giá', color: 'volcano' },
+  auction_winner_payment: { text: 'Thanh toán đấu giá', color: 'orange' },
+  auction_seller_payment: { text: 'Nhận tiền đấu giá', color: 'blue' },
+  subscription_payment: { text: 'Thanh toán gói dịch vụ', color: 'gold' }
+};
+
+// Mapping trạng thái giao dịch
+const statusMap = {
+  completed: { text: 'Thành công', color: 'success' },
+  pending: { text: 'Đang xử lý', color: 'processing' },
+  failed: { text: 'Thất bại', color: 'error' }
+};
 
 const WalletPage = () => {
   const [balance, setBalance] = useState(0);
@@ -22,24 +43,32 @@ const WalletPage = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
   const [paymentData, setPaymentData] = useState(null);
+  const [transactions, setTransactions] = useState([]);
+  const [loading, setLoading] = useState(false);
   const userId = useSelector((state) => state.auth.user.id);
-
   const [showBalance, setShowBalance] = useState(true);
 
   useEffect(() => {
-    checkWallet(userId).then((response) => {
-      // console.log('API Response:', response.data);
-      setBalance(response.data.balance);
-    }).catch((error) => {
-      console.error('Lỗi API:', {
-        message: error.message,
-        response: error.response?.data,
-        config: error.config
-      });
-      message.error('Lỗi khi lấy thông tin ví. Vui lòng thử lại sau.');
-    });
-
+    fetchWalletData();
   }, []);
+
+  const fetchWalletData = async () => {
+    try {
+      setLoading(true);
+      const [balanceRes, transactionsRes] = await Promise.all([
+        checkWallet(userId),
+        getWalletTransactions()
+      ]);
+      
+      setBalance(balanceRes.data.balance);
+      setTransactions(transactionsRes.data || []);
+    } catch (error) {
+      console.error('Lỗi khi lấy dữ liệu ví:', error);
+      message.error('Lỗi khi lấy thông tin ví. Vui lòng thử lại sau.');
+    } finally {
+      setLoading(false);
+    }
+  };;
 
   // Giữ nguyên hàm API tạo đơn hàng ZabPay
   const createZabPayOrder = async (amount) => {
@@ -141,41 +170,120 @@ const WalletPage = () => {
   const columns = [
     {
       title: "Thời gian",
-      dataIndex: "date",
-      key: "date",
+      dataIndex: "created_at",
+      key: "created_at",
+      render: (date) => new Date(date).toLocaleString(),
+      sorter: (a, b) => new Date(a.created_at) - new Date(b.created_at),
+      defaultSortOrder: 'descend'
+    },
+    {
+      title: "Mã giao dịch",
+      dataIndex: "reference_id",
+      key: "reference_id",
+      render: (id) => <span className="text-gray-500 font-mono">{id}</span>
     },
     {
       title: "Loại giao dịch",
-      dataIndex: "type",
-      key: "type",
-      render: (type) =>
-        type === "deposit" ? (
-          <span className="text-blue-600 font-medium">Nạp tiền</span>
-        ) : (
-          <span className="text-red-600 font-medium">Rút tiền</span>
-        ),
+      dataIndex: "entry_type",
+      key: "entry_type",
+      render: (type) => (
+        <Tag color={transactionTypeMap[type]?.color || 'default'}>
+          {transactionTypeMap[type]?.text || type}
+        </Tag>
+      ),
+      filters: Object.entries(transactionTypeMap).map(([key, value]) => ({
+        text: value.text,
+        value: key
+      })),
+      onFilter: (value, record) => record.entry_type === value,
     },
     {
       title: "Số tiền",
       dataIndex: "amount",
       key: "amount",
-      render: (amount) => `₫ ${amount.toLocaleString()} VNĐ`,
+      render: (amount, record) => (
+        <span className={record.entry_type === 'deposit' ? 'text-green-600' : 'text-red-600'}>
+          {record.entry_type === 'deposit' ? '+' : '-'}₫{amount.toLocaleString()}
+        </span>
+      ),
+      sorter: (a, b) => a.amount - b.amount
     },
     {
       title: "Trạng thái",
       dataIndex: "status",
       key: "status",
+      render: (status) => (
+        <Tag color={statusMap[status]?.color || 'default'}>
+          {statusMap[status]?.text || status}
+        </Tag>
+      ),
+      filters: Object.entries(statusMap).map(([key, value]) => ({
+        text: value.text,
+        value: key
+      })),
+      onFilter: (value, record) => record.status === value,
+    },
+    {
+      title: "Chi tiết",
+      key: "action",
+      render: (_, record) => (
+        <Button type="link" size="small" onClick={() => showTransactionDetail(record)}>
+          Xem chi tiết
+        </Button>
+      ),
     },
   ];
 
-  const depositHistory = [
-    { date: "2025-04-06", type: "deposit", amount: 500000, status: "Thành công" },
-    { date: "2025-04-03", type: "deposit", amount: 200000, status: "Thành công" },
-  ];
-
-  const withdrawHistory = [
-    { date: "2025-04-02", type: "withdraw", amount: 100000, status: "Đang xử lý" },
-  ];
+  const showTransactionDetail = (transaction) => {
+    Modal.info({
+      title: 'Chi tiết giao dịch',
+      width: 600,
+      content: (
+        <div className="space-y-2">
+          <div className="flex justify-between">
+            <span className="text-gray-600">Mã giao dịch:</span>
+            <span className="font-medium">{transaction.reference_id}</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-gray-600">Loại giao dịch:</span>
+            <Tag color={transactionTypeMap[transaction.entry_type]?.color || 'default'}>
+              {transactionTypeMap[transaction.entry_type]?.text || transaction.entry_type}
+            </Tag>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-gray-600">Số tiền:</span>
+            <span className={transaction.entry_type === 'deposit' ? 'text-green-600' : 'text-red-600'}>
+              {transaction.entry_type === 'deposit' ? '+' : '-'}₫{transaction.amount.toLocaleString()}
+            </span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-gray-600">Trạng thái:</span>
+            <Tag color={statusMap[transaction.status]?.color || 'default'}>
+              {statusMap[transaction.status]?.text || transaction.status}
+            </Tag>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-gray-600">Thời gian tạo:</span>
+            <span>{new Date(transaction.created_at).toLocaleString()}</span>
+          </div>
+          {transaction.completed_at && (
+            <div className="flex justify-between">
+              <span className="text-gray-600">Thời gian hoàn thành:</span>
+              <span>{new Date(transaction.completed_at).toLocaleString()}</span>
+            </div>
+          )}
+          <div className="flex justify-between">
+            <span className="text-gray-600">Mô tả:</span>
+            <span>{transaction.reference_type}</span>
+          </div>
+        </div>
+      ),
+      okText: 'Đóng',
+      okButtonProps: {
+      className: 'text-red-600 border-red-600 hover:text-white hover:bg-red-600',
+      },
+    });
+  };
 
   return (
     <>
@@ -235,14 +343,22 @@ const WalletPage = () => {
           </TabPane>
 
           {/* Tab 2: Lịch sử giao dịch */}
+          {/* Tab 2: Lịch sử giao dịch */}
           <TabPane tab="Lịch sử giao dịch" key="2">
             <Card className="shadow-md rounded-lg overflow-hidden">
-              <h2 className="text-xl font-semibold mb-4">Lịch sử Nạp / Rút tiền</h2>
+              <h2 className="text-xl font-semibold mb-4">Lịch sử giao dịch</h2>
               <Table
                 columns={columns}
-                dataSource={[...depositHistory, ...withdrawHistory]}
-                rowKey={(record, index) => index}
-                pagination={{ pageSize: 5 }}
+                dataSource={transactions}
+                rowKey="id"
+                loading={loading}
+                pagination={{ 
+                  pageSize: 10,
+                  showSizeChanger: true,
+                  pageSizeOptions: ['10', '20', '50'],
+                  showTotal: (total) => `Tổng ${total} giao dịch`
+                }}
+                scroll={{ x: true }}
               />
             </Card>
           </TabPane>
