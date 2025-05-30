@@ -47,7 +47,7 @@ const OrderHistoryDetail = ({ visible, onClose, orderData }) => {
 
     // Status object định nghĩa icon, màu và text cho từng trạng thái - giống OrderHistory
     const statusConfig = {
-        'pending': { color: 'orange', icon: <ClockCircleOutlined />, text: 'Chờ xử lý' },
+        'pending': { color: 'orange', icon: <ClockCircleOutlined />, text: 'Chờ xác nhận' },
         'packaging': { color: 'purple', icon: <GiftOutlined />, text: 'Đang đóng gói' },
         'delivering': { color: 'blue', icon: <CarOutlined />, text: 'Đang giao hàng' },
         'delivered': { color: 'cyan', icon: <CheckOutlined />, text: 'Đã giao hàng' },
@@ -188,6 +188,11 @@ const OrderHistoryDetail = ({ visible, onClose, orderData }) => {
                                 </Tag>
                             )}
                         </Descriptions.Item>
+                        {orderData.status === 'canceled' && orderData.canceled_reason && (
+                            <Descriptions.Item label="Lý do hủy đơn" span={3}>
+                                <span>{orderData.canceled_reason}</span>
+                            </Descriptions.Item>
+                        )}
                         <Descriptions.Item label="Loại đơn hàng" span={3}>
                             <Tag color={getTypeColor(order.type)}>
                                 {getTypeText(order.type)}

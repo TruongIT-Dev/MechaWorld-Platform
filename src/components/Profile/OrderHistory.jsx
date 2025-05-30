@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Tabs, Input, Card, Button, Tag, Avatar, Spin, message, Image, Empty, notification, Modal } from "antd";
+import { Tabs, Input, Card, Button, Tag, Avatar, Spin, message, Image, Empty, notification, Modal, Alert } from "antd";
 import {
   SearchOutlined,
   ShopOutlined,
@@ -11,7 +11,8 @@ import {
   CloseCircleOutlined,
   QuestionCircleOutlined,
   EyeOutlined,
-  TruckOutlined
+  TruckOutlined,
+  InfoCircleOutlined
 } from "@ant-design/icons";
 
 import { GetListOrderHistory, GetOrderDetail, ConfirmOrderDelivered } from "../../apis/Orders/APIOrder";
@@ -36,6 +37,13 @@ const OrderHistory = () => {
   const [confirmingOrderId, setConfirmingOrderId] = useState(null);
   const [confirmLoading, setConfirmLoading] = useState(false);
 
+  // State cho modal xem lý do hủy
+  const [cancelReasonModalVisible, setCancelReasonModalVisible] = useState(false);
+  const [selectedCancelOrder, setSelectedCancelOrder] = useState(null);
+
+  // console.log("orders", orders);
+
+
   // Status object định nghĩa icon, màu và text cho từng trạng thái
   const statusConfig = {
     'pending': { color: 'orange', icon: <ClockCircleOutlined />, text: 'Chờ xử lý' },
@@ -55,6 +63,8 @@ const OrderHistory = () => {
     setLoading(true);
     try {
       const response = await GetListOrderHistory();
+      // console.log("fetch res", response);
+
       const ordersData = response.data;
 
       // Lấy danh sách seller_id duy nhất
@@ -92,6 +102,7 @@ const OrderHistory = () => {
           statusIcon = defaultStatusInfo.icon;
           statusColor = defaultStatusInfo.color;
         }
+
         return {
           id: order.id,
           code: order.code,
@@ -109,6 +120,9 @@ const OrderHistory = () => {
           formattedTotal: formatCurrency(order.total_amount),
           paymentMethod: formatPaymentMethod(order.payment_method),
           createdAt: new Date(order.created_at).toLocaleDateString('vi-VN'),
+          // Thêm thông tin về việc hủy đơn hàng
+          canceledBy: order.canceled_by,
+          canceledReason: order.canceled_reason,
           items: order_items.map(item => ({
             id: item.id,
             name: item.name,
@@ -181,7 +195,7 @@ const OrderHistory = () => {
       delivering: "Đang giao hàng",
       delivered: "Đã giao hàng",
       completed: "Đã nhận hàng",
-      cancelled: "Đã hủy",
+      canceled: "Đã hủy",
       failed: "Thất bại",
     };
     return map[status] || "Không xác định";
@@ -219,7 +233,7 @@ const OrderHistory = () => {
     { key: "delivering", label: "Đang giao hàng" },
     { key: "delivered", label: "Đã giao thành công" },
     { key: "completed", label: "Hoàn tất" },
-    { key: "cancelled", label: "Đã hủy" },
+    { key: "canceled", label: "Đã hủy" },
     { key: "failed", label: "Thất bại" },
   ];
 
@@ -249,6 +263,18 @@ const OrderHistory = () => {
 
     setConfirmingOrderId(id);
     setConfirmModalVisible(true);
+  };
+
+  // Hàm hiển thị modal lý do hủy đơn
+  const showCancelReasonModal = (order) => {
+    setSelectedCancelOrder(order);
+    setCancelReasonModalVisible(true);
+  };
+
+  // Hàm đóng modal lý do hủy đơn
+  const handleCloseCancelReasonModal = () => {
+    setCancelReasonModalVisible(false);
+    setSelectedCancelOrder(null);
   };
 
   // Hàm xử lý xác nhận đã giao hàng
@@ -339,6 +365,11 @@ const OrderHistory = () => {
     return status === 'delivered';
   };
 
+  // Kiểm tra xem button xem lý do hủy có nên hiển thị không (chỉ hiện với đơn đã hủy)
+  const shouldShowCancelReasonButton = (status, canceledReason) => {
+    return status === 'canceled' && canceledReason;
+  };
+
   return (
     <div className="max-w-5xl mx-auto p-6">
       <Tabs activeKey={activeTab} onChange={setActiveTab}>
@@ -416,6 +447,16 @@ const OrderHistory = () => {
                     Xác nhận đã nhận hàng
                   </Button>
                 )}
+                {shouldShowCancelReasonButton(order.status, order.canceledReason) && (
+                  <Button
+                    type="default"
+                    danger
+                    onClick={() => showCancelReasonModal(order)}
+                    icon={<InfoCircleOutlined />}
+                  >
+                    Xem lý do hủy
+                  </Button>
+                )}
                 <Button
                   type="primary"
                   className="bg-blue-500"
@@ -466,6 +507,73 @@ const OrderHistory = () => {
             Lưu ý: Sau khi xác nhận, bạn sẽ không thể khiếu nại về tình trạng đơn hàng. Vui lòng kiểm tra kỹ trước khi tiếp tục.
           </p>
         </div>
+      </Modal>
+
+      {/* Modal xem lý do hủy đơn hàng */}
+      <Modal
+        title={
+          <div className="flex items-center gap-2 text-lg font-semibold text-red-600">
+            <CloseCircleOutlined className="text-red-500" />
+            Lý do hủy đơn hàng
+          </div>
+        }
+        open={cancelReasonModalVisible}
+        onCancel={handleCloseCancelReasonModal}
+        footer={[
+          <Button key="close" type="primary" onClick={handleCloseCancelReasonModal}>
+            Đóng
+          </Button>
+        ]}
+        width={500}
+      >
+        {selectedCancelOrder && (
+          <div className="space-y-4">
+            {/* Thông tin đơn hàng */}
+            <div className="bg-gray-50 rounded-lg p-4">
+              <h4 className="font-semibold text-gray-800 mb-2">Thông tin đơn hàng:</h4>
+              <div className="grid grid-cols-1 gap-2 text-sm">
+                <div>
+                  <span className="text-gray-600">Mã đơn hàng:</span>
+                  <span className="ml-2 font-semibold text-blue-600">
+                    {selectedCancelOrder.code}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-gray-600">Tổng tiền:</span>
+                  <span className="ml-2 font-semibold text-red-600">
+                    {selectedCancelOrder.formattedTotal}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-gray-600">Ngày tạo:</span>
+                  <span className="ml-2">{selectedCancelOrder.createdAt}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Lý do hủy */}
+            <Alert
+              message="Lý do hủy đơn hàng"
+              description={
+                <div className="mt-2">
+                  <p className="text-base">
+                    "{selectedCancelOrder.canceledReason}"
+                  </p>
+                </div>
+              }
+              type="error"
+              showIcon
+            />
+
+            {/* Thông tin thanh toán */}
+            <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+              <h5 className="text-sm font-medium text-green-800 mb-2">Thông tin thanh toán:</h5>
+              <p className="text-sm text-green-700">
+                Đơn hàng này đã bị hủy, do đó số tiền đã thanh toán sẽ được hoàn trả lại vào tài khoản của bạn ngay lập tức. Bạn không bị mất bất kỳ khoản tiền nào.
+              </p>
+            </div>
+          </div>
+        )}
       </Modal>
 
       {/* Modal chi tiết đơn hàng */}

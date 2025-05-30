@@ -7,10 +7,12 @@ import { PhoneOutlined, LockOutlined } from "@ant-design/icons";
 import { updateUser } from "../../features/auth/authSlice";
 import { verifyToken, verifyOtp, verifyPhone } from '../../apis/Authentication/APIAuth';
 import { GetShopInfoById } from '../../apis/Seller Profile/APISellerProfile';
+import { GetUserByPhone } from '../../apis/User/APIUser';
 
 const FirstForm = ({ form, setIsPhoneVerified }) => {
 
     const user = useSelector((state) => state.auth.user);
+    const vietnamPhoneRegex = /^(03|05|07|08|09)[0-9]{8}$/;
 
     const [email, setEmail] = useState(user?.email || "");
     const [shopName, setShopName] = useState("");
@@ -44,7 +46,7 @@ const FirstForm = ({ form, setIsPhoneVerified }) => {
         if (access_token) {
             try {
                 verifyToken(access_token).then(response => {
-                    console.log("Data user", response.data);
+                    // console.log("Data user", response.data);
 
                     setEmail(response.data.email);
                     // setFullName(response.data.full_name);
@@ -83,7 +85,7 @@ const FirstForm = ({ form, setIsPhoneVerified }) => {
         const fetchShopInfo = async () => {
             try {
                 const response = await GetShopInfoById(shopID);
-                console.log("Shop:", response);
+                // console.log("Shop:", response);
                 if (response?.data?.shop_name) {
                     setShopName(response.data.shop_name);
                     setShopExists(true); // Đánh dấu đã có shop
@@ -120,9 +122,15 @@ const FirstForm = ({ form, setIsPhoneVerified }) => {
     }, [shopExists, form]);
 
 
+    //  Check User Detail by phone
+    const CheckIfUserExisted = async () => {
+        const response = await GetUserByPhone(phoneNumber);
+        // console.log(response);
+        return response;
+    };
+
     // Gửi OTP
     const handleSendOtp = async () => {
-
         // Validate Ko nhập Sđt
         if (!phoneNumber) {
             message.error("Vui lòng nhập số điện thoại!");
@@ -130,29 +138,40 @@ const FirstForm = ({ form, setIsPhoneVerified }) => {
         }
 
         // Validate Nhập Sđt không hợp lệ
-        if (!/^[0-9]{10}$/.test(phoneNumber)) {
+        const vietnamPhoneRegex = /^(03|05|07|08|09)[0-9]{8}$/;
+        if (!vietnamPhoneRegex.test(phoneNumber)) {
             message.error("Số điện thoại không hợp lệ!");
             return;
         }
 
+        try {
+            // ✅ PHẢI GỌI FUNCTION VÀ AWAIT
+            const userExistResponse = await CheckIfUserExisted();
 
+            // Kiểm tra sđt tồn tại
+            if (userExistResponse.status === 200) {
+                message.error("Số điện thoại đã tồn tại.");
+                return;
+            }
+        } catch (error) {
+            // Nếu API trả về lỗi 404 (không tìm thấy user) thì OK để tiếp tục
+            if (error.response?.status !== 404) {
+                message.error("Lỗi khi kiểm tra số điện thoại!");
+                return;
+            }
+            // Nếu 404 thì có nghĩa là số điện thoại chưa tồn tại, tiếp tục gửi OTP
+        }
+
+        // Tiếp tục gửi OTP nếu số điện thoại chưa tồn tại
         try {
             const response = await verifyPhone(phoneNumber);
             const otpValue = response.data.otp_code;
 
-            setOtpCode(otpValue); // Cập nhật state nhưng không dùng ngay lập tức
-
-            // console.log("✅ Gửi OTP Response:", response);
-            // console.log("otpCode từ API:", otpValue); // ✅ Đảm bảo in ra đúng giá trị
+            setOtpCode(otpValue);
 
             if (response.status === 200) {
-                console.log("Gửi OTP thành công", response);
-
-                message.success({
-                    content: `OTP của bạn là: ${otpValue}`,
-                    duration: 10, // ⏳ Giữ thông báo trong 10 giây
-                });
-                setStep(2); // Chuyển qua bước nhập OTP
+                setStep(2);
+                message.success('Mã OTP đã gửi thành công. Vui lòng kiểm tra tin nhắn.')
                 setOtpVisible(true);
                 setIsResendDisabled(true);
                 setCountdown(60);
@@ -174,8 +193,8 @@ const FirstForm = ({ form, setIsPhoneVerified }) => {
 
     // Hàm xác thực OTP
     const handleVerifyOtp = async () => {
-        console.log("📩 Đã gọi handleVerifyOtp");
-        console.log("🔢 OTP hiện tại:", otp);
+        // console.log("📩 Đã gọi handleVerifyOtp");
+        // console.log("🔢 OTP hiện tại:", otp);
 
         if (!otp) {
             message.error("Vui lòng nhập mã OTP!");
@@ -184,10 +203,10 @@ const FirstForm = ({ form, setIsPhoneVerified }) => {
 
         try {
             const response = await verifyOtp(user?.id, phoneNumber, otp);
-            console.log("✅ Xác thực OTP Response:", response);
+            // console.log("✅ Xác thực OTP Response:", response);
 
             if (response.status === 200) {
-                message.success("Xác thực thành công!");
+                message.success("Xác thực OTP thành công!");
                 setOtpVisible(false);
                 setModalVisible(false); // Đảm bảo đúng cách đóng modal
                 setIsPhoneVerified(true);
@@ -306,13 +325,16 @@ const FirstForm = ({ form, setIsPhoneVerified }) => {
                                     <Input
                                         addonBefore={prefixSelector}
                                         size="large"
-                                        placeholder="Nhập số điện thoại"
+                                        placeholder="Nhập số điện thoại (VD: 0912345678)"
                                         value={phoneNumber}
                                         onChange={(e) => setPhoneNumber(e.target.value)}
                                         className="mb-1"
+                                        maxLength={10}
                                     />
-                                    {!/^[0-9]{10}$/.test(phoneNumber) && phoneNumber &&
-                                        <div className="text-red-500 text-center text-sm mt-1">Số điện thoại không hợp lệ!</div>
+                                    {!vietnamPhoneRegex.test(phoneNumber) && phoneNumber &&
+                                        <div className="text-red-500 text-center text-sm mt-1">
+                                            Số điện thoại không hợp lệ!
+                                        </div>
                                     }
                                 </div>
 
@@ -320,7 +342,7 @@ const FirstForm = ({ form, setIsPhoneVerified }) => {
                                     type="primary"
                                     className="w-full bg-blue-500 hover:bg-blue-600 h-10"
                                     onClick={handleSendOtp}
-                                    disabled={!/^[0-9]{10}$/.test(phoneNumber)}
+                                    disabled={!vietnamPhoneRegex.test(phoneNumber)}
                                 >
                                     Gửi mã OTP
                                 </Button>

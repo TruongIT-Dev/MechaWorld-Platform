@@ -10,6 +10,7 @@ import { Provider } from "react-redux";
 import { BrowserRouter } from "react-router-dom";
 import { store, persistor } from "./app/store.js";
 import { CartProvider } from "./context/CartContext.jsx";
+import { NotificationsProvider } from './context/NotificationContext.jsx'
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import { PersistGate } from "redux-persist/integration/react";
 
@@ -19,9 +20,11 @@ ReactDOM.createRoot(document.getElementById("root")).render(
       <React.StrictMode>
         <BrowserRouter>
           <GoogleOAuthProvider clientId={import.meta.env.VITE_CLIENT_ID_SECRET}>
-            <CartProvider>
-              <App />
-            </CartProvider>
+            <NotificationsProvider>
+              <CartProvider>
+                <App />
+              </CartProvider>
+            </NotificationsProvider>
           </GoogleOAuthProvider>
         </BrowserRouter>
       </React.StrictMode>

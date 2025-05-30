@@ -137,19 +137,18 @@ const GundamProductPage = () => {
     // Handle Buy Instant
     const handleBuyNow = async (id) => {
         try {
-            // Kiểm tra nếu chưa đăng nhập
             if (!userId) {
                 message.error('Bạn cần phải Đăng nhập trước!');
                 navigate('/member/login');
-                return; // Dừng function tại đây
+                return;
             }
 
-            // Gọi API để thêm vào giỏ hàng
-            const response = await AddToCart(id);
-            if (response?.data) {
-                setAdded(true);
+            await addToCart({ id });
+
+            // Đợi một chút để đảm bảo state được cập nhật
+            setTimeout(() => {
                 navigate('/checkout');
-            }
+            }, 100);
 
         } catch (error) {
             message.error("Sản phẩm đã có trong Giỏ hàng!");
@@ -158,7 +157,6 @@ const GundamProductPage = () => {
             setLoadingAdded(false);
         }
     }
-
 
     // ************** Hàm Format Tiền Việt *****************
     const formatCurrencyVND = (price) => {

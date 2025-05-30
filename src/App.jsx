@@ -49,6 +49,7 @@ import {
   ExchangeMyPost,
   CollectionContainer,
   GundamCollectionApp,
+  NotificationPage,
 
 } from "./routes/router";
 
@@ -57,10 +58,14 @@ import { logout, updateUser } from "./features/auth/authSlice";
 
 import Spinner from "./components/Spinner";
 import PageLoading from "./components/PageLoading";
+
 import { restoreDeliveryFees } from "./features/exchange/middleware/deliveryFeePersistence";
 
+import { db } from './features/notification/firebase-config'
+import { collection, getDocs } from 'firebase/firestore'
 
-// Initialize Firebase
+
+
 function App() {
 
   const dispatch = useDispatch();
@@ -81,6 +86,20 @@ function App() {
       dispatch(logout());
     }
   }, [dispatch]);
+
+  useEffect(() => {
+    const testConnection = async () => {
+      try {
+        const querySnapshot = await getDocs(collection(db, 'notifications'))
+        console.log('Firebase connected successfully!')
+        console.log('Documents count:', querySnapshot.size)
+      } catch (error) {
+        console.error('Firebase connection error:', error)
+      }
+    }
+
+    testConnection()
+  }, [])
 
   // Phân quyền dựa trên vai trò
   const ProtectedRoute = ({ children }) => {
@@ -109,6 +128,10 @@ function App() {
             {/* Product Route */}
             <Route path="product" element={<ProductPage />} />
             <Route path="product/:slug" element={<ProductDetailPage />} />
+            
+
+            {/* Notification */}
+            <Route path="notifications" element={<NotificationPage />} />
             
 
             {/* Aution Route */}

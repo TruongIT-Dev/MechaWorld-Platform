@@ -16,6 +16,8 @@ export const ExchangePage = React.lazy(() => import('../components/Exchange/Exch
 export const SignIn = React.lazy(() => import("../components/Login/SignIn"));
 export const SignUp = React.lazy(() => import("../components/Login/SignUp"));
 
+// Notification
+export const NotificationPage = React.lazy(() => import("../components/Notification/index"));
 
 // Product Detail Page route
 export const ProductDetailPage = React.lazy(() => import('../components/ProductDetail/ProductDetail'));

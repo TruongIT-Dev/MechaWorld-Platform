@@ -26,7 +26,7 @@ const SecondForm = ({ user, setUser, setHasAddress }) => {
 
     // Address properties
     const [isPickupAddress, setIsPickupAddress] = useState(false);
-    const [isPrimary, setIsPrimary] = useState(true);
+    // const [isPrimary, setIsPrimary] = useState(true);
 
     // GHN API setup
     const ghn_api = 'https://dev-online-gateway.ghn.vn/shiip/public-api/master-data/';
@@ -141,7 +141,7 @@ const SecondForm = ({ user, setUser, setHasAddress }) => {
             province_name: city ? city.ProvinceName : "",
             district_name: district ? district.DistrictName : "",
             is_pickup_address: true,
-            is_primary: isPrimary
+            is_primary: false
         };
         try {
             await updateAddress(user.id, addresses[0].id, addressData);
@@ -169,7 +169,7 @@ const SecondForm = ({ user, setUser, setHasAddress }) => {
             province_name: city ? city.ProvinceName : "",
             district_name: district ? district.DistrictName : "",
             is_pickup_address: true,
-            is_primary: isPrimary
+            is_primary: false
         };
 
         try {
@@ -178,7 +178,7 @@ const SecondForm = ({ user, setUser, setHasAddress }) => {
             message.success("Thêm địa chỉ thành công!");
             form.resetFields();
             setIsPickupAddress(true);
-            setIsPrimary(false);
+            // setIsPrimary(false);
             setModalVisible(false);
             fetchUserAddresses(); // Refresh addresses list
         } catch (error) {
@@ -254,7 +254,7 @@ const SecondForm = ({ user, setUser, setHasAddress }) => {
                 className="address-form"
             >
                 <div className="mb-4">
-                    <h2 className="text-xl font-bold">NHẬP ĐỊA CHỈ CỦA SHOP</h2>
+                    <h2 className="text-xl font-bold">NHẬP ĐỊA CHỈ SHOP</h2>
                     <Paragraph className="text-gray-500">
                         Chúng tôi có thu thập địa chỉ lấy hàng của shop để thực hiện việc vận chuyển dễ dàng hơn.
                     </Paragraph>
@@ -324,8 +324,8 @@ const SecondForm = ({ user, setUser, setHasAddress }) => {
                                 <i className="fas fa-map-marker-alt"></i>
                                 {/* Thay bằng icon từ thư viện bạn đang dùng nếu không dùng Font Awesome */}
                             </div>
-                            <Text className="text-lg font-medium mb-2">Bạn chưa có địa chỉ lấy hàng</Text>
-                            <Text className="text-gray-500 mb-6">Vui lòng cung cấp địa chỉ lấy hàng để thuận tiện cho việc vận chuyển.</Text>
+                            <Text className="text-lg uppercase font-medium mb-2">Bạn chưa có địa chỉ lấy hàng</Text>
+                            <Text className="text-gray-500 mb-6">Vui lòng cung cấp thêm thông tin địa chỉ để thuận tiện cho việc vận chuyển.</Text>
                             <Button
                                 type="primary"
                                 onClick={() => setModalVisible(true)}
@@ -333,7 +333,7 @@ const SecondForm = ({ user, setUser, setHasAddress }) => {
                                 size="large"
                                 icon={<PlusOutlined />}
                             >
-                                Thêm mới địa chỉ
+                                Thêm địa chỉ lấy hàng
                             </Button>
                         </div>
                     </div>

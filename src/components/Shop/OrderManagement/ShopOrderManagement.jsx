@@ -1,9 +1,9 @@
 import { useSelector } from "react-redux";
 import { useEffect, useState } from "react";
-import { Table, Row, Tag, Button, Dropdown, Modal, message, Upload, Space, Tooltip, Input, Select, notification, Empty, Card, Image, Typography } from "antd";
-import { StopOutlined, EllipsisOutlined, DollarOutlined, WalletOutlined, BankOutlined, MobileOutlined, CreditCardOutlined, ClockCircleOutlined, CheckCircleOutlined, GiftOutlined, CarOutlined, FileTextOutlined, CheckOutlined, CloseCircleOutlined, QuestionCircleOutlined, MessageOutlined, EyeOutlined, TruckOutlined } from "@ant-design/icons";
+import { Table, Row, Tag, Button, Dropdown, Modal, message, Upload, Space, Tooltip, Input, Select, notification, Empty, Card, Image, Typography, Alert } from "antd";
+import { StopOutlined, EllipsisOutlined, DollarOutlined, WalletOutlined, BankOutlined, MobileOutlined, CreditCardOutlined, ClockCircleOutlined, CheckCircleOutlined, GiftOutlined, CarOutlined, FileTextOutlined, CheckOutlined, CloseCircleOutlined, QuestionCircleOutlined, MessageOutlined, EyeOutlined, TruckOutlined, InfoCircleOutlined } from "@ant-design/icons";
 
-import { GetOrder, ConfirmOrder } from "../../../apis/Sellers/APISeller";
+import { GetOrder, ConfirmOrder, CancelPendingOrder } from "../../../apis/Sellers/APISeller";
 import { PackagingOrder, GetOrderDetail } from '../../../apis/Orders/APIOrder';
 
 import OrderHistoryDetail from '../../Profile/OrderHistoryDetail';
@@ -53,6 +53,13 @@ function ShopOrderManagement() {
   const [orderDetail, setOrderDetail] = useState(null);
   const [loadingOrderDetail, setLoadingOrderDetail] = useState(false);
 
+  // Thêm state cho modal hủy đơn hàng
+  const [isCancelModalVisible, setIsCancelModalVisible] = useState(false);
+  const [selectedCancelOrder, setSelectedCancelOrder] = useState(null);
+  const [cancelReason, setCancelReason] = useState('');
+  const [cancelLoading, setCancelLoading] = useState(false);
+
+
   // Xử lý thay đổi trạng thái đơn hàng
   const handleAction = async (record, actionKey) => {
     if (actionKey === "accept") {
@@ -61,7 +68,7 @@ function ShopOrderManagement() {
         const response = await ConfirmOrder(record.seller_id, record.id);
         if (response.status === 200) {
           message.success("Đơn hàng đã được xác nhận thành công!");
-          fetchOrders(); // Tải lại danh sách đơn hàng
+          fetchOrders();
         } else {
           message.error("Không thể xác nhận đơn hàng!");
         }
@@ -72,19 +79,62 @@ function ShopOrderManagement() {
         setLoading(false);
       }
     } else if (actionKey === "cancel") {
-      Modal.confirm({
-        title: 'Xác nhận hủy đơn hàng',
-        content: `Bạn có chắc chắn muốn hủy đơn hàng ${record.code} không?`,
-        okText: 'Xác nhận hủy',
-        cancelText: 'Hủy',
-        okButtonProps: { danger: true },
-        onOk: () => {
-          message.success("Đã gửi yêu cầu hủy đơn hàng thành công!");
-          // Implement API call to cancel order
-        }
-      });
+      // Gọi modal hủy đơn hàng thay vì confirm đơn giản
+      showCancelModal(record);
     } else if (actionKey === "detail") {
       handleViewOrderDetail(record.id);
+    }
+  };
+
+  const showCancelModal = (record) => {
+    setSelectedCancelOrder(record);
+    setCancelReason('');
+    setIsCancelModalVisible(true);
+  };
+
+  const handleCancelModalClose = () => {
+    setIsCancelModalVisible(false);
+    setSelectedCancelOrder(null);
+    setCancelReason('');
+  };
+
+  const handleCancelOrder = async () => {
+    if (!cancelReason.trim()) {
+      message.warning('Vui lòng nhập lý do hủy đơn hàng!');
+      return;
+    }
+
+    try {
+      setCancelLoading(true);
+
+      const response = await CancelPendingOrder(userId, selectedCancelOrder.id, cancelReason);
+
+      if (response.status === 200) {
+        notification.open({
+          type: 'success',
+          message: `Đã hủy đơn hàng thành công!`,
+          description: `Đơn hàng  ${selectedCancelOrder.code} đã bị hủy.`
+        });
+        handleCancelModalClose();
+        fetchOrders(); // Tải lại danh sách đơn hàng
+      } else {
+        message.error('Không thể hủy đơn hàng. Vui lòng thử lại!');
+      }
+    } catch (error) {
+      console.error('Error canceling order:', error);
+
+      // Xử lý các lỗi cụ thể
+      if (error.response?.status === 400) {
+        message.error('Đơn hàng không thể hủy ở trạng thái hiện tại!');
+      } else if (error.response?.status === 404) {
+        message.error('Không tìm thấy đơn hàng!');
+      } else if (error.response?.status === 403) {
+        message.error('Bạn không có quyền hủy đơn hàng này!');
+      } else {
+        message.error('Đã xảy ra lỗi khi hủy đơn hàng. Vui lòng thử lại!');
+      }
+    } finally {
+      setCancelLoading(false);
     }
   };
 
@@ -141,7 +191,7 @@ function ShopOrderManagement() {
       setLoading(true);
       const response = await GetOrder(userId);
 
-      console.log("Order", response);
+      // console.log("Order", response);
 
 
       if (response && response.data) {
@@ -612,6 +662,134 @@ function ShopOrderManagement() {
             className="py-8"
           />
         )}
+      </Modal>
+
+      {/* Modal hủy đơn hàng */}
+      <Modal
+        title={
+          <div className="flex items-center space-x-2">
+            <span className="text-red-500 text-xl"><InfoCircleOutlined /></span>
+            <span className="text-lg font-semibold text-red-600">Xác nhận hủy đơn hàng</span>
+          </div>
+        }
+        open={isCancelModalVisible}
+        onCancel={handleCancelModalClose}
+        width={600}
+        maskClosable={false}
+        footer={[
+          <Button
+            key="back"
+            onClick={handleCancelModalClose}
+            disabled={cancelLoading}
+          >
+            Quay lại
+          </Button>,
+          <Button
+            key="submit"
+            type="primary"
+            danger
+            onClick={handleCancelOrder}
+            loading={cancelLoading}
+            disabled={!cancelReason.trim()}
+          >
+            Xác nhận hủy
+          </Button>
+        ]}
+      >
+        <div className="space-y-4">
+          {/* Cảnh báo */}
+          <Alert
+            message="Lưu ý khi hủy đơn hàng!"
+            description={
+              <ul className="list-disc list-inside space-y-1 mt-2">
+                <li>Việc hủy đơn hàng sẽ không thể hoàn tác</li>
+                <li>Khách hàng sẽ nhận được thông báo về việc hủy đơn</li>
+              </ul>
+            }
+            type="warning"
+            showIcon
+            className="mb-4"
+          />
+
+          {/* Thông tin đơn hàng */}
+          <div className="bg-gray-50 rounded-lg p-4">
+            <h4 className="font-semibold text-gray-800 mb-2">Thông tin đơn hàng:</h4>
+            <div className="grid grid-cols-2 gap-3 text-sm">
+              <div>
+                <span className="text-gray-600">Mã đơn hàng:</span>
+                <span className="ml-2 font-semibold text-blue-600">
+                  {selectedCancelOrder?.code}
+                </span>
+              </div>
+              <div>
+                <span className="text-gray-600">Tổng tiền:</span>
+                <span className="ml-2 font-semibold text-red-600">
+                  {formatCurrency(selectedCancelOrder?.total_amount)} đ
+                </span>
+              </div>
+              <div>
+                <span className="text-gray-600">Trạng thái:</span>
+                <Tag color="gold" className="ml-2 font-semibold">
+                  {selectedCancelOrder?.status === 'pending' ? 'Chờ xác nhận' :
+                    selectedCancelOrder?.status === 'packaging' ? 'Đang đóng gói' :
+                      selectedCancelOrder?.status}
+                </Tag>
+              </div>
+              <div>
+                <span className="text-gray-600">Ngày tạo:</span>
+                <span className="ml-2">
+                  {selectedCancelOrder?.created_at ?
+                    new Date(selectedCancelOrder.created_at).toLocaleDateString('vi-VN') :
+                    'N/A'
+                  }
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Lý do hủy đơn */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              <span className="text-red-500">*</span> Lý do hủy đơn hàng:
+            </label>
+            <Input.TextArea
+              value={cancelReason}
+              onChange={(e) => setCancelReason(e.target.value)}
+              placeholder="Vui lòng nhập lý do cụ thể cho việc hủy đơn hàng này (tối thiểu 10 ký tự)..."
+              rows={4}
+              maxLength={500}
+              showCount
+              className="resize-none"
+            />
+            <div className="mt-2 text-xs text-gray-500">
+              Lý do hủy sẽ được gửi cho khách hàng và lưu vào hệ thống để theo dõi.
+            </div>
+          </div>
+
+          {/* Gợi ý lý do */}
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+            <h5 className="text-sm font-medium text-blue-800 mb-2">Một số lý do phổ biến:</h5>
+            <div className="flex flex-wrap gap-2">
+              {[
+                'Hết hàng',
+                'Sản phẩm có lỗi',
+                'Khách hàng yêu cầu hủy',
+                'Không thể giao hàng',
+                'Giá sản phẩm thay đổi',
+              ].map((reason) => (
+                <Button
+                  key={reason}
+                  size="small"
+                  type="link"
+                  className="text-blue-600 px-2 py-1 text-xs border border-blue-300 rounded hover:bg-blue-100"
+                  onClick={() => setCancelReason(reason)}
+                >
+                  {reason}
+                </Button>
+              ))}
+            </div>
+          </div>
+        </div>
       </Modal>
 
       {/* Modal chi tiết đơn hàng */}

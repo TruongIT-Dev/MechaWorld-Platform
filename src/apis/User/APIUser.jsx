@@ -26,6 +26,9 @@ export const BecomeSeller = () => {
 }
 
 // 4. Get user details using a phone_number number as a query parameter (Get user by Phone)
+export const GetUserByPhone = (phone) => {
+    return axios.get(`/users/by-phone?phone_number=${phone}`)
+}
 
 
 // 5. Get detailed information about a specific user (Get user by Id)

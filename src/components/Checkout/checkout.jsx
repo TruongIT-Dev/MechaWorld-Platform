@@ -286,9 +286,9 @@ const Checkout = () => {
         ...addr,
         is_primary: addr.id === address.id
       })));
-      message.success("Đã cập nhật địa chỉ mặc định!");
+      message.success("Đã cập nhật địa chỉ giao hàng!");
     } catch (error) {
-      message.error("Lỗi khi cập nhật địa chỉ mặc định!");
+      message.error("Lỗi khi cập nhật địa chỉ!");
       console.error(error);
     }
   };
@@ -297,7 +297,7 @@ const Checkout = () => {
     if (!userAddress) {
       notification.error({
         message: "THÔNG BÁO LỖI!",
-        description: "Bạn chưa có địa chỉ nhận hàng."
+        description: "Bạn chưa có địa chỉ giao hàng."
       });
       return;
     }
@@ -433,7 +433,7 @@ const Checkout = () => {
                             }}
                             className="text-sm"
                           >
-                            Đặt mặc định
+                            Đặt làm địa chỉ giao hàng
                           </Button>
                         )}
                       </div>
@@ -612,7 +612,7 @@ const Checkout = () => {
               description={
                 <div className="text-center">
                   <p className="text-lg text-gray-500 mb-4">Không có sản phẩm nào để thanh toán</p>
-                  <Button type="primary" size="large" className="bg-blue-500" onClick={() => navigate('/shopping')}>
+                  <Button type="primary" size="large" className="bg-blue-500" onClick={() => navigate('/product')}>
                     Quay lại mua hàng
                   </Button>
                 </div>
@@ -630,7 +630,7 @@ const Checkout = () => {
                     <p className="font-semibold text-base mb-2">Ghi chú</p>
                     <input
                       type="text"
-                      placeholder="Nhập ghi chú..."
+                      placeholder="Nhập ghi chú cho shop..."
                       className="w-full p-2 border rounded"
                       value={note}
                       onChange={(e) => setNote(e.target.value)}

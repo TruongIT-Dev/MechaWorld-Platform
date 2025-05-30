@@ -42,7 +42,11 @@ export const RestoreGundam = (id, gundamId) => {
 }
 
 // 7. Cancel a pending order by the seller
-
+export const CancelPendingOrder = (seller_id, order_id, reason) => {
+    return axios.patch(`/sellers/${seller_id}/orders/${order_id}/cancel`, {
+        reason: reason,
+    })
+}
 
 // 8. Upgrade seller's subscription to a higher tier plan.
 

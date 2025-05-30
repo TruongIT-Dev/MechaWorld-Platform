@@ -2,7 +2,7 @@ import Cookies from 'js-cookie';
 import { useSelector } from "react-redux";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Steps, Button, Form, message } from "antd";
+import { Steps, Button, Form, message, notification } from "antd";
 import { ShopOutlined, TruckOutlined, ContainerOutlined, FileDoneOutlined } from "@ant-design/icons";
 
 import FirstForm from "./FirstForm";
@@ -150,10 +150,15 @@ export default function RegisterShop() {
 
   const handleSubmit = async () => {
     try {
-      const values = await form.validateFields();
-      console.log("Gửi dữ liệu:", values);
+      await form.validateFields();
+      // console.log("Gửi dữ liệu:", values);
 
-      message.success("Đang chuyển tới Shop của bạn...");
+      notification.open({
+        message: 'Chào mừng Nhà Bán Hàng MECHAWORLD.',
+        description: '',
+        icon: <ShopOutlined style={{ color: '#108ee9' }} />
+      });
+
       setTimeout(() => {
         navigate("/shop/dashboard");
         window.location.reload();
