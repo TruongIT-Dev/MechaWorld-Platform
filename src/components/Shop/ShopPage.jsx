@@ -3,6 +3,7 @@ import {
   BankOutlined,
   ShopOutlined,
   InboxOutlined,
+  GiftOutlined,
 } from '@ant-design/icons';
 import { useDispatch, useSelector } from 'react-redux';
 import { useEffect, useState } from 'react';
@@ -65,7 +66,12 @@ export default function ShopPage() {
       icon: <BankOutlined />,
       label: <Link to="/shop/auction-management">Quản Lý Đấu Giá</Link>
     },
-  ];
+    {
+    key: '5',
+    icon: <GiftOutlined />,
+    label: <Link to="/shop/subscription">Đăng ký gói</Link>
+  },
+];
 
   useEffect(() => {
     // Fetch shop info từ API và cập nhật vào Redux

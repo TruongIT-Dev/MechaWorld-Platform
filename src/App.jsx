@@ -25,6 +25,7 @@ import {
   ShopOrderManagement,
   ShopAuctionManagement,
   ShopReportManagement,
+  Subscription,
   ShopRegister,
   RegisterShopLayout,
   AutionList,
@@ -186,6 +187,7 @@ function App() {
               <Route path="order-management" element={<ShopOrderManagement />} />
               <Route path="auction-management" element={<ShopAuctionManagement />} />
               <Route path="report-management" element={<ShopReportManagement />} />
+              <Route path="Subscription" element={<Subscription />} />
             </Route>
 
             {/* Error route */}
