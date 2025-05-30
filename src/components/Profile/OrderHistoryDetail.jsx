@@ -1,5 +1,5 @@
-import { Modal, Descriptions, Divider, Card, Avatar, Image, Tag, Tabs } from 'antd';
-import { ShopOutlined, UserOutlined, EnvironmentOutlined, ClockCircleOutlined, PhoneOutlined, GiftOutlined, CarOutlined, CheckOutlined, CheckCircleOutlined, CloseCircleOutlined, TruckOutlined } from '@ant-design/icons';
+import { Modal, Descriptions, Divider, Card, Avatar, Image, Tag, Tabs, Button } from 'antd';
+import { ShopOutlined, UserOutlined, EnvironmentOutlined, ClockCircleOutlined, PhoneOutlined, GiftOutlined, CarOutlined, CheckOutlined, CheckCircleOutlined, CloseCircleOutlined, TruckOutlined,SearchOutlined } from '@ant-design/icons';
 import { useState, useEffect } from 'react';
 
 const OrderHistoryDetail = ({ visible, onClose, orderData }) => {
@@ -165,8 +165,24 @@ const OrderHistoryDetail = ({ visible, onClose, orderData }) => {
                         </Descriptions.Item>
                         {order_delivery.delivery_tracking_code && (
                             <Descriptions.Item label="Mã vận đơn" span={3}>
-                                {order_delivery.delivery_tracking_code}
-                            </Descriptions.Item>
+                                <div>
+                                    {order_delivery.delivery_tracking_code}
+                                    <Button
+                                        icon={<SearchOutlined />}
+                                        size="small"
+                                        className="flex items-center"
+                                        onClick={() =>
+                                            window.open(
+                                            `https://tracking.ghn.dev/?order_code=${order_delivery.delivery_tracking_code}`,
+                                            "_blank"
+                                            )
+                                        }
+                                    >
+                                        Theo dõi giao hàng
+                                    </Button>
+                                </div>
+                                
+                                            </Descriptions.Item>
                         )}
                         <Descriptions.Item label="Ngày đặt hàng" span={3}>
                             {formatDate(order.created_at)}
