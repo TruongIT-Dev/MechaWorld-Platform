@@ -44,10 +44,10 @@ const Notification = () => {
 
     const handleVisibleChange = async (newVisible) => {
         setVisible(newVisible)
-        if (newVisible && unreadCount > 0) {
-            // Đánh dấu tất cả đã đọc khi mở popover
-            await markAllAsRead()
-        }
+        // if (newVisible && unreadCount > 0) {
+        //      Đánh dấu tất cả đã đọc khi mở popover
+        //      await markAllAsRead()
+        // }
     }
 
     const handleViewAll = () => {

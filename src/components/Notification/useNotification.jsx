@@ -128,12 +128,12 @@ export default function useNotifications(maxNotifications = 5) {
 
                                 addedDocs.forEach((change) => {
                                     const newNotif = change.doc.data()
-                                    // notification.success({
-                                    //     message: 'Thông báo mới!',
-                                    //     description: `${newNotif.title}: ${newNotif.message}`,
-                                    //     placement: 'topRight',
-                                    //     duration: 4
-                                    // })
+                                    notification.success({
+                                        message: `${newNotif.title}`,
+                                        description: `${newNotif.message}`,
+                                        placement: 'topRight',
+                                        duration: 4
+                                    })
                                 })
                             }
                         }
