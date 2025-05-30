@@ -62,21 +62,12 @@ const ExchangeDetailInformation = () => {
   const isPartnerFeeAvailable = useSelector((state) =>
     hasDeliveryFee(state, exchangeDetail?.partner.id, exchangeDetail?.id)
   );
+
   // console.log('partner id: ',exchangeDetail?.partner.id);
   // console.log('your id: ',exchangeDetail?.current_user.id);
   // console.log('partner check: ',isPartnerFeeAvailable);
   // console.log('your check: ',isFeeAvailable);
 
-  // const cacheDeliveryFee = (userId, exchangeId, fee) => {
-  //   const key = `${userId}_${exchangeId}`;
-  //   localStorage.setItem(key, JSON.stringify(fee));
-  // };
-
-  // const getCachedDeliveryFee = (userId, exchangeId) => {
-  //   const key = `${userId}_${exchangeId}`;
-  //   const raw = localStorage.getItem(key);
-  //   return raw ? JSON.parse(raw) : null;
-  // };
   // const yourDeData = getCachedDeliveryFee(res.data.current_user.id, res.data.id)
   // const partnerDeData = getCachedDeliveryFee(res.data.partner.id, res.data.id)
 
@@ -95,6 +86,7 @@ const ExchangeDetailInformation = () => {
         await getDeliveryFee(res.data.current_user.id, res.data.id)
           .then((yourDeliFee) => {
             setDeliverData(yourDeliFee);
+            console.log('phí giao hàng của bạn: ', yourDeliFee);
             // console.log("Delivery fee:", yourDeliFee);
           })
           .catch((error) => {
@@ -104,7 +96,7 @@ const ExchangeDetailInformation = () => {
         await getDeliveryFee(res.data.partner.id, res.data.id)
           .then((yourDeliFee) => {
             setDeliverPartnerData(yourDeliFee);
-            // console.log("Delivery partner fee:", yourDeliFee);
+            console.log('phí giao hàng của đối tác: ', yourDeliFee);
           })
           .catch((error) => {
             console.error("Error fetching delivery fee:", error);
@@ -259,6 +251,8 @@ const ExchangeDetailInformation = () => {
                   exchangeDetail={exchangeDetail}
                   selectedAddress={selectedAddress}
                   selectedPickupAddress={selectedPickupAddress}
+                  fetchExchangeData={fetchExchangeData}
+                  fetchUserAddress={fetchUserAddress}
                 />
               </div>
             </div>

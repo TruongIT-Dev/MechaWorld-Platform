@@ -2,7 +2,8 @@ import PropTypes from 'prop-types';
 import { useSelector, useDispatch } from "react-redux";
 import { useEffect, useState } from "react";
 import { CheckCircleOutlined, MoreOutlined, PlusOutlined } from "@ant-design/icons";
-import { Table, Row, Button, Select, Input, Modal, Dropdown, Form, Tag, Col, Typography, DatePicker, message, Alert } from "antd";
+import { ExclamationCircleOutlined } from '@ant-design/icons';
+import { Table, Row, Button, Select, Input, Modal, Dropdown, Form, Tag, Col, Typography,DatePicker,message, Alert, Card } from "antd";
 
 import { SellingGundam, RestoreGundam } from "../../../apis/Sellers/APISeller";
 import { GetGundamByID } from '../../../apis/User/APIUser';
@@ -10,8 +11,9 @@ import { GetSellerStatus } from "../../../apis/Sellers/APISeller";
 import { incrementListingsUsed, decrementListingsUsed, updateSellerPlan } from '../../../features/user/userSlice';
 import { CreateAuctionRequest } from '../../../apis/Auction/APIAuction';
 import moment from 'moment';
+import { DeleteGundam } from '../../../apis/Gundams/APIGundam';
 
-function ShopProduct({ isCreating, setIsCreating }) {
+function ShopProduct({ isCreating, setIsCreating, isUpdating, setIsUpdating, setGundamData }) {
 
   // console.log("setIsCreating", setIsCreating);
 
@@ -148,7 +150,7 @@ function ShopProduct({ isCreating, setIsCreating }) {
         }
         return item;
       });
-
+      
       setGundamList(updatedList);
       applyFilters(updatedList); // Áp dụng lại bộ lọc với danh sách mới
 
@@ -180,7 +182,7 @@ function ShopProduct({ isCreating, setIsCreating }) {
         }
         return item;
       });
-
+      
       setGundamList(updatedList);
       applyFilters(updatedList); // Áp dụng lại bộ lọc với danh sách mới
 
@@ -209,6 +211,8 @@ function ShopProduct({ isCreating, setIsCreating }) {
     switch (key) {
       case "edit":
         console.log("📝 Chỉnh sửa sản phẩm:", record);
+        setGundamData(record);
+        setIsUpdating(true);
         // Không cần modal cảnh báo cho edit
         break;
 
@@ -251,7 +255,7 @@ function ShopProduct({ isCreating, setIsCreating }) {
         case 'delete':
           console.log("❌ Xóa sản phẩm:", record);
           // Thực hiện xóa sản phẩm
-          // await deleteProduct(record);
+          await DeleteGundam(record.gundam_id, user.id);
           message.success('Đã xóa sản phẩm thành công!');
           break;
 
@@ -457,6 +461,7 @@ function ShopProduct({ isCreating, setIsCreating }) {
           auctioning: { text: "Đang đấu giá", color: "blue" },
           // "for exchange": { text: "", color: "" },
           exchanging: { text: "Đang trao đổi", color: "cyan" },
+          "for exchange": { text: "Đang trao đổi", color: "cyan" },
         };
 
         const statusTag = statusMap[status];

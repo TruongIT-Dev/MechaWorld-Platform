@@ -41,7 +41,9 @@ const ExchangeInformationSection = ({
   //   const [userRefundRequest, setUserRefundRequest] = useState(null);
   const isFailed = ["failed", "canceled"].includes(exchangeDetail?.status);
   // console.log("check exchange data", exchangeData);
-  console.log("check exchangeDetails", exchangeDetail);
+
+  // console.log("check exchangeDetails", exchangeDetail);
+  
   // console.log("check firstUser", currentUser);
   // console.log("check secondUser", partner);
   // console.log("check selectedAddress", selectedAddress);

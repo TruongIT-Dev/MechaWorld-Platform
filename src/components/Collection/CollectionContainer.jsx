@@ -31,7 +31,7 @@ export const SERIES_LISTS = [
   'Mobile Fighter G Gundam'
 ];
 
-const CollectionContainer = ({ setIsCreating }) => {
+const CollectionContainer = ({ setIsCreating, setIsUpdating, setGundamData }) => {
   const user = useSelector((state) => state.auth.user);
 
   // State for collection data
@@ -204,7 +204,10 @@ const CollectionContainer = ({ setIsCreating }) => {
       console.error("Error updating wishlist status:", error);
     }
   };
-
+  const handleUpdate = () => {
+    setGundamData(selectedProduct);
+    setIsUpdating(true);
+  }
   return (
     <div className="container max-w-7xl mx-auto mb-6 px-4 py-8 mt-36 min-h-screen bg-white rounded-lg shadow">
       <Title level={2} className="text-center mb-8 uppercase">
@@ -266,6 +269,7 @@ const CollectionContainer = ({ setIsCreating }) => {
             onCancel={() => setDetailModalVisible(false)}
             toggleFavorite={toggleFavorite}
             toggleWishlist={toggleWishlist}
+            handleUpdate={handleUpdate}
           />
         </>
       )}

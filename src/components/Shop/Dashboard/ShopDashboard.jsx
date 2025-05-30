@@ -11,6 +11,7 @@ import ShopInfoTab from './ShopInfoTab';
 
 import { updateShopInfo } from '../../../features/user/userSlice';
 import { GetShopInfoById, UpdateShopName } from '../../../apis/Seller Profile/APISellerProfile';
+import ShopUpgradePlan from './ShopUpgradePlan';
 
 const { TabPane } = Tabs;
 
@@ -23,6 +24,7 @@ const ShopDashboard = () => {
 
   // const userId = useSelector((state) => state.auth.user.id);
   const user = useSelector((state) => state.auth.user);
+  const sellerPlan = useSelector((state) => state.user.sellerPlan);
   const dispatch = useDispatch()
 
 
@@ -52,6 +54,7 @@ const ShopDashboard = () => {
 
   // Fetch initial data
   useEffect(() => {
+    console.log(sellerPlan);
     // Get InfoShop
     GetShopInfoById(user.id)
       .then((res) => {
@@ -163,6 +166,20 @@ const ShopDashboard = () => {
             shopInfo={formattedShopData}
             originalShopName={originalShopName}
             onUpdateShopInfo={handleShopInfoUpdate}
+          />
+        </TabPane>
+        <TabPane
+          tab={
+            <span>
+              <ShopOutlined />
+              Gói dịch vụ
+            </span>
+          }
+          key="3"
+        >
+          <ShopUpgradePlan
+            shopInfo={formattedShopData}
+            sellerPlan={sellerPlan}
           />
         </TabPane>
       </Tabs>
