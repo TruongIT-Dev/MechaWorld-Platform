@@ -15,8 +15,8 @@ import {
   InfoCircleOutlined
 } from "@ant-design/icons";
 
-import { GetListOrderHistory, GetOrderDetail, ConfirmOrderDelivered } from "../../apis/Orders/APIOrder";
-import { GetShopInfoById } from "../../apis/Seller Profile/APISellerProfile";
+import { GetListOrderHistory, GetOrderDetail, ConfirmOrderDelivered } from "../../../apis/Orders/APIOrder";
+import { GetShopInfoById } from "../../../apis/Seller Profile/APISellerProfile";
 import OrderHistoryDetail from "./OrderHistoryDetail";
 
 const { Search } = Input;
