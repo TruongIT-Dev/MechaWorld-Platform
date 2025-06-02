@@ -1,11 +1,12 @@
 import PropTypes from 'prop-types';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { useEffect, useState } from 'react';
 import { ArrowRightOutlined, CheckCircleOutlined, TruckOutlined, UploadOutlined } from '@ant-design/icons';
 import { Button, Modal, Alert, notification, Typography } from 'antd';
 import { CreditCardIcon, PackageCheck } from 'lucide-react';
 
 import { checkDeliveryFee } from '../../../../apis/GHN/APIGHN';
+import { checkWallet } from '../../../../apis/User/APIUser';
 import { getDeliveryFee, saveDeliveryFee } from '../../../../utils/exchangeUtils';
 import { addressExchange, payDeliveryfee } from '../../../../apis/Exchange/APIExchange';
 import { updateDeliveryFee, updateExchangeData } from '../../../../features/exchange/exchangeSlice';
@@ -26,11 +27,15 @@ const ActionButtons = ({
 
   const dispatch = useDispatch();
 
+  const userId = useSelector((state) => state.auth.user.id);
+
   const [isAddressModalVisible, setIsAddressModalVisible] = useState(false);
   const [isConfirmedModalVisible, setIsConfirmedModalVisible] = useState(false);
 
   const [isLoading, setIsLoading] = useState(false);
   const [stageButton, setStageButton] = useState();
+
+  const [balance, setBalance] = useState(0);
 
   // const cacheDeliveryFee = (userId, exchangeId, fee) => {
   //   const key = `${userId}_${exchangeId}`;
@@ -38,6 +43,17 @@ const ActionButtons = ({
   //   sessionStorage.setItem(key, JSON.stringify(fee));
   // };
 
+  useEffect(() => {
+    if (userId) {
+      checkWallet(userId)
+        .then((response) => {
+          setBalance(response.data.balance);
+        })
+        .catch((error) => {
+          console.error('Lỗi khi lấy số dư ví:', error);
+        });
+    }
+  }, [userId]);
 
   // 
   const handleConfirmTransaction = () => {
@@ -154,7 +170,7 @@ const ActionButtons = ({
             message: "Lỗi khi lấy phí vận chuyển ",
             description: "Check lại response từ GHN."
           });
-                  // saveDeliveryFee(exchangeDetail.current_user.id, exchangeDetail.id, res.data.data);
+          // saveDeliveryFee(exchangeDetail.current_user.id, exchangeDetail.id, res.data.data);
         }
         saveDeliveryFee(exchangeDetail.current_user.id, exchangeDetail.id, res.data.data);
         moveToNextStage();
@@ -210,29 +226,30 @@ const ActionButtons = ({
 
   // Handler for stage 3 - Process payment
   const handlePayment = async () => {
-    // console.log("Processing payment...");
     setIsLoading(true);
 
     try {
       // Lấy thông tin delivery fee từ cache
-      // const raw = getCachedDeliveryFee(exchangeDetail.current_user.id, exchangeDetail.id);
       const raw = getCachedDeliveryDate(exchangeDetail.current_user.id, exchangeDetail.id);
-        if (!raw) {
+      if (!raw) {
         throw new Error("Không tìm thấy thông tin phí vận chuyển");
-        }
+      }
+
+      const deliveryFee = raw.total;
+
+      // Kiểm tra số dư
+      if (balance < deliveryFee) {
+        throw new Error(`Số dư không đủ. Bạn cần ${deliveryFee.toLocaleString()} VND nhưng chỉ có ${balance.toLocaleString()} VND`);
+      }
 
       const data = {
         expected_delivery_time: raw.to_estimate_date || new Date().toISOString(),
-        delivery_fee: raw.total,
+        delivery_fee: deliveryFee,
         note: raw?.note || "Không có"
       };
 
-      // console.log("Payment data being sent:", data);
-
-      // Đợi một khoảng thời gian trước khi gửi request (nếu cần)
       await new Promise(resolve => setTimeout(resolve, 1500));
 
-      // Gọi API và đợi kết quả
       const res = await payDeliveryfee(exchangeDetail.id, data);
 
       if (res.status === 200) {
