@@ -36,12 +36,10 @@ export const WalletPage = React.lazy(() => import('../components/Wallet/WalletUs
 
 
 // Member Profile route
-export const ProfilePage = React.lazy(() => import("../components/Profile/Profiles"));
-export const UserProfile = React.lazy(() => import("../components/Profile/UserProfile"));
-export const OrderHistory = React.lazy(() => import("../components/Profile/OrderHistory"));
-export const AuctionHistory = React.lazy(() => import("../components/Profile/Auction"));
-export const TradeHistory = React.lazy(() => import("../components/Profile/TradeHistory"));
-export const SettingAddress = React.lazy(() => import("../components/Profile/SettingAddress"));
+export const ProfilePage = React.lazy(() => import("../components/Profile/UserManagement/Profiles"));
+export const UserProfile = React.lazy(() => import("../components/Profile/UserManagement/UserProfile"));
+export const OrderHistory = React.lazy(() => import("../components/Profile/OrderManagement/OrderHistory"));
+export const SettingAddress = React.lazy(() => import("../components/Profile/UserManagement/SettingAddress"));
 
 
 // Register Shop route
@@ -78,15 +76,12 @@ export const AddCollection = React.lazy(() => import("../components/Collection/A
 
 
 // Moderator route
-export const ModFeedbacks = React.lazy(() => import("../components/Moderator/ModFeedbacks"));
-export const ModOrders = React.lazy(() => import("../components/Moderator/ModOrders"));
-export const ModTransactions = React.lazy(() => import("../components/Moderator/ModTransactions"));
-export const ModGundams = React.lazy(() => import("../components/Moderator/ModGundams"));
-export const ModUsers = React.lazy(() => import("../components/Moderator/ModUsers"));
-export const ModRefunds = React.lazy(() => import("../components/Moderator/ModRefunds"));
-export const ModAuctions = React.lazy(() => import("../components/Moderator/ModAuctions"));
-export const ModExchanges = React.lazy(() => import("../components/Moderator/ModExchanges"));
-
+export const ModDashboard = React.lazy(() => import("../components/Moderator/Dashboard/Dashboard"));
+export const ModUsers = React.lazy(() => import("../components/Moderator/UserManagement/ModUsers"));
+export const ModOrders = React.lazy(() => import("../components/Moderator/OrderManagement/ModOrders"));
+export const ModAuctions = React.lazy(() => import("../components/Moderator/AuctionManagement/ModAuctions"));
+export const ModExchanges = React.lazy(() => import("../components/Moderator/ExchangeManagement/ModExchanges"));
+export const ModTransactions = React.lazy(() => import("../components/Moderator/TransactionManagement/ModTransactions"));
 
 
 // 404 page route

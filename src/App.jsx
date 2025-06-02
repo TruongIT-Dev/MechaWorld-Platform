@@ -10,9 +10,7 @@ import {
   SignIn,
   ProfilePage,
   UserProfile,
-  TradeHistory,
   OrderHistory,
-  AuctionHistory,
   UserLayout,
   ProductDetailPage,
   ShopDashboard, ShopPage,
@@ -32,12 +30,9 @@ import {
   AutionDetail,
   ModeratorLayout,
   SignUp,
-  ModFeedbacks,
   ModAuctions,
   ModOrders,
   ModTransactions,
-  ModRefunds,
-  ModGundams,
   ModUsers,
   ModExchanges,
   ExchangeDetailInformation,
@@ -51,6 +46,7 @@ import {
   CollectionContainer,
   GundamCollectionApp,
   NotificationPage,
+  ModDashboard,
 
 } from "./routes/router";
 
@@ -129,11 +125,11 @@ function App() {
             {/* Product Route */}
             <Route path="product" element={<ProductPage />} />
             <Route path="product/:slug" element={<ProductDetailPage />} />
-            
+
 
             {/* Notification */}
             <Route path="notifications" element={<NotificationPage />} />
-            
+
 
             {/* Aution Route */}
             <Route path="auction" element={<AutionList />} />
@@ -170,11 +166,9 @@ function App() {
             {/* Member Profile Route */}
             <Route path="member/profile" element={<ProfilePage />}>
               <Route path="account" element={<UserProfile />} />
-              <Route path="tradehistory" element={<TradeHistory />} />
-              <Route path="orderhistory" element={<OrderHistory />} />
-              <Route path="auctionHistory" element={<AuctionHistory />} />
-              <Route path="wallet" element={<WalletPage />} />
               <Route path="address-setting" element={<SettingAddress />} />
+              <Route path="orderhistory" element={<OrderHistory />} />
+              <Route path="wallet" element={<WalletPage />} />
             </Route>
 
 
@@ -210,15 +204,13 @@ function App() {
           {/* Những Route cho màn hình Moderator & Admin khác */}
           {/* Moderator Route */}
           <Route path="moderator" element={<ModeratorLayout />} >
-            <Route index element={<ModUsers />} />
-            <Route path="mod-users" element={<ModUsers />} />
-            <Route path="mod-auctions" element={<ModAuctions />} />
-            <Route path="mod-orders" element={<ModOrders />} />
-            <Route path="mod-transactions" element={<ModTransactions />} />
-            <Route path="mod-refunds" element={<ModRefunds />} />
-            <Route path="mod-gundams" element={<ModGundams />} />
-            <Route path="mod-feedbacks" element={<ModFeedbacks />} />
-            <Route path="mod-exchanges" element={<ModExchanges />} />
+            <Route index element={<Navigate to="dashboard" replace />} />
+            <Route path="dashboard" element={<ModDashboard />} />
+            <Route path="user-management" element={<ModUsers />} />
+            <Route path="order-management" element={<ModOrders />} />
+            <Route path="exchange-management" element={<ModExchanges />} />
+            <Route path="auction-management" element={<ModAuctions />} />
+            <Route path="transaction-management" element={<ModTransactions />} />
           </Route>
 
           {/* Admin Route */}
