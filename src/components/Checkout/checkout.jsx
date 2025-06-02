@@ -340,7 +340,7 @@ const Checkout = () => {
 
       // Cerrar notificación de carga y mostrar éxito
       message.destroy("orderProcessing");
-      message.success("Đặt hàng thành công!");
+      // message.success("Đặt hàng thành công!");
       navigate('/member/profile/orderHistory');
     } catch (error) {
       // Cerrar notificación de carga
