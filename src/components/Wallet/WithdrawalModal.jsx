@@ -1,15 +1,33 @@
 import { useState } from 'react';
 import { Modal, Steps, InputNumber, Button, Select, message, Alert, Card } from 'antd';
 import { MinusOutlined, BankOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
+import { RequestWalletWithdrawal, GetUserBankAccounts } from '../../apis/Wallet/APIWallet';
 
 const { Step } = Steps;
 const { Option } = Select;
 
-const WithdrawalModal = ({ visible, onCancel, onSuccess, balance, bankAccounts }) => {
+const WithdrawalModal = ({ visible, onCancel, onSuccess, balance, bankAccounts: initialBankAccounts }) => {
     const [withdrawAmount, setWithdrawAmount] = useState(null);
     const [selectedBankAccount, setSelectedBankAccount] = useState(null);
     const [currentStep, setCurrentStep] = useState(0);
     const [isProcessing, setIsProcessing] = useState(false);
+    const [bankAccounts, setBankAccounts] = useState(initialBankAccounts || []);
+    const [isLoadingBankAccounts, setIsLoadingBankAccounts] = useState(false);
+
+    // Hàm load danh sách tài khoản ngân hàng nếu chưa có
+    const loadBankAccounts = async () => {
+        if (bankAccounts.length === 0) {
+            try {
+                setIsLoadingBankAccounts(true);
+                const response = await GetUserBankAccounts();
+                setBankAccounts(response.data || []);
+            } catch (error) {
+                message.error('Không thể tải danh sách tài khoản ngân hàng');
+            } finally {
+                setIsLoadingBankAccounts(false);
+            }
+        }
+    };
 
     const handleClose = () => {
         if (!isProcessing) {
@@ -22,16 +40,14 @@ const WithdrawalModal = ({ visible, onCancel, onSuccess, balance, bankAccounts }
 
     const createWithdrawalRequest = async () => {
         try {
-            // API call to create withdrawal request
-            // const response = await createWithdrawalRequest({
-            //   amount: withdrawAmount,
-            //   bank_account_id: selectedBankAccount
-            // });
-
-            // Mock success for demo
-            return { success: true };
+            const response = await RequestWalletWithdrawal(withdrawAmount, selectedBankAccount);
+            return response.data;
         } catch (error) {
-            throw new Error('Không thể tạo yêu cầu rút tiền');
+            if (error.response) {
+                const errorMessage = error.response.data.message || 'Không thể tạo yêu cầu rút tiền';
+                throw new Error(errorMessage);
+            }
+            throw new Error('Không thể kết nối đến server');
         }
     };
 
@@ -57,7 +73,7 @@ const WithdrawalModal = ({ visible, onCancel, onSuccess, balance, bankAccounts }
         try {
             const result = await createWithdrawalRequest();
 
-            if (result.success) {
+            if (result) {
                 setCurrentStep(2);
                 setTimeout(() => {
                     onSuccess(withdrawAmount);
@@ -90,6 +106,11 @@ const WithdrawalModal = ({ visible, onCancel, onSuccess, balance, bankAccounts }
             closable={!isProcessing}
             maskClosable={!isProcessing}
             className="rounded-lg"
+            afterOpenChange={(opened) => {
+                if (opened) {
+                    loadBankAccounts();
+                }
+            }}
         >
             <div className="mt-6">
                 <Steps current={currentStep} className="mb-8">
@@ -119,13 +140,18 @@ const WithdrawalModal = ({ visible, onCancel, onSuccess, balance, bankAccounts }
                             <label className="block text-gray-700 font-medium mb-3">
                                 Chọn tài khoản ngân hàng nhận tiền
                             </label>
-                            {bankAccounts && bankAccounts.length > 0 ? (
+                            {isLoadingBankAccounts ? (
+                                <div className="text-center py-4">
+                                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500 mx-auto"></div>
+                                </div>
+                            ) : bankAccounts && bankAccounts.length > 0 ? (
                                 <Select
                                     placeholder="Chọn tài khoản ngân hàng"
                                     value={selectedBankAccount}
                                     onChange={setSelectedBankAccount}
                                     className="w-full"
                                     size="large"
+                                    loading={isLoadingBankAccounts}
                                 >
                                     {bankAccounts.map(account => (
                                         <Option key={account.id} value={account.id}>
@@ -223,6 +249,7 @@ const WithdrawalModal = ({ visible, onCancel, onSuccess, balance, bankAccounts }
                                 disabled={!withdrawAmount || !selectedBankAccount || withdrawAmount < 50000 || withdrawAmount > maxWithdraw}
                                 size="large"
                                 className="bg-orange-500 hover:bg-orange-600"
+                                loading={isLoadingBankAccounts}
                             >
                                 Tạo yêu cầu rút tiền
                             </Button>
@@ -254,8 +281,13 @@ const WithdrawalModal = ({ visible, onCancel, onSuccess, balance, bankAccounts }
                         <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
                             <div className="text-sm space-y-1">
                                 <p><strong>Số tiền:</strong> ₫{withdrawAmount?.toLocaleString()}</p>
-                                <p><strong>Tài khoản nhận:</strong> {selectedBankAccount}</p>
-                                <p><strong>Mã yêu cầu:</strong> WD{Date.now()}</p>
+                                <p><strong>Tài khoản nhận:</strong> 
+                                    {(() => {
+                                        const account = bankAccounts.find(a => a.id === selectedBankAccount);
+                                        return account ? `${account.bank_name} - ${account.account_number}` : 'Unknown';
+                                    })()}
+                                </p>
+                                <p><strong>Thời gian:</strong> {new Date().toLocaleString()}</p>
                             </div>
                         </div>
                     </div>
