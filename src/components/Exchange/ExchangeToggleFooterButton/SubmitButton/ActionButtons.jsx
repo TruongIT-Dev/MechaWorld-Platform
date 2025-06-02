@@ -348,24 +348,24 @@ const ActionButtons = ({
         );
 
       // Stage 4
-      case 4:
-        if (exchangeDetail.status === 'delivered') {
-          return (
-            <Button
-              type="primary"
-              icon={<PackageCheck />}
-              size="large"
-              onClick={handleConfirmDelivery}
-              loading={isLoading}
-              block
-              className="bg-blue-500 hover:bg-blue-600"
-            >
-              Xác nhận đã nhận hàng
-            </Button>
-          );
-        } else {
-          return null;
-        } default: return null;
+      // case 4:
+      //   if (exchangeDetail.status === 'delivered') {
+      //     return (
+      //       <Button
+      //         type="primary"
+      //         icon={<PackageCheck />}
+      //         size="large"
+      //         onClick={handleConfirmDelivery}
+      //         loading={isLoading}
+      //         block
+      //         className="bg-blue-500 hover:bg-blue-600"
+      //       >
+      //         Xác nhận đã nhận hàng
+      //       </Button>
+      //     );
+      //   } else {
+      //     return null;
+      //   } default: return null;
     }
   };
 
