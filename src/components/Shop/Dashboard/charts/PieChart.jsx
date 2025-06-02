@@ -10,8 +10,12 @@ const PieChart = ({ shopData, onElementClick, onElementDoubleClick }) => {
   const containerRef = useRef(null);
   const chartRef = useRef(null);
   useEffect(() => {
+    
+    if (shopData.length === 0) {
+      return null;
+    }
     if (!containerRef.current) return;
-
+    // Clear previous chart if exists
     // Process data for pie chart
     const pieData = Object.entries(groupBy(shopData, "grade")).map(
       ([type, list]) => ({
@@ -19,7 +23,7 @@ const PieChart = ({ shopData, onElementClick, onElementDoubleClick }) => {
         value: list.reduce((acc, item) => acc + item.value, 0),
       })
     );
-
+    
     // Create and render pie chart
     chartRef.current = new Pie(containerRef.current, {
       data: pieData,

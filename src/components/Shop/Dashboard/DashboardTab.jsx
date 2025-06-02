@@ -46,7 +46,7 @@ const DashboardTab = ({ shopData }) => {
       setStatsData(mappedStatsData);
       setDashboardData(data);
 
-      setColumnData(shopData);
+      // setColumnData(shopData);
     } else {
       message.error('Không thể tải dữ liệu thống kê');
     }
@@ -65,9 +65,14 @@ const DashboardTab = ({ shopData }) => {
             <Row gutter={16} className="mb-6">
                 <StatCards stats={statsData} />
             </Row>
-
-            {/* Charts */}
-            <Row gutter={16}>
+            {(shopData.length === 0 ? (
+              <Row gutter={16} style={{ marginBottom: 24 }}>
+                <Col span={24} style={{ textAlign: 'center', color: '#888' }}>
+                  Không có dữ liệu để hiển thị biểu đồ.
+                </Col>
+              </Row>
+            ) : (
+              <Row gutter={16}>
                 <Col xs={24} lg={12}>
                     <PieChart
                         shopData={shopData}
@@ -78,7 +83,9 @@ const DashboardTab = ({ shopData }) => {
                 <Col xs={24} lg={12}>
                     <ColumnChart data={columnData} />
                 </Col>
-            </Row>
+              </Row>
+            ))}
+            
         </div>
     );
 };

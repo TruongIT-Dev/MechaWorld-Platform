@@ -30,32 +30,8 @@ const ShopDashboard = () => {
   const dispatch = useDispatch()
 
 
-  // Mock shop data for charts
-  // const shopData = [
-  //   { city: 'Hcm', type: 'Card', value: 14500 },
-  //   { city: 'Hcm', type: 'Figure', value: 8500 },
-  //   { city: 'Hcm', type: 'Gundam', value: 10000 },
-  //   { city: 'Hcm', type: 'Rider Belt', value: 7000 },
-  //   { city: 'HN', type: 'Card', value: 9000 },
-  //   { city: 'HN', type: 'Figure', value: 8500 },
-  //   { city: 'HN', type: 'Gundam', value: 11000 },
-  //   { city: 'HN', type: 'Rider Belt', value: 6000 },
-  //   { city: 'HA', type: 'Card', value: 14000 },
-  //   { city: 'HA', type: 'Figure', value: 9000 },
-  //   { city: 'HA', type: 'Gundam', value: 10000 },
-  //   { city: 'HA', type: 'Rider Belt', value: 9000 },
-  //   { city: 'DN', type: 'Card', value: 9000 },
-  //   { city: 'DN', type: 'Figure', value: 8500 },
-  //   { city: 'DN', type: 'Gundam', value: 10000 },
-  //   { city: 'DN', type: 'Rider Belt', value: 6000 },
-  //   { city: 'QN', type: 'Card', value: 18000 },
-  //   { city: 'QN', type: 'Figure', value: 11000 },
-  //   { city: 'QN', type: 'Gundam', value: 15000 },
-  //   { city: 'QN', type: 'Rider Belt', value: 14000 },
-  // ];
-
   // Fetch initial data
-  useEffect(() => {
+  useEffect( () => {
     console.log(sellerPlan);
     // Get InfoShop
     GetShopInfoById(user.id)
@@ -77,11 +53,15 @@ const ShopDashboard = () => {
       .catch((error) => {
         console.error("Error fetching seller address status: ", error);
       });
-    GetOrder(user.id)
+     GetOrder(user.id)
     .then((res) => {
       if (res.status === 200) {
         const data = res.data;
-
+        if (data == null ) {
+          console.log("No orders found for this user.");
+          setShopData([]); 
+          return;
+        }
         // Lọc và map dữ liệu
         const formattedOrderData = data
           .filter((order) => order.order.status === "completed") // Lọc đơn hàng đã hoàn tất
@@ -90,7 +70,6 @@ const ShopDashboard = () => {
               type: order.order.type,
               value: order.order.items_subtotal,
               grade: item.grade,
-              // payment_method: order.order.payment_method,
             }))
           );
 
@@ -177,7 +156,7 @@ const ShopDashboard = () => {
           }
           key="1"
         >
-          <DashboardTab shopData={shopData} shopInfo={formattedShopData} />
+          <DashboardTab shopData={shopData}  />
         </TabPane>
 
         <TabPane

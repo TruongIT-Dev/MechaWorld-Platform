@@ -2,6 +2,7 @@ import { Card, Typography } from "antd";
 import { BarChartOutlined } from "@ant-design/icons";
 import { useEffect, useRef } from "react";
 import { Column } from "@antv/g2plot";
+import { Text } from "lucide-react";
 
 const { Title } = Typography;
 
@@ -11,7 +12,6 @@ const ColumnChart = ({ data }) => {
     console.log(data);
   useEffect(() => {
     if (!containerRef.current) return;
-
     // Destroy existing chart if it exists
     if (chartRef.current) {
       chartRef.current.destroy();
@@ -44,7 +44,20 @@ const ColumnChart = ({ data }) => {
       }
     };
   }, [data]);
-
+  if (!data || data.length === 0) {
+    return (
+      <Card
+        title={
+          <Title level={5}>
+            <BarChartOutlined /> Doanh thu theo loại đơn hàng
+          </Title>
+        }
+        className="shadow-sm hover:shadow-md transition-shadow"
+      >
+        <Text type="secondary">Không có dữ liệu để hiển thị</Text>
+      </Card>
+    );
+  }
   return (
     <Card
       title={
