@@ -12,6 +12,7 @@ import ShopInfoTab from './ShopInfoTab';
 import { updateShopInfo } from '../../../features/user/userSlice';
 import { GetShopInfoById, UpdateShopName } from '../../../apis/Seller Profile/APISellerProfile';
 import ShopUpgradePlan from './ShopUpgradePlan';
+import { GetOrder } from '../../../apis/Sellers/APISeller';
 
 const { TabPane } = Tabs;
 
@@ -21,6 +22,7 @@ const ShopDashboard = () => {
   const [originalShopName, setOriginalShopName] = useState('');
   const [addresses, setAddresses] = useState([]);
   const [formattedShopData, setFormattedShopData] = useState({});
+  const [shopData, setShopData] = useState({});
 
   // const userId = useSelector((state) => state.auth.user.id);
   const user = useSelector((state) => state.auth.user);
@@ -29,28 +31,28 @@ const ShopDashboard = () => {
 
 
   // Mock shop data for charts
-  const shopData = [
-    { city: 'Hcm', type: 'Card', value: 14500 },
-    { city: 'Hcm', type: 'Figure', value: 8500 },
-    { city: 'Hcm', type: 'Gundam', value: 10000 },
-    { city: 'Hcm', type: 'Rider Belt', value: 7000 },
-    { city: 'HN', type: 'Card', value: 9000 },
-    { city: 'HN', type: 'Figure', value: 8500 },
-    { city: 'HN', type: 'Gundam', value: 11000 },
-    { city: 'HN', type: 'Rider Belt', value: 6000 },
-    { city: 'HA', type: 'Card', value: 14000 },
-    { city: 'HA', type: 'Figure', value: 9000 },
-    { city: 'HA', type: 'Gundam', value: 10000 },
-    { city: 'HA', type: 'Rider Belt', value: 9000 },
-    { city: 'DN', type: 'Card', value: 9000 },
-    { city: 'DN', type: 'Figure', value: 8500 },
-    { city: 'DN', type: 'Gundam', value: 10000 },
-    { city: 'DN', type: 'Rider Belt', value: 6000 },
-    { city: 'QN', type: 'Card', value: 18000 },
-    { city: 'QN', type: 'Figure', value: 11000 },
-    { city: 'QN', type: 'Gundam', value: 15000 },
-    { city: 'QN', type: 'Rider Belt', value: 14000 },
-  ];
+  // const shopData = [
+  //   { city: 'Hcm', type: 'Card', value: 14500 },
+  //   { city: 'Hcm', type: 'Figure', value: 8500 },
+  //   { city: 'Hcm', type: 'Gundam', value: 10000 },
+  //   { city: 'Hcm', type: 'Rider Belt', value: 7000 },
+  //   { city: 'HN', type: 'Card', value: 9000 },
+  //   { city: 'HN', type: 'Figure', value: 8500 },
+  //   { city: 'HN', type: 'Gundam', value: 11000 },
+  //   { city: 'HN', type: 'Rider Belt', value: 6000 },
+  //   { city: 'HA', type: 'Card', value: 14000 },
+  //   { city: 'HA', type: 'Figure', value: 9000 },
+  //   { city: 'HA', type: 'Gundam', value: 10000 },
+  //   { city: 'HA', type: 'Rider Belt', value: 9000 },
+  //   { city: 'DN', type: 'Card', value: 9000 },
+  //   { city: 'DN', type: 'Figure', value: 8500 },
+  //   { city: 'DN', type: 'Gundam', value: 10000 },
+  //   { city: 'DN', type: 'Rider Belt', value: 6000 },
+  //   { city: 'QN', type: 'Card', value: 18000 },
+  //   { city: 'QN', type: 'Figure', value: 11000 },
+  //   { city: 'QN', type: 'Gundam', value: 15000 },
+  //   { city: 'QN', type: 'Rider Belt', value: 14000 },
+  // ];
 
   // Fetch initial data
   useEffect(() => {
@@ -75,6 +77,31 @@ const ShopDashboard = () => {
       .catch((error) => {
         console.error("Error fetching seller address status: ", error);
       });
+    GetOrder(user.id)
+    .then((res) => {
+      if (res.status === 200) {
+        const data = res.data;
+
+        // Lọc và map dữ liệu
+        const formattedOrderData = data
+          .filter((order) => order.order.status === "completed") // Lọc đơn hàng đã hoàn tất
+          .flatMap((order) =>
+            order.order_items.map((item) => ({
+              type: order.order.type,
+              value: order.order.items_subtotal,
+              grade: item.grade,
+              // payment_method: order.order.payment_method,
+            }))
+          );
+
+        console.log("Formatted Order Data:", formattedOrderData);
+        setShopData(formattedOrderData); // Cập nhật state shopData
+      }
+    })
+    .catch((error) => {
+      console.error("Error fetching orders:", error);
+      message.error("Lỗi khi tải đơn hàng");
+    });
   }, [user.id]);
 
 
@@ -150,7 +177,7 @@ const ShopDashboard = () => {
           }
           key="1"
         >
-          <DashboardTab shopData={shopData} />
+          <DashboardTab shopData={shopData} shopInfo={formattedShopData} />
         </TabPane>
 
         <TabPane

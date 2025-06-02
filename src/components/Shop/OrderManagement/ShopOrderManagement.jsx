@@ -6,8 +6,7 @@ import { StopOutlined, EllipsisOutlined, DollarOutlined, WalletOutlined, BankOut
 import { GetOrder, ConfirmOrder, CancelPendingOrder } from "../../../apis/Sellers/APISeller";
 import { PackagingOrder, GetOrderDetail } from '../../../apis/Orders/APIOrder';
 
-import OrderHistoryDetail from '../../Profile/OrderHistoryDetail';
-import { center } from "@antv/g2plot/lib/plots/sankey/sankey";
+import OrderHistoryDetail from '../../Profile/OrderManagement/OrderHistoryDetail';
 
 // Trạng thái đơn hàng với màu sắc tương ứng
 const orderStatusColors = {

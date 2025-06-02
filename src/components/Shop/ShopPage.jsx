@@ -66,11 +66,11 @@ export default function ShopPage() {
       icon: <BankOutlined />,
       label: <Link to="/shop/auction-management">Quản Lý Đấu Giá</Link>
     },
-    {
-    key: '5',
-    icon: <GiftOutlined />,
-    label: <Link to="/shop/subscription">Đăng ký gói</Link>
-  },
+  //   {
+  //   key: '5',
+  //   icon: <GiftOutlined />,
+  //   label: <Link to="/shop/subscription">Đăng ký gói</Link>
+  // },
 ];
 
   useEffect(() => {
