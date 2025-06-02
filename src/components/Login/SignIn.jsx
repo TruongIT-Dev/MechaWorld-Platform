@@ -50,11 +50,9 @@ export default function SignIn() {
   // Hàm Thông báo Đăng nhập Thành công
   const showSuccessNotification = () => {
     notification.success({
-      message: 'ĐĂNG NHẬP THÀNH CÔNG!',
-      description: 'Đang chuyển trang...',
-      duration: 2,
+      message: 'Đăng nhập thành công.',
+      description: 'Chào mừng bạn đến với MechaWorld.',
       placement: 'topRight',
-      showProgress: true,
     });
   };
 
@@ -77,7 +75,7 @@ export default function SignIn() {
 
       setTimeout(() => {
         navigate("/");
-      }, 1000);
+      }, 500);
 
     } catch (error) {
       console.error("Lỗi đăng nhập:", error);

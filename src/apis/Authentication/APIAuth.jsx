@@ -78,7 +78,7 @@ export const signupEmail = (email, fullname, password) => {
 
 // 6. POST Check if Email is existed
 export const checkEmail = (email) => {
-  return axios.post(`/check-email?email`,{
+  return axios.post(`/check-email`,{
     email: email
   }, {
     headers: {

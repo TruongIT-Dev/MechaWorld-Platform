@@ -270,7 +270,7 @@ const ShopProductCreate = ({ setIsCreating, gundamData}) => {
                   onClick={() => setIsCreating(false)}
                   disabled={isUploading}
                 >
-                  Hủy thêm sản phẩm
+                  Hủy 
                 </Button>
                 <Button
                   type="primary"

@@ -78,14 +78,14 @@ export default function ExchangeManageNegotiation() {
                 requireCompensation: compensationType !== 'none' && values.compensationAmount > 0
             };
 
-            console.log("Updated negotiation data:", offerUpdateData);
-            console.log("Sending to API with structure:");
-            console.log({
-                compensation_amount: offerUpdateData.compensationAmount,
-                note: offerUpdateData.note,
-                payer_id: offerUpdateData.id,
-                require_compensation: offerUpdateData.requireCompensation
-            });
+            // console.log("Updated negotiation data:", offerUpdateData);
+            // console.log("Sending to API with structure:");
+            // console.log({
+            //     compensation_amount: offerUpdateData.compensationAmount,
+            //     note: offerUpdateData.note,
+            //     payer_id: offerUpdateData.id,
+            //     require_compensation: offerUpdateData.requireCompensation
+            // });
 
             updateExchangeOffer(currentNegotiation?.offer.id, offerUpdateData).then((res) => {
                 if (res.status === 200) {
@@ -119,7 +119,7 @@ export default function ExchangeManageNegotiation() {
             message.error('Vui lòng kiểm tra lại thông tin đã nhập!');
         });
     };
-    
+
     useEffect(() => {
         getAllExchangeOffer().then((res) => {
             setOfferData(res.data);
@@ -240,13 +240,13 @@ export default function ExchangeManageNegotiation() {
                 return (
                     <div className="space-y-1">
                         <p className="text-sm text-left text-gray-700 line-clamp-2">
-                            {latestNote?.content || offer.note || 'Không có tin nhắn'}
+                            {latestNote?.content || 'Không có tin nhắn'}
                         </p>
-                        {latestNote && (
+                        {/* {latestNote && (
                             <p className="text-xs text-gray-400">
                                 {new Date(latestNote.created_at).toLocaleDateString('vi-VN')}
                             </p>
-                        )}
+                        )} */}
                     </div>
                 );
             },

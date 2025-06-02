@@ -1,13 +1,12 @@
 import { useSelector } from "react-redux";
 import { useEffect, useState } from "react";
-import { Table, Row, Tag, Button, Dropdown, Modal, message, Upload, Space, Tooltip, Input, Select, notification, Empty, Card, Image, Typography, Alert } from "antd";
-import { StopOutlined, EllipsisOutlined, DollarOutlined, WalletOutlined, BankOutlined, MobileOutlined, CreditCardOutlined, ClockCircleOutlined, CheckCircleOutlined, GiftOutlined, CarOutlined, FileTextOutlined, CheckOutlined, CloseCircleOutlined, QuestionCircleOutlined, MessageOutlined, EyeOutlined, TruckOutlined, InfoCircleOutlined } from "@ant-design/icons";
+import { Table, Row, Tag, Button, Dropdown, Modal, message, Upload, Space, Tooltip, Input, Select, notification, Empty, Card, Image, Typography, Alert, Divider, Col, Progress } from "antd";
+import { StopOutlined, EllipsisOutlined, DollarOutlined, WalletOutlined, BankOutlined, MobileOutlined, CreditCardOutlined, ClockCircleOutlined, CheckCircleOutlined, GiftOutlined, CarOutlined, FileTextOutlined, CheckOutlined, CloseCircleOutlined, QuestionCircleOutlined, MessageOutlined, EyeOutlined, TruckOutlined, InfoCircleOutlined, CloudUploadOutlined, CloseOutlined, InboxOutlined } from "@ant-design/icons";
 
 import { GetOrder, ConfirmOrder, CancelPendingOrder } from "../../../apis/Sellers/APISeller";
 import { PackagingOrder, GetOrderDetail } from '../../../apis/Orders/APIOrder';
 
-import OrderHistoryDetail from '../../Profile/OrderHistoryDetail';
-import { center } from "@antv/g2plot/lib/plots/sankey/sankey";
+import OrderHistoryDetail from '../../Profile/OrderManagement/OrderHistoryDetail';
 
 // Trạng thái đơn hàng với màu sắc tương ứng
 const orderStatusColors = {
@@ -67,7 +66,7 @@ function ShopOrderManagement() {
         setLoading(true);
         const response = await ConfirmOrder(record.seller_id, record.id);
         if (response.status === 200) {
-          message.success("Đơn hàng đã được xác nhận thành công!");
+          // message.success("Đơn hàng đã được xác nhận thành công!");
           fetchOrders();
         } else {
           message.error("Không thể xác nhận đơn hàng!");
@@ -242,7 +241,7 @@ function ShopOrderManagement() {
       const response = await PackagingOrder(selectedOrder.id, formData);
 
       if (response.status === 200) {
-        message.success("Xác nhận đóng gói thành công!");
+        // message.success("Xác nhận đóng gói thành công!");
         setIsModalPackageVisible(false);
         fetchOrders(); // Tải lại danh sách đơn hàng
       } else {
@@ -273,6 +272,8 @@ function ShopOrderManagement() {
 
     return codeMatch && statusMatch && typeMatch;
   });
+
+  const uploadProgress = (packagingImages.length / 5) * 100;
 
   // Cột dữ liệu của bảng
   const columns = [
@@ -467,7 +468,7 @@ function ShopOrderManagement() {
           onClick: () => handleAction(record, "detail")
         });
 
-        if (["pending", "confirmed", "packaging"].includes(record.status)) {
+        if (["pending"].includes(record.status)) {
           menuItems.push({
             key: "cancel",
             label: "Hủy đơn",
@@ -579,47 +580,132 @@ function ShopOrderManagement() {
 
       {/* Modal đóng gói sản phẩm */}
       <Modal
-        title={<span className="w-full flex justify-center text-lg font-semibold">XÁC NHẬN ĐÓNG GÓI ĐƠN HÀNG</span>}
         open={isModalPackageVisible}
         onCancel={() => setIsModalPackageVisible(false)}
-        footer={[
-          <Button key="back" onClick={() => setIsModalPackageVisible(false)}>
-            Hủy
-          </Button>,
-          <Button
-            key="submit"
-            type="primary"
-            onClick={handlePackagingConfirm}
-            loading={loading}
-            className="bg-blue-500 hover:bg-blue-600"
-          >
-            Xác nhận
-          </Button>
-        ]}
+        width={650}
+        centered
+        closable={true}
+        closeIcon={<CloseOutlined className="text-gray-400 hover:text-gray-600 text-lg" />}
+        footer={null}
+        className="rounded-2xl"
       >
-        <div className="mb-4">
-          <p className="mb-2 text-lg">Mã đơn hàng: <strong>{selectedOrder?.code}</strong></p>
-          <p className="text-red-400 font-medium">
-            Yêu cầu shop gửi ảnh xác thực đã đóng gói sản phẩm. Sau khi xác thực, bên vận chuyển sẽ bắt đầu lấy hàng. Nếu mặt hàng không khớp với hình ảnh đã xác thực, Shop sẽ chịu trách nhiệm bồi thường.
-          </p>
-        </div>
-        <div className="mt-6">
-          <label className="font-medium">
-            <span className="text-red-500">*</span> Gửi ảnh xác minh (tối đa 5 ảnh)
-          </label>
+        <div className="p-6">
+          {/* Header */}
+          <div className="text-center mb-8">
+            <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-50 rounded-full mb-4">
+              <InboxOutlined className="text-3xl text-blue-600" />
+            </div>
+            <Typography.Title level={2} className="!mb-2 uppercase !text-gray-800">
+              Xác Nhận Đóng Gói Đơn Hàng
+            </Typography.Title>
+            <Typography.Text type="secondary" className="text-base">
+              Vui lòng xác nhận và gửi ảnh chứng minh đã đóng gói sản phẩm
+            </Typography.Text>
+          </div>
 
-          <br />
+          {/* Warning Notice */}
+          <Alert
+            type="warning"
+            showIcon
+            icon={<InfoCircleOutlined />}
+            className="mb-6"
+            message={
+              <Typography.Text strong className="text-amber-800">
+                Lưu ý quan trọng
+              </Typography.Text>
+            }
+            description={
+              <div className="text-amber-700">
+                <span className="!mb-2 !text-amber-700">
+                  • Ảnh phải rõ nét, thể hiện đầy đủ sản phẩm đã được đóng gói
+                </span> <br />
+                <span className="!mb-2 !text-amber-700">
+                  • Sau khi xác nhận, đơn vị vận chuyển sẽ đến lấy hàng
+                </span> <br />
+                <span className="!mb-0 !text-amber-700">
+                  • Shop chịu trách nhiệm nếu sản phẩm không khớp với ảnh xác thực
+                </span>
+              </div>
+            }
+          />
 
-          <Upload
-            multiple
-            listType="picture-card"
-            fileList={packagingImages}
-            onChange={handleImageUpload}
-            beforeUpload={() => false}
-            maxCount={5}
-          >
-            {packagingImages.length < 5 && "+ Thêm ảnh"}
-          </Upload>
+          {/* Upload Section */}
+          <div className="mb-6">
+            <div className="flex items-center justify-between mb-4">
+              <Typography.Title level={5} className="!mb-0">
+                <span className="text-red-500 mr-1">*</span>
+                Ảnh xác minh đóng gói
+              </Typography.Title>
+              <Typography.Text type="secondary" className="text-sm">
+                {packagingImages.length}/5 ảnh
+              </Typography.Text>
+            </div>
+
+            {/* Progress Bar */}
+            <div className="mb-4">
+              <Progress
+                percent={uploadProgress}
+                showInfo={false}
+                strokeColor="#3b82f6"
+                className="mb-2"
+              />
+              <Typography.Text type="secondary" className="text-xs">
+                Tải lên tối thiểu 1 ảnh để tiếp tục
+              </Typography.Text>
+            </div>
+
+            {/* Upload Area */}
+            <Upload
+              multiple
+              listType="picture-card"
+              fileList={packagingImages}
+              onChange={handleImageUpload}
+              beforeUpload={() => false}
+              maxCount={5}
+              accept="image/*"
+              className="w-full"
+            >
+              {packagingImages.length < 5 && (
+                <div className="flex flex-col items-center justify-center p-4 text-center">
+                  <CloudUploadOutlined className="text-2xl text-gray-400 mb-2" />
+                  <Typography.Text className="text-sm text-gray-600 block">Thêm ảnh</Typography.Text>
+                  <Typography.Text type="secondary" className="text-xs mt-1">
+                    JPG, PNG (tối đa 10MB)
+                  </Typography.Text>
+                </div>
+              )}
+            </Upload>
+          </div>
+
+          <Divider className="my-6" />
+
+          {/* Action Buttons */}
+          <Row gutter={12}>
+            <Col span={12}>
+              <Button
+                size="large"
+                onClick={() => setIsModalPackageVisible(false)}
+                className="w-full h-12 border-gray-300 hover:!border-gray-400"
+                block
+              >
+                Hủy bỏ
+              </Button>
+            </Col>
+            <Col span={12}>
+              <Button
+                type="primary"
+                size="large"
+                onClick={handlePackagingConfirm}
+                loading={loading}
+                disabled={packagingImages.length < 1}
+                className="w-full h-12 bg-blue-500 hover:!bg-blue-600 border-blue-500 hover:!border-blue-600"
+                icon={!loading && <CheckCircleOutlined />}
+                block
+              >
+                {loading ? 'Đang xử lý...' : 'Xác nhận đóng gói'}
+              </Button>
+            </Col>
+          </Row>
         </div>
       </Modal>
 
