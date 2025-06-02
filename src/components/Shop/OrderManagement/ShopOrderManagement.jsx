@@ -7,7 +7,6 @@ import { GetOrder, ConfirmOrder, CancelPendingOrder } from "../../../apis/Seller
 import { PackagingOrder, GetOrderDetail } from '../../../apis/Orders/APIOrder';
 
 import OrderHistoryDetail from '../../Profile/OrderManagement/OrderHistoryDetail';
-import { center } from "@antv/g2plot/lib/plots/sankey/sankey";
 
 // Trạng thái đơn hàng với màu sắc tương ứng
 const orderStatusColors = {

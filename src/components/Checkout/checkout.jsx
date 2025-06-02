@@ -86,7 +86,7 @@ const Checkout = () => {
           from_ward_code: shopAddress.ward_code,
           to_district_id: userAddress.ghn_district_id,
           to_ward_code: userAddress.ghn_ward_code,
-          service_id: 0,
+          service_id: 53321,
           service_type_id: 2,
           weight: selectedItems.length * 200,
           insurance_value: totalPrice,
