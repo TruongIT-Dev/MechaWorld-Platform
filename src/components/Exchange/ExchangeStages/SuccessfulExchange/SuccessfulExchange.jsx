@@ -8,8 +8,8 @@ const SuccessfulExchange = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 via-blue-50 to-purple-50 p-4 flex items-center justify-center">
-      <div className="max-w-4xl w-full">
+    <div className=" bg-gradient-to-br from-green-50 via-blue-50 to-purple-50 p-1 flex items-center justify-center">
+      <div className=" w-full">
         <Card
           className="shadow-2xl border-0 overflow-hidden"
           bodyStyle={{ padding: 0 }}
@@ -84,10 +84,7 @@ const SuccessfulExchange = () => {
                       <Text className="text-gray-600">Thời gian:</Text>
                       <Text className="font-medium">{new Date().toLocaleString('vi-VN')}</Text>
                     </div>
-                    <div className="flex justify-between items-center">
-                      <Text className="text-gray-600">Mã giao dịch:</Text>
-                      <Text className="font-mono text-blue-600">#TX{Math.random().toString(36).substr(2, 9).toUpperCase()}</Text>
-                    </div>
+
                   </div>
                 </Card>
               </div>
