@@ -13,7 +13,6 @@ const DashboardTab = ({ shopData }) => {
     // State to track filtered data for charts
     const [columnData, setColumnData] = useState(Array.isArray(shopData) ? shopData : []);
     const user = useSelector((state) => state.auth.user);
-    const [dashboardData, setDashboardData] = useState();
     const [statsData, setStatsData] = useState([]);
 
 
@@ -44,7 +43,6 @@ const DashboardTab = ({ shopData }) => {
       ];
 
       setStatsData(mappedStatsData);
-      setDashboardData(data);
 
       // setColumnData(shopData);
     } else {
