@@ -63,12 +63,18 @@ const OrderHistory = () => {
     setLoading(true);
     try {
       const response = await GetListOrderHistory();
-      // console.log("fetch res", response);
+      console.log("fetch res", response);
 
       const ordersData = response.data;
 
-      // Lấy danh sách seller_id duy nhất
-      const sellerIds = [...new Set(ordersData.map(item => item.order.seller_id))];
+      // Lọc chỉ lấy orders có type "regular" hoặc "auction", loại bỏ "exchange"
+      const filteredOrdersData = ordersData.filter(item => {
+        const orderType = item.order.type || item.order.order_type; // Kiểm tra cả 2 trường có thể có
+        return orderType === 'regular' || orderType === 'auction';
+      });
+
+      // Lấy danh sách seller_id duy nhất từ dữ liệu đã lọc
+      const sellerIds = [...new Set(filteredOrdersData.map(item => item.order.seller_id))];
 
       // Gọi API lấy thông tin shop
       const sellerInfoMap = {};
@@ -77,8 +83,8 @@ const OrderHistory = () => {
         sellerInfoMap[id] = info;
       }));
 
-      // Xử lý dữ liệu đơn hàng
-      const processedOrders = ordersData.map(item => {
+      // Xử lý dữ liệu đơn hàng với dữ liệu đã được lọc
+      const processedOrders = filteredOrdersData.map(item => {
         const { order, order_items } = item;
         const shopInfo = sellerInfoMap[order.seller_id] || {};
         const status = order.status;
@@ -123,6 +129,8 @@ const OrderHistory = () => {
           // Thêm thông tin về việc hủy đơn hàng
           canceledBy: order.canceled_by,
           canceledReason: order.canceled_reason,
+          // Thêm thông tin loại đơn hàng để debug nếu cần
+          orderType: order.type || order.order_type,
           items: order_items.map(item => ({
             id: item.id,
             name: item.name,
@@ -371,8 +379,8 @@ const OrderHistory = () => {
   };
 
   return (
-    <div className="max-w-5xl mx-auto p-6">
-      <Tabs activeKey={activeTab} onChange={setActiveTab}>
+    <div className="mx-auto p-6">
+      <Tabs centered={true} activeKey={activeTab} onChange={setActiveTab}>
         {tabItems.map((tab) => (
           <Tabs.TabPane tab={<span className="text-base font-medium">{tab.label}</span>} key={tab.key} />
         ))}

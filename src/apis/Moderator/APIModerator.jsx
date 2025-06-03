@@ -60,4 +60,27 @@ export const RejectAuctionRequest = (requestID, reason) => {
       reason: reason,
     });
   };
-  
+
+// 4. PATCH Update auction time by moderator
+export const UpdateAuctionTime = (auctionID, timeData) => {
+    return axios.patch(`/mod/auctions/${auctionID}`, timeData);
+};
+
+// 5. GET - Lấy danh sách yêu cầu rút tiền
+export const GetWithdrawalRequests = () => {
+    return axios.get('/mod/withdrawal-requests');
+};
+
+export const RejectWithdrawalRequest = (requestID, reason) => {
+    console.log('Sending reject request with:', { requestID, reason });
+    return axios.patch(`/mod/withdrawal-requests/${requestID}/reject`, {
+        reason: reason,
+    });
+};
+
+export const CompleteWithdrawalRequest = (requestID, transactionReference) => {
+    console.log('Sending complete request with:', { requestID, transactionReference });
+    return axios.patch(`/mod/withdrawal-requests/${requestID}/complete`, {
+        transaction_reference: transactionReference,
+    });
+};

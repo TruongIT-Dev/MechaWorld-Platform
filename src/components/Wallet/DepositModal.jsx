@@ -215,10 +215,10 @@ const DepositModal = ({ visible, onCancel, onSuccess }) => {
                                     className="w-full bg-blue-500 hover:bg-blue-600 h-12"
                                     onClick={() => window.open(paymentData.orderUrl, '_blank')}
                                 >
-                                    Mở ZaloPay để thanh toán
+                                    Mở cổng ZaloPay để thanh toán
                                 </Button>
 
-                                <Button
+                                {/* <Button
                                     type="default"
                                     size="large"
                                     className="w-full h-12 border-green-500 text-green-600 hover:bg-green-50"
@@ -226,7 +226,7 @@ const DepositModal = ({ visible, onCancel, onSuccess }) => {
                                 >
                                     <CheckCircleOutlined className="mr-2" />
                                     Tôi đã thanh toán thành công
-                                </Button>
+                                </Button> */}
                             </div>
 
                             <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
