@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Modal, Form, Input, Select, Button, message, Card, List, Popconfirm } from 'antd';
 import { BankOutlined, DeleteOutlined, PlusOutlined } from '@ant-design/icons';
-import { GetUserBankAccounts, AddUserBankAccount } from '../../apis/Wallet/APIWallet'; 
+import { GetUserBankAccounts, AddUserBankAccount,DeleteUserBankAccount } from '../../apis/Wallet/APIWallet'; 
 const { Option } = Select;
 
 const BankAccountModal = ({ visible, onCancel, onSuccess }) => {
@@ -95,6 +95,20 @@ const BankAccountModal = ({ visible, onCancel, onSuccess }) => {
         }
     };
 
+    const handleDeleteBankAccount = async (accountId) => {
+    setLoading(prev => ({...prev, delete: true}));
+    try {
+        await DeleteUserBankAccount(accountId);
+        message.success('Xóa tài khoản thành công');
+        fetchBankAccounts(); // Làm mới danh sách sau khi xóa
+    } catch (error) {
+        console.error('Lỗi khi xóa tài khoản:', error);
+        message.error(error.message || 'Xóa tài khoản thất bại');
+    } finally {
+        setLoading(prev => ({...prev, delete: false}));
+    }
+};
+
 
     const handleClose = () => {
         setIsAddingNew(false);
@@ -145,7 +159,7 @@ const BankAccountModal = ({ visible, onCancel, onSuccess }) => {
                                     actions={[
                                         <Popconfirm
                                             title="Bạn có chắc chắn muốn xóa tài khoản này?"
-                                            
+                                            onConfirm={() => handleDeleteBankAccount(account.id)}
                                             okText="Xóa"
                                             cancelText="Hủy"
                                             okButtonProps={{ danger: true }}

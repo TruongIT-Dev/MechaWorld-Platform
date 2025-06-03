@@ -129,3 +129,8 @@ export const GetWithdrawalRequest = () => {
 export const CancelWithdrawalRequest = (requestId) => {
   return axios.patch(`/users/me/wallet/withdrawal-requests/${requestId}/cancel`);
 };
+
+// 9. Delete user bank account
+export const DeleteUserBankAccount = (bankAccountId) => {
+    return axios.delete(`/users/me/bank-accounts/${bankAccountId}`);
+};
