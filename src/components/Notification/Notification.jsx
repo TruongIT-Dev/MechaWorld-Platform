@@ -1,5 +1,5 @@
 // components/Notification.jsx - UPDATED
-import React, { useState } from 'react'
+import { useState } from 'react'
 import {
     Badge,
     Button,
@@ -200,8 +200,6 @@ const Notification = () => {
         </div>
     )
 
-    console.log('🔔 [BELL] Rendering with unreadCount:', unreadCount)
-
     return (
         <Popover
             content={notificationContent}
@@ -210,8 +208,7 @@ const Notification = () => {
             open={visible}
             onOpenChange={handleVisibleChange}
             placement="bottomRight"
-            overlayClassName="notification-popover"
-            overlayStyle={{ zIndex: 1050 }}
+            style={{ zIndex: 1050 }}
         >
             <Badge count={unreadCount} size="small" offset={[-2, 2]}>
                 <Button

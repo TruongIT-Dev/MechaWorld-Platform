@@ -27,3 +27,7 @@ export const UpdateShopName = (shop_name, id) => {
         user_id: id,
     })
 }
+
+export const SellerDashboard = (sellerID) => {
+    return axios.get(`/sellers/${sellerID}/dashboard`)
+}
