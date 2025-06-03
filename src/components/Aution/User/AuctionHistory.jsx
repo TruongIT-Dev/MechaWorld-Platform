@@ -1,79 +1,100 @@
-import React from 'react';
-import { Title } from '../Design';
+import React, { useEffect, useState } from 'react';
+import { Table, Tag, Avatar, Tooltip } from 'antd';
+import { formatDisplayTime } from './dateFormat';
 
-const AuctionHistory = React.memo(({ bidHistory = [], participants = [] }) => {
-  // Tạo map từ participants để dễ tra cứu thông tin user
-  const participantsMap = React.useMemo(() => {
-    const map = {};
-    participants.forEach(participant => {
-      if (participant.user_id) {
-        map[participant.user_id] = {
-          ...participant.user,
-          full_name: participant.user?.full_name || `Người dùng ${participant.user_id.slice(0, 6)}`,
-          avatar_url: participant.user?.avatar_url || '/default-avatar.png'
-        };
-      }
-    });
-    return map;
-  }, [participants]);
+const AuctionHistory = ({ bids, participants, startingPrice, currentPrice, bidIncrement }) => {
+  const [dataSource, setDataSource] = useState([]);
+  const [highlightedRow, setHighlightedRow] = useState(null);
 
-  const formatTime = (timestamp) => {
-    try {
-      return new Date(timestamp).toLocaleTimeString('vi-VN');
-    } catch {
-      return '--:--';
+  // Cập nhật datasource khi bids thay đổi
+  useEffect(() => {
+    const formattedData = bids.map(bid => ({
+      key: bid.id || bid.timestamp,
+      timestamp: bid.timestamp,
+      user: bid.user || { full_name: 'Ẩn danh' },
+      price: bid.price,
+      type: bid.type,
+      isNew: bid.isNew // Thêm trạng thái mới
+    }));
+    
+    setDataSource(formattedData);
+
+    // Highlight bid mới nhất
+    if (bids.length > 0 && bids[0].isNew) {
+      setHighlightedRow(bids[0].id);
+      const timer = setTimeout(() => setHighlightedRow(null), 2000);
+      return () => clearTimeout(timer);
     }
-  };
+  }, [bids]);
 
-  // Sắp xếp bidHistory theo thời gian mới nhất trước
-  const sortedBidHistory = React.useMemo(() => {
-    return [...bidHistory].sort((a, b) => 
-      new Date(b.timestamp || b.created_at) - new Date(a.timestamp || a.created_at)
-    );
-  }, [bidHistory]);
+  const columns = [
+    {
+      title: 'Thời gian',
+      dataIndex: 'timestamp',
+      key: 'timestamp',
+      render: (time) => formatDisplayTime(time),
+      width: 150,
+    },
+    {
+      title: 'Người đấu giá',
+      dataIndex: 'user',
+      key: 'user',
+      render: (user) => (
+        <div className="flex items-center gap-2">
+          <Avatar src={user?.avatar_url} size="small">
+            {user?.full_name?.charAt(0) || 'A'}
+          </Avatar>
+          <span>{user?.full_name || 'Ẩn danh'}</span>
+          {highlightedRow === user.id && (
+            <span className="text-green-500 animate-pulse">🆕</span>
+          )}
+        </div>
+      ),
+    },
+    {
+      title: 'Giá',
+      dataIndex: 'price',
+      key: 'price',
+      render: (price, record) => (
+        <div className="flex items-center gap-2">
+          <span className="font-medium">{price?.toLocaleString() || '0'} VNĐ</span>
+          {record.type === 'bid' && (
+            <Tag color={price === currentPrice ? 'green' : 'default'}>
+              {price === currentPrice ? 'Hiện tại' : 'Đã bị vượt'}
+            </Tag>
+          )}
+        </div>
+      ),
+      align: 'right',
+    },
+    {
+      title: 'Loại',
+      dataIndex: 'type',
+      key: 'type',
+      render: (type) => (
+        <Tag color={type === 'bid' ? 'blue' : 'purple'}>
+          {type === 'bid' ? 'Đặt giá' : 'Tham gia'}
+        </Tag>
+      ),
+    },
+  ];
 
   return (
-    <div className="space-y-3">
-      {sortedBidHistory.map((bid) => {
-        // Lấy thông tin user theo thứ tự ưu tiên:
-        // 1. Từ bid.user (nếu có)
-        // 2. Từ participantsMap (nếu có bidder_id)
-        // 3. Fallback mặc định
-        const user = bid.user || 
-                   (bid.bidder_id && participantsMap[bid.bidder_id]) || 
-                   {
-                     full_name: `Người dùng ${bid.bidder_id?.slice(0, 6) || 'ẩn danh'}`,
-                     avatar_url: '/default-avatar.png'
-                   };
-
-        return (
-          <div 
-            key={`${bid.id || bid.bid_id}-${bid.timestamp || bid.created_at}`}
-            className="flex justify-between items-center p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
-          >
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-gray-200 overflow-hidden">
-                <img 
-                  src={user.avatar_url} 
-                  alt={user.full_name}
-                  className="w-full h-full object-cover"
-                  onError={(e) => e.target.src = '/default-avatar.png'}
-                />
-              </div>
-              <div>
-                <p className="font-medium">{user.full_name}</p>
-                <p className="text-xs text-gray-500">
-                  {formatTime(bid.timestamp || bid.created_at)}
-                </p>
-              </div>
-            </div>
-            <div className="text-lg font-semibold text-green-600">
-              {(bid.price || bid.amount)?.toLocaleString('vi-VN')}₫
-            </div>
-          </div>
-        );
-      })}
+    <div className="bg-white rounded-lg shadow p-4">
+      <Table
+        columns={columns}
+        dataSource={dataSource}
+        rowKey="key"
+        pagination={{ pageSize: 10 }}
+        rowClassName={(record) => 
+          highlightedRow === record.key ? 'highlight-row' : ''
+        }
+        locale={{
+          emptyText: 'Chưa có lịch sử đấu giá'
+        }}
+      />
     </div>
   );
-});
+};
+
 export default AuctionHistory;

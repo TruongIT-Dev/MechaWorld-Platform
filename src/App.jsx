@@ -26,8 +26,7 @@ import {
   Subscription,
   ShopRegister,
   RegisterShopLayout,
-  AutionList,
-  AutionDetail,
+  AuctionList,
   ModeratorLayout,
   SignUp,
   ModAuctions,
@@ -47,7 +46,10 @@ import {
   GundamCollectionApp,
   NotificationPage,
   ModDashboard,
-
+  OrderExchange,
+  AuctionDetail,
+  AdminLayout,
+  AdminDashboard,
 } from "./routes/router";
 
 import { verifyToken } from "./apis/Authentication/APIAuth";
@@ -58,15 +60,9 @@ import PageLoading from "./components/PageLoading";
 
 import { restoreDeliveryFees } from "./features/exchange/middleware/deliveryFeePersistence";
 
-import { db } from './features/notification/firebase-config'
-import { collection, getDocs } from 'firebase/firestore'
-
-
-
 function App() {
-
   const dispatch = useDispatch();
-  const user = useSelector((state) => state.auth.user); // Lấy thông tin người dùng từ Redux
+  const user = useSelector((state) => state.auth.user);
 
   useEffect(() => {
     const accessToken = Cookies.get("access_token");
@@ -84,95 +80,67 @@ function App() {
     }
   }, [dispatch]);
 
-  useEffect(() => {
-    const testConnection = async () => {
-      try {
-        const querySnapshot = await getDocs(collection(db, 'notifications'))
-        console.log('Firebase connected successfully!')
-        console.log('Documents count:', querySnapshot.size)
-      } catch (error) {
-        console.error('Firebase connection error:', error)
-      }
-    }
-
-    testConnection()
-  }, [])
-
-  // Phân quyền dựa trên vai trò
+  // Role-based route protection
   const ProtectedRoute = ({ children }) => {
-    if (user?.role === "moderator" || user?.role === "admin") {
+    if (user?.role === "admin") {
+      return <Navigate to="/admin" replace />;
+    }
+    if (user?.role === "moderator") {
       return <Navigate to="/moderator" replace />;
     }
-    return children; // Nếu không phải moderator/admin, hiển thị nội dung bình thường
+    return children;
   };
 
   return (
     <>
-      <PageLoading /> {/* Hiệu ứng loading khi chuyển trang */}
-      <Suspense fallback={<Spinner />}> {/* Loading khi tải component */}
+      <PageLoading />
+      <Suspense fallback={<Spinner />}>
         <Routes>
-          {/* Route màn hình role Member & Shop */}
-          <Route
-            path="/"
-            element={
-              <ProtectedRoute>
-                <UserLayout />
-              </ProtectedRoute>
-            }
-          >
+          {/* Main User Routes */}
+          <Route path="/" element={<ProtectedRoute><UserLayout /></ProtectedRoute>}>
             <Route index element={<HomePage />} />
 
-            {/* Product Route */}
+            {/* Product Routes */}
             <Route path="product" element={<ProductPage />} />
             <Route path="product/:slug" element={<ProductDetailPage />} />
-
 
             {/* Notification */}
             <Route path="notifications" element={<NotificationPage />} />
 
+            {/* Auction Routes */}
+            <Route path="auction" element={<AuctionList />} />
+            <Route path="auction/:auctionID" element={<AuctionDetail />} />
 
-            {/* Aution Route */}
-            <Route path="auction" element={<AutionList />} />
-            <Route path="auction/:auctionID" element={<AutionDetail />} />
-
-
-
-            {/* Exchange Main Route */}
+            {/* Exchange Routes */}
             <Route path="/exchange" element={<ExchangePage />}>
               <Route path="list" element={<ExchangeList />} />
               <Route path="manage-gundam" element={<ExchangeGundamManagement />} />
               <Route index element={<ExchangeList />} />
             </Route>
-
-            {/* Exchange side Route */}
             <Route path="/exchange/manage" element={<ExchangeManage />} />
             <Route path="/exchange/my-post" element={<ExchangeMyPost />} />
             <Route path="/exchange/detail/:id" element={<ExchangeDetailInformation />} />
 
-
-            {/* Collection Route */}
+            {/* Collection Routes */}
             <Route path="collection" element={<GundamCollectionApp />} >
               <Route path="list" element={<CollectionContainer />} />
               <Route path="add" element={<AddCollection />} />
             </Route>
 
-            {/* Cart route */}
+            {/* Cart & Checkout */}
             <Route path="cart" element={<CartPage1 />} />
-
-            {/* Checkout route */}
             <Route path="checkout" element={<Checkout />} />
 
-
-            {/* Member Profile Route */}
+            {/* Member Profile Routes */}
             <Route path="member/profile" element={<ProfilePage />}>
               <Route path="account" element={<UserProfile />} />
               <Route path="address-setting" element={<SettingAddress />} />
-              <Route path="orderhistory" element={<OrderHistory />} />
               <Route path="wallet" element={<WalletPage />} />
+              <Route path="orders/regular-auction" index element={<OrderHistory />} />
+              <Route path="orders/exchange" element={<OrderExchange />} />
             </Route>
 
-
-            {/* Shop Route */}
+            {/* Shop Routes */}
             <Route path="shop" element={<ShopPage />}>
               <Route path="dashboard" element={<ShopDashboard />} />
               <Route path="address" element={<ShopAddress />} />
@@ -184,25 +152,23 @@ function App() {
               <Route path="Subscription" element={<Subscription />} />
             </Route>
 
-            {/* Error route */}
+            {/* Error Routes */}
             <Route path="error" element={<PageNotFound />} />
             <Route path="*" element={<PageNotFound />} />
           </Route>
 
-          {/* Login & Signup */}
+          {/* Authentication Routes */}
           <Route path="member">
             <Route path="login" index element={<SignIn />} />
             <Route path="signup" element={<SignUp />} />
           </Route>
 
-          {/* Layout Đăng ký Shop */}
-          <Route path="registe-shop" element={<RegisterShopLayout />}>
+          {/* Shop Registration */}
+          <Route path="register-shop" element={<RegisterShopLayout />}>
             <Route index element={<ShopRegister />} />
           </Route>
 
-
-          {/* Những Route cho màn hình Moderator & Admin khác */}
-          {/* Moderator Route */}
+          {/* Moderator Routes */}
           <Route path="moderator" element={<ModeratorLayout />} >
             <Route index element={<Navigate to="dashboard" replace />} />
             <Route path="dashboard" element={<ModDashboard />} />
@@ -213,14 +179,15 @@ function App() {
             <Route path="transaction-management" element={<ModTransactions />} />
           </Route>
 
-          {/* Admin Route */}
-
-
+          {/* Admin Routes */}
+          <Route path="admin" element={<AdminLayout />}>
+            <Route index element={<Navigate to="dashboard" replace />} />
+            <Route path="dashboard" element={<AdminDashboard />} />
+          </Route>
         </Routes>
       </Suspense>
     </>
   );
-
 }
 
 export default App;

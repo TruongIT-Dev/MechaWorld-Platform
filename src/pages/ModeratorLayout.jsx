@@ -57,6 +57,11 @@ const ModeratorLayout = () => {
     dispatch(logout());
     Cookies.remove("access_token");
     Cookies.remove("user");
+
+    setTimeout(() => {
+      // navigate('/');
+      window.location.href = "/";
+    }, 50);
   };
 
   // Menu items với icons

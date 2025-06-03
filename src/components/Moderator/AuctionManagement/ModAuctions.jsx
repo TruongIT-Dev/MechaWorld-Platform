@@ -14,6 +14,7 @@ import AuctionFilters from './AuctionFilters';
 import AuctionTable from './AuctionTable';
 import AuctionDetailModal from './AuctionDetailModal';
 import RejectModal from './RejectModal';
+import EditTimeModal from './EditTimeModal';
 
 const { Title, Text } = Typography;
 
@@ -27,6 +28,20 @@ const ModAuctions = () => {
   const [rejectReason, setRejectReason] = useState("");
   const [selectedRequestId, setSelectedRequestId] = useState(null);
   const [loadingAction, setLoadingAction] = useState(false);
+  const [timeModalVisible, setTimeModalVisible] = useState(false);
+  const [selectedAuctionForEdit, setSelectedAuctionForEdit] = useState(null);
+
+  // Thêm hàm này
+  const handleChangeTime = (auction) => {
+    setSelectedAuctionForEdit(auction);
+    setTimeModalVisible(true);
+  };
+
+  // Thêm hàm refresh data
+  const handleTimeUpdateSuccess = () => {
+    fetchData();
+  };
+
 
   // Fetch data
   const fetchData = () => {
@@ -155,6 +170,7 @@ const ModAuctions = () => {
         onApprove={handleApprove}
         onReject={openRejectModal}
         loadingAction={loadingAction}
+        onChangeTime={handleChangeTime} //todo
       />
 
       {/* Detail Modal */}
@@ -174,6 +190,13 @@ const ModAuctions = () => {
         rejectReason={rejectReason}
         setRejectReason={setRejectReason}
         loading={loadingAction}
+      />
+      {/* Edit Time Modal */}
+      <EditTimeModal
+        visible={timeModalVisible}
+        onClose={() => setTimeModalVisible(false)}
+        auctionData={selectedAuctionForEdit}
+        onSuccess={handleTimeUpdateSuccess}
       />
 
     </div>

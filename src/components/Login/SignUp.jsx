@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Form, Input, Button, Typography, Steps, message, Modal } from "antd";
+import { Form, Input, Button, Typography, Steps, message, Modal, notification } from "antd";
 import { NavLink } from "react-router-dom";
 import { sendOTPEmail, signupEmail, verifyEmail, checkEmail } from "../../apis/Authentication/APIAuth";
 
@@ -25,13 +25,18 @@ export default function SignUp() {
             // Kiểm tra xem email đã được nhập hay chưa
             const emailCheck = await checkEmail(email);
             // API call để gửi OTP
-            console.log("emailCheck", emailCheck);
+            // console.log("emailCheck", emailCheck);
+
             if (emailCheck?.data?.exists === true) {
-                message.error("Email đã tồn tại trong hệ thống! Vui lòng quay lại trang đăng nhập.");
+                notification.error({
+                    message: 'Đăng ký không hợp lệ.',
+                    description: 'Email đã tồn tại. Vui lòng chọn email khác!'
+                });
                 return;
             }
-            const response = await sendOTPEmail(email);
-            console.log("Đã gửi OTP đến email:", response);
+
+            await sendOTPEmail(email);
+            // console.log("Đã gửi OTP đến email:", response);
 
             // Giả lập thành công
             message.success(`Mã OTP đã được gửi đến ${email}`);
@@ -96,8 +101,8 @@ export default function SignUp() {
 
     // Hàm xử lý Đăng ký
     const onFinishSignUp = async (values) => {
-        console.log("Submited Form đăng ký:", values);
-        console.log("verifiedEmail:", verifiedEmail);
+        // console.log("Submited Form đăng ký:", values);
+        // console.log("verifiedEmail:", verifiedEmail);
         setLoading(true);
         try {
             if (values.password !== values["re-password"]) {

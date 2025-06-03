@@ -143,15 +143,26 @@ const GundamProductPage = () => {
                 return;
             }
 
-            await addToCart({ id });
+            // Check xem sản phẩm đã có trong giỏ hàng chưa
+            const existingItem = cartItems.find(item => item.gundam_id === id);
+            // console.log("cartItems", cartItems);
+            // console.log("existingItem", existingItem);
 
-            // Đợi một chút để đảm bảo state được cập nhật
-            setTimeout(() => {
+            if (existingItem) {
+                // Nếu đã có trong giỏ hàng, chuyển thẳng tới checkout
                 navigate('/checkout');
-            }, 100);
+            } else {
+                // Nếu chưa có, thêm vào giỏ hàng rồi chuyển tới checkout
+                await addToCart({ id });
+
+                // Đợi một chút để đảm bảo state được cập nhật
+                setTimeout(() => {
+                    navigate('/checkout');
+                }, 100);
+            }
 
         } catch (error) {
-            message.error("Sản phẩm đã có trong Giỏ hàng!");
+            message.error("Có lỗi xảy ra khi xử lý giỏ hàng!");
             console.error("Error:", error);
         } finally {
             setLoadingAdded(false);
@@ -296,7 +307,7 @@ const GundamProductPage = () => {
                 </div>
 
                 {/* Suggested Products */}
-                <SuggestProduct />
+                {/* <SuggestProduct /> */}
             </div>
         </div>
     );
