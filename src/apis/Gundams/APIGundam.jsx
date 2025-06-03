@@ -16,6 +16,10 @@ export const GetGundamByGrade = (grade) => {
 export const GetGundams = () => {
     return axios.get('/gundams?status=published')
 }
+// 2. Retrieves a list of selling Gundams by name
+export const GetGundamsName = (gundamName) => {
+    return axios.get(`/gundams?name=${gundamName}&status=published`);
+}
 
 export const GetGundamsAuction = () => {
     return axios.get('/gundams?status=auctioning')
