@@ -49,6 +49,10 @@ export const GetListAuctionRequestsForModerator = () => {
     return axios.get('/mod/auction-requests');
 }
 
+export const GetListAuctionForModerator = () => {
+    return axios.get('/mod/auctions');
+}
+
 // 2. PATCH Approve an auction request by moderator
 export const ApproveAuctionRequest = (requestID) => {
     return axios.patch(`/mod/auction-requests/${requestID}/approve`);

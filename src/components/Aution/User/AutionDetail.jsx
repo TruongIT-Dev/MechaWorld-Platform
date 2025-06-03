@@ -473,9 +473,9 @@ const AuctionDetail = () => {
   const sortedBidHistory = [...bidHistory].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
 
   return (
-    <section className="mt-10 pt-24 px-8">
+    <section className="mt-16 py-24 px-8">
       <Container>
-        <div className="sse-status mb-4">
+        {/* <div className="sse-status mb-4">
           {connectionStatus === 'connecting' && (
             <div className="bg-yellow-100 p-2 rounded text-center">
               <span className="animate-pulse">🔄 Đang kết nối với máy chủ...</span>
@@ -496,7 +496,7 @@ const AuctionDetail = () => {
               ❌ Mất kết nối với máy chủ
             </div>
           )}
-        </div>
+        </div> */}
 
         <div className="flex justify-between gap-8">
           <div className="w-1/2">
@@ -596,18 +596,24 @@ const AuctionDetail = () => {
 
                 <div className="my-6">
                   <Caption>Thời gian còn lại:</Caption>
-                  <div className="flex gap-4 text-center mt-3">
-                    {['days', 'hours', 'minutes', 'seconds'].map((unit) => (
-                      <div key={unit} className="p-4 px-6 shadow-md rounded-lg">
-                        <Title level={4}>{countdown[unit]}</Title>
-                        <Caption>
-                          {unit === 'days' ? 'Ngày' : 
-                          unit === 'hours' ? 'Giờ' : 
-                          unit === 'minutes' ? 'Phút' : 'Giây'}
-                        </Caption>
-                      </div>
-                    ))}
-                  </div>
+                  {auctionDetail.auction.status === 'scheduled' ? (
+                    <div className=" bg-gray-100 rounded-lg">
+                      <Title level={6}>Chưa bắt đầu</Title>
+                    </div>
+                  ) : (
+                    <div className="flex gap-4 text-center mt-3">
+                      {['days', 'hours', 'minutes', 'seconds'].map((unit) => (
+                        <div key={unit} className="p-4 px-6 shadow-md rounded-lg">
+                          <Title level={4}>{countdown[unit]}</Title>
+                          <Caption>
+                            {unit === 'days' ? 'Ngày' : 
+                            unit === 'hours' ? 'Giờ' : 
+                            unit === 'minutes' ? 'Phút' : 'Giây'}
+                          </Caption>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
 
                 <div className="space-y-3 my-6">

@@ -1,13 +1,17 @@
 import { useState, useEffect } from 'react';
 import { Modal, Form, Input, Select, Button, message, Card, List, Popconfirm } from 'antd';
 import { BankOutlined, DeleteOutlined, PlusOutlined } from '@ant-design/icons';
-
+import { GetUserBankAccounts, AddUserBankAccount,DeleteUserBankAccount } from '../../apis/Wallet/APIWallet'; 
 const { Option } = Select;
 
 const BankAccountModal = ({ visible, onCancel, onSuccess }) => {
     const [form] = Form.useForm();
     const [banks, setBanks] = useState([]);
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState({
+        fetch: false,
+        add: false,
+        delete: false
+    });
     const [bankAccounts, setBankAccounts] = useState([]);
     const [isAddingNew, setIsAddingNew] = useState(false);
 
@@ -15,6 +19,8 @@ const BankAccountModal = ({ visible, onCancel, onSuccess }) => {
         if (visible) {
             fetchBanks();
             fetchBankAccounts();
+        } else {
+            form.resetFields();
         }
     }, [visible]);
 
@@ -30,67 +36,79 @@ const BankAccountModal = ({ visible, onCancel, onSuccess }) => {
     };
 
     const fetchBankAccounts = async () => {
+        setLoading(prev => ({...prev, fetch: true}));
         try {
-            // API call to get user's bank accounts
-            // const response = await getBankAccounts();
-            // setBankAccounts(response.data || []);
-
-            // Mock data for demo
-            setBankAccounts([
-                {
-                    id: 1,
-                    account_holder: 'NGUYEN VAN A',
-                    account_number: '1234567890',
-                    bank_code: 'VCB',
-                    bank_name: 'Vietcombank',
-                    is_default: true
-                }
-            ]);
+            const response = await GetUserBankAccounts();
+            setBankAccounts(response.data || []);
         } catch (error) {
             console.error('Lỗi khi lấy tài khoản ngân hàng:', error);
+            message.error(error.message || 'Không thể tải danh sách tài khoản');
+        } finally {
+            setLoading(prev => ({...prev, fetch: false}));
         }
     };
 
     const handleAddBankAccount = async (values) => {
-        setLoading(true);
+        setLoading(prev => ({...prev, add: true}));
         try {
-            const selectedBank = banks.find(bank => bank.code === values.bank_code);
+            // Clear validation errors trước khi submit
+            form.setFields([
+                { name: 'account_name', errors: null },
+                { name: 'account_number', errors: null },
+                { name: 'bank_code', errors: null }
+            ]);
 
-            const newAccount = {
-                account_holder: values.account_holder.toUpperCase(),
+            const selectedBank = banks.find(bank => bank.code === values.bank_code);
+            
+            if (!selectedBank) {
+                throw new Error('Ngân hàng không hợp lệ');
+            }
+
+            const result = await AddUserBankAccount({
+                account_name: values.account_name.toUpperCase(),
                 account_number: values.account_number,
                 bank_code: values.bank_code,
-                bank_name: selectedBank?.shortName || selectedBank?.name
-            };
+                bank_name: selectedBank.name,
+                bank_short_name: selectedBank.shortName,
+            });
 
-            // API call to add bank account
-            // const response = await addBankAccount(newAccount);
-
-            // Mock success
-            setBankAccounts(prev => [...prev, { ...newAccount, id: Date.now() }]);
-
-            form.resetFields();
-            setIsAddingNew(false);
-            message.success('Thêm tài khoản ngân hàng thành công');
-            onSuccess();
+            if (!result.success) {
+                message.success('Thêm tài khoản thành công ');
+                form.resetFields();
+                setIsAddingNew(false);
+                fetchBankAccounts();
+            } 
         } catch (error) {
-            message.error('Không thể thêm tài khoản ngân hàng');
+            console.error('Lỗi:', error);
+            
+            // Hiển thị lỗi cụ thể lên các field tương ứng
+            if (error.message.includes('AccountName')) {
+                form.setFields([{ name: 'account_name', errors: [error.message] }]);
+            }
+            if (error.message.includes('BankShortName')) {
+                form.setFields([{ name: 'bank_code', errors: [error.message] }]);
+            }
+            
+            message.error(error.message || 'Có lỗi xảy ra');
         } finally {
-            setLoading(false);
+            setLoading(prev => ({...prev, add: false}));
         }
     };
 
-    const handleDeleteAccount = async (accountId) => {
-        try {
-            // API call to delete bank account
-            // await deleteBankAccount(accountId);
+    const handleDeleteBankAccount = async (accountId) => {
+    setLoading(prev => ({...prev, delete: true}));
+    try {
+        await DeleteUserBankAccount(accountId);
+        message.success('Xóa tài khoản thành công');
+        fetchBankAccounts(); // Làm mới danh sách sau khi xóa
+    } catch (error) {
+        console.error('Lỗi khi xóa tài khoản:', error);
+        message.error(error.message || 'Xóa tài khoản thất bại');
+    } finally {
+        setLoading(prev => ({...prev, delete: false}));
+    }
+};
 
-            setBankAccounts(prev => prev.filter(acc => acc.id !== accountId));
-            message.success('Xóa tài khoản thành công');
-        } catch (error) {
-            message.error('Không thể xóa tài khoản');
-        }
-    };
 
     const handleClose = () => {
         setIsAddingNew(false);
@@ -111,6 +129,7 @@ const BankAccountModal = ({ visible, onCancel, onSuccess }) => {
             footer={null}
             width={700}
             className="rounded-lg"
+            destroyOnClose
         >
             <div className="space-y-6">
                 {/* Existing Bank Accounts */}
@@ -121,13 +140,18 @@ const BankAccountModal = ({ visible, onCancel, onSuccess }) => {
                             type="primary"
                             icon={<PlusOutlined />}
                             onClick={() => setIsAddingNew(true)}
+                            disabled={loading.fetch || loading.delete}
                             className="bg-blue-500 hover:bg-blue-600"
                         >
                             Thêm tài khoản mới
                         </Button>
                     </div>
 
-                    {bankAccounts.length > 0 ? (
+                    {loading.fetch ? (
+                        <Card className="text-center py-8 bg-gray-50">
+                            <p className="text-gray-600">Đang tải danh sách tài khoản...</p>
+                        </Card>
+                    ) : bankAccounts.length > 0 ? (
                         <List
                             dataSource={bankAccounts}
                             renderItem={(account) => (
@@ -135,16 +159,18 @@ const BankAccountModal = ({ visible, onCancel, onSuccess }) => {
                                     actions={[
                                         <Popconfirm
                                             title="Bạn có chắc chắn muốn xóa tài khoản này?"
-                                            onConfirm={() => handleDeleteAccount(account.id)}
+                                            onConfirm={() => handleDeleteBankAccount(account.id)}
                                             okText="Xóa"
                                             cancelText="Hủy"
                                             okButtonProps={{ danger: true }}
+                                            disabled={loading.delete}
                                         >
                                             <Button
                                                 type="text"
                                                 icon={<DeleteOutlined />}
                                                 danger
                                                 size="small"
+                                                loading={loading.delete}
                                             />
                                         </Popconfirm>
                                     ]}
@@ -168,7 +194,7 @@ const BankAccountModal = ({ visible, onCancel, onSuccess }) => {
                                         description={
                                             <div className="space-y-1">
                                                 <p className="text-gray-700">
-                                                    <strong>Chủ tài khoản:</strong> {account.account_holder}
+                                                    <strong>Chủ tài khoản:</strong> {account.account_name}
                                                 </p>
                                                 <p className="text-gray-700">
                                                     <strong>Số tài khoản:</strong>
@@ -198,23 +224,27 @@ const BankAccountModal = ({ visible, onCancel, onSuccess }) => {
                             layout="vertical"
                             onFinish={handleAddBankAccount}
                             className="space-y-4"
+                            validateTrigger={['onChange', 'onBlur']}
                         >
                             <Form.Item
                                 label="Tên chủ tài khoản"
-                                name="account_holder"
+                                name="account_name"
                                 rules={[
-                                    { required: true, message: 'Vui lòng nhập tên chủ tài khoản' },
-                                    { min: 2, message: 'Tên phải có ít nhất 2 ký tự' }
+                                    { 
+                                        required: true, 
+                                        message: 'Vui lòng nhập tên chủ tài khoản',
+                                        whitespace: true 
+                                    },
+                                    { 
+                                        pattern: /^[A-Z\s]+$/, 
+                                        message: 'Tên phải viết hoa không dấu' 
+                                    }
                                 ]}
+                                normalize={value => value?.toUpperCase()}
                             >
                                 <Input
                                     placeholder="NGUYEN VAN A"
                                     size="large"
-                                    className="uppercase"
-                                    onChange={(e) => {
-                                        const value = e.target.value.toUpperCase();
-                                        form.setFieldsValue({ account_holder: value });
-                                    }}
                                 />
                             </Form.Item>
 
@@ -222,8 +252,14 @@ const BankAccountModal = ({ visible, onCancel, onSuccess }) => {
                                 label="Số tài khoản"
                                 name="account_number"
                                 rules={[
-                                    { required: true, message: 'Vui lòng nhập số tài khoản' },
-                                    { pattern: /^\d{6,20}$/, message: 'Số tài khoản phải từ 6-20 chữ số' }
+                                    { 
+                                        required: true, 
+                                        message: 'Vui lòng nhập số tài khoản' 
+                                    },
+                                    { 
+                                        pattern: /^\d{6,20}$/, 
+                                        message: 'Số tài khoản phải từ 6-20 chữ số' 
+                                    }
                                 ]}
                             >
                                 <Input
@@ -236,14 +272,20 @@ const BankAccountModal = ({ visible, onCancel, onSuccess }) => {
                             <Form.Item
                                 label="Ngân hàng"
                                 name="bank_code"
-                                rules={[{ required: true, message: 'Vui lòng chọn ngân hàng' }]}
+                                rules={[
+                                    { 
+                                        required: true, 
+                                        message: 'Vui lòng chọn ngân hàng' 
+                                    }
+                                ]}
                             >
                                 <Select
                                     placeholder="Chọn ngân hàng"
                                     size="large"
                                     showSearch
+                                    optionFilterProp="children"
                                     filterOption={(input, option) =>
-                                        option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                                        option.children.toLowerCase().includes(input.toLowerCase())
                                     }
                                 >
                                     {banks.map(bank => (
@@ -271,13 +313,14 @@ const BankAccountModal = ({ visible, onCancel, onSuccess }) => {
                                         form.resetFields();
                                     }}
                                     size="large"
+                                    disabled={loading.add}
                                 >
                                     Hủy
                                 </Button>
                                 <Button
                                     type="primary"
                                     htmlType="submit"
-                                    loading={loading}
+                                    loading={loading.add}
                                     size="large"
                                     className="bg-blue-500 hover:bg-blue-600"
                                 >
