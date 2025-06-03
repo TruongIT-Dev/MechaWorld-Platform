@@ -27,13 +27,14 @@ export default function Profile() {
       ],
     },
     {
-      key: "/member/profile/orders",
+      key: "/member/profile/orderHistory",
       icon: <ShoppingOutlined className="text-lg text-red-500" />,
-      label: <Link to="/member/profile/orderHistory">Đơn hàng</Link>,
-      children: [
-        { key: "/member/profile/orders/regular-auction", label: <Link to="/member/profile/orders/regular-auction">Mua bán & Đấu giá</Link> },
-        { key: "/member/profile/orders/exchange", label: <Link to="/member/profile/orders/exchange">Trao đổi</Link> },
-      ],
+      label: <Link to="/member/profile/orderhistory">Đơn mua</Link>,
+    },
+    {
+      key: "/member/profile/auctionHistory",
+      icon: <BankOutlined className="text-lg text-red-500" />,
+      label: <Link to="/member/profile/auctionHistory">Lịch sử đấu giá</Link>,
     },
     {
       key: "/member/profile/wallet",
@@ -72,7 +73,7 @@ export default function Profile() {
         <Menu
           mode="inline"
           selectedKeys={[location.pathname]} // Highlight menu dựa trên đường dẫn hiện tại
-          defaultOpenKeys={["/member/profile", "/member/profile/orderHistory"]} // Mở menu mặc định
+          defaultOpenKeys={["/member/profile"]} // Mở menu mặc định
           items={items}
         />
 

@@ -11,7 +11,7 @@ import TransactionHistory from './TransactionHistory';
 import DepositModal from './DepositModal';
 import WithdrawalModal from './WithdrawalModal';
 import BankAccountModal from './BankAccountModal';
-import WithdrawalHistory from './WithdrawalHistory';
+
 const { TabPane } = Tabs;
 
 const WalletPage = () => {
@@ -108,13 +108,6 @@ const WalletPage = () => {
               loading={loading}
             />
           </TabPane>
-          <TabPane tab="Danh sách hoàn tiền" key="3">
-            <WithdrawalHistory
-              bankAccounts={bankAccounts}
-              loading={loading}
-            />
-          </TabPane>
-
         </Tabs>
 
         {/* Modals */}

@@ -15,9 +15,6 @@ export default function OfferDetailModal({ open, offer, post, onClose, onAction 
     // console.log("OfferDetailModal - visible:", open);
     // console.log("OfferDetailModal - offer:", offer);
     // console.log("OfferDetailModal - post:", post);
-    // console.log("latestNote", latestNote);
-    const latestNote = offer?.negotiation_notes[0]
-
 
     if (!offer) {
         // console.log("OfferDetailModal - Not rendering due to missing offer data");
@@ -132,9 +129,9 @@ export default function OfferDetailModal({ open, offer, post, onClose, onAction 
             onCancel={onClose}
             footer={
                 <>
-                    {/* <Button key="reject" danger onClick={() => onAction(offer.id, "reject")}>
+                    <Button key="reject" danger onClick={() => onAction(offer.id, "reject")}>
                         Từ chối đề xuất
-                    </Button>, */}
+                    </Button>,
                     <Button key="accept" type="primary" className="bg-blue-500" onClick={() => onAction(offer.id, "accept")}>
                         Chấp nhận đề xuất
                     </Button>,
@@ -239,7 +236,7 @@ export default function OfferDetailModal({ open, offer, post, onClose, onAction 
             <Card title={`💬 Tin nhắn từ ${offererInfo.full_name}`}>
                 <div className="bg-blue-50 p-4 rounded-lg border-l-4 border-blue-400">
                     <Paragraph className="mb-0 text-gray-700 text-base">
-                        {latestNote?.content || offer.note || "Không có tin nhắn đề xuất nào."}
+                        {offer.note || "Không có tin nhắn đề xuất nào."}
                     </Paragraph>
                 </div>
             </Card>

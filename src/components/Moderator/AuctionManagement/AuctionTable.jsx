@@ -13,10 +13,7 @@ import {
   CheckCircleOutlined,
   CloseCircleOutlined,
   EyeOutlined,
-  EditOutlined,
-  ClockCircleOutlined
 } from "@ant-design/icons";
-import dayjs from "dayjs";
 
 const { Text } = Typography;
 
@@ -25,7 +22,6 @@ export default function AuctionTable({
     onViewDetail,
     onApprove,
     onReject,
-    onChangeTime, // Thêm prop này
     loadingAction,
     formatCurrency,
     getStatusTag
@@ -74,22 +70,6 @@ export default function AuctionTable({
             ),
         },
         {
-            title: "🕒 Thời gian",
-            key: "time",
-            width: 200,
-            render: (_, record) => (
-                <div className="text-center whitespace-nowrap">
-                    <div>
-                        <ClockCircleOutlined className="mr-1" />
-                        {dayjs(record.startTime).format('DD/MM HH:mm')}
-                    </div>
-                    <div className="text-xs text-gray-500">
-                        → {dayjs(record.endTime).format('DD/MM HH:mm')}
-                    </div>
-                </div>
-            ),
-        },
-        {
             title: "💰 Giá khởi điểm",
             dataIndex: "startingPrice",
             key: "startingPrice",
@@ -110,26 +90,6 @@ export default function AuctionTable({
             render: (price) => (
                 <div className="text-center">
                     <Text className="font-medium">{formatCurrency(price)}</Text>
-                </div>
-            ),
-        },
-        {
-            title: "⏱️ Chỉnh giờ",
-            key: "timeAdjust",
-            width: 100,
-            render: (_, record) => (
-                <div className="flex justify-center">
-                    {(record.status === "approved" || record.status === "active") && (
-                        <Tooltip title="Chỉnh thời gian">
-                            <Button
-                                type="default"
-                                size="small"
-                                icon={<EditOutlined />}
-                                onClick={() => onChangeTime(record)}
-                                className="text-orange-500 border-orange-300 hover:bg-orange-50"
-                            />
-                        </Tooltip>
-                    )}
                 </div>
             ),
         },
@@ -200,9 +160,9 @@ export default function AuctionTable({
                     showQuickJumper: true,
                     showTotal: (total, range) => `${range[0]}-${range[1]} của ${total} yêu cầu`
                 }}
-                scroll={{ x: 1500 }} // Tăng scroll để phù hợp với các cột mới
+                scroll={{ x: 1200 }}
                 className="auction-table"
             />
         </Card>
     );
-}
+  }

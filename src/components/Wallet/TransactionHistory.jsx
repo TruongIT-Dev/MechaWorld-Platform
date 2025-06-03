@@ -30,11 +30,6 @@ const statusMap = {
     failed: { text: 'Thất bại', color: 'error' }
 };
 
-const isPositiveTransaction = (entryType) => {
-  const positiveTypes = ['deposit', 'refund', 'release_funds', 'auction_deposit_refund', 'auction_compensation'];
-  return positiveTypes.includes(entryType);
-};
-
 const TransactionHistory = ({ transactions, loading }) => {
     const showTransactionDetail = (transaction) => {
         const typeInfo = transactionTypeMap[transaction.entry_type] || {};
@@ -70,13 +65,11 @@ const TransactionHistory = ({ transactions, loading }) => {
                     <div className="grid grid-cols-2 gap-4">
                         <div>
                             <p className="text-gray-600 text-sm mb-1">Số tiền</p>
-                            <p className={`text-lg font-semibold ${
-                                isPositiveTransaction(transaction.entry_type) ? 'text-green-600' : 'text-red-600'
-                            }`}>
-                                {isPositiveTransaction(transaction.entry_type) ? '+' : '-'}₫{transaction.amount.toLocaleString()}
+                            <p className={`text-lg font-semibold ${transaction.entry_type === 'deposit' ? 'text-green-600' : 'text-red-600'
+                                }`}>
+                                {transaction.entry_type === 'deposit' ? '+' : '-'}₫{transaction.amount.toLocaleString()}
                             </p>
                         </div>
-
                         <div>
                             <p className="text-gray-600 text-sm mb-1">Trạng thái</p>
                             <Tag color={statusInfo.color} className="text-sm">
@@ -156,15 +149,14 @@ const TransactionHistory = ({ transactions, loading }) => {
             dataIndex: "amount",
             key: "amount",
             width: 150,
-            render: (amount, record) => {
-  const isPositive = isPositiveTransaction(record.entry_type);
-  return (
-    <div className={`font-semibold ${isPositive ? 'text-green-600' : 'text-red-600'}`}>
-      {isPositive ? '+' : ''}{amount.toLocaleString()}₫
-    </div>
-  );
-}
-,
+            render: (amount, record) => (
+                <div className={`font-semibold ${record.entry_type === 'deposit' ? 'text-green-600' : 'text-red-600'
+                    }`}>
+                    <div>
+                        {record.entry_type === 'deposit' ? '+' : '-'}₫{amount.toLocaleString()}
+                    </div>
+                </div>
+            ),
             sorter: (a, b) => a.amount - b.amount
         },
         {

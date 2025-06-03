@@ -203,7 +203,7 @@ const FirstForm = ({ form, setIsPhoneVerified }) => {
 
         try {
             const response = await verifyOtp(user?.id, phoneNumber, otp);
-            console.log("✅ Xác thực OTP Response:", response);
+            // console.log("✅ Xác thực OTP Response:", response);
 
             if (response.status === 200) {
                 message.success("Xác thực OTP thành công!");
@@ -219,23 +219,11 @@ const FirstForm = ({ form, setIsPhoneVerified }) => {
                     phone_number: phoneNumber  // cập nhật số điện thoại
                 }));
 
+            } else {
+                message.error("OTP không đúng! Vui lòng kiểm tra lại.");
             }
         } catch (error) {
-            const statusCode = error.response?.status || error.status;
-            switch (statusCode) {
-                case 400:
-                    message.error("Mã OTP không hợp lệ hoặc đã hết hạn.");
-                    break;
-
-                case 401:
-                    message.error("Không có quyền truy cập. Vui lòng đăng nhập lại.");
-                    break;
-
-                default:
-                    // console.error("OTP verification error:", error);
-                    message.error("Lỗi khi xác thực OTP. Vui lòng thử lại sau.");
-                    break;
-            }
+            message.error("Lỗi khi xác thực OTP.");
         }
     };
 
