@@ -32,7 +32,7 @@ export default function PlaceDeposit({
   const [deliverDate, setDeliverDate] = useState(null);
   const [loading, setLoading] = useState(false);
   const exchange = exchangeDetails;
-
+  console.log(deliverData, "deliverData");
   const formatCurrency = (value) => {
     if (!value || value === 0) return "0";
     return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
@@ -42,9 +42,13 @@ export default function PlaceDeposit({
     setIsLoading(true);
     setLoading(true);
     try {
+      let storedata;
       await getDeliveryFee(exchange.current_user.id, exchange.id)
         .then((yourDeliFee) => {
           setDeliverData(yourDeliFee);
+          console.log(yourDeliFee, "yourDeliFee");
+          setTotal(yourDeliFee?.total);
+          storedata = yourDeliFee;
         })
         .catch((error) => {
           console.error("Error fetching delivery fee:", error);
@@ -66,15 +70,16 @@ export default function PlaceDeposit({
         service_id: 53321
       };
 
-      setTotal(deliverData?.total || 0);
+      // setTotal(deliverData?.total );
 
       await checkTimeDeliver(deliverDataCheck).then((res) => {
+        console.log(res, "res checkTimeDeliver");
         setDeliverDate(res.data);
         const key = `${firstUser.id}_${exchange.id}_deliverDate`;
 
         const data = {
           ...res.data.data.leadtime_order,
-          total: total,
+          total: storedata?.total,
           note: note
         };
         localStorage.setItem(key, JSON.stringify(data));
@@ -91,7 +96,7 @@ export default function PlaceDeposit({
   useEffect(() => {
     // Initialize AOS
     AOS.init({
-      duration: 800,
+      duration: 100,
       once: true,
     });
     fetchDeliveryFeeAndDeliveryTime();
@@ -196,7 +201,7 @@ export default function PlaceDeposit({
                 </div>
                 <div className="flex justify-between items-center px-4">
                   <Text>Phí giao hàng:</Text>
-                  <Text strong>{formatCurrency(deliveryDetails?.total || 0)} đ</Text>
+                  <Text strong>{formatCurrency(total )} đ</Text>
                 </div>
                 <div className="flex justify-between items-center px-4 italic text-gray-500">
                   <Text italic>Ngày nhận hàng dự kiến:</Text>

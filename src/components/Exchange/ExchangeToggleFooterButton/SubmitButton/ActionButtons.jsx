@@ -123,7 +123,7 @@ const ActionButtons = ({
   // Gọi API tính phí vận chuyển
   const handleDeliverFee = () => {
     // console.log("111");
-    setIsConfirmedModalVisible(false);
+    // setIsConfirmedModalVisible(false);
 
     const deliverData = {
       service_type_id: 2,
@@ -157,35 +157,18 @@ const ActionButtons = ({
                   // saveDeliveryFee(exchangeDetail.current_user.id, exchangeDetail.id, res.data.data);
         }
         saveDeliveryFee(exchangeDetail.current_user.id, exchangeDetail.id, res.data.data);
+        fetchExchangeData();
+
         moveToNextStage();
-        setIsAddressModalVisible(false);
+        // setIsAddressModalVisible(false);
+        setIsConfirmedModalVisible(false);
       } else {
         console.log("xảy ra lỗi");
       }
     })
   }
 
-  // Lấy key data từ LocalStorage
-  const getCachedDeliveryFee = (userId, exchangeId) => {
-    try {
-      const key = `${userId}_${exchangeId}_deliverFee`;
-      // console.log("Fetching from localStorage with key:", key);
 
-      const raw = localStorage.getItem(key);
-      if (!raw) {
-        console.warn("No data found in localStorage for key:", key);
-        return null;
-      }
-
-      const parsedData = JSON.parse(raw);
-      console.log("Parsed data from localStorage:", parsedData);
-
-      return parsedData;
-    } catch (error) {
-      console.error("Error reading from localStorage:", error);
-      return null;
-    }
-  };
   const getCachedDeliveryDate = (userId, exchangeId) => {
     try {
       const key = `${userId}_${exchangeId}_deliverDate`;
@@ -252,6 +235,7 @@ const ActionButtons = ({
       });
     } finally {
       setIsLoading(false);
+      fetchExchangeData();
     }
   };
 
