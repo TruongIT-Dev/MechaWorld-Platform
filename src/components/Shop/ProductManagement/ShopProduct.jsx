@@ -1,9 +1,9 @@
 import PropTypes from 'prop-types';
 import { useSelector, useDispatch } from "react-redux";
 import { useEffect, useState } from "react";
-import { CheckCircleOutlined, MoreOutlined, PlusOutlined } from "@ant-design/icons";
+import { CheckCircleOutlined, ClockCircleOutlined, DollarOutlined, MoreOutlined, PlusOutlined, SendOutlined, TrophyOutlined } from "@ant-design/icons";
 import { ExclamationCircleOutlined } from '@ant-design/icons';
-import { Table, Row, Button, Select, Input, Modal, Dropdown, Form, Tag, Col, Typography,DatePicker,message, Alert, Card } from "antd";
+import { Table, Row, Button, Select, Input, Modal, Dropdown, Form, Tag, Col, Typography, DatePicker, message, Alert, InputNumber } from "antd";
 
 import { SellingGundam, RestoreGundam } from "../../../apis/Sellers/APISeller";
 import { GetGundamByID } from '../../../apis/User/APIUser';
@@ -101,10 +101,10 @@ function ShopProduct({ isCreating, setIsCreating, isUpdating, setIsUpdating, set
         starting_price: Number(values.start_price),
       };
 
-      console.log("Dữ liệu gửi đi:", auctionRequestData);
+      // console.log("Dữ liệu gửi đi:", auctionRequestData);
 
       // Call API
-      const response = await CreateAuctionRequest(user.id, auctionRequestData);
+      await CreateAuctionRequest(user.id, auctionRequestData);
 
       // 1. Tắt modal
       setSellModalVisible(false);
@@ -113,25 +113,27 @@ function ShopProduct({ isCreating, setIsCreating, isUpdating, setIsUpdating, set
       message.success("Tạo yêu cầu đấu giá thành công!");
 
       // 3. Cập nhật state ngay lập tức mà không cần reload
-      // Giả sử bạn có một state gundamList chứa danh sách sản phẩm
-      // Bạn cần cập nhật status của sản phẩm vừa được đấu giá
       setGundamList(prevList =>
         prevList.map(item =>
           item.gundam_id === selectedProduct.gundam_id
-            ? { ...item, status: 'pending' } // hoặc status mới tùy API trả về
+            ? { ...item, status: 'pending' }
             : item
         )
       );
 
-      // Hoặc nếu bạn sử dụng fetchGundamList để lấy dữ liệu mới
-      await fetchGundamList(); // Đảm bảo hàm này cập nhật state đúng cách
+      await fetchGundamList();
 
       // 4. Reset form
       form.resetFields();
 
     } catch (error) {
-      console.error("Lỗi khi tạo yêu cầu đấu giá:", error);
-      message.error(error.message || "Có lỗi xảy ra khi gửi yêu cầu đấu giá");
+      if (error.response && error.response.status === 403) {
+        message.error("Bạn không đủ lượt mở đấu giá");
+      } else if (error.status === 403) {
+        message.error("Bạn không đủ lượt mở đấu giá");
+      } else {
+        message.error(error.message || "Có lỗi xảy ra khi gửi yêu cầu đấu giá");
+      }
     } finally {
       setLoading(false);
     }
@@ -150,9 +152,9 @@ function ShopProduct({ isCreating, setIsCreating, isUpdating, setIsUpdating, set
         }
         return item;
       });
-      
+
       setGundamList(updatedList);
-      applyFilters(updatedList); // Áp dụng lại bộ lọc với danh sách mới
+      applyFilters(updatedList)
 
       // Cập nhật bộ đếm số lượng sản phẩm đăng bán trong Redux
       dispatch(incrementListingsUsed());
@@ -182,9 +184,9 @@ function ShopProduct({ isCreating, setIsCreating, isUpdating, setIsUpdating, set
         }
         return item;
       });
-      
+
       setGundamList(updatedList);
-      applyFilters(updatedList); // Áp dụng lại bộ lọc với danh sách mới
+      applyFilters(updatedList);
 
       // Cập nhật bộ đếm số lượng sản phẩm đăng bán trong Redux
       dispatch(decrementListingsUsed());
@@ -210,10 +212,10 @@ function ShopProduct({ isCreating, setIsCreating, isUpdating, setIsUpdating, set
   const handleMenuClick = async (key, record) => {
     switch (key) {
       case "edit":
-        console.log("📝 Chỉnh sửa sản phẩm:", record);
+        // console.log("📝 Chỉnh sửa sản phẩm:", record);
         setGundamData(record);
         setIsUpdating(true);
-        // Không cần modal cảnh báo cho edit
+
         break;
 
       case "delete":
@@ -253,14 +255,13 @@ function ShopProduct({ isCreating, setIsCreating, isUpdating, setIsUpdating, set
     try {
       switch (type) {
         case 'delete':
-          console.log("❌ Xóa sản phẩm:", record);
-          // Thực hiện xóa sản phẩm
+          // console.log("❌ Xóa sản phẩm:", record);
           await DeleteGundam(record.gundam_id, user.id);
           message.success('Đã xóa sản phẩm thành công!');
           break;
 
         case 'unsell':
-          console.log("🚫 Hủy bán sản phẩm:", record);
+          // console.log("🚫 Hủy bán sản phẩm:", record);
           await handleRestoreProduct(record);
           message.success('Đã hủy bán sản phẩm thành công!');
           break;
@@ -623,205 +624,261 @@ function ShopProduct({ isCreating, setIsCreating, isUpdating, setIsUpdating, set
 
         {/* Auction Modal */}
         <Modal
-          title="Tạo yêu cầu đấu giá"
+          title={
+            <div className="flex items-center space-x-2">
+              <TrophyOutlined className="text-blue-600" />
+              <span className="text-lg font-bold text-gray-800">Tạo yêu cầu đấu giá</span>
+            </div>
+          }
           open={sellModalVisible}
           onCancel={() => setSellModalVisible(false)}
           footer={null}
-          width={600}
+          width={650}
+          centered
+          bodyStyle={{ maxHeight: '80vh' }}
+          className="auction-modal"
         >
           {selectedProduct && (
-            <div className="mb-4 p-4 border rounded-lg bg-gray-50">
-              <div className="flex items-center space-x-4">
+            <div className="mb-4">
+              {/* Product Info Card */}
+              <div className="flex items-center space-x-3 p-3 bg-blue-50 rounded-lg border">
                 <img
                   src={selectedProduct.primary_image_url}
                   alt={selectedProduct.name}
-                  className="w-20 h-20 object-cover rounded"
+                  className="w-24 h-24 object-cover rounded"
                 />
-                <div>
-                  <h3 className="font-semibold">{selectedProduct.name}</h3>
-                  <p>Phân khúc: {selectedProduct.grade}</p>
-                  <p>Tình trạng: {selectedProduct.condition === 'new' ? 'Hàng mới' :
-                    selectedProduct.condition === 'open box' ? 'Đã mở hộp' : 'Đã qua sử dụng'}</p>
+                <div className="flex-1">
+                  <h3 className="font-semibold text-gray-800 mb-1">{selectedProduct.name}</h3>
+                  <div className="flex items-center space-x-4 text-base">
+                    <span className="text-gray-600">Phân khúc: <Tag color="blue" className="ml-1">{selectedProduct.grade}</Tag></span>
+                    <span className="text-gray-600">Tình trạng:
+                      <Tag color="green" className="ml-1">
+                        {selectedProduct.condition === 'new' ? 'Hàng mới' :
+                          selectedProduct.condition === 'open box' ? 'Đã mở hộp' : 'Đã qua sử dụng'}
+                      </Tag>
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Auction Rules - Compact */}
+              <div className="mt-3 p-3 bg-yellow-50 rounded-lg border border-yellow-200">
+                <div className="flex items-start space-x-2">
+                  <ExclamationCircleOutlined className="text-orange-500 mt-0.5" />
+                  <div className="flex-1">
+                    <h4 className="font-semibold text-gray-800 mb-2 text-sm">Quy định đấu giá</h4>
+                    <div className="grid grid-cols-2 gap-2 text-sm text-gray-700">
+                      <div>• Giá khởi điểm ≥ 100,000đ</div>
+                      <div>• Bước giá: 3-10% giá khởi điểm</div>
+                      <div>• Giá mua ngay ≥ 150% giá khởi điểm</div>
+                      <div>• Bắt đầu sau ít nhất 2 ngày</div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
           )}
 
           <Form form={form} onFinish={handleFinish} layout="vertical">
-            <Row gutter={16}>
-              <Col span={12}>
-                <Form.Item
-                  label="Giá khởi điểm (đ)"
-                  name="start_price"
-                  rules={[
-                    { required: true, message: 'Vui lòng nhập giá khởi điểm' },
-                    {
-                      pattern: /^[1-9]\d*$/,
-                      message: 'Giá phải là số nguyên dương'
-                    },
-                    {
-                      validator: (_, value) =>
-                        value >= 100000
-                          ? Promise.resolve()
-                          : Promise.reject(new Error('Giá khởi điểm phải từ 100000 VNĐ trở lên')),
-                    }
-                  ]}
-                  extra="Vui lòng nhập số tiền từ 100000 VNĐ trở lên."
-                >
-                  <Input
-                    type="number"
-                    className="w-full"
-                    min={100000}
-                    addonAfter="đ"
-                  />
-                </Form.Item>
-              </Col>
-              <Col span={12}>
-                <Form.Item
-                  label="Bước giá tối thiểu (đ)"
-                  name="step"
-                  rules={[
-                    { required: true, message: 'Vui lòng nhập bước giá' },
-                    {
-                      validator: (_, value) => {
-                        const startingPrice = form.getFieldValue('start_price');
-                        if (!value || !startingPrice) {
-                          return Promise.resolve();
-                        }
+            {/* Pricing Section */}
+            <div className="space-y-4">
+              <div className="flex items-center space-x-2 mb-3">
+                <DollarOutlined className="text-green-600" />
+                <span className="font-semibold">Thiết lập giá</span>
+              </div>
 
-                        const minStep = Math.max(Math.ceil(startingPrice * 0.03), 10000); // lấy giá trị lớn hơn giữa 3% và 10,000
-                        const maxStep = Math.floor(startingPrice * 0.1); // 10%
-
-                        if (value >= minStep && value <= maxStep) {
-                          return Promise.resolve();
-                        }
-
-                        return Promise.reject(
-                          new Error(`Bước giá phải nằm trong khoảng từ ${minStep.toLocaleString()} đến ${maxStep.toLocaleString()} đ`)
-                        );
+              <Row gutter={12}>
+                <Col span={8}>
+                  <Form.Item
+                    label="Giá khởi điểm (đ)"
+                    name="start_price"
+                    rules={[
+                      { required: true, message: 'Vui lòng nhập giá khởi điểm' },
+                      {
+                        pattern: /^[1-9]\d*$/,
+                        message: 'Giá phải là số nguyên dương'
                       },
-                    },
-                  ]}
-                >
+                    ]}
+                  >
+                    <InputNumber
+                      min={100000}
+                      placeholder="100,000"
+                      suffix="đ"
+                      style={{ width: "100%" }}
+                      formatter={(value) =>
+                        `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                      }
+                      parser={(value) => value.replace(/[^0-9]/g, "")}
+                    />
+                  </Form.Item>
+                </Col>
+                <Col span={8}>
+                  <Form.Item
+                    label="Bước giá (đ)"
+                    name="step"
+                    rules={[
+                      { required: true, message: 'Vui lòng nhập bước giá' },
+                      {
+                        validator: (_, value) => {
+                          const startingPrice = form.getFieldValue('start_price');
+                          if (!value || !startingPrice) {
+                            return Promise.resolve();
+                          }
 
-                  <Input
-                    type="number"
-                    className="w-full"
-                    min={1}
-                    addonAfter="đ"
-                  />
-                </Form.Item>
-              </Col>
-            </Row>
+                          const minStep = Math.max(Math.ceil(startingPrice * 0.03), 10000);
+                          const maxStep = Math.floor(startingPrice * 0.1);
 
-            <Row gutter={16}>
-              <Col span={12}>
-                <Form.Item
-                  label="Giá mua ngay (đ)"
-                  name="final_price"
-                  rules={[
-                    { required: true, message: 'Vui lòng nhập giá mua ngay' },
-                    ({ getFieldValue }) => ({
-                      validator(_, value) {
-                        const startPrice = getFieldValue('start_price');
-                        const minFinalPrice = startPrice * 1.5;
+                          if (value >= minStep && value <= maxStep) {
+                            return Promise.resolve();
+                          }
 
-                        if (!value || value >= minFinalPrice) {
+                          return Promise.reject(
+                            new Error(`${minStep.toLocaleString()}-${maxStep.toLocaleString()}đ`)
+                          );
+                        },
+                      },
+                    ]}
+                  >
+                    <InputNumber
+                      min={1}
+                      placeholder="10,000"
+                      suffix="đ"
+                      style={{ width: "100%" }}
+                      formatter={(value) =>
+                        `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                      }
+                      parser={(value) => value.replace(/[^0-9]/g, "")}
+                    />
+                  </Form.Item>
+                </Col>
+                <Col span={8}>
+                  <Form.Item
+                    label="Giá mua ngay (đ)"
+                    name="final_price"
+                    rules={[
+                      { required: true, message: 'Vui lòng nhập giá mua ngay' },
+                      ({ getFieldValue }) => ({
+                        validator(_, value) {
+                          const startPrice = getFieldValue('start_price');
+                          const minFinalPrice = startPrice * 1.5;
+
+                          if (!value || value >= minFinalPrice) {
+                            return Promise.resolve();
+                          }
+
+                          return Promise.reject(
+                            new Error(`Tối thiểu: ${minFinalPrice.toLocaleString()}đ`)
+                          );
+                        },
+                      }),
+                    ]}
+                  >
+                    <InputNumber
+                      min={1}
+                      placeholder="150,000"
+                      suffix="đ"
+                      style={{ width: "100%" }}
+                      formatter={(value) =>
+                        `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                      }
+                      parser={(value) => value.replace(/[^0-9]/g, "")}
+                    />
+                  </Form.Item>
+                </Col>
+              </Row>
+            </div>
+
+            {/* Time Section */}
+            <div className="space-y-4 mt-6">
+              <div className="flex items-center space-x-2 mb-3">
+                <ClockCircleOutlined className="text-blue-600" />
+                <span className="font-semibold">Thời gian đấu giá</span>
+              </div>
+
+              <Row gutter={12}>
+                <Col span={12}>
+                  <Form.Item
+                    label="Ngày bắt đầu"
+                    name="start_time"
+                    rules={[
+                      { required: true, message: 'Vui lòng chọn ngày bắt đầu' },
+                      ({ getFieldValue }) => ({
+                        validator(_, value) {
+                          if (!value || !value.isValid()) {
+                            return Promise.reject(new Error('Thời gian không hợp lệ'));
+                          }
+                          const minStartDate = moment().add(2, 'days').startOf('day');
+                          if (value.isBefore(minStartDate)) {
+                            return Promise.reject(new Error('Phải sau ít nhất 2 ngày'));
+                          }
                           return Promise.resolve();
-                        }
+                        },
+                      }),
+                    ]}
+                  >
+                    <DatePicker
+                      format="DD/MM/YYYY"
+                      className="w-full"
+                      placeholder="Chọn ngày bắt đầu"
+                      disabledDate={(current) =>
+                        current && current < moment().add(2, 'days').startOf('day')
+                      }
+                    />
+                  </Form.Item>
+                </Col>
 
-                        return Promise.reject(
-                          new Error(`Giá mua ngay phải lớn hơn hoặc bằng 150% giá khởi điểm (${minFinalPrice.toLocaleString()} đ)`)
-                        );
-                      },
-                    }),
-                  ]}
-                  extra="Giá mua ngay phải lớn hơn hoặc bằng 150% giá khởi điểm."
-                >
-                  <Input
-                    type="number"
-                    className="w-full"
-                    min={1}
-                    addonAfter="đ"
-                  />
-                </Form.Item>
+                <Col span={12}>
+                  <Form.Item
+                    label="Ngày kết thúc"
+                    name="end_time"
+                    rules={[
+                      { required: true, message: 'Vui lòng chọn ngày kết thúc' },
+                      ({ getFieldValue }) => ({
+                        validator(_, value) {
+                          const startDate = getFieldValue('start_time');
+                          if (!value || !value.isValid()) {
+                            return Promise.reject(new Error('Thời gian không hợp lệ'));
+                          }
+                          if (!startDate || value.isAfter(startDate)) {
+                            return Promise.resolve();
+                          }
+                          return Promise.reject(new Error('Phải sau ngày bắt đầu'));
+                        },
+                      }),
+                    ]}
+                  >
+                    <DatePicker
+                      format="DD/MM/YYYY"
+                      className="w-full"
+                      placeholder="Chọn ngày kết thúc"
+                      disabledDate={(current) =>
+                        current && current < moment().add(2, 'days').startOf('day')
+                      }
+                    />
+                  </Form.Item>
+                </Col>
+              </Row>
+            </div>
 
-              </Col>
-            </Row>
-
-            <Row gutter={16}>
-              <Col span={12}>
-                <Form.Item
-                  label="Thời gian bắt đầu"
-                  name="start_time"
-                  rules={[
-                    { required: true, message: 'Vui lòng chọn ngày bắt đầu' },
-                    ({ getFieldValue }) => ({
-                      validator(_, value) {
-                        if (!value || !value.isValid()) {
-                          return Promise.reject(new Error('Thời gian không hợp lệ'));
-                        }
-                        const minStartDate = moment().add(2, 'days').startOf('day');
-                        if (value.isBefore(minStartDate)) {
-                          return Promise.reject(new Error('Thời gian bắt đầu phải cách ngày hôm nay ít nhất 2 ngày'));
-                        }
-                        return Promise.resolve();
-                      },
-                    }),
-                  ]}
-                >
-                  <DatePicker
-                    format="YYYY-MM-DD"
-                    className="w-full"
-                    disabledDate={(current) =>
-                      current && current < moment().add(2, 'days').startOf('day')
-                    }
-                  />
-                </Form.Item>
-              </Col>
-
-              <Col span={12}>
-                <Form.Item
-                  label="Thời gian kết thúc"
-                  name="end_time"
-                  rules={[
-                    { required: true, message: 'Vui lòng chọn ngày kết thúc' },
-                    ({ getFieldValue }) => ({
-                      validator(_, value) {
-                        const startDate = getFieldValue('start_time');
-                        if (!value || !value.isValid()) {
-                          return Promise.reject(new Error('Thời gian không hợp lệ'));
-                        }
-                        if (!startDate || value.isAfter(startDate)) {
-                          return Promise.resolve();
-                        }
-                        return Promise.reject(new Error('Thời gian kết thúc phải sau thời gian bắt đầu'));
-                      },
-                    }),
-                  ]}
-                >
-                  <DatePicker
-                    format="YYYY-MM-DD"
-                    className="w-full"
-                    disabledDate={(current) =>
-                      current && current < moment().add(2, 'days').startOf('day')
-                    }
-                  />
-                </Form.Item>
-              </Col>
-            </Row>
-
-            <Form.Item className="flex justify-center mt-4">
+            {/* Action Buttons */}
+            <div className="flex justify-end space-x-3 pt-4 mt-6 border-t">
+              <Button
+                size="large"
+                onClick={() => setSellModalVisible(false)}
+              >
+                Hủy bỏ
+              </Button>
               <Button
                 type="primary"
                 htmlType="submit"
-                className="bg-blue-600 hover:bg-blue-500 text-white w-full"
+                className="bg-blue-600 hover:bg-blue-700"
                 size="large"
                 loading={loading}
+                icon={<SendOutlined />}
               >
                 Gửi yêu cầu đấu giá
               </Button>
-            </Form.Item>
+            </div>
           </Form>
         </Modal>
       </div>
