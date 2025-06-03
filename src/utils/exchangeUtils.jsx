@@ -26,8 +26,8 @@ export const saveDeliveryFee = async (userID, exchangeID, feeData) => {
     );
 
     // Lưu vào localStorage với cùng cấu trúc
-    // const localStorageKey = `${userID}_${exchangeID}_deliverFee`;
-    // localStorage.setItem(localStorageKey, JSON.stringify(feeData));
+    const localStorageKey = `${userID}_${exchangeID}_deliverFee`;
+    localStorage.setItem(localStorageKey, JSON.stringify(feeData));
 
     console.log("Phí giao hàng đã được lưu thành công.");
   } catch (error) {
@@ -76,7 +76,7 @@ export const saveDeliveryDate = async (userID, exchangeID, dateData) => {
       },
       { merge: true }
     );
-    console.log('Thông tin giao hàng',dateData)
+
     // Lưu vào localStorage với cùng cấu trúc
     const localStorageKey = `${userID}_${exchangeID}_deliverDate`;
     localStorage.setItem(localStorageKey, JSON.stringify(dateData));

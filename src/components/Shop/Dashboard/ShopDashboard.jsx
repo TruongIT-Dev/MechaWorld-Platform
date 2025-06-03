@@ -31,8 +31,8 @@ const ShopDashboard = () => {
 
 
   // Fetch initial data
-  useEffect(() => {
-    // console.log(sellerPlan);
+  useEffect( () => {
+    console.log(sellerPlan);
     // Get InfoShop
     GetShopInfoById(user.id)
       .then((res) => {

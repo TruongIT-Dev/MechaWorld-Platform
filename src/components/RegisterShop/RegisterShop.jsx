@@ -115,7 +115,7 @@ export default function RegisterShop() {
         if (shopExists) {
           // Cập nhật shop nếu tồn tại
           await UpdateShopName(values.shop_name, user?.id);
-          // console.log("Shop name updated");
+          console.log("Shop name updated");
         } else {
           // Tạo mới nếu chưa tồn tại
           await CreateShop(values.shop_name, user?.id);

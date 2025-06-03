@@ -1,7 +1,6 @@
-import { useState, useEffect } from 'react';
-import { Typography, Space, Button, Alert, message } from 'antd';
+import { useState } from 'react';
+import { Typography, Space, Button, Alert } from 'antd';
 import { DollarOutlined, ReloadOutlined, ExportOutlined } from '@ant-design/icons';
-import { GetWithdrawalRequests } from '../../../apis/Moderator/APIModerator';
 
 // Import components
 import WithdrawalStatistics from './WithdrawalStatistics';
@@ -12,9 +11,129 @@ import ProcessRequestModal from './ProcessRequestModal';
 
 const { Title, Text } = Typography;
 
+// Mock data cho yêu cầu rút tiền
+const withdrawalData = [
+  {
+    key: "1",
+    id: "WD001",
+    user: {
+      name: "Nguyễn Văn An",
+      avatar: "https://i.pravatar.cc/32",
+      phone: "0901234567",
+      email: "nguyenvana@email.com",
+      role: "seller",
+      accountBalance: 5200000,
+      totalEarned: 15600000
+    },
+    amount: 2000000,
+    bankInfo: {
+      bankName: "Vietcombank",
+      accountNumber: "1234567890",
+      accountHolder: "NGUYEN VAN AN",
+      branch: "Chi nhánh Quận 1"
+    },
+    requestDate: "2024-05-31 14:30",
+    status: "pending",
+    priority: "normal",
+    notes: "Rút tiền bán hàng tháng 5",
+    transactionHistory: [
+      { date: "2024-05-30", type: "Bán hàng", amount: 800000, status: "completed" },
+      { date: "2024-05-28", type: "Bán hàng", amount: 1200000, status: "completed" },
+      { date: "2024-05-25", type: "Rút tiền", amount: -500000, status: "completed" }
+    ]
+  },
+  {
+    key: "2",
+    id: "WD002",
+    user: {
+      name: "Trần Thị Bảo",
+      avatar: "https://i.pravatar.cc/32",
+      phone: "0907654321",
+      email: "tranthib@email.com",
+      role: "member",
+      accountBalance: 850000,
+      totalEarned: 2400000
+    },
+    amount: 500000,
+    bankInfo: {
+      bankName: "Techcombank",
+      accountNumber: "9876543210",
+      accountHolder: "TRAN THI BAO",
+      branch: "Chi nhánh Quận 3"
+    },
+    requestDate: "2024-05-31 10:15",
+    status: "pending",
+    priority: "high",
+    notes: "Cần rút gấp để thanh toán",
+    transactionHistory: [
+      { date: "2024-05-29", type: "Hoàn tiền", amount: 300000, status: "completed" },
+      { date: "2024-05-20", type: "Bán item", amount: 550000, status: "completed" }
+    ]
+  },
+  {
+    key: "3",
+    id: "WD003",
+    user: {
+      name: "Lê Hoàng Cường",
+      avatar: "https://i.pravatar.cc/32",
+      phone: "0909876543",
+      email: "lehoangcuong@email.com",
+      role: "seller",
+      accountBalance: 0,
+      totalEarned: 8900000
+    },
+    amount: 1500000,
+    bankInfo: {
+      bankName: "BIDV",
+      accountNumber: "5555666677",
+      accountHolder: "LE HOANG CUONG",
+      branch: "Chi nhánh Quận 5"
+    },
+    requestDate: "2024-05-30 16:45",
+    status: "completed",
+    priority: "normal",
+    notes: "Rút tiền định kỳ",
+    completedDate: "2024-05-31 09:20",
+    transactionCode: "VCB240531092001",
+    processedBy: "Admin",
+    transactionHistory: [
+      { date: "2024-05-28", type: "Bán hàng", amount: 1200000, status: "completed" },
+      { date: "2024-05-25", type: "Bán hàng", amount: 800000, status: "completed" }
+    ]
+  },
+  {
+    key: "4",
+    id: "WD004",
+    user: {
+      name: "Phạm Minh Dũng",
+      avatar: "https://i.pravatar.cc/32",
+      phone: "0908765432",
+      email: "phamminhd@email.com",
+      role: "member",
+      accountBalance: 350000,
+      totalEarned: 1200000
+    },
+    amount: 800000,
+    bankInfo: {
+      bankName: "ACB",
+      accountNumber: "1111222233",
+      accountHolder: "PHAM MINH DUNG",
+      branch: "Chi nhánh Tân Bình"
+    },
+    requestDate: "2024-05-29 20:30",
+    status: "rejected",
+    priority: "normal",
+    notes: "Rút tiền mua gundam mới",
+    rejectedDate: "2024-05-30 08:15",
+    rejectedReason: "Số dư tài khoản không đủ. Chỉ có 350,000₫ nhưng yêu cầu rút 800,000₫",
+    rejectedBy: "Admin",
+    transactionHistory: [
+      { date: "2024-05-25", type: "Hoàn tiền", amount: 350000, status: "completed" }
+    ]
+  }
+];
+
 const ModWithdrawals = () => {
-  const [withdrawalData, setWithdrawalData] = useState([]);
-  const [loading, setLoading] = useState(false);
   const [filteredStatus, setFilteredStatus] = useState(null);
   const [filteredRole, setFilteredRole] = useState(null);
   const [searchText, setSearchText] = useState("");
@@ -22,23 +141,6 @@ const ModWithdrawals = () => {
   const [isProcessModalVisible, setIsProcessModalVisible] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState(null);
   const [dateRange, setDateRange] = useState(null);
-
-  // Fetch withdrawal requests from API
-  const fetchWithdrawalRequests = async () => {
-    try {
-      setLoading(true);
-      const response = await GetWithdrawalRequests();
-      setWithdrawalData(response.data || []);
-    } catch (error) {
-      message.error('Không thể tải danh sách yêu cầu rút tiền');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchWithdrawalRequests();
-  }, []);
 
   // Thống kê tổng quan
   const stats = {
@@ -54,13 +156,15 @@ const ModWithdrawals = () => {
   // Lọc dữ liệu
   const filteredData = withdrawalData.filter((item) => {
     const matchesStatus = filteredStatus ? item.status === filteredStatus : true;
+    const matchesRole = filteredRole ? item.user.role === filteredRole : true;
     const matchesSearch = searchText ? (
+      item.user.name.toLowerCase().includes(searchText.toLowerCase()) ||
+      item.user.email.toLowerCase().includes(searchText.toLowerCase()) ||
       item.id.toLowerCase().includes(searchText.toLowerCase()) ||
-      item.bank_account.account_number.includes(searchText) ||
-      (item.user_id && item.user_id.toLowerCase().includes(searchText.toLowerCase()))
+      item.bankInfo.accountNumber.includes(searchText)
     ) : true;
 
-    return matchesStatus && matchesSearch;
+    return matchesStatus && matchesRole && matchesSearch;
   });
 
   // Xử lý xem chi tiết
@@ -77,37 +181,30 @@ const ModWithdrawals = () => {
 
   // Xử lý hoàn thành rút tiền
   const handleCompleteWithdrawal = async (requestId, transactionCode) => {
-    try {
-      // Gọi API hoàn thành
-      // const response = await CompleteWithdrawalRequest(requestId, transactionCode);
-      message.success('Đã hoàn thành yêu cầu rút tiền');
-      fetchWithdrawalRequests();
-      return { success: true };
-    } catch (error) {
-      message.error('Không thể hoàn thành yêu cầu');
-      return { success: false };
-    }
+    // Gọi API hoàn thành
+    console.log('Complete withdrawal:', requestId, transactionCode);
+    // PATCH /v1/mod/withdrawal-requests/:requestID/complete
+
+    // Simulate API call
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve({ success: true });
+      }, 1000);
+    });
   };
 
   // Xử lý từ chối rút tiền
   const handleRejectWithdrawal = async (requestId, rejectReason) => {
-    try {
-      // Gọi API từ chối
-      // const response = await RejectWithdrawalRequest(requestId, rejectReason);
-      message.success('Đã từ chối yêu cầu rút tiền');
-      fetchWithdrawalRequests();
-      return { success: true };
-    } catch (error) {
-      message.error('Không thể từ chối yêu cầu');
-      return { success: false };
-    }
-  };
+    // Gọi API từ chối
+    console.log('Reject withdrawal:', requestId, rejectReason);
+    // PATCH /v1/mod/withdrawal-requests/:requestID/reject
 
-  // Format date for display
-  const formatDate = (dateString) => {
-    if (!dateString) return '';
-    const date = new Date(dateString);
-    return date.toLocaleString('vi-VN');
+    // Simulate API call
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve({ success: true });
+      }, 1000);
+    });
   };
 
   return (
@@ -124,13 +221,7 @@ const ModWithdrawals = () => {
           </Text>
         </div>
         <Space>
-          <Button 
-            icon={<ReloadOutlined />} 
-            onClick={fetchWithdrawalRequests}
-            loading={loading}
-          >
-            Làm mới
-          </Button>
+          <Button icon={<ReloadOutlined />}>Làm mới</Button>
           <Button icon={<ExportOutlined />}>Xuất báo cáo</Button>
         </Space>
       </div>
@@ -165,7 +256,6 @@ const ModWithdrawals = () => {
       {/* Withdrawals Table */}
       <WithdrawalsTable
         data={filteredData}
-        loading={loading}
         onViewDetails={handleViewDetails}
         onProcessRequest={handleProcessRequest}
       />

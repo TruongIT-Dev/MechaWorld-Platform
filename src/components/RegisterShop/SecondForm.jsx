@@ -67,7 +67,7 @@ const SecondForm = ({ user, setUser, setHasAddress }) => {
             const pickupAddresses = response?.data?.filter(addr => addr.is_pickup_address === true);
             // console.log(pickupAddresses);
             setAddresses(pickupAddresses);
-            // console.log("Fetched User Addresses:", response);
+            console.log("Fetched User Addresses:", response);
         } catch (error) {
             console.error('Lỗi khi lấy danh sách địa chỉ:', error);
             message.error('Không thể tải thông tin địa chỉ');
@@ -364,11 +364,11 @@ const SecondForm = ({ user, setUser, setHasAddress }) => {
                             try {
                                 const values = await form.validateFields();
                                 if (addresses.length > 0) {
-                                    // console.log("Dữ liệu address ht: ", addresses);
-                                    // console.log("Dữ liệu form: ", values);
+                                    console.log("Dữ liệu address ht: ", addresses);
+                                    console.log("Dữ liệu form: ", values);
                                     handleUpdateAddress(values, addresses);
                                 } else {
-                                    // console.log("Dữ liệu form: ", values);
+                                    console.log("Dữ liệu form: ", values);
                                     handleAddNewAddress(values);
                                 }
 

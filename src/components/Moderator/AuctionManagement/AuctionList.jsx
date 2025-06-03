@@ -1,13 +1,11 @@
-import { Table, Button, Tooltip, Modal, Input, message, Popconfirm, Descriptions, DatePicker, Form } from "antd";
-import { InfoCircleOutlined, EditOutlined } from "@ant-design/icons";
+import { Table, Button, Tooltip, Modal, Input, message, Popconfirm, Descriptions } from "antd";
+import { InfoCircleOutlined } from "@ant-design/icons";
 import { useEffect, useState } from "react";
 import {
   GetListAuctionRequestsForModerator,
   ApproveAuctionRequest,
   RejectAuctionRequest,
-  UpdateAuctionTime,
 } from "../../../apis/Moderator/APIModerator";
-import dayjs from "dayjs";
 
 const formatCurrency = (value) =>
   value?.toLocaleString("vi-VN") + " đ";
@@ -20,9 +18,6 @@ const AuctionList = ({ searchTerm, filteredStatus }) => {
   const [loadingAction, setLoadingAction] = useState(false);
   const [detailModalVisible, setDetailModalVisible] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
-  const [timeModalVisible, setTimeModalVisible] = useState(false);
-  const [selectedAuction, setSelectedAuction] = useState(null);
-  const [form] = Form.useForm();
 
   const fetchData = () => {
     GetListAuctionRequestsForModerator()
@@ -35,8 +30,6 @@ const AuctionList = ({ searchTerm, filteredStatus }) => {
           status: item.status,
           startingPrice: item.starting_price,
           stepPrice: item.bid_increment,
-          startTime: item.start_time,
-          endTime: item.end_time,
           gundamSnapshot: item.gundam_snapshot // Store the entire snapshot
         }));
         setAuctionData(formatted);
@@ -80,27 +73,6 @@ const AuctionList = ({ searchTerm, filteredStatus }) => {
     setSelectedRequestId(null);
   };
 
-  const handleUpdateTime = async () => {
-    try {
-      const values = await form.validateFields();
-      setLoadingAction(true);
-      
-      await UpdateAuctionTime(selectedAuction.id, {
-        start_time: values.startTime.format('YYYY-MM-DDTHH:mm:ssZ'),
-        end_time: values.endTime.format('YYYY-MM-DDTHH:mm:ssZ')
-      });
-      
-      message.success("Cập nhật thời gian đấu giá thành công!");
-      fetchData();
-      setTimeModalVisible(false);
-    } catch (error) {
-      message.error("Lỗi khi cập nhật thời gian đấu giá!");
-      console.error(error);
-    } finally {
-      setLoadingAction(false);
-    }
-  };
-
   const openRejectModal = (id) => {
     setSelectedRequestId(id);
     setRejectModalVisible(true);
@@ -109,15 +81,6 @@ const AuctionList = ({ searchTerm, filteredStatus }) => {
   const showDetailModal = (record) => {
     setSelectedProduct(record.gundamSnapshot);
     setDetailModalVisible(true);
-  };
-
-  const showTimeModal = (record) => {
-    setSelectedAuction(record);
-    form.setFieldsValue({
-      startTime: dayjs(record.startTime),
-      endTime: dayjs(record.endTime)
-    });
-    setTimeModalVisible(true);
   };
 
   const filteredData = auctionData.filter(
@@ -138,24 +101,24 @@ const AuctionList = ({ searchTerm, filteredStatus }) => {
       dataIndex: "gundamName",
       key: "gundamName",
     },
-    {
-      title: "Trạng thái",
-      dataIndex: "status",
-      key: "status",
-      render: (status) => {
-        let className = '';
-        
-        if (status === 'approved') {
-          className = 'text-green-600 bg-green-50 px-2 py-1 rounded font-medium';
-        } else if (status === 'rejected') {
-          className = 'text-red-600 bg-red-50 px-2 py-1 rounded font-medium';
-        } else {
-          className = 'text-yellow-600 bg-yellow-50 px-2 py-1 rounded font-medium';
-        }
-        
-        return <span className={className}>{status}</span>;
+     {
+    title: "Trạng thái",
+    dataIndex: "status",
+    key: "status",
+    render: (status) => {
+      let className = '';
+      
+      if (status === 'approved') {
+        className = 'text-green-600 bg-green-50 px-2 py-1 rounded font-medium';
+      } else if (status === 'rejected') {
+        className = 'text-red-600 bg-red-50 px-2 py-1 rounded font-medium';
+      } else {
+        className = 'text-yellow-600 bg-yellow-50 px-2 py-1 rounded font-medium';
       }
-    },
+      
+      return <span className={className}>{status}</span>;
+    }
+  },
     {
       title: "Giá khởi điểm",
       dataIndex: "startingPrice",
@@ -167,16 +130,6 @@ const AuctionList = ({ searchTerm, filteredStatus }) => {
       dataIndex: "stepPrice",
       key: "stepPrice",
       render: formatCurrency,
-    },
-    {
-      title: "Thời gian",
-      key: "time",
-      render: (_, record) => (
-        <div>
-          <div>Bắt đầu: {dayjs(record.startTime).format('DD/MM/YYYY HH:mm')}</div>
-          <div>Kết thúc: {dayjs(record.endTime).format('DD/MM/YYYY HH:mm')}</div>
-        </div>
-      ),
     },
     {
       title: "Chi tiết",
@@ -191,72 +144,45 @@ const AuctionList = ({ searchTerm, filteredStatus }) => {
       ),
     },
     {
-  title: "Chỉnh thời gian",
-  key: "timeAdjustment",
-  render: (_, record) => {
-    // Kiểm tra kỹ điều kiện status
-    console.log('Record status:', record.status); // Thêm dòng này để debug
-    
-    if (record.status === "approved" || record.status === "APPROVED") { // Kiểm tra cả chữ hoa/thường
-      return (
-        <Button
-          icon={<EditOutlined />}
-          onClick={() => showTimeModal(record)}
-          type="primary"
-        >
-          Chỉnh sửa
-        </Button>
-      );
-    }
-    return <span>Không thể chỉnh</span>;
-  },
-},
-    {
       title: "Hành động",
       key: "actions",
       render: (_, record) => {
-        if (record.status === "rejected") {
-          return <span>Đã từ chối</span>;
+        if (record.status === "approved" || record.status === "rejected") {
+          return <span>Đã xử lý</span>;
         }
-        
-        if (record.status === "pending") {
-          return (
-            <div style={{ display: "flex", gap: 8 }}>
-              <Popconfirm
-                title="Bạn có chắc chắn muốn phê duyệt yêu cầu này?"
-                onConfirm={() => handleApprove(record.id)}
-                okText="Phê duyệt"
-                cancelText="Hủy"
+      
+        return (
+          <div style={{ display: "flex", gap: 8 }}>
+            <Popconfirm
+              title="Bạn có chắc chắn muốn phê duyệt yêu cầu này?"
+              onConfirm={() => handleApprove(record.id)}
+              okText="Phê duyệt"
+              cancelText="Hủy"
+            >
+              <Button
+                className="text-green-600 border-green-600 hover:text-white hover:bg-green-600"
+                type="default"
+                loading={loadingAction}
               >
-                <Button
-                  className="text-green-600 border-green-600 hover:text-white hover:bg-green-600"
-                  type="default"
-                  loading={loadingAction}
-                >
-                  Phê duyệt
-                </Button>
-              </Popconfirm>
-              <Button danger onClick={() => openRejectModal(record.id)}>
-                Từ chối
+                Phê duyệt
               </Button>
-            </div>
-          );
-        }
-        return <span>Đã phê duyệt</span>;
+            </Popconfirm>
+            <Button danger onClick={() => openRejectModal(record.id)}>
+              Từ chối
+            </Button>
+          </div>
+        );
       },
     },
   ];
 
   return (
     <>
-<Table
-  columns={columns}
-  dataSource={filteredData}
-  pagination={{ pageSize: 5 }}
-  scroll={{ x: 1500 }} // Tăng giá trị này nếu cần
-  style={{ width: '100%' }}
-/>
-
+      <Table
+        columns={columns}
+        dataSource={filteredData}
+        pagination={{ pageSize: 5 }}
+      />
 
       <Modal
         title="Từ chối yêu cầu đấu giá"
@@ -313,43 +239,6 @@ const AuctionList = ({ searchTerm, filteredStatus }) => {
             <Descriptions.Item label="Slug">{selectedProduct.slug}</Descriptions.Item>
           </Descriptions>
         )}
-      </Modal>
-
-      {/* Update Time Modal */}
-      <Modal
-        title="Chỉnh sửa thời gian đấu giá"
-        visible={timeModalVisible}
-        onCancel={() => setTimeModalVisible(false)}
-        footer={[
-          <Button key="cancel" onClick={() => setTimeModalVisible(false)}>
-            Hủy
-          </Button>,
-          <Button
-            key="update"
-            type="primary"
-            onClick={handleUpdateTime}
-            loading={loadingAction}
-          >
-            Cập nhật
-          </Button>,
-        ]}
-      >
-        <Form form={form} layout="vertical">
-          <Form.Item
-            name="startTime"
-            label="Thời gian bắt đầu"
-            rules={[{ required: true, message: 'Vui lòng chọn thời gian bắt đầu' }]}
-          >
-            <DatePicker showTime format="DD/MM/YYYY HH:mm" />
-          </Form.Item>
-          <Form.Item
-            name="endTime"
-            label="Thời gian kết thúc"
-            rules={[{ required: true, message: 'Vui lòng chọn thời gian kết thúc' }]}
-          >
-            <DatePicker showTime format="DD/MM/YYYY HH:mm" />
-          </Form.Item>
-        </Form>
       </Modal>
     </>
   );

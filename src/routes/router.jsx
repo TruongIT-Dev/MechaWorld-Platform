@@ -5,7 +5,6 @@ import React from "react";
 // Layout
 export const UserLayout = React.lazy(() => import('../pages/UserLayout'));
 export const ModeratorLayout = React.lazy(() => import('../pages/ModeratorLayout'));
-export const AdminLayout = React.lazy(() => import("../pages/AdminLayout"));
 
 // Navigation Bar route
 export const HomePage = React.lazy(() => import('../pages/HomePage'));
@@ -39,10 +38,8 @@ export const WalletPage = React.lazy(() => import('../components/Wallet/WalletUs
 // Member Profile route
 export const ProfilePage = React.lazy(() => import("../components/Profile/UserManagement/Profiles"));
 export const UserProfile = React.lazy(() => import("../components/Profile/UserManagement/UserProfile"));
-export const SettingAddress = React.lazy(() => import("../components/Profile/UserManagement/SettingAddress"));
-
 export const OrderHistory = React.lazy(() => import("../components/Profile/OrderManagement/OrderHistory"));
-export const OrderExchange = React.lazy(() => import("../components/Profile/OrderManagement/OrderExchange"));
+export const SettingAddress = React.lazy(() => import("../components/Profile/UserManagement/SettingAddress"));
 
 
 // Register Shop route
@@ -69,8 +66,8 @@ export const ExchangeDetailInformation = React.lazy(() => import("../components/
 export const ExchangeGundamManagement = React.lazy(() => import("../components/Exchange/ExchangeGundamManagement"));
 
 // Aution route
-export const AuctionList = React.lazy(() => import("../components/Aution/User/AutionList"));
-export const AuctionDetail = React.lazy(() => import("../components/Aution/User/AutionDetail"));
+export const AutionList = React.lazy(() => import("../components/Aution/User/AutionList"));
+export const AutionDetail = React.lazy(() => import("../components/Aution/User/AutionDetail"));
 
 // Collection route
 export const GundamCollectionApp = React.lazy(() => import("../components/Collection/Collection"));
@@ -85,10 +82,6 @@ export const ModOrders = React.lazy(() => import("../components/Moderator/OrderM
 export const ModAuctions = React.lazy(() => import("../components/Moderator/AuctionManagement/ModAuctions"));
 export const ModExchanges = React.lazy(() => import("../components/Moderator/ExchangeManagement/ModExchanges"));
 export const ModTransactions = React.lazy(() => import("../components/Moderator/TransactionManagement/ModTransactions"));
-
-
-// Admin route
-export const AdminDashboard = React.lazy(() => import("../components/Admin/AdminDashboard"));
 
 
 // 404 page route

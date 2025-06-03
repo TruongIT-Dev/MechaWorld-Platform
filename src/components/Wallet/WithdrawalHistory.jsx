@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { Table, Tag, Button, Modal, Card, Timeline, Popconfirm, Tooltip, Space, message } from 'antd';
+import { useState } from 'react';
+import { Table, Tag, Button, Modal, Card, Timeline, Popconfirm, Tooltip } from 'antd';
 import {
     EyeOutlined,
     StopOutlined,
@@ -8,251 +8,325 @@ import {
     ExclamationCircleOutlined,
     BankOutlined
 } from '@ant-design/icons';
-import { GetWithdrawalRequest,CancelWithdrawalRequest } from '../../apis/Wallet/APIWallet';
+import { WITHDRAWAL_STATUS_MAP, WITHDRAWAL_STATUS } from '../constants/withdrawalConstants';
 
-const WithdrawalHistory = () => {
-    const [data, setData] = useState([]);
-    const [loading, setLoading] = useState(false);
-    const [selectedRecord, setSelectedRecord] = useState(null);
-    const [isModalVisible, setIsModalVisible] = useState(false);
+const WithdrawalHistory = ({ withdrawalRequests, loading, onCancel }) => {
 
-    const fetchWithdrawalHistory = async () => {
-        try {
-            setLoading(true);
-            const response = await GetWithdrawalRequest();
-            setData(response.data || []);
-        } catch (error) {
-            message.error('Không thể tải lịch sử rút tiền');
-        } finally {
-            setLoading(false);
-        }
-    };
+    const showRequestDetail = (request) => {
+        const statusInfo = WITHDRAWAL_STATUS_MAP[request.status] || {};
 
-    useEffect(() => {
-        fetchWithdrawalHistory();
-    }, []);
+        Modal.info({
+            title: (
+                <div className="flex items-center">
+                    <BankOutlined className="mr-2 text-blue-500" />
+                    Chi tiết yêu cầu rút tiền
+                </div>
+            ),
+            width: 700,
+            content: (
+                <div className="space-y-6 mt-4">
+                    {/* Header Info */}
+                    <Card size="small" className="bg-gray-50">
+                        <div className="grid grid-cols-2 gap-4">
+                            <div>
+                                <p className="text-gray-600 text-sm mb-1">Mã yêu cầu</p>
+                                <p className="font-mono text-sm bg-white px-2 py-1 rounded border">
+                                    {request.id || request.reference_id}
+                                </p>
+                            </div>
+                            <div>
+                                <p className="text-gray-600 text-sm mb-1">Trạng thái</p>
+                                <Tag color={statusInfo.color} className="text-sm">
+                                    {statusInfo.text}
+                                </Tag>
+                            </div>
+                        </div>
+                    </Card>
 
-    const getStatusTag = (status) => {
-        switch (status) {
-            case 'completed':
-                return <Tag icon={<CheckCircleOutlined />} color="success">Thành công</Tag>;
-            case 'pending':
-                return <Tag icon={<ClockCircleOutlined />} color="processing">Đang xử lý</Tag>;
-            case 'rejected':
-                return <Tag icon={<StopOutlined />} color="error">Đã từ chối</Tag>;
-            default:
-                return <Tag color="default">{status}</Tag>;
-        }
+                    {/* Amount and Bank Info */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <Card title="Thông tin rút tiền" size="small">
+                            <div className="space-y-3">
+                                <div className="flex justify-between">
+                                    <span className="text-gray-600">Số tiền:</span>
+                                    <span className="font-semibold text-red-600 text-lg">
+                                        -₫{request.amount.toLocaleString()}
+                                    </span>
+                                </div>
+                                <div className="flex justify-between">
+                                    <span className="text-gray-600">Phí giao dịch:</span>
+                                    <span className="text-green-600">Miễn phí</span>
+                                </div>
+                                <div className="flex justify-between border-t pt-2">
+                                    <span className="text-gray-600 font-medium">Tổng nhận:</span>
+                                    <span className="font-bold text-lg">
+                                        ₫{request.amount.toLocaleString()}
+                                    </span>
+                                </div>
+                            </div>
+                        </Card>
+
+                        <Card title="Tài khoản nhận" size="small">
+                            <div className="space-y-2">
+                                <div>
+                                    <p className="text-gray-600 text-sm">Ngân hàng</p>
+                                    <p className="font-medium">{request.bank_account?.bank_name}</p>
+                                </div>
+                                <div>
+                                    <p className="text-gray-600 text-sm">Chủ tài khoản</p>
+                                    <p className="font-medium">{request.bank_account?.account_holder}</p>
+                                </div>
+                                <div>
+                                    <p className="text-gray-600 text-sm">Số tài khoản</p>
+                                    <p className="font-mono bg-gray-100 px-2 py-1 rounded text-sm">
+                                        {request.bank_account?.account_number}
+                                    </p>
+                                </div>
+                            </div>
+                        </Card>
+                    </div>
+
+                    {/* Timeline */}
+                    <Card title="Tiến độ xử lý" size="small">
+                        <Timeline>
+                            <Timeline.Item
+                                color="blue"
+                                dot={<CheckCircleOutlined />}
+                            >
+                                <div>
+                                    <p className="font-medium">Yêu cầu được tạo</p>
+                                    <p className="text-sm text-gray-500">
+                                        {new Date(request.created_at).toLocaleString('vi-VN')}
+                                    </p>
+                                </div>
+                            </Timeline.Item>
+
+                            {request.status !== WITHDRAWAL_STATUS.PENDING && (
+                                <Timeline.Item
+                                    color={request.status === WITHDRAWAL_STATUS.CANCELLED ? 'red' : 'orange'}
+                                    dot={
+                                        request.status === WITHDRAWAL_STATUS.CANCELLED ?
+                                            <ExclamationCircleOutlined /> :
+                                            <ClockCircleOutlined />
+                                    }
+                                >
+                                    <div>
+                                        <p className="font-medium">
+                                            {request.status === WITHDRAWAL_STATUS.CANCELLED ? 'Đã hủy' : 'Đang xử lý'}
+                                        </p>
+                                        <p className="text-sm text-gray-500">
+                                            {request.processed_at && new Date(request.processed_at).toLocaleString('vi-VN')}
+                                        </p>
+                                    </div>
+                                </Timeline.Item>
+                            )}
+
+                            {request.status === WITHDRAWAL_STATUS.COMPLETED && (
+                                <Timeline.Item
+                                    color="green"
+                                    dot={<CheckCircleOutlined />}
+                                >
+                                    <div>
+                                        <p className="font-medium">Hoàn thành</p>
+                                        <p className="text-sm text-gray-500">
+                                            {new Date(request.completed_at).toLocaleString('vi-VN')}
+                                        </p>
+                                        {request.transaction_id && (
+                                            <p className="text-xs text-gray-400 mt-1">
+                                                Mã GD: {request.transaction_id}
+                                            </p>
+                                        )}
+                                    </div>
+                                </Timeline.Item>
+                            )}
+
+                            {request.status === WITHDRAWAL_STATUS.PENDING && (
+                                <Timeline.Item
+                                    color="gray"
+                                    dot={<ClockCircleOutlined />}
+                                >
+                                    <div>
+                                        <p className="font-medium text-gray-500">Chờ xử lý</p>
+                                        <p className="text-sm text-gray-400">
+                                            Dự kiến: 1-3 ngày làm việc
+                                        </p>
+                                    </div>
+                                </Timeline.Item>
+                            )}
+                        </Timeline>
+                    </Card>
+
+                    {/* Notes */}
+                    {request.notes && (
+                        <Card title="Ghi chú" size="small">
+                            <p className="text-gray-700">{request.notes}</p>
+                        </Card>
+                    )}
+
+                    {/* Status Description */}
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                        <p className="text-blue-800 text-sm">
+                            <strong>Trạng thái hiện tại:</strong> {statusInfo.description}
+                        </p>
+                    </div>
+                </div>
+            ),
+            okText: 'Đóng',
+            okButtonProps: {
+                className: 'bg-blue-500 hover:bg-blue-600 border-blue-500',
+            },
+        });
     };
 
     const columns = [
         {
-            title: 'Mã yêu cầu',
-            dataIndex: 'id',
-            key: 'id',
-            render: (id) => <span className="font-mono">#{id.substring(0, 8)}</span>,
-        },
-        {
-            title: 'Ngân hàng',
-            dataIndex: ['bank_account', 'bank_name'],
-            key: 'bank_name',
-            render: (bankName, record) => (
-                <div className="flex items-center">
-                    <BankOutlined className="mr-2 text-blue-500" />
-                    <span>{bankName} ({record.bank_account.account_number})</span>
+            title: "Thời gian",
+            dataIndex: "created_at",
+            key: "created_at",
+            width: 180,
+            render: (date) => (
+                <div>
+                    <div className="font-medium text-gray-900">
+                        {new Date(date).toLocaleDateString('vi-VN')}
+                    </div>
+                    <div className="text-sm text-gray-500">
+                        {new Date(date).toLocaleTimeString('vi-VN')}
+                    </div>
                 </div>
             ),
+            sorter: (a, b) => new Date(a.created_at) - new Date(b.created_at),
+            defaultSortOrder: 'descend'
         },
         {
-            title: 'Số tiền',
-            dataIndex: 'amount',
-            key: 'amount',
+            title: "Mã yêu cầu",
+            dataIndex: "id",
+            key: "id",
+            width: 130,
+            render: (id) => (
+                <code className="text-gray-600 text-xs bg-gray-100 px-2 py-1 rounded">
+                    WD{id}
+                </code>
+            )
+        },
+        {
+            title: "Số tiền",
+            dataIndex: "amount",
+            key: "amount",
+            width: 150,
             render: (amount) => (
-                <span className="font-semibold">₫{amount.toLocaleString()}</span>
+                <div className="font-semibold text-red-600">
+                    -₫{amount.toLocaleString()}
+                </div>
             ),
+            sorter: (a, b) => a.amount - b.amount
         },
         {
-            title: 'Trạng thái',
-            dataIndex: 'status',
-            key: 'status',
-            render: (status) => getStatusTag(status),
-        },
-        {
-            title: 'Thời gian',
-            dataIndex: 'created_at',
-            key: 'created_at',
-            render: (date) => new Date(date).toLocaleString(),
-        },
-        {
-            title: 'Thao tác',
-            key: 'action',
+            title: "Ngân hàng",
+            key: "bank_info",
+            width: 200,
             render: (_, record) => (
-                <Space size="small">
+                <div>
+                    <div className="font-medium text-gray-900">
+                        {record.bank_account?.bank_name}
+                    </div>
+                    <div className="text-sm text-gray-500">
+                        {record.bank_account?.account_number}
+                    </div>
+                </div>
+            )
+        },
+        {
+            title: "Trạng thái",
+            dataIndex: "status",
+            key: "status",
+            width: 130,
+            render: (status) => {
+                const statusInfo = WITHDRAWAL_STATUS_MAP[status] || {};
+                return (
+                    <Tag color={statusInfo.color}>
+                        {statusInfo.text}
+                    </Tag>
+                );
+            },
+            filters: Object.entries(WITHDRAWAL_STATUS_MAP).map(([key, value]) => ({
+                text: value.text,
+                value: key
+            })),
+            onFilter: (value, record) => record.status === value,
+        },
+        {
+            title: "Thao tác",
+            key: "actions",
+            width: 150,
+            render: (_, record) => (
+                <div className="flex space-x-2">
                     <Tooltip title="Xem chi tiết">
                         <Button
                             type="text"
+                            size="small"
                             icon={<EyeOutlined />}
-                            onClick={() => {
-                                setSelectedRecord(record);
-                                setIsModalVisible(true);
-                            }}
+                            onClick={() => showRequestDetail(record)}
+                            className="text-blue-600 hover:text-blue-800"
                         />
                     </Tooltip>
-                    {record.status === 'pending' && (
+
+                    {record.status === WITHDRAWAL_STATUS.PENDING && (
                         <Popconfirm
-                            title="Hủy yêu cầu rút tiền?"
-                            onConfirm={() => handleCancelWithdrawal(record.id)}
-                            okText="Đồng ý"
-                            cancelText="Hủy"
-                            okButtonProps={{ type: 'default', style: { borderColor: '#1677ff', color: '#1677ff' } }}
+                            title="Bạn có chắc chắn muốn hủy yêu cầu này?"
+                            description="Hành động này không thể hoàn tác."
+                            onConfirm={() => onCancel(record.id)}
+                            okText="Hủy yêu cầu"
+                            cancelText="Không"
+                            okButtonProps={{ danger: true }}
                         >
                             <Tooltip title="Hủy yêu cầu">
-                                <Button type="text" danger icon={<StopOutlined />} />
+                                <Button
+                                    type="text"
+                                    size="small"
+                                    icon={<StopOutlined />}
+                                    danger
+                                />
                             </Tooltip>
                         </Popconfirm>
                     )}
-                </Space>
+                </div>
             ),
         },
     ];
 
-    const handleCancelWithdrawal = async (id) => {
-        try {
-            await CancelWithdrawalRequest(id);
-            message.success('Đã hủy yêu cầu rút tiền');
-            fetchWithdrawalHistory(); // Làm mới danh sách
-        } catch (error) {
-            if (error?.response?.status === 422) {
-                message.error('Yêu cầu không còn ở trạng thái chờ xử lý');
-            } else if (error?.response?.status === 403) {
-                message.error('Bạn không có quyền hủy yêu cầu này');
-            } else {
-                message.error('Không thể hủy yêu cầu. Vui lòng thử lại');
-            }
-        }
-    };
-
-
-    const getTimelineItems = (record) => {
-        const items = [
-            {
-                color: 'green',
-                children: (
-                    <div>
-                        <p className="font-medium">Tạo yêu cầu rút tiền</p>
-                        <p>{new Date(record.created_at).toLocaleString()}</p>
-                    </div>
-                ),
-            },
-        ];
-
-        if (record.processed_at) {
-            items.push({
-                color: record.status === 'completed' ? 'green' : 'red',
-                children: (
-                    <div>
-                        <p className="font-medium">
-                            {record.status === 'completed' ? 'Hoàn thành' : 'Từ chối'}
-                        </p>
-                        <p>{new Date(record.processed_at).toLocaleString()}</p>
-                        {record.rejected_reason && <p>Lý do: {record.rejected_reason}</p>}
-                    </div>
-                ),
-            });
-        }
-
-        return items;
-    };
-
     return (
         <div>
-            <Card
-                title="Lịch sử rút tiền"
-                extra={
-                    <Button type="primary" onClick={fetchWithdrawalHistory} loading={loading}>
-                        Làm mới
-                    </Button>
-                }
-            >
+            <Card className="shadow-sm border-0">
+                <div className="mb-6">
+                    <h3 className="text-lg font-semibold text-gray-900">Lịch sử rút tiền</h3>
+                    <p className="text-gray-600 text-sm mt-1">Theo dõi các yêu cầu rút tiền của bạn</p>
+                </div>
+
                 <Table
                     columns={columns}
-                    dataSource={data}
+                    dataSource={withdrawalRequests}
                     rowKey="id"
                     loading={loading}
-                    pagination={{ pageSize: 5 }}
+                    pagination={{
+                        pageSize: 10,
+                        showSizeChanger: true,
+                        pageSizeOptions: ['10', '20', '50'],
+                        showTotal: (total) => `Tổng ${total} yêu cầu`,
+                        showQuickJumper: true
+                    }}
                     scroll={{ x: true }}
+                    className="border border-gray-200 rounded-lg"
+                    size="middle"
+                    locale={{
+                        emptyText: (
+                            <div className="text-center py-8">
+                                <BankOutlined className="text-4xl text-gray-300 mb-3" />
+                                <p className="text-gray-500">Chưa có yêu cầu rút tiền nào</p>
+                            </div>
+                        )
+                    }}
                 />
             </Card>
-
-            <Modal
-                title="Chi tiết yêu cầu rút tiền"
-                open={isModalVisible}
-                onCancel={() => setIsModalVisible(false)}
-                footer={null}
-                width={700}
-            >
-                {selectedRecord && (
-                    <div className="space-y-6">
-                        <div className="flex justify-between items-center">
-                            <div>
-                                <h3 className="text-lg font-semibold">
-                                    Mã yêu cầu: #{selectedRecord.id.substring(0, 8)}
-                                </h3>
-                                <p className="text-gray-500">
-                                    {new Date(selectedRecord.created_at).toLocaleString()}
-                                </p>
-                            </div>
-                            {getStatusTag(selectedRecord.status)}
-                        </div>
-
-                        <Card title="Thông tin ngân hàng" bordered={false}>
-                            <div className="space-y-2">
-                                <p>
-                                    <span className="font-medium">Ngân hàng:</span>{' '}
-                                    {selectedRecord.bank_account.bank_name}
-                                </p>
-                                <p>
-                                    <span className="font-medium">Số tài khoản:</span>{' '}
-                                    {selectedRecord.bank_account.account_number}
-                                </p>
-                                <p>
-                                    <span className="font-medium">Tên chủ tài khoản:</span>{' '}
-                                    {selectedRecord.bank_account.account_name}
-                                </p>
-                            </div>
-                        </Card>
-
-                        <Card title="Thông tin giao dịch" bordered={false}>
-                            <div className="space-y-2">
-                                <p>
-                                    <span className="font-medium">Số tiền:</span>{' '}
-                                    <span className="text-lg font-bold">
-                                        ₫{selectedRecord.amount.toLocaleString()}
-                                    </span>
-                                </p>
-                                {selectedRecord.transaction_reference && (
-                                    <p>
-                                        <span className="font-medium">Mã giao dịch:</span>{' '}
-                                        {selectedRecord.transaction_reference}
-                                    </p>
-                                )}
-                                {selectedRecord.rejected_reason && (
-                                    <p>
-                                        <span className="font-medium">Lý do từ chối:</span>{' '}
-                                        <span className="text-red-500">
-                                            {selectedRecord.rejected_reason}
-                                        </span>
-                                    </p>
-                                )}
-                            </div>
-                        </Card>
-
-                        <Card title="Trạng thái" bordered={false}>
-                            <Timeline items={getTimelineItems(selectedRecord)} />
-                        </Card>
-                    </div>
-                )}
-            </Modal>
         </div>
     );
 };

@@ -259,7 +259,7 @@ const ShopProductUpdate = ({ setIsUpdating, gundamData}) => {
   ];
 
   return (
-    <div className="bg-white max-w-7xl mt-36 p-6 rounded-lg shadow-sm mx-auto">
+    <div className="bg-white p-6 rounded-lg shadow-sm mx-auto">
 
       <h2 className="text-2xl font-semibold text-gray-800 pb-3 uppercase mb-6 border-b">Cập Nhập Sản Phẩm Gundam </h2>
 
@@ -298,7 +298,7 @@ const ShopProductUpdate = ({ setIsUpdating, gundamData}) => {
                   onClick={() => setIsUpdating(false)}
                   disabled={isUploading}
                 >
-                  Hủy
+                  Hủy thêm sản phẩm
                 </Button>
                 <Button
                   type="primary"

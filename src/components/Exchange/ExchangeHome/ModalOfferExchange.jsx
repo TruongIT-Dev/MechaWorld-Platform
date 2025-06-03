@@ -151,15 +151,15 @@ export default function ModalOfferExchange({ isOpen, onClose, requestData, gunda
                 (form.getFieldValue('compensationAmount') || 0) : 0;
 
             // Debug logging - Kiểm tra từng giá trị
-            // console.log('=== DEBUG PAYLOAD CREATION ===');
-            // console.log('selectedGundams:', selectedGundams);
-            // console.log('selectedYourGundams:', selectedYourGundams);
-            // console.log('requestPost:', requestPost);
-            // console.log('currentUser:', currentUser);
-            // console.log('requestData:', requestData);
-            // console.log('compensationType:', compensationType);
-            // console.log('compensationAmount:', compensationAmount);
-            // console.log('form values:', values);
+            console.log('=== DEBUG PAYLOAD CREATION ===');
+            console.log('selectedGundams:', selectedGundams);
+            console.log('selectedYourGundams:', selectedYourGundams);
+            console.log('requestPost:', requestPost);
+            console.log('currentUser:', currentUser);
+            console.log('requestData:', requestData);
+            console.log('compensationType:', compensationType);
+            console.log('compensationAmount:', compensationAmount);
+            console.log('form values:', values);
 
             // Validate business rules
             const businessRuleErrors = await validateBusinessRules({ ...values, compensationAmount });
@@ -182,9 +182,9 @@ export default function ModalOfferExchange({ isOpen, onClose, requestData, gunda
             };
 
             // Detailed logging
-            // console.log('=== FINAL OFFER DATA ===');
-            // console.log('offerData object:', offerData);
-            // console.log('JSON.stringify(offerData):', JSON.stringify(offerData, null, 2));
+            console.log('=== FINAL OFFER DATA ===');
+            console.log('offerData object:', offerData);
+            console.log('JSON.stringify(offerData):', JSON.stringify(offerData, null, 2));
 
             // Kiểm tra từng property
             Object.keys(offerData).forEach(key => {
@@ -192,8 +192,8 @@ export default function ModalOfferExchange({ isOpen, onClose, requestData, gunda
             });
 
             // Gọi API tạo yêu cầu trao đổi
-            await createExchangeOffer(offerData);
-            // console.log("responseCreateExchangeOffer", responseCreateExchangeOffer);
+            const responseCreateExchangeOffer = await createExchangeOffer(offerData);
+            console.log("responseCreateExchangeOffer", responseCreateExchangeOffer);
 
             // Xử lý response thành công
             message.success('Đã gửi yêu cầu trao đổi thành công!');
@@ -408,7 +408,7 @@ export default function ModalOfferExchange({ isOpen, onClose, requestData, gunda
                                 </div>
 
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6 max-h-96 overflow-y-auto">
-                                    {yourGundamList?.filter(gundam => gundam.status === 'in store').map((gundam) => (
+                                    {yourGundamList?.map((gundam) => (
                                         <Card
                                             key={gundam.gundam_id}
                                             hoverable
@@ -425,6 +425,18 @@ export default function ModalOfferExchange({ isOpen, onClose, requestData, gunda
                                                         src={gundam.primary_image_url}
                                                         className="h-48 w-full object-cover"
                                                     />
+                                                    <Tag
+                                                        color={gundam.condition === 'New' ? 'gold' : 'purple'}
+                                                        className="absolute top-2 right-2"
+                                                    >
+                                                        {gundam.condition}
+                                                    </Tag>
+                                                    <Tag
+                                                        color={gundam.status === 'in store' ? 'green' : 'red'}
+                                                        className="absolute top-2 left-2"
+                                                    >
+                                                        {gundam.status}
+                                                    </Tag>
                                                 </div>
                                             }
                                             onClick={() => gundam.status === 'in store' && handleYourGundamSelect(gundam.gundam_id)}
@@ -505,6 +517,18 @@ export default function ModalOfferExchange({ isOpen, onClose, requestData, gunda
                                                         src={gundam.primary_image_url}
                                                         className="h-48 w-full object-cover"
                                                     />
+                                                    <Tag
+                                                        color={gundam.condition === 'New' ? 'gold' : 'purple'}
+                                                        className="absolute top-2 right-2"
+                                                    >
+                                                        {gundam.condition}
+                                                    </Tag>
+                                                    <Tag
+                                                        color={gundam.status === 'for exchange' ? 'green' : 'red'}
+                                                        className="absolute top-2 left-2"
+                                                    >
+                                                        {gundam.status}
+                                                    </Tag>
                                                 </div>
                                             }
                                             onClick={() => gundam.status === 'for exchange' && handleGundamSelect(gundam.gundam_id)}
@@ -524,7 +548,7 @@ export default function ModalOfferExchange({ isOpen, onClose, requestData, gunda
                                         </Card>
                                     ))}
 
-                                    {yourGundamList?.filter(gundam => gundam.status === 'in store').length === 0 && (
+                                    {gundamList?.length === 0 && (
                                         <div className="col-span-3 text-center py-8 bg-gray-100 rounded-lg">
                                             <p className="text-gray-500">{requestData?.full_name} chưa thêm Gundam nào để trao đổi</p>
                                         </div>

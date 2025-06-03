@@ -139,14 +139,10 @@ export const PayForWinningBid = (auctionID, paymentData) => {
   });
 };
 
-// 13. GET List sellers auction history
-export const GetSellerAuction = (sellersID) => {
-    return axios.get(`/sellers/${sellersID}/auctions`);
-}
 
-// 14. Cancer auction by seller
-export const CancelAuction = (auctionID,reason) => {
-    return axios.patch(`/sellers/me/auctions/${auctionID}/cancel`, {
-      reason: reason,
-    });
-}
+
+
+
+
+
+

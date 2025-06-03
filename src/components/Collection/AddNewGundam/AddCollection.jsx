@@ -2,7 +2,7 @@ import Cookies from "js-cookie";
 import PropTypes from "prop-types";
 import { useEffect, useState } from "react";
 import { Form, message, notification, Steps, Card, Button, Space } from "antd";
-import { ArrowLeftOutlined, ArrowRightOutlined, CheckCircleOutlined } from '@ant-design/icons';
+import { ArrowLeftOutlined, ArrowRightOutlined, CheckCircleOutlined, CheckOutlined } from '@ant-design/icons';
 
 import { GetGrades } from '../../../apis/Gundams/APIGundam';
 import { PostGundam } from "../../../apis/User/APIUser";
@@ -109,8 +109,73 @@ const AddCollection = ({ setIsCreating }) => {
         console.error("Lỗi khi lấy danh sách phân khúc:", error);
       });
   }, []);
-  
-  
+  // Xử lý khi người dùng chọn ảnh
+  //   const handleImageUpload = ({ file }) => {
+  //     if (images.length >= 5) {
+  //       message.error("Chỉ được chọn tối đa 5 ảnh!");
+  //       return;
+  //     }
+
+  //     const reader = new FileReader();
+  //     reader.onload = (e) => {
+  //       const newImage = { url: e.target.result, file };
+  //       setImages([...images, newImage]);
+
+  //       // Nếu chưa có ảnh chính, đặt ảnh đầu tiên làm ảnh chính
+  //       if (!primaryImage) setPrimaryImage(e.target.result);
+  //     };
+  //     reader.readAsDataURL(file);
+  //   };
+
+  // Xóa ảnh khỏi danh sách
+  //   const handleRemoveImage = (index) => {
+  //     const newImages = images.filter((_, i) => i !== index);
+  //     setImages(newImages);
+
+  //     // Nếu ảnh chính bị xóa, chọn ảnh đầu tiên còn lại làm ảnh chính
+  //     // if (images[index].url === primaryImage && newImages.length > 0) {
+  //     //   setPrimaryImage(newImages[0].url);
+  //     // } else if (newImages.length === 0) {
+  //     //   setPrimaryImage(null);
+  //     // }
+  //   };
+
+  // Xử lý giá trị tiền tệ (12,000 VNĐ)
+  //   const formatPrice = (value) => {
+  //     return value.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  //   };
+
+  // const handleFinish = (values) => {
+  //     console.log("Dữ liệu nhập:", values); // Kiểm tra dữ liệu đã nhập trước khi gửi API
+
+  //     const productData = {
+  //       ...values,
+  //       user_id: user.id,
+  //       condition_description: conditionOptions[values.condition] || values.condition_description,
+  //       primary_image: images.find((img) => img.url === primaryImage)?.file || null,
+  //       secondary_images: images.filter((img) => img.url !== primaryImage).map((img) => img.file),
+  //     };
+
+  //     console.log("Dữ liệu gửi API:", productData); // Kiểm tra dữ liệu gửi API
+
+  //     if (!productData.primary_image) {
+  //       message.error("Vui lòng chọn ít nhất 1 ảnh làm ảnh chính!");
+  //       return;
+  //     }
+
+  //     PostGundam(user.id, productData)
+  //       .then(() => {
+  //         message.success("Sản phẩm đã được đăng ký thành công!");
+  //         form.resetFields();
+  //         setImages([]);
+  //         setPrimaryImage(null);
+  //         setIsCreating(false);
+  //       })
+  //       .catch((err) => {
+  //         message.error("Lỗi đăng ký sản phẩm: " + err.message);
+  //         console.log(err);
+  //       });
+  //   };
   //  Xử lý thêm dòng nhập phụ kiện
   const handleAddAccessory = () => {
     setAccessories([...accessories, { name: "", quantity: 1 }]);
@@ -189,6 +254,7 @@ const AddCollection = ({ setIsCreating }) => {
     const values = form.getFieldsValue(true);
     setIsUploading(true);
 
+    const hideLoading = message.loading("Đang xử lý...", 0);
     const formData = new FormData();
 
     // Thêm các trường cơ bản
@@ -232,6 +298,7 @@ const AddCollection = ({ setIsCreating }) => {
 
     PostGundam(user.id, formData)
       .then((response) => {
+        hideLoading();
         if (response.status === 201) {
           notification.success({
             message: "Thêm thành công Gundam!",
@@ -245,6 +312,7 @@ const AddCollection = ({ setIsCreating }) => {
         }
       })
       .catch((error) => {
+        hideLoading();
         console.error("Error details:", error);
         message.error("Lỗi khi đăng ký sản phẩm! Vui lòng thử lại.");
       })
@@ -343,8 +411,9 @@ const AddCollection = ({ setIsCreating }) => {
                   type="primary"
                   onClick={nextStep}
                   className="bg-blue-500"
+                  icon={<ArrowRightOutlined />}
                 >
-                  Tiếp theo <ArrowRightOutlined className="ml-1" />
+                  Tiếp theo
                 </Button>
               </Space>
             )}

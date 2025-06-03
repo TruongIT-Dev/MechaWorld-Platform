@@ -68,6 +68,8 @@ const ExchangeDetailInformation = () => {
   // console.log('partner check: ',isPartnerFeeAvailable);
   // console.log('your check: ',isFeeAvailable);
 
+  // const yourDeData = getCachedDeliveryFee(res.data.current_user.id, res.data.id)
+  // const partnerDeData = getCachedDeliveryFee(res.data.partner.id, res.data.id)
 
 
   const fetchExchangeData = async () => {
@@ -76,19 +78,16 @@ const ExchangeDetailInformation = () => {
 
 
 
-      await getExchangeDetail(exchangeId).then(async (res) => {
-        console.log(res.data, "exchangeDetail");
+      getExchangeDetail(exchangeId).then(async (res) => {
         setExchangeDetail(res.data);
         setFirstUser(res.data.current_user);
         setSecondUser(res.data.partner);
-        let deliveryFee ;
-        let partnerDeliveryFee ;
+
         await getDeliveryFee(res.data.current_user.id, res.data.id)
           .then((yourDeliFee) => {
             setDeliverData(yourDeliFee);
             console.log('phí giao hàng của bạn: ', yourDeliFee);
             // console.log("Delivery fee:", yourDeliFee);
-            deliveryFee = yourDeliFee;
           })
           .catch((error) => {
             console.error("Error fetching delivery fee:", error);
@@ -98,7 +97,6 @@ const ExchangeDetailInformation = () => {
           .then((yourDeliFee) => {
             setDeliverPartnerData(yourDeliFee);
             console.log('phí giao hàng của đối tác: ', yourDeliFee);
-            partnerDeliveryFee = yourDeliFee;
           })
           .catch((error) => {
             console.error("Error fetching delivery fee:", error);
@@ -116,11 +114,11 @@ const ExchangeDetailInformation = () => {
               } else {
                 setFirstCurrentStage(3); // Nếu có delivery_fee nhưng chưa thanh toán
               }
-            } else if (deliverData !== null || deliveryFee !== null) {
-              setFirstCurrentStage(3);
+            } else if (deliverData !== null || isFeeAvailable === true) {
+              setFirstCurrentStage(3); // Nếu isFeeAvailable là true
             } else {
               // console.log("qua bước này rồi nhé");
-              setFirstCurrentStage(2); 
+              setFirstCurrentStage(2); // Nếu có from_address nhưng không có delivery_fee
             }
 
             if (res.data.partner.from_address === null) {
@@ -131,7 +129,7 @@ const ExchangeDetailInformation = () => {
               } else {
                 setSecondCurrentStage(3);
               }
-            } else if (deliverPartnerData !== null || partnerDeliveryFee !== null) {
+            } else if (deliverPartnerData !== null || isPartnerFeeAvailable === true) {
               setSecondCurrentStage(3);
             } else {
               setSecondCurrentStage(2)

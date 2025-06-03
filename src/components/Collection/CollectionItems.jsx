@@ -16,7 +16,7 @@ const EmptyCollection = ({ onAddNew }) => (
             </div>
         }
     >
-        <Button type="primary" className='bg-blue-500' icon={<PlusOutlined />} onClick={onAddNew}>
+        <Button type="primary" icon={<PlusOutlined />} onClick={onAddNew}>
             Thêm mô hình
         </Button>
     </Empty>
