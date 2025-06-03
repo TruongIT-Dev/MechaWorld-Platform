@@ -169,26 +169,26 @@ const AuctionCard = ({ auctionData }) => {
     
     // Nếu có actual_end_time và auction đã hoàn thành (có người thắng)
     if (auction.actual_end_time != null && auction.order_id != null) {
-      return "completed";
+      return "Hoàn tất";
     }
     
     // Nếu có actual_end_time nhưng không có người thắng
     if (auction.actual_end_time != null) {
-      return "ended";
+      return "Đã kết thúc";
     }
     
     // Kiểm tra trạng thái theo thời gian
-    if (now < startTime) return "scheduled";
-    if (now >= startTime && now <= endTime) return "active";
-    return "ended";
+    if (now < startTime) return "Sắp diễn ra";
+    if (now >= startTime && now <= endTime) return "Đang diễn ra";
+    return "Đã kết thúc";
   };
   const status = getAuctionStatus();
 
   const statusStyles = {
-    active: { text: "text-green-500", bg: "bg-green-100" },
-    ended: { text: "text-red-500", bg: "bg-red-100" },
-    scheduled: { text: "text-blue-500", bg: "bg-blue-100" },
-    completed: { text: "text-purple-500", bg: "bg-purple-100" }
+    "Đang diễn ra": { text: "text-green-500", bg: "bg-green-100" },
+    "Đã kết thúc": { text: "text-red-500", bg: "bg-red-100" },
+    "Sắp diễn ra": { text: "text-blue-500", bg: "bg-blue-100" },
+    "Hoàn tất": { text: "text-purple-500", bg: "bg-purple-100" }
   };
   const dateOnly = new Date(auction.actual_end_time).toISOString().split('T')[0];
   const renderStatusInfo = () => {
