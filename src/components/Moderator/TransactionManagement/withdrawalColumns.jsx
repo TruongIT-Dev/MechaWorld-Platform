@@ -1,5 +1,4 @@
-import { useState } from 'react';
-import { Space, Avatar, Tag, Badge, Button, Typography, Table } from 'antd';
+import { Space, Avatar, Tag, Badge, Button, Typography } from 'antd';
 import {
     UserOutlined,
     BankOutlined,
@@ -10,7 +9,6 @@ import {
     CreditCardOutlined,
     CalendarOutlined
 } from '@ant-design/icons';
-import WithdrawalDetailModal from './WithdrawalDetailModal';
 
 const { Text } = Typography;
 
@@ -46,36 +44,6 @@ export const renderPriority = (amount) => {
         return { color: 'orange', text: 'Trung bình', icon: '⚠️' };
     }
     return { color: 'blue', text: 'Bình thường', icon: '📋' };
-};
-
-const WithdrawalRequestsTable = ({ data, loading, handleProcessRequest }) => {
-    const [selectedRecord, setSelectedRecord] = useState(null);
-    const [modalVisible, setModalVisible] = useState(false);
-
-    const handleViewDetails = (record) => {
-        setSelectedRecord(record);
-        setModalVisible(true);
-    };
-
-    const columns = getWithdrawalColumns(handleViewDetails, handleProcessRequest);
-
-    return (
-        <>
-            <Table
-                columns={columns}
-                dataSource={data}
-                loading={loading}
-                scroll={{ x: 1300 }}
-                rowKey="id"
-            />
-            
-            <WithdrawalDetailModal 
-                visible={modalVisible}
-                record={selectedRecord}
-                onClose={() => setModalVisible(false)}
-            />
-        </>
-    );
 };
 
 export const getWithdrawalColumns = (handleViewDetails, handleProcessRequest) => [
