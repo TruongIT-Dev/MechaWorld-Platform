@@ -1,15 +1,17 @@
 import React, { useEffect, useState } from "react";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import { RiAuctionFill } from "react-icons/ri";
 import { GiTakeMyMoney } from "react-icons/gi";
 import { MdOutlineFavorite } from "react-icons/md";
-import { Caption, PrimaryButton, Title } from "../Design";
-import { Input, Select, Card, Modal, message } from "antd";
+import { Caption, PrimaryButton } from "../Design";
+import { BankOutlined, CheckCircleOutlined, ClockCircleOutlined, DeleteOutlined, EyeOutlined, PlusOutlined, UserOutlined } from '@ant-design/icons';
+import { Input, Select, Card, Modal, message, Row, Col, Tabs, Empty, Typography, Space, Tag, Divider, Button, Tooltip, Alert, Avatar, Badge } from "antd";
 import { GetListAuction, ParticipateInAuction } from "../../../apis/Auction/APIAuction";
 import Cookies from 'js-cookie';
 
 const { Search } = Input;
 const { Option } = Select;
+const { Title, Text } = Typography;
 
 const formatDate = (dateString) => {
   const date = new Date(dateString);
@@ -57,13 +59,13 @@ const useCountdown = (endTime) => {
 const parseUserCookie = (cookieString) => {
   try {
     if (!cookieString) return null;
-    
+
     const cookieMatch = cookieString.match(/user=([^;]+)/);
     if (!cookieMatch) return null;
-    
+
     const encodedValue = cookieMatch[1];
     let decodedValue;
-    
+
     try {
       decodedValue = decodeURIComponent(encodedValue);
     } catch {
@@ -83,9 +85,9 @@ const parseUserCookie = (cookieString) => {
 
     const firstBrace = cleanJson.indexOf('{');
     const lastBrace = cleanJson.lastIndexOf('}');
-    
+
     if (firstBrace === -1 || lastBrace === -1) return null;
-    
+
     cleanJson = cleanJson.substring(firstBrace, lastBrace + 1);
 
     cleanJson = cleanJson
@@ -114,7 +116,7 @@ const getCurrentUserFromCookies = () => {
         }
       }
     }
-    
+
     return parseUserCookie(document.cookie);
   } catch (e) {
     console.error("Error getting user from cookies:", e);
@@ -122,7 +124,61 @@ const getCurrentUserFromCookies = () => {
   }
 };
 
+
+// Filter Side Bar
+const FilterSidebar = () => {
+  const grades = ["High Grade", "Real Grade", "Master Grade", "Perfect Grade"];
+  const scales = ["1/144", "1/100", "1/60"];
+
+  return (
+    <div className="bg-white shadow-s1 rounded-xl p-6">
+      <div className="flex items-center gap-2 mb-6">
+        <Title level={5}>Bộ lọc Gundam</Title>
+      </div>
+
+      {/* Grade Filter */}
+      <div className="mb-6">
+        <Text level={6} className="mb-3 text-gray-700">Grade</Text>
+        <div className="space-y-2">
+          {grades.map(grade => (
+            <label key={grade} className="flex items-center gap-2 cursor-pointer hover:bg-gray-50 p-2 rounded">
+              <input
+                type="checkbox"
+                className="rounded border-gray-300 text-blue-500 focus:ring-blue-500"
+              />
+              <span className="text-sm text-gray-600">{grade}</span>
+            </label>
+          ))}
+        </div>
+      </div>
+
+      {/* Scale Filter */}
+      <div className="mb-6">
+        <Text level={4} className="mb-3 text-gray-700">Tỷ lệ (Scale)</Text>
+        <div className="space-y-2">
+          {scales.map(scale => (
+            <label key={scale} className="flex items-center gap-2 cursor-pointer hover:bg-gray-50 p-2 rounded">
+              <input
+                type="checkbox"
+                className="rounded border-gray-300 text-blue-500 focus:ring-blue-500"
+              />
+              <span className="text-sm text-gray-600">{scale}</span>
+            </label>
+          ))}
+        </div>
+      </div>
+
+      <button className="w-full bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium py-2 px-4 rounded-lg transition-colors">
+        Áp dụng bộ lọc
+      </button>
+    </div>
+  );
+};
+
+
+// Auction Card
 const AuctionCard = ({ auctionData }) => {
+  const navigate = useNavigate();
   const [hasParticipated, setHasParticipated] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [depositAmount, setDepositAmount] = useState(0);
@@ -130,10 +186,10 @@ const AuctionCard = ({ auctionData }) => {
   const [cookieError, setCookieError] = useState(false);
 
   // Destructure data correctly
-  const { 
-    auction, 
-    auction_participants: participants = [], 
-    auction_bids: bids = [] 
+  const {
+    auction,
+    auction_participants: participants = [],
+    auction_bids: bids = []
   } = auctionData;
 
   useEffect(() => {
@@ -146,7 +202,7 @@ const AuctionCard = ({ auctionData }) => {
       const user = getCurrentUserFromCookies();
       if (user) {
         setCurrentUser(user);
-        
+
         // Kiểm tra xem user hiện tại đã tham gia chưa
         const userParticipated = participants.some(
           participant => participant.user_id === user.id
@@ -159,63 +215,63 @@ const AuctionCard = ({ auctionData }) => {
     }
   }, [participants]);
 
-  
   const countdown = useCountdown(auction.end_time);
 
   const getAuctionStatus = () => {
-    const now = new Date();
-    const startTime = new Date(auction.start_time);
-    const endTime = new Date(auction.end_time);
-    
-    // Nếu có actual_end_time và auction đã hoàn thành (có người thắng)
-    if (auction.actual_end_time != null && auction.order_id != null) {
-      return "completed";
-    }
-    
-    // Nếu có actual_end_time nhưng không có người thắng
-    if (auction.actual_end_time != null) {
-      return "ended";
-    }
-    
-    // Kiểm tra trạng thái theo thời gian
-    if (now < startTime) return "scheduled";
-    if (now >= startTime && now <= endTime) return "active";
-    return "ended";
+    return auction.status;
   };
+
   const status = getAuctionStatus();
 
-  const statusStyles = {
-    active: { text: "text-green-500", bg: "bg-green-100" },
-    ended: { text: "text-red-500", bg: "bg-red-100" },
-    scheduled: { text: "text-blue-500", bg: "bg-blue-100" },
-    completed: { text: "text-purple-500", bg: "bg-purple-100" }
+  const statusConfig = {
+    active: {
+      color: 'success',
+      text: 'Đang diễn ra',
+      icon: <ClockCircleOutlined />
+    },
+    ended: {
+      color: 'error',
+      text: 'Đã kết thúc',
+      icon: <CheckCircleOutlined />
+    },
+    scheduled: {
+      color: 'processing',
+      text: 'Sắp diễn ra',
+      icon: <ClockCircleOutlined />
+    },
+    completed: {
+      color: 'purple',
+      text: 'Hoàn thành',
+      icon: <CheckCircleOutlined />
+    }
   };
-  const dateOnly = new Date(auction.actual_end_time).toISOString().split('T')[0];
+
+  const dateOnly = auction.actual_end_time ?
+    new Date(auction.actual_end_time).toISOString().split('T')[0] : '';
+
   const renderStatusInfo = () => {
     switch (status) {
       case 'scheduled':
         return (
-          <div className="text-[19px] text-gray-500 mt-1">
+          <Text type="secondary" className="text-base">
+            <ClockCircleOutlined className="mr-1" />
             Bắt đầu: {formatDate(auction.start_time)}
-          </div>
+          </Text>
         );
       case 'active':
         return (
-          <div className="text-[19px] text-green-500 mt-1">
+          <Text type="success" className="text-base font-medium">
+            <ClockCircleOutlined className="mr-1" />
             Kết thúc trong: {countdown}
-          </div>
+          </Text>
         );
       case 'ended':
-        return (
-          <div className="text-[19px] text-green-500 mt-1">
-            Kết thúc vào: {dateOnly}
-          </div>
-        );
       case 'completed':
         return (
-          <div className="text-[19px] text-green-500 mt-1">
+          <Text type="secondary" className="text-base">
+            <CheckCircleOutlined className="mr-1" />
             Kết thúc vào: {dateOnly}
-          </div>
+          </Text>
         );
       default:
         return null;
@@ -224,30 +280,46 @@ const AuctionCard = ({ auctionData }) => {
 
   const handleClickedDetailAution = (id) => {
     if (status === "ended" || hasParticipated || currentUser?.id === auction.seller_id) {
-      window.location.assign(`/auction/${id}`);
+      navigate(`/auction/${id}`);
       return;
     }
-    
-    message.warning("Vui lòng nhấn 'Tham gia' để đăng ký trước khi xem chi tiết");
+    Modal.warning({
+      title: 'Thông báo',
+      content: "Vui lòng nhấn 'Tham gia' để đăng ký trước khi xem chi tiết",
+      okText: 'Đã hiểu'
+    });
   };
 
   const handleJoinAuction = () => {
     if (!currentUser) {
-      message.warning("Vui lòng đăng nhập để tham gia đấu giá.");
+      Modal.warning({
+        title: 'Chưa đăng nhập',
+        content: "Vui lòng đăng nhập để tham gia đấu giá.",
+        okText: 'Đã hiểu'
+      });
       return;
     }
 
     if (status === "scheduled") {
-      message.warning("Hiện tại phiên chưa bắt đầu nên chưa thể tham gia.");
+      Modal.info({
+        title: 'Thông báo',
+        content: "Hiện tại phiên chưa bắt đầu nên chưa thể tham gia.",
+        okText: 'Đã hiểu'
+      });
       return;
     }
 
     if (currentUser.id === auction.seller_id) {
-      message.warning("Bạn không thể tham gia phiên đấu giá của chính mình.");
+      Modal.warning({
+        title: 'Không thể tham gia',
+        content: "Bạn không thể tham gia phiên đấu giá của chính mình.",
+        okText: 'Đã hiểu'
+      });
       return;
     }
 
-    const deposit = auction.deposit_amount || Math.floor(auction.starting_price * 0.15);
+    const deposit = auction.deposit_amount ||
+      Math.floor(auction.starting_price * parseFloat(auction.deposit_rate || "0.15"));
     setDepositAmount(deposit);
     setIsModalOpen(true);
   };
@@ -255,25 +327,17 @@ const AuctionCard = ({ auctionData }) => {
   const confirmParticipation = async () => {
     try {
       await ParticipateInAuction(auction.id);
-      message.success("Tham gia đấu giá thành công!");
+      Modal.success({
+        title: 'Thành công',
+        content: 'Tham gia đấu giá thành công!',
+      });
       setHasParticipated(true);
     } catch (err) {
       console.error("Chi tiết lỗi:", err);
-
-      const errorMsg =
-        err?.response?.data?.message ||
-        err?.response?.data?.error ||
-        err?.message ||
-        "Lỗi không xác định";
-
-      if (errorMsg.toLowerCase().includes("insufficient balance")) {
-        message.error("Vui lòng nạp tiền. Số dư không đủ để đặt cọc.");
-      } else if (errorMsg.toLowerCase().includes("already participated")) {
-        message.info("Bạn đã tham gia phiên đấu giá này.");
-        setHasParticipated(true);
-      } else {
-        message.error("Không thể tham gia đấu giá. Vui lòng thử lại!");
-      }
+      Modal.error({
+        title: 'Lỗi',
+        content: 'Không thể tham gia đấu giá. Vui lòng thử lại!',
+      });
     } finally {
       setIsModalOpen(false);
     }
@@ -281,146 +345,206 @@ const AuctionCard = ({ auctionData }) => {
 
   if (cookieError) {
     return (
-      <div className="bg-white shadow-s1 rounded-xl p-4 w-full sm:w-[300px] mx-auto mt-4">
-        <div className="text-red-500 text-center py-4">
-          Lỗi khi xác thực thông tin người dùng. Vui lòng đăng nhập lại.
-        </div>
-      </div>
+      <Card className="w-full max-w-sm mx-auto">
+        <Alert
+          message="Lỗi xác thực"
+          description="Lỗi khi xác thực thông tin người dùng. Vui lòng đăng nhập lại."
+          type="error"
+          showIcon
+        />
+      </Card>
     );
   }
 
   return (
-    <div className="bg-white shadow-s1 rounded-xl p-4 w-full sm:w-[300px] mx-auto mt-4">
-      <div className="h-40 sm:h-56 relative overflow-hidden">
-        <div onClick={() => handleClickedDetailAution(auction.id)}>
-          <img
-            src={auction.gundam_snapshot?.image_url || "default-image.jpg"}
-            alt={auction.gundam_snapshot?.name || "No Name"}
-            className="w-full h-full object-cover"
-          />
-        </div>
-        <div className="absolute top-0 left-0 py-2 w-full">
-          <div className="flex items-center justify-between">
-            <Caption className={`${statusStyles[status]?.text} ${statusStyles[status]?.bg} px-3 py-1 text-sm`}>
-              {status}
-            </Caption>
-            <Caption className="text-green-500 bg-green-100 px-3 py-1 text-sm">
-              {participants.length || 0} Người tham gia
-            </Caption>
-          </div>
-        </div>
-      </div>
+    <>
+      <Card
+        className="w-full max-w-sm hover:shadow-lg transition-all duration-300 cursor-pointer"
+        cover={
+          <div className="relative h-56 overflow-hidden group">
+            <div onClick={() => handleClickedDetailAution(auction.id)}>
+              <img
+                src={auction.gundam_snapshot?.image_url || "default-image.jpg"}
+                alt={auction.gundam_snapshot?.name || "No Name"}
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+              />
+            </div>
 
-      <div className="details">
-
-        {renderStatusInfo()}
-        <Title className="uppercase text-sm sm:text-base">{auction.gundam_snapshot.name}</Title>
-        <div className="text-xs text-gray-500 mt-1">
-          {auction.gundam_snapshot.grade} - {auction.gundam_snapshot.scale}
-        </div>
-
-        
-
-        <hr className="mt-3" />
-        <div className="flex items-center justify-between py-4">
-          <div className="flex items-center gap-3 sm:gap-5">
-            <RiAuctionFill size={30} className="text-green-500" />
-            <div>
-              <Caption className="text-green-500">Giá khởi điểm</Caption>
-              <Title className="text-sm sm:text-base">
-                {auction.starting_price.toLocaleString()} VNĐ
-              </Title>
+            {/* Status Badges Overlay */}
+            <div className="absolute top-3 left-3 right-3 flex justify-between items-start">
+              <Badge
+                status={statusConfig[status]?.color}
+                text={
+                  <span className="bg-white/90 backdrop-blur-sm px-2 py-1 rounded-full text-sm font-medium">
+                    {statusConfig[status]?.text}
+                  </span>
+                }
+              />
+              <div className="bg-white/90 backdrop-blur-sm px-2 py-1 rounded-full">
+                <Text className="text-sm font-medium text-green-600">
+                  <UserOutlined className="mr-1" />
+                  {auction.total_participants || 0}
+                </Text>
+              </div>
             </div>
           </div>
-          <div className="w-[1px] h-10 bg-gray-300"></div>
-          <div className="flex items-center gap-3 sm:gap-5">
-            <GiTakeMyMoney size={30} className="text-red-500" />
-            <div>
-              <Caption className="text-red-500">Mua ngay</Caption>
-              <Title className="text-sm sm:text-base">
-                {auction.buy_now_price.toLocaleString()} VNĐ
-              </Title>
-            </div>
-          </div>
+        }
+        bodyStyle={{ padding: '16px' }}
+      >
+        {/* Status Info */}
+        <div className="mb-3">
+          {renderStatusInfo()}
         </div>
 
-        <hr className="mb-3" />
-        <div className="flex items-center justify-between mt-3 gap-2">
-          <button
+        {/* Product Title */}
+        <Title level={4} className="mb-2 text-base leading-tight">
+          {auction.gundam_snapshot?.name}
+        </Title>
+
+        {/* Product Tags */}
+        <Space size={[4, 4]} wrap className="mb-4">
+          <Tag color="default">{auction.gundam_snapshot?.grade}</Tag>
+          <Tag color="default">{auction.gundam_snapshot?.scale}</Tag>
+        </Space>
+
+        <Divider className="my-4" />
+
+        {/* Price Information */}
+        <Row gutter={16} className="mb-4">
+          <Col span={12}>
+            <div className="text-center p-3 bg-green-50 rounded-lg">
+              <RiAuctionFill className="text-green-500 text-xl mx-auto mb-1" />
+              <Text type="secondary" className="block text-xs">
+                Giá khởi điểm
+              </Text>
+              <Title level={5} className="text-green-600 mb-0 text-sm">
+                {auction.starting_price?.toLocaleString()} VNĐ
+              </Title>
+            </div>
+          </Col>
+          <Col span={12}>
+            <div className="text-center p-3 bg-red-50 rounded-lg">
+              <GiTakeMyMoney className="text-red-500 text-xl mx-auto mb-1" />
+              <Text type="secondary" className="block text-xs">
+                Mua ngay
+              </Text>
+              <Title level={5} className="text-red-600 mb-0 text-sm">
+                {auction.buy_now_price?.toLocaleString()} VNĐ
+              </Title>
+            </div>
+          </Col>
+        </Row>
+
+        <Divider className="my-4" />
+
+        {/* Action Buttons */}
+        <Space size="small" className="w-full">
+          <Button
+            type={status === "ended" ? "default" : "primary"}
+            icon={<EyeOutlined />}
             onClick={() => handleClickedDetailAution(auction.id)}
-            className={`flex-1 text-sm px-3 py-2 rounded-md ${
-              status === "ended" ? "bg-gray-500 hover:bg-gray-600" : "bg-blue-500 hover:bg-blue-600"
-            } text-white`}
+            className="flex-1 bg-blue-500"
+            size="middle"
           >
             {status === "ended" ? "Xem kết quả" : "Xem chi tiết"}
-          </button>
+          </Button>
 
           {currentUser?.id === auction.seller_id ? (
-            <button
-              className="flex-1 text-sm px-3 py-2 rounded-md bg-gray-400 text-white cursor-not-allowed"
-              disabled
-            >
+            <Button disabled className="flex-1" size="middle">
               Phiên của bạn
-            </button>
+            </Button>
           ) : (
-            <button
-              onClick={handleJoinAuction}
-              disabled={hasParticipated}
-              className={`flex-1 text-sm px-3 py-2 rounded-md ${
-                hasParticipated ? 'bg-gray-400' : 'bg-red-500 hover:bg-red-600'
-              } text-white`}
-            >
-              {hasParticipated ? "Đã tham gia" : "Tham gia"}
-            </button>
+            <Tooltip title={hasParticipated ? "Bạn đã tham gia phiên này" : "Tham gia đấu giá"}>
+              <Button
+                type={hasParticipated ? "default" : "primary"}
+                danger={!hasParticipated}
+                icon={hasParticipated ? <CheckCircleOutlined /> : null}
+                onClick={handleJoinAuction}
+                disabled={hasParticipated}
+                className="flex-1"
+                size="middle"
+              >
+                {hasParticipated ? "Đã tham gia" : "Tham gia"}
+              </Button>
+            </Tooltip>
+          )}
+        </Space>
+      </Card>
+
+      {/* Participation Modal */}
+      <Modal
+        title="Xác nhận tham gia đấu giá"
+        open={isModalOpen}
+        onCancel={() => setIsModalOpen(false)}
+        footer={[
+          <Button key="cancel" onClick={() => setIsModalOpen(false)}>
+            Hủy
+          </Button>,
+          <Button key="confirm" className="bg-blue-500" type="primary" onClick={confirmParticipation}>
+            Xác nhận tham gia
+          </Button>
+        ]}
+        centered
+      >
+        <div className="py-4">
+          <Alert
+            message={
+              <div>
+                Số tiền cọc là{' '}
+                <Text strong className="text-lg text-blue-600">
+                  {depositAmount?.toLocaleString()} VNĐ
+                </Text>{' '}
+                (15% giá khởi điểm)
+              </div>
+            }
+            description="Bạn có chắc chắn muốn tham gia đấu giá?"
+            type="info"
+            showIcon
+            className="mb-4"
+          />
+
+          {currentUser && (
+            <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+              <Avatar icon={<UserOutlined />} />
+              <div>
+                <Text strong>{currentUser.full_name}</Text>
+                <br />
+                <Text type="secondary" className="text-sm">
+                  {currentUser.email}
+                </Text>
+              </div>
+            </div>
           )}
         </div>
-      </div>
-
-      <Modal
-        title="Xác nhận tham gia"
-        open={isModalOpen}
-        onOk={confirmParticipation}
-        onCancel={() => setIsModalOpen(false)}
-        okText="Xác nhận"
-        cancelText="Hủy"
-        okButtonProps={{ className: "bg-blue-500 hover:bg-blue-600" }}
-      >
-        <p>
-          Số tiền cọc là <strong>{depositAmount.toLocaleString()} VNĐ</strong> (15% giá khởi điểm). <br />
-          Bạn có chắc chắn muốn tham gia đấu giá?
-        </p>
-        {currentUser && (
-          <p className="mt-2 text-sm">
-            Tham gia với tư cách: <strong>{currentUser.full_name}</strong> ({currentUser.email})
-          </p>
-        )}
       </Modal>
-    </div>
+    </>
   );
 };
 
+
+// Auction List
 const AuctionList = () => {
   const [auctions, setAuctions] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState('active');
 
   useEffect(() => {
     const fetchAuctions = async () => {
       try {
         setLoading(true);
         const response = await GetListAuction();
-        
+
         // Giữ nguyên toàn bộ dữ liệu trả về (bao gồm auction, participants, bids)
-        const validAuctions = response.data.filter(item => 
-          ["scheduled", "active", "ended","completed"].includes(item.auction?.status) &&
+        const validAuctions = response.data.filter(item =>
           item.auction?.gundam_snapshot &&
           item.auction?.start_time &&
           item.auction?.end_time
         );
-        
-        validAuctions.sort((a, b) => 
-          new Date(b.auction.start_time) - new Date(a.auction.start_time)
+
+        validAuctions.sort((a, b) =>
+          new Date(b.auction.created_at) - new Date(a.auction.created_at)
         );
-        
+
         setAuctions(validAuctions);
       } catch (error) {
         console.error("Error fetching auction data:", error);
@@ -440,64 +564,122 @@ const AuctionList = () => {
     );
   }
 
-  return (
-    <div className="container mx-auto p-4 min-h-screen mt-24">
-      <div className="rounded-xl w-full mt-10">
-        <h1 className="text-3xl font-bold">Sàn Đấu Giá GunDam</h1>
-        <p className="text-gray-400">Tham gia đấu giá các Gundam phiên bản giới hạn.</p>
-      </div>
+  // Filter auctions based on tab
+  const activeAuctions = auctions.filter(item =>
+    ['active', 'ended', 'completed'].includes(item.auction.status)
+  );
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-        <div className="col-span-3">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {auctions.length > 0 ? (
-              auctions.map((auctionData) => (
-                <AuctionCard key={auctionData.auction.id} auctionData={auctionData} />
-              ))
-            ) : (
-              <div>No auctions available</div>
-            )}
+  const scheduledAuctions = auctions.filter(item =>
+    item.auction.status === 'scheduled'
+  );
+
+  const currentAuctions = activeTab === 'active' ? activeAuctions : scheduledAuctions;
+
+  return (
+    <div className="container mx-auto p-4 mb-5 min-h-screen mt-36">
+      {/* Header */}
+      <div className="bg-white rounded-xl shadow-sm p-6 mb-8">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-800">Sàn Đấu Giá GunDam</h1>
+            <p className="text-gray-600 mt-2">Tham gia đấu giá các Gundam phiên bản giới hạn.</p>
+          </div>
+          <div className="flex items-center gap-4">
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="Tìm kiếm Gundam..."
+                className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none w-64"
+              />
+              <div className="absolute left-3 top-2.5 text-gray-400">
+                🔍
+              </div>
+            </div>
+            <select className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none">
+              <option value="newest">Mới nhất</option>
+              <option value="price-low">Giá thấp đến cao</option>
+              <option value="price-high">Giá cao đến thấp</option>
+              <option value="ending-soon">Sắp kết thúc</option>
+            </select>
           </div>
         </div>
-
-        <div className="col-span-1 mt-4">
-          <Card className="mb-6">
-            <div className="mb-4">
-              <label className="block text-sm font-medium mb-2">Sắp xếp theo</label>
-              <Select defaultValue="newest" className="w-full">
-                <Option value="newest">Mới nhất</Option>
-                <Option value="price-low">Giá thấp đến cao</Option>
-                <Option value="price-high">Giá cao đến thấp</Option>
-                <Option value="ending-soon">Sắp kết thúc</Option>
-              </Select>
-            </div>
-
-            <div className="mb-4">
-              <label className="block text-sm font-medium mb-2">Tìm kiếm</label>
-              <Search placeholder="Nhập tên sản phẩm" enterButton />
-            </div>
-          </Card>
-
-          <Card>
-            <h3 className="text-lg font-bold mb-4">Sản phẩm sắp kết thúc</h3>
-            {auctions
-              .filter(auctionData => new Date(auctionData.auction.end_time) > new Date())
-              .sort((a, b) => new Date(a.auction.end_time) - new Date(b.auction.end_time))
-              .slice(0, 3)
-              .map((auctionData) => (
-                <div key={auctionData.auction.id} className="mb-4">
-                  <div className="text-md font-semibold">{auctionData.auction.gundam_snapshot.name}</div>
-                  <div className="text-sm text-gray-500">
-                    Giá khởi điểm: {auctionData.auction.starting_price.toLocaleString()} VNĐ
-                  </div>
-                  <div className="text-xs text-gray-400">
-                    Kết thúc: {new Date(auctionData.auction.end_time).toLocaleString()}
-                  </div>
-                </div>
-              ))}
-          </Card>
-        </div>
       </div>
+
+      {/* Main Layout */}
+      <Row gutter={32} className="">
+        {/* Left Sidebar - Filters */}
+        <Col xs={24} lg={6}>
+          <FilterSidebar />
+        </Col>
+
+        {/* Center Content - Tabs and Auctions */}
+        <Col xs={24} lg={18} className="bg-white p-4 rounded-lg">
+          {/* Tabs */}
+          <Tabs
+            activeKey={activeTab}
+            onChange={setActiveTab}
+            type="card"
+            size="large"
+            className="custom-auction-tabs"
+            centered
+            items={[
+              {
+                key: 'active',
+                label: (
+                  <div className="flex items-center justify-center gap-2 px-12 py-3 font-medium">
+                    <RiAuctionFill className="text-lg" />
+                    <span>Đấu giá đang mở ({activeAuctions.length})</span>
+                  </div>
+                ),
+              },
+              {
+                key: 'scheduled',
+                label: (
+                  <div className="flex items-center justify-center gap-2 px-12 py-3 font-medium">
+                    <span>Sắp mở ({scheduledAuctions.length})</span>
+                  </div>
+                ),
+              },
+            ]}
+          />
+
+          {/* Auction Grid */}
+          <div className="space-y-6">
+            {currentAuctions.length > 0 ? (
+              <Row gutter={[24, 24]}>
+                {currentAuctions.map((auctionData) => (
+                  <Col key={auctionData.auction.id} xs={24} md={12}>
+                    <AuctionCard auctionData={auctionData} />
+                  </Col>
+                ))}
+              </Row>
+            ) : (
+              <Card className="shadow-sm" bodyStyle={{ padding: '48px 24px' }}>
+                <Empty
+                  image={<div className="text-6xl mb-4">📦</div>}
+                  imageStyle={{ height: 'auto', marginBottom: '16px' }}
+                  description={
+                    <div className="text-center">
+                      <Title level={4} className="text-gray-500 mb-2 mt-4">
+                        {activeTab === 'active'
+                          ? 'Không có phiên đấu giá nào đang diễn ra'
+                          : 'Không có phiên đấu giá nào sắp mở'
+                        }
+                      </Title>
+                      <p className="text-gray-400 mb-0">
+                        {activeTab === 'active'
+                          ? 'Hãy quay lại sau để xem các phiên đấu giá mới'
+                          : 'Các phiên đấu giá sắp tới sẽ được cập nhật sớm'
+                        }
+                      </p>
+                    </div>
+                  }
+                />
+              </Card>
+            )}
+          </div>
+        </Col>
+      </Row>
     </div>
   );
 };

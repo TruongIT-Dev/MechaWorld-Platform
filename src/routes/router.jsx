@@ -55,7 +55,7 @@ export const ShopAddress = React.lazy(() => import("../components/Shop/ShopAddre
 export const ShopProductManagement = React.lazy(() => import("../components/Shop/ProductManagement/ShopProductManagement"));
 export const ShopPage = React.lazy(() => import("../components/Shop/ShopPage"));
 export const ShopTransaction = React.lazy(() => import("../components/Shop/ShopTransaction"));
-export const ShopAuctionManagement = React.lazy(() => import("../components/Shop/ShopAuctionManagement"));
+export const ShopAuctionManagement = React.lazy(() => import("../components/Shop/AuctionManagement/ShopAuctionManagement"));
 export const ShopOrderManagement = React.lazy(() => import("../components/Shop/OrderManagement/ShopOrderManagement"));
 export const ShopReportManagement = React.lazy(() => import("../components/Shop/ShopReportManagement"));
 export const Subscription = React.lazy(() => import("../components/Shop/subscription"));
@@ -68,7 +68,7 @@ export const ExchangeMyPost = React.lazy(() => import("../components/Exchange/Ex
 export const ExchangeDetailInformation = React.lazy(() => import("../components/Exchange/ExchangeDetailInformation"));
 export const ExchangeGundamManagement = React.lazy(() => import("../components/Exchange/ExchangeGundamManagement"));
 
-// Aution route
+// Auction route
 export const AuctionList = React.lazy(() => import("../components/Aution/User/AutionList"));
 export const AuctionDetail = React.lazy(() => import("../components/Aution/User/AutionDetail"));
 
