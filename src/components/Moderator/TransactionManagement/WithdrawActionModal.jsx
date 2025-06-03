@@ -25,13 +25,23 @@ const WithdrawActionModal = ({
 
   return (
     <Modal
-      visible={visible}
-      title={actionType === 'complete' ? 'Chấp nhận yêu cầu' : 'Từ chối yêu cầu'}
-      onCancel={onCancel}
-      onOk={handleSubmit}
-      cancelText="Hủy"
-      okText="Xác nhận"
-    >
+            title={
+                <Space>
+                    <DollarOutlined className="text-blue-500" />
+                    <span>Chi tiết yêu cầu rút tiền</span>
+                    <Text code className="text-blue-600">{record.id}</Text>
+                </Space>
+            }
+            open={visible}
+            onCancel={onClose}
+            footer={[
+                <Button key="close" onClick={onClose}>
+                    Đóng
+                </Button>
+            ]}
+            width={800}
+            styles={{ body: { maxHeight: '70vh', overflowY: 'auto' } }}
+        >
       <div style={{ marginBottom: 16 }}>
         <Button 
           type={actionType === 'complete' ? 'primary' : 'default'} 
