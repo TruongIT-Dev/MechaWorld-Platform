@@ -4,6 +4,7 @@ import { IoIosStar, IoIosStarHalf, IoIosStarOutline } from 'react-icons/io';
 import { commonClassNameOfInput } from '../Design';
 import { AiOutlinePlus } from 'react-icons/ai';
 import { GetListAuctionDetial, PlaceBid, PayForWinningBid } from '../../../apis/Auction/APIAuction';
+import { GetGundamDetailBySlug } from '../../apis/Gundams/APIGundam';
 import { getUserAddresses } from '../../../apis/User/APIUser';
 import { getUser } from '../../../apis/User/APIUser';
 import { useParams, useNavigate } from 'react-router-dom';
@@ -574,25 +575,7 @@ const AuctionDetail = () => {
                   {auctionDetail.auction.gundam_snapshot?.name || 'Tên sản phẩm không có'}
                 </Title>
 
-                <div className="flex gap-5 items-center my-4">
-                  <div className="flex text-yellow-400">
-                    <IoIosStar size={20} />
-                    <IoIosStar size={20} />
-                    <IoIosStar size={20} />
-                    <IoIosStarHalf size={20} />
-                    <IoIosStarOutline size={20} />
-                  </div>
-                  <Caption>(2 đánh giá)</Caption>
-                </div>
-
-                <div className="space-y-3 my-6">
-                  <Caption>
-                    <span className="font-medium">Tình trạng:</span> {auctionDetail.auction.gundam_snapshot?.condition || 'Không xác định'}
-                  </Caption>
-                  <Caption>
-                    <span className="font-medium">Xác minh:</span> {auctionDetail.is_verified ? "Đã xác minh" : "Chưa xác minh"}
-                  </Caption>
-                </div>
+                {/* to do dung  auctionDetail.auction.gundam_snapshot?.id to list detail dung API :GetGundamDetailBySlug de lay thong tin chi tiet */}
 
                 <div className="my-6">
                   <Caption>Thời gian còn lại:</Caption>

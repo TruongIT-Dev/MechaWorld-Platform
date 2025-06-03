@@ -47,6 +47,7 @@ import {
   GundamCollectionApp,
   NotificationPage,
   ModDashboard,
+  AutionListJoined,
 
 } from "./routes/router";
 
@@ -169,6 +170,7 @@ function App() {
               <Route path="address-setting" element={<SettingAddress />} />
               <Route path="orderhistory" element={<OrderHistory />} />
               <Route path="wallet" element={<WalletPage />} />
+              <Route path="auction-list" element={<AutionListJoined />} />
             </Route>
 
 

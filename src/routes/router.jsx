@@ -68,6 +68,7 @@ export const ExchangeGundamManagement = React.lazy(() => import("../components/E
 // Aution route
 export const AutionList = React.lazy(() => import("../components/Aution/User/AutionList"));
 export const AutionDetail = React.lazy(() => import("../components/Aution/User/AutionDetail"));
+export const AutionListJoined = React.lazy(() => import("../components/Aution/User/AutionListJoined"));
 
 // Collection route
 export const GundamCollectionApp = React.lazy(() => import("../components/Collection/Collection"));

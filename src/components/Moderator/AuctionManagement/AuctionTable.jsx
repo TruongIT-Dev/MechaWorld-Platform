@@ -25,7 +25,6 @@ export default function AuctionTable({
     onViewDetail,
     onApprove,
     onReject,
-    onChangeTime, // Thêm prop này
     loadingAction,
     formatCurrency,
     getStatusTag
@@ -110,26 +109,6 @@ export default function AuctionTable({
             render: (price) => (
                 <div className="text-center">
                     <Text className="font-medium">{formatCurrency(price)}</Text>
-                </div>
-            ),
-        },
-        {
-            title: "⏱️ Chỉnh giờ",
-            key: "timeAdjust",
-            width: 100,
-            render: (_, record) => (
-                <div className="flex justify-center">
-                    {(record.status === "approved" || record.status === "active") && (
-                        <Tooltip title="Chỉnh thời gian">
-                            <Button
-                                type="default"
-                                size="small"
-                                icon={<EditOutlined />}
-                                onClick={() => onChangeTime(record)}
-                                className="text-orange-500 border-orange-300 hover:bg-orange-50"
-                            />
-                        </Tooltip>
-                    )}
                 </div>
             ),
         },
