@@ -84,9 +84,51 @@ export const AddMoney = async (amount, description, redirectUrl) => {
     }
 };
 
-export const GetWalletTransactions = () => {
-    return axios.get(`/users/me/wallet/entries`);
-}
-// export const GetMoney = async (id) => {
-//     return axios.get(`users/${id}/wallet/`);
-// }
+
+// 4. GET: List user bank accounts
+export const GetUserBankAccounts = () => {
+    return axios.get('/users/me/bank-accounts');
+};
+
+// 5. POST: Add new bank account
+export const AddUserBankAccount = (bankAccountData) => {
+    return axios.post('/users/me/bank-accounts', bankAccountData, {
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    });
+};
+
+// 6. POST: Request withdrawal from wallet
+export const RequestWalletWithdrawal = (amount, bankAccountId) => {
+    if (!amount || amount <= 0) {
+        throw new Error('Số tiền rút không hợp lệ');
+    }
+    if (!bankAccountId) {
+        throw new Error('Thiếu bank_account_id');
+    }
+
+    return axios.post('/users/me/wallet/withdrawal-requests', {
+        amount,
+        bank_account_id: bankAccountId
+    }, {
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    });
+};
+
+// 7. GET: List withdrawal requests
+export const GetWithdrawalRequest = () => {
+    return axios.get('/users/me/wallet/withdrawal-requests');
+};
+
+// 8. Delete requested withdrawal
+export const CancelWithdrawalRequest = (requestId) => {
+  return axios.patch(`/users/me/wallet/withdrawal-requests/${requestId}/cancel`);
+};
+
+// 9. Delete user bank account
+export const DeleteUserBankAccount = (bankAccountId) => {
+    return axios.delete(`/users/me/bank-accounts/${bankAccountId}`);
+};

@@ -3,6 +3,7 @@ import {
   Tag,
   Typography,
   message,
+  Tabs,
 } from "antd";
 import {
   GetListAuctionRequestsForModerator,
@@ -14,8 +15,11 @@ import AuctionFilters from './AuctionFilters';
 import AuctionTable from './AuctionTable';
 import AuctionDetailModal from './AuctionDetailModal';
 import RejectModal from './RejectModal';
+import EditTimeModal from './EditTimeModal';
+import AuctionList from './AuctionList';
 
 const { Title, Text } = Typography;
+const { TabPane } = Tabs;
 
 const ModAuctions = () => {
   const [auctionData, setAuctionData] = useState([]);
@@ -147,15 +151,41 @@ const ModAuctions = () => {
       />
 
       {/* Main Table */}
-      <AuctionTable
-        formatCurrency={formatCurrency}
-        getStatusTag={getStatusTag}
-        data={filteredData}
-        onViewDetail={handleViewDetail}
-        onApprove={handleApprove}
-        onReject={openRejectModal}
-        loadingAction={loadingAction}
-      />
+              <Tabs
+          defaultActiveKey="1"
+          type="card"
+          className="bg-white rounded-lg shadow-sm"
+        >
+          <TabPane tab="Danh sách đấu giá" key="1">
+            <div className="space-y-6">
+              <AuctionList
+                formatCurrency={formatCurrency}
+                getStatusTag={getStatusTag}
+                data={filteredData}
+                onViewDetail={handleViewDetail}
+                onApprove={handleApprove}
+                onReject={openRejectModal}
+                loadingAction={loadingAction}
+                onChangeTime={handleChangeTime} //todo
+              />
+            </div>
+          </TabPane>
+
+          <TabPane tab="Danh sách yêu cầu" key="2">
+            <AuctionTable
+              formatCurrency={formatCurrency}
+              getStatusTag={getStatusTag}
+              data={filteredData}
+              onViewDetail={handleViewDetail}
+              onApprove={handleApprove}
+              onReject={openRejectModal}
+              loadingAction={loadingAction}
+              onChangeTime={handleChangeTime} //todo
+            />
+          </TabPane>
+
+        </Tabs>
+      
 
       {/* Detail Modal */}
       <AuctionDetailModal
