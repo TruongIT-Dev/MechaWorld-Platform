@@ -3,7 +3,7 @@ import Cookies from 'js-cookie';
 
 
 
-const baseURL = 'http://localhost:8080/v1/';
+const baseURL = 'https://gundam-platform-api.fly.dev/v1/';
 // const baseURL = '/v1';
 // axios.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded';
 const accessToken = Cookies.get('access_token');
