@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
 import { HomeOutlined, UserOutlined } from '@ant-design/icons';
 import { Card, Col, Row, Button, Breadcrumb, Empty } from 'antd';
-
+import { useNavigate } from 'react-router-dom';
 import FilterSidebar from './ProductFilter';
 import { GetGundamByGrade, GetGundams } from '../../apis/Gundams/APIGundam';
 
 const Product = () => {
-
+    const navigate = useNavigate();
     const { Meta } = Card;
 
     // useState
@@ -53,7 +53,8 @@ const Product = () => {
 
     // Hàm chuyển tới trang Chi tiết Gundam
     const handleClickedDetailGundam = (slug) => {
-        window.location.assign(`/product/${slug}`);
+        // window.location.assign(`/product/${slug}`);
+        navigate(`/product/${slug}`);
     };
 
 
