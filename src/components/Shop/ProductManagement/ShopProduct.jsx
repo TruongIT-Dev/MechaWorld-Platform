@@ -483,10 +483,10 @@ function ShopProduct({ isCreating, setIsCreating, isUpdating, setIsUpdating, set
       width: 100,
       render: (_, record) => {
         const menuItems = [
-          { key: "edit", label: "✏️ Chỉnh sửa sản phẩm", },
+          // { key: "edit", label: "✏️ Chỉnh sửa sản phẩm", },
         ];
         if (record.status === "in store") {
-          menuItems.push({ key: "delete", label: "❌ xóa sản phẩm" });
+          menuItems.push({ key: "delete", label: "❌ xóa sản phẩm" },{ key: "edit", label: "✏️ Chỉnh sửa sản phẩm", },);
         }
         if (record.status === "published") {
           menuItems.push({ key: "unsell", label: "🚫 Hủy bán sản phẩm" });
