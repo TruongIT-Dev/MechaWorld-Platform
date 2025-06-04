@@ -196,7 +196,7 @@ const AuctionSection = ({ auctions }) => {
   }
   
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div data-aos="zoom-in" data-duration="1000" data-aos-once="true" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {auctions.map((auctionData) => {
         const auction = auctionData.auction;
         const statusBadge = getStatusBadge(auction.status);

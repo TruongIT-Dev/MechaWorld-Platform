@@ -90,7 +90,7 @@ const HomePage = () => {
             {/* Products Section */}
             <section className="py-12">
                 <div className="container mx-auto px-4">
-                    <h2 className="text-3xl font-bold mb-8 text-center">Sản phẩm GunDam</h2>
+                    <h2 data-aos="fade-down" data-duration="1000" data-aos-once="true" className="text-3xl font-bold mb-8 text-center">Sản phẩm GunDam</h2>
                     {loading.products ? (
                         <div className="text-center">Loading products...</div>
                     ) : error.products ? (
@@ -104,7 +104,7 @@ const HomePage = () => {
             {/* Exchange Section */}
             <section className="py-12 bg-gray-100 dark:bg-gray-800">
                 <div className="container mx-auto px-4">
-                    <h2 className="text-3xl font-bold mb-8 text-center">Trao đổi Gundam</h2>
+                    <h2 data-aos="fade-down" data-duration="1000" data-aos-once="true" className="text-3xl font-bold mb-8 text-center">Trao đổi Gundam</h2>
                     {loading.exchanges ? (
                         <div className="text-center">Loading exchanges...</div>
                     ) : error.exchanges ? (
@@ -118,7 +118,7 @@ const HomePage = () => {
             {/* Auction Section */}
             <section className="py-12">
                 <div className="container mx-auto px-4">
-                    <h2 className="text-3xl font-bold mb-8 text-center">Đấu giá Gundam</h2>
+                    <h2 data-aos="fade-down" data-duration="1000" data-aos-once="true" className="text-3xl font-bold mb-8 text-center">Đấu giá Gundam</h2>
                     {loading.auctions ? (
                         <div className="text-center">Loading auctions...</div>
                     ) : error.auctions ? (

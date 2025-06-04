@@ -9,7 +9,7 @@ const ProductSection = ({ products }) => {
     };
 
     return (
-        <div className="mb-8">
+        <div data-aos="fade-left" data-duration="1000" data-aos-once="true" className="mb-8">
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                 {products.slice(0, visibleProducts).map((product) => (
                     <div key={product.gundam_id} className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 flex flex-col h-full">
