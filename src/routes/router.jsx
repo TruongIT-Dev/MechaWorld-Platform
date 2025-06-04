@@ -59,6 +59,7 @@ export const ShopOrderManagement = React.lazy(() => import("../components/Shop/O
 export const ShopReportManagement = React.lazy(() => import("../components/Shop/ShopReportManagement"));
 export const Subscription = React.lazy(() => import("../components/Shop/Subscription"));
 
+
 // Exchange Route
 export const ExchangeList = React.lazy(() => import("../components/Exchange/ExchangeHome/ExchangeList"));
 export const ExchangeManage = React.lazy(() => import("../components/Exchange/ExchangeManage/ExchangeManage"));
