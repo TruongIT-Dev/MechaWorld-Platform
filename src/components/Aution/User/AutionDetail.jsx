@@ -7,19 +7,19 @@ import { GetListAuctionDetial, PlaceBid, PayForWinningBid } from '../../../apis/
 import { getUserAddresses } from '../../../apis/User/APIUser';
 import { getUser } from '../../../apis/User/APIUser';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Button, message, Modal, Form, Input, Radio, Divider } from 'antd';
-import { InfoCircleOutlined } from '@ant-design/icons';
+import { message,  Form } from 'antd';
 import Cookies from 'js-cookie';
 import axios from 'axios';
 import { formatToCustomTime, formatDisplayTime } from './dateFormat';
 import AuctionPaymentModal from './AuctionPaymentModal';
 import ParticipantsTable from './ParticipantsTable';
+import GundamAuctionDetail from './GundamAuctionDetail';
 
 const AuctionDetail = () => {
   const { auctionID } = useParams();
   const [auctionDetail, setAuctionDetail] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState("auctionHistory");
+  const [activeTab, setActiveTab] = useState("gundamDetails");
   const [bidPrice, setBidPrice] = useState('');
   const [bidError, setBidError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -421,16 +421,32 @@ const AuctionDetail = () => {
   const handleTabClick = (tab) => setActiveTab(tab);
 
   const handleBidChange = (e) => {
-    const value = e.target.value;
-    setBidPrice(value);
-    if (!value) return setBidError('');
+    let value = e.target.value;
+    
+    // Loại bỏ tất cả ký tự không phải số
+    const numericValue = value.replace(/[^0-9]/g, '');
+    
+    // Cập nhật state với giá trị số
+    setBidPrice(numericValue);
+    
+    if (!numericValue) {
+      setBidError('');
+      return;
+    }
 
-    const numericValue = Number(value);
+
+
+    const numValue = Number(numericValue);
     const minBid = (auctionDetail?.auction?.current_price || 0) + 
                   (auctionDetail?.auction?.bid_increment || 0);
 
-    setBidError(numericValue < minBid ? 
+    setBidError(numValue < minBid ? 
       `Giá đấu phải tối thiểu ${minBid.toLocaleString()} VNĐ` : '');
+  };
+
+    const formatBidValue = (value) => {
+    if (!value) return '';
+    return Number(value).toLocaleString() + ' VNĐ';
   };
 
   const handleSubmitBid = async (e) => {
@@ -574,26 +590,6 @@ const AuctionDetail = () => {
                   {auctionDetail.auction.gundam_snapshot?.name || 'Tên sản phẩm không có'}
                 </Title>
 
-                <div className="flex gap-5 items-center my-4">
-                  <div className="flex text-yellow-400">
-                    <IoIosStar size={20} />
-                    <IoIosStar size={20} />
-                    <IoIosStar size={20} />
-                    <IoIosStarHalf size={20} />
-                    <IoIosStarOutline size={20} />
-                  </div>
-                  <Caption>(2 đánh giá)</Caption>
-                </div>
-
-                <div className="space-y-3 my-6">
-                  <Caption>
-                    <span className="font-medium">Tình trạng:</span> {auctionDetail.auction.gundam_snapshot?.condition || 'Không xác định'}
-                  </Caption>
-                  <Caption>
-                    <span className="font-medium">Xác minh:</span> {auctionDetail.is_verified ? "Đã xác minh" : "Chưa xác minh"}
-                  </Caption>
-                </div>
-
                 <div className="my-6">
                   <Caption>Thời gian còn lại:</Caption>
                   {auctionDetail.auction.status === 'scheduled' ? (
@@ -639,13 +635,23 @@ const AuctionDetail = () => {
                 <form onSubmit={handleSubmitBid} className="mt-6 p-5 bg-white rounded-lg shadow-md">
                   <div className="mb-4">
                     <input
-                      className={`${commonClassNameOfInput} ${bidError ? 'border-red-500' : ''} w-full`}
-                      type="number"
-                      placeholder={`Tối thiểu ${((auctionDetail.auction.current_price || 0) + (auctionDetail.auction.bid_increment || 0)).toLocaleString()} VNĐ`}
-                      value={bidPrice}
+                      className={`${commonClassNameOfInput} ${bidError ? 'border-red-500' : ''} w-full pr-12`}
+                      type="text"
+                      placeholder={`Tối thiểu ${((auctionDetail?.auction?.current_price || 0) + (auctionDetail?.auction?.bid_increment || 0)).toLocaleString()} VNĐ`}
+                      value={formatBidValue(bidPrice)}
                       onChange={handleBidChange}
-                      min={(auctionDetail?.auction?.current_price || 0) + (auctionDetail?.auction?.bid_increment || 0)}
+                      onFocus={(e) => {
+                        // Khi focus, hiển thị giá trị số không format
+                        e.target.value = bidPrice || '';
+                      }}
+                      onBlur={(e) => {
+                        // Khi blur, format lại giá trị
+                        e.target.value = formatBidValue(bidPrice);
+                      }}
                     />
+                    <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 pointer-events-none">
+                      VNĐ
+                    </span>
                     {bidError && <p className="text-red-500 text-sm mt-1">{bidError}</p>}
                   </div>
                   <button
@@ -666,6 +672,11 @@ const AuctionDetail = () => {
         <div className="mt-12">
           <div className="flex border-b">
             <button
+              className={`px-6 py-3 ${activeTab === 'gundamDetails' ? 'border-b-2 border-black font-medium' : 'text-gray-500'}`}
+              onClick={() => handleTabClick('gundamDetails')}>
+              Chi tiết Gundam
+            </button>
+            <button
               className={`px-6 py-3 ${activeTab === 'auctionHistory' ? 'border-b-2 border-black font-medium' : 'text-gray-500'}`}
               onClick={() => handleTabClick('auctionHistory')}
             >
@@ -677,9 +688,14 @@ const AuctionDetail = () => {
             >
               Người tham gia ({participants.length})
             </button>
+            
           </div>
 
           <div className="mt-6">
+            {activeTab === 'gundamDetails' && (
+              // todo
+              <GundamAuctionDetail gundamId={auctionDetail?.auction?.gundam_id} /> 
+            )}
             {activeTab === 'auctionHistory' && (
               <div className="bg-white rounded-lg shadow overflow-hidden">
                 <div className="p-4 border-b">
@@ -759,6 +775,7 @@ const AuctionDetail = () => {
             {activeTab === 'participants' && (
               <ParticipantsTable participants={participants} />
             )}
+            
           </div>
         </div>
       </Container>

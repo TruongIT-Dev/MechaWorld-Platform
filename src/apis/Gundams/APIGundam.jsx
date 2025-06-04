@@ -26,7 +26,9 @@ export const GetGundamsAuction = () => {
 }
 
 // 3. Retrieves detailed information about a specific Gundam model
-
+export const GetGundamDetailByID = (gundam_id) => {
+    return axios.get(`/gundams/${gundam_id}`);
+}
 
 // 4. Retrieves a specific Gundam model by its unique slug
 export const GetGundamDetailBySlug = (slug) => {

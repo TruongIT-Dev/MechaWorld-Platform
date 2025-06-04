@@ -37,7 +37,8 @@
     "react-slick": "^0.29.0",
     "react-toastify": "^11.0.3",
     "redux-persist": "^6.0.0",
-    "slick-carousel": "^1.8.1"
+    "slick-carousel": "^1.8.1",
+    "swiper": "^11.2.8"
   },
   "devDependencies": {
     "@types/react": "^18.2.43",
