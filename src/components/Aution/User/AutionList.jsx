@@ -389,7 +389,7 @@ const AuctionCard = ({ auctionData }) => {
             type={status === "ended" ? "default" : "primary"}
             icon={<EyeOutlined />}
             onClick={() => handleClickedDetailAution(auction.id)}
-            className="flex-1 bg-blue-500"
+            className="flex-1 bg-blue-500 text-white"
             size="middle"
           >
             {status === "ended" ? "Xem kết quả" : "Xem chi tiết"}

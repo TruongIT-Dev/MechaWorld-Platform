@@ -491,8 +491,12 @@ const AuctionDetail = () => {
       message.success("Đặt giá thành công!");
       setBidPrice('');
     } catch (error) {
-      const apiError = error?.response?.data?.message;
-      message.error(apiError || "Đặt giá thất bại");
+      const apiError = error?.response?.data?.error;
+      if (apiError === "seller cannot bid on their own auction") {
+        message.error("Không thể đặt giá trong phiên của mình");
+      } else {
+        message.error(apiError || "Đặt giá thất bại");
+      }
     } finally {
       setIsSubmitting(false);
     }
