@@ -81,3 +81,11 @@ export const checkWallet = (id) => {
     return axios.get(`/users/${id}/wallet`)
 }
 
+
+export const getUserAuctionParticipation = () => {
+    return axios.get(`/users/me/auctions`)
+}
+
+export const getUserAuctionBids = (id) => {
+    return axios.get(`/users/me/auctions/:auctionID/bids?auctionID=${id}`)
+}
