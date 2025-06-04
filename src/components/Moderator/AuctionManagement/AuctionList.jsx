@@ -88,6 +88,8 @@ const AuctionList = ({ searchTerm, filteredStatus }) => {
         return 'Đã hoàn thành';
       case 'ended':
         return 'Đã kết thúc';
+      case 'canceled':
+        return 'Đã hủy';
       default:
         return status;
     }
@@ -131,6 +133,7 @@ const AuctionList = ({ searchTerm, filteredStatus }) => {
           status === 'active' ? 'text-green-500' : 
           status === 'completed' ? 'text-purple-500' : 
           status === 'ended' ? 'text-red-500' :
+          status === 'canceled' ? 'text-orange-400' :
           'text-gray-500'
         }`}>
           {mapStatusText(status)}

@@ -40,6 +40,8 @@ const WithdrawalHistory = () => {
                 return <Tag icon={<ClockCircleOutlined />} color="processing">Đang xử lý</Tag>;
             case 'rejected':
                 return <Tag icon={<StopOutlined />} color="error">Đã từ chối</Tag>;
+            case 'canceled':
+                return <Tag icon={<ExclamationCircleOutlined />} color="warning">Đã hủy</Tag>;
             default:
                 return <Tag color="default">{status}</Tag>;
         }

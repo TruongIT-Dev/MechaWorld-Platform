@@ -27,7 +27,8 @@ const transactionTypeMap = {
 const statusMap = {
     completed: { text: 'Thành công', color: 'success' },
     pending: { text: 'Đang xử lý', color: 'processing' },
-    failed: { text: 'Thất bại', color: 'error' }
+    failed: { text: 'Thất bại', color: 'error' },
+    canceled: { text: 'Đã hủy', color: 'warning' },
 };
 
 const isPositiveTransaction = (entryType) => {

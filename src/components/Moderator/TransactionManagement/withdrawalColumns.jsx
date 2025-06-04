@@ -26,6 +26,7 @@ export const renderStatus = (status) => {
         pending: { color: 'orange', text: 'Chờ xử lý', icon: <ClockCircleOutlined /> },
         completed: { color: 'green', text: 'Đã hoàn thành', icon: <CheckCircleOutlined /> },
         rejected: { color: 'red', text: 'Đã từ chối', icon: <ExclamationCircleOutlined /> },
+        canceled: { color: 'gray', text: 'Đã hủy', icon: <CreditCardOutlined /> },
     };
     const config = statusConfig[status] || statusConfig.pending;
     return (

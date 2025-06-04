@@ -840,6 +840,10 @@ function ShopProduct({ isCreating, setIsCreating, isUpdating, setIsUpdating, set
                             return Promise.reject(new Error('Thời gian không hợp lệ'));
                           }
                           if (!startDate || value.isAfter(startDate)) {
+                            // Kiểm tra không quá 7 ngày
+                            if (startDate && value.diff(startDate, 'days') > 7) {
+                              return Promise.reject(new Error('Ngày kết thúc tối đa 7 ngày sau ngày bắt đầu'));
+                            }
                             return Promise.resolve();
                           }
                           return Promise.reject(new Error('Phải sau ngày bắt đầu'));

@@ -62,6 +62,7 @@ const AuctionSection = ({ auctions }) => {
   const [isModalOpenMap, setIsModalOpenMap] = useState({});
   const [depositAmountMap, setDepositAmountMap] = useState({});
   const [loading, setLoading] = useState(true);
+  const [showAll, setShowAll] = useState(false);
 
   useEffect(() => {
     const fetchUserData = () => {
@@ -187,7 +188,8 @@ const AuctionSection = ({ auctions }) => {
       active: { color: 'green', text: 'ĐANG DIỄN RA' },
       ended: { color: 'red', text: 'ĐÃ KẾT THÚC' },
       scheduled: { color: 'blue', text: 'SẮP DIỄN RA' },
-      completed: { color: 'purple', text: 'HOÀN THÀNH' }
+      completed: { color: 'purple', text: 'HOÀN THÀNH' },
+      canceled: { color: 'gray', text: 'ĐÃ HỦY' },
     };
 
     return statusConfig[status] || { color: 'default', text: 'UNKNOWN' };
@@ -197,149 +199,171 @@ const AuctionSection = ({ auctions }) => {
     return <div>Loading user data...</div>;
   }
 
+  // Chỉ lấy các phiên active hoặc scheduled
+  const filteredAuctions = (auctions || []).filter(
+    auctionData =>
+      auctionData?.auction?.status === "active" ||
+      auctionData?.auction?.status === "scheduled"
+  );
+
+  // Số lượng sản phẩm muốn hiển thị mặc định
+  const DISPLAY_LIMIT = 3;
+  const displayAuctions = showAll ? filteredAuctions : filteredAuctions.slice(0, DISPLAY_LIMIT);
+
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {(auctions || []).map((auctionData) => {
-        const auction = auctionData?.auction;
-        if (!auction) return null; // Skip nếu không có dữ liệu
+    <div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {displayAuctions.map((auctionData) => {
+          const auction = auctionData?.auction;
+          if (!auction) return null; // Skip nếu không có dữ liệu
 
-        const statusBadge = getStatusBadge(auction.status);
-        const hasParticipated = hasParticipatedMap[auction.id] || false;
-        const isModalOpen = isModalOpenMap[auction.id] || false;
-        const depositAmount = depositAmountMap[auction.id] || 0;
-        const isAuctionEnded = auction.status === 'ended' || auction.status === 'completed';
+          const statusBadge = getStatusBadge(auction.status);
+          const hasParticipated = hasParticipatedMap[auction.id] || false;
+          const isModalOpen = isModalOpenMap[auction.id] || false;
+          const depositAmount = depositAmountMap[auction.id] || 0;
+          const isAuctionEnded = auction.status === 'ended' || auction.status === 'completed';
 
-        return (
-          <div key={auction.id} className="relative">
-            {/* Status Badge */}
-            <div className="absolute top-2 right-2 z-10">
-              <Badge
-                status={statusBadge.color}
-                text={
-                  <span className="bg-white/90 backdrop-blur-sm px-2 py-1 rounded-full text-xs font-medium">
-                    {statusBadge.text}
-                  </span>
-                }
-              />
-            </div>
-
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 h-full flex flex-col">
-              <div className="relative h-48 overflow-hidden">
-                <img
-                  src={auction.gundam_snapshot.image_url}
-                  alt={auction.gundam_snapshot.name}
-                  className="w-full h-full object-cover"
+          return (
+            <div key={auction.id} className="relative">
+              {/* Status Badge */}
+              <div className="absolute top-2 right-2 z-10">
+                <Badge
+                  status={statusBadge.color}
+                  text={
+                    <span className="bg-white/90 backdrop-blur-sm px-2 py-1 rounded-full text-xs font-medium">
+                      {statusBadge.text}
+                    </span>
+                  }
                 />
               </div>
-              <div className="p-4 flex-grow flex flex-col">
-                <h3 className="text-lg font-semibold mb-2">{auction.gundam_snapshot.name}</h3>
 
-                <div className="flex justify-between mb-2">
-                  <span className="text-gray-600 dark:text-gray-300">Giá hiện tại:</span>
-                  <span className="font-bold">{auction.current_price} VNĐ</span>
+              <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 h-full flex flex-col">
+                <div className="relative h-48 overflow-hidden">
+                  <img
+                    src={auction.gundam_snapshot.image_url}
+                    alt={auction.gundam_snapshot.name}
+                    className="w-full h-full object-cover"
+                  />
                 </div>
+                <div className="p-4 flex-grow flex flex-col">
+                  <h3 className="text-lg font-semibold mb-2">{auction.gundam_snapshot.name}</h3>
 
-                <div className="flex justify-between mb-2">
-                  <span className="text-gray-600 dark:text-gray-300">Số lượt đấu giá:</span>
-                  <span>{auction.total_bids}</span>
-                </div>
+                  <div className="flex justify-between mb-2">
+                    <span className="text-gray-600 dark:text-gray-300">Giá hiện tại:</span>
+                    <span className="font-bold">{auction.current_price} VNĐ</span>
+                  </div>
 
-                <div className="flex justify-between mb-4">
-                  <span className="text-gray-600 dark:text-gray-300">Kết thúc:</span>
-                  <span>
-                    <ClockCircleOutlined className="mr-1" />
-                    {new Date(auction.end_time).toLocaleString()}
-                  </span>
-                </div>
+                  <div className="flex justify-between mb-2">
+                    <span className="text-gray-600 dark:text-gray-300">Số lượt đấu giá:</span>
+                    <span>{auction.total_bids}</span>
+                  </div>
 
-                <div className="mt-auto flex space-x-2">
-                  <Button
-                    type={auction.status === "ended" ? "default" : "primary"}
-                    icon={<EyeOutlined />}
-                    onClick={() => handleClickedDetailAution(auction)}
-                    className="flex-1 text-[#1890ff] border-[#1890ff] hover:bg-blue-50"
-                  >
-                    {auction.status === "ended" ? "Xem kết quả" : "Xem chi tiết"}
-                  </Button>
+                  <div className="flex justify-between mb-4">
+                    <span className="text-gray-600 dark:text-gray-300">Kết thúc:</span>
+                    <span>
+                      <ClockCircleOutlined className="mr-1" />
+                      {new Date(auction.end_time).toLocaleString()}
+                    </span>
+                  </div>
 
-                  {currentUser?.id === auction.seller_id ? (
-                    <Button disabled className="flex-1">
-                      Phiên của bạn
+                  <div className="mt-auto flex space-x-2">
+                    <Button
+                      type={auction.status === "ended" ? "default" : "primary"}
+                      icon={<EyeOutlined />}
+                      onClick={() => handleClickedDetailAution(auction)}
+                      className="flex-1 text-[#1890ff] border-[#1890ff] hover:bg-blue-50"
+                    >
+                      {auction.status === "ended" ? "Xem kết quả" : "Xem chi tiết"}
                     </Button>
-                  ) : (
-                    <Tooltip title={hasParticipated ? "Bạn đã tham gia phiên này" : "Tham gia đấu giá"}>
-                      <Button
-                        type={hasParticipated ? "default" : "primary"}
-                        danger={!hasParticipated}
-                        icon={hasParticipated ? <CheckCircleOutlined /> : null}
-                        onClick={() => handleJoinAuction(auction)}
-                        disabled={hasParticipated}
-                        className="flex-1"
-                      >
-                        {hasParticipated ? "Đã tham gia" : "Tham gia"}
+
+                    {currentUser?.id === auction.seller_id ? (
+                      <Button disabled className="flex-1">
+                        Phiên của bạn
                       </Button>
-                    </Tooltip>
+                    ) : (
+                      <Tooltip title={hasParticipated ? "Bạn đã tham gia phiên này" : "Tham gia đấu giá"}>
+                        <Button
+                          type={hasParticipated ? "default" : "primary"}
+                          danger={!hasParticipated}
+                          icon={hasParticipated ? <CheckCircleOutlined /> : null}
+                          onClick={() => handleJoinAuction(auction)}
+                          disabled={hasParticipated}
+                          className="flex-1"
+                        >
+                          {hasParticipated ? "Đã tham gia" : "Tham gia"}
+                        </Button>
+                      </Tooltip>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Participation Modal */}
+              <Modal
+                title="Xác nhận tham gia đấu giá"
+                open={isModalOpen}
+                onCancel={() => setIsModalOpenMap(prev => ({ ...prev, [auction.id]: false }))}
+                footer={[
+                  <Button key="cancel" onClick={() => setIsModalOpenMap(prev => ({ ...prev, [auction.id]: false }))}>
+                    Hủy
+                  </Button>,
+                  <Button
+                    type={isAuctionEnded ? "default" : hasParticipated ? "default" : "primary"}
+                    danger={!isAuctionEnded && !hasParticipated}
+                    icon={isAuctionEnded ? null : hasParticipated ? <CheckCircleOutlined /> : null}
+                    onClick={isAuctionEnded ? null : () => handleJoinAuction(auction)}
+                    disabled={isAuctionEnded || hasParticipated}
+                    className="flex-1"
+                  >
+                    {isAuctionEnded ? "Đã kết thúc" : hasParticipated ? "Đã tham gia" : "Tham gia"}
+                  </Button>
+                ]}
+                centered
+              >
+                <div className="py-4">
+                  <Alert
+                    message={
+                      <div>
+                        Số tiền cọc là{' '}
+                        <span className="font-bold text-blue-600">
+                          {depositAmount.toLocaleString()} VNĐ
+                        </span>{' '}
+                        (15% giá khởi điểm)
+                      </div>
+                    }
+                    description="Bạn có chắc chắn muốn tham gia đấu giá?"
+                    type="info"
+                    showIcon
+                    className="mb-4"
+                  />
+
+                  {currentUser && (
+                    <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                      <Avatar icon={<UserOutlined />} />
+                      <div>
+                        <span className="font-bold">{currentUser.full_name}</span>
+                        <br />
+                        <span className="text-gray-500 text-sm">
+                          {currentUser.email}
+                        </span>
+                      </div>
+                    </div>
                   )}
                 </div>
-              </div>
+              </Modal>
             </div>
-
-            {/* Participation Modal */}
-            <Modal
-              title="Xác nhận tham gia đấu giá"
-              open={isModalOpen}
-              onCancel={() => setIsModalOpenMap(prev => ({ ...prev, [auction.id]: false }))}
-              footer={[
-                <Button key="cancel" onClick={() => setIsModalOpenMap(prev => ({ ...prev, [auction.id]: false }))}>
-                  Hủy
-                </Button>,
-                <Button
-                  type={isAuctionEnded ? "default" : hasParticipated ? "default" : "primary"}
-                  danger={!isAuctionEnded && !hasParticipated}
-                  icon={isAuctionEnded ? null : hasParticipated ? <CheckCircleOutlined /> : null}
-                  onClick={isAuctionEnded ? null : () => handleJoinAuction(auction)}
-                  disabled={isAuctionEnded || hasParticipated}
-                  className="flex-1"
-                >
-                  {isAuctionEnded ? "Đã kết thúc" : hasParticipated ? "Đã tham gia" : "Tham gia"}
-                </Button>
-              ]}
-              centered
-            >
-              <div className="py-4">
-                <Alert
-                  message={
-                    <div>
-                      Số tiền cọc là{' '}
-                      <span className="font-bold text-blue-600">
-                        {depositAmount.toLocaleString()} VNĐ
-                      </span>{' '}
-                      (15% giá khởi điểm)
-                    </div>
-                  }
-                  description="Bạn có chắc chắn muốn tham gia đấu giá?"
-                  type="info"
-                  showIcon
-                  className="mb-4"
-                />
-
-                {currentUser && (
-                  <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                    <Avatar icon={<UserOutlined />} />
-                    <div>
-                      <span className="font-bold">{currentUser.full_name}</span>
-                      <br />
-                      <span className="text-gray-500 text-sm">
-                        {currentUser.email}
-                      </span>
-                    </div>
+          );
+        })}
+      </div>
+      {/* Nút Xem thêm */}
+                  <div className="text-center mt-6">
+                      <Link 
+                          to="/auction" 
+                          className="inline-block px-6 py-2 border border-blue-500 text-blue-500 rounded hover:bg-blue-50 transition-colors"
+                      >
+                          Xem thêm các phiên đấu giá
+                      </Link>
                   </div>
-                )}
-              </div>
-            </Modal>
-          </div>
-        );
-      })}
     </div>
   );
 };
