@@ -321,7 +321,7 @@ const AuctionDetail = () => {
     const connect = () => {
       setConnectionStatus('connecting');
       try {
-        const url = `/v1/auctions/${auctionID}/stream`;
+        const url = `https://gundam-platform-api.fly.dev/v1/auctions/${auctionID}/stream`
         const eventSource = new EventSource(url);
         eventSourceRef.current = eventSource;
 
