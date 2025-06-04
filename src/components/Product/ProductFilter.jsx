@@ -46,7 +46,7 @@ const FilterSidebar = ({ onFilterChange }) => {
                 />
             </div>
 
-            <Collapse defaultActiveKey={["1"]} ghost>
+            <Collapse defaultActiveKey={["1", "2"]} ghost>
                 {/* Loại Gundam */}
                 <Panel className="font-bold" header="Loại Gundam" key="1">
                     <Radio.Group

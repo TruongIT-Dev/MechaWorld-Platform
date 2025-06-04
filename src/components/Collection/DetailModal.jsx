@@ -231,40 +231,6 @@ const DetailModal = ({ visible, product, onCancel, toggleFavorite, toggleWishlis
                             )}
                         </Collapse>
                     </Tabs.TabPane>
-
-                    <Tabs.TabPane tab="Bộ sưu tập liên quan" key="2">
-                        <div className="p-4 bg-gray-50 rounded-lg">
-                            <Typography.Title level={5}>Cùng dòng Series</Typography.Title>
-                            <div className="flex overflow-x-auto gap-4 py-2">
-                                {[1, 2, 3].map(i => (
-                                    <div key={i} className="flex-none w-40">
-                                        <Card
-                                            hoverable
-                                            cover={<img alt="example" src="/api/placeholder/150/150" />}
-                                            size="small"
-                                        >
-                                            <Card.Meta title={`${product.series} #${i}`} description="HG 1/144" />
-                                        </Card>
-                                    </div>
-                                ))}
-                            </div>
-
-                            <Typography.Title level={5} className="mt-4">Cùng Grade</Typography.Title>
-                            <div className="flex overflow-x-auto gap-4 py-2">
-                                {[1, 2, 3].map(i => (
-                                    <div key={i} className="flex-none w-40">
-                                        <Card
-                                            hoverable
-                                            cover={<img alt="example" src="/api/placeholder/150/150" />}
-                                            size="small"
-                                        >
-                                            <Card.Meta title={`${product.grade} Model #${i}`} description={product.grade} />
-                                        </Card>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    </Tabs.TabPane>
                 </Tabs>
             </div>
         </Modal>

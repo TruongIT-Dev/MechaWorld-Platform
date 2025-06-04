@@ -1,16 +1,14 @@
-import React, { useEffect, useState } from "react";
-import { NavLink, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { RiAuctionFill } from "react-icons/ri";
 import { GiTakeMyMoney } from "react-icons/gi";
-import { MdOutlineFavorite } from "react-icons/md";
 import { Caption, PrimaryButton } from "../Design";
-import { BankOutlined, CheckCircleOutlined, ClockCircleOutlined, DeleteOutlined, EyeOutlined, PlusOutlined, UserOutlined } from '@ant-design/icons';
-import { Input, Select, Card, Modal, message, Row, Col, Tabs, Empty, Typography, Space, Tag, Divider, Button, Tooltip, Alert, Avatar, Badge } from "antd";
+import { CheckCircleOutlined, ClockCircleOutlined, EyeOutlined, UserOutlined } from '@ant-design/icons';
+import { Card, Modal, Row, Col, Tabs, Empty, Typography, Space, Tag, Divider, Button, Tooltip, Alert, Avatar, Badge } from "antd";
 import { GetListAuction, ParticipateInAuction } from "../../../apis/Auction/APIAuction";
 import Cookies from 'js-cookie';
+import FilterSidebar from "../../Product/ProductFilter";
 
-const { Search } = Input;
-const { Option } = Select;
 const { Title, Text } = Typography;
 
 const formatDate = (dateString) => {
@@ -124,58 +122,6 @@ const getCurrentUserFromCookies = () => {
   }
 };
 
-
-// Filter Side Bar
-const FilterSidebar = () => {
-  const grades = ["High Grade", "Real Grade", "Master Grade", "Perfect Grade"];
-  const scales = ["1/144", "1/100", "1/60"];
-
-  return (
-    <div className="bg-white shadow-s1 rounded-xl p-6">
-      <div className="flex items-center gap-2 mb-6">
-        <Title level={5}>Bộ lọc Gundam</Title>
-      </div>
-
-      {/* Grade Filter */}
-      <div className="mb-6">
-        <Text level={6} className="mb-3 text-gray-700">Grade</Text>
-        <div className="space-y-2">
-          {grades.map(grade => (
-            <label key={grade} className="flex items-center gap-2 cursor-pointer hover:bg-gray-50 p-2 rounded">
-              <input
-                type="checkbox"
-                className="rounded border-gray-300 text-blue-500 focus:ring-blue-500"
-              />
-              <span className="text-sm text-gray-600">{grade}</span>
-            </label>
-          ))}
-        </div>
-      </div>
-
-      {/* Scale Filter */}
-      <div className="mb-6">
-        <Text level={4} className="mb-3 text-gray-700">Tỷ lệ (Scale)</Text>
-        <div className="space-y-2">
-          {scales.map(scale => (
-            <label key={scale} className="flex items-center gap-2 cursor-pointer hover:bg-gray-50 p-2 rounded">
-              <input
-                type="checkbox"
-                className="rounded border-gray-300 text-blue-500 focus:ring-blue-500"
-              />
-              <span className="text-sm text-gray-600">{scale}</span>
-            </label>
-          ))}
-        </div>
-      </div>
-
-      <button className="w-full bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium py-2 px-4 rounded-lg transition-colors">
-        Áp dụng bộ lọc
-      </button>
-    </div>
-  );
-};
-
-
 // Auction Card
 const AuctionCard = ({ auctionData }) => {
   const navigate = useNavigate();
@@ -193,8 +139,8 @@ const AuctionCard = ({ auctionData }) => {
   } = auctionData;
 
   useEffect(() => {
-    console.log("Participants data:", participants);
-    console.log("Auction data:", auction);
+    // console.log("Participants data:", participants);
+    // console.log("Auction data:", auction);
   }, [participants, auction]);
 
   useEffect(() => {
@@ -528,6 +474,16 @@ const AuctionList = () => {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('active');
 
+  const [filters, setFilters] = useState({
+    selectedGrade: null,
+  });
+
+  // Filter Side Bar
+  // Hàm nhận dữ liệu lọc từ FilterSidebar
+  const handleFilterChange = (newFilters) => {
+    setFilters(newFilters);
+  };
+
   useEffect(() => {
     const fetchAuctions = async () => {
       try {
@@ -559,7 +515,7 @@ const AuctionList = () => {
   if (loading) {
     return (
       <div className="container mx-auto p-4 min-h-screen mt-14 flex justify-center items-center">
-        <div>Loading auctions...</div>
+        <div>Đang tải các phiên Đấu giá...</div>
       </div>
     );
   }
@@ -574,6 +530,26 @@ const AuctionList = () => {
   );
 
   const currentAuctions = activeTab === 'active' ? activeAuctions : scheduledAuctions;
+
+  // Apply grade filter
+  const filteredAuctions = currentAuctions.filter(item => {
+    // Nếu không có grade filter được chọn, hiển thị tất cả
+    if (!filters.selectedGrade) {
+      return true;
+    }
+
+    // Kiểm tra xem auction có gundam_snapshot và grade không
+    if (!item.auction?.gundam_snapshot?.grade) {
+      return false;
+    }
+
+    //Trong gundam_snapshow.grade: data: Entry Grade
+    // nhưng filter thì lại đang entry-grade
+    // có cách nào để chỉnh lại data:grade để phù hợp với
+
+    // So sánh grade (không phân biệt hoa thường)
+    return item.auction.gundam_snapshot.grade.toLowerCase() === filters.selectedGrade;
+  });
 
   return (
     <div className="container mx-auto p-4 mb-5 min-h-screen mt-36">
@@ -605,11 +581,31 @@ const AuctionList = () => {
         </div>
       </div>
 
+      {/* Filter Status Display */}
+      {filters.selectedGrade && (
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
+          <div className="flex items-center justify-between">
+            <span className="text-blue-800">
+              Đang lọc theo Grade: <strong>{filters.selectedGrade}</strong>
+            </span>
+            <button
+              onClick={() => setFilters({ ...filters, selectedGrade: null })}
+              className="text-blue-600 hover:text-blue-800 text-sm underline"
+            >
+              Xóa bộ lọc
+            </button>
+          </div>
+          <div className="text-sm text-blue-600 mt-1">
+            Tìm thấy {filteredAuctions} phiên đấu giá
+          </div>
+        </div>
+      )}
+
       {/* Main Layout */}
       <Row gutter={32} className="">
         {/* Left Sidebar - Filters */}
         <Col xs={24} lg={6}>
-          <FilterSidebar />
+          <FilterSidebar onFilterChange={handleFilterChange} />
         </Col>
 
         {/* Center Content - Tabs and Auctions */}
@@ -628,7 +624,7 @@ const AuctionList = () => {
                 label: (
                   <div className="flex items-center justify-center gap-2 px-12 py-3 font-medium">
                     <RiAuctionFill className="text-lg" />
-                    <span>Đấu giá đang mở ({activeAuctions.length})</span>
+                    <span>Phiên Đấu giá đang diễn ra ({activeAuctions.length})</span>
                   </div>
                 ),
               },
@@ -636,7 +632,8 @@ const AuctionList = () => {
                 key: 'scheduled',
                 label: (
                   <div className="flex items-center justify-center gap-2 px-12 py-3 font-medium">
-                    <span>Sắp mở ({scheduledAuctions.length})</span>
+                    <ClockCircleOutlined className="text-lg"/>
+                    <span>Phiên Đấu giá sắp diễn ra ({scheduledAuctions.length})</span>
                   </div>
                 ),
               },
@@ -645,9 +642,9 @@ const AuctionList = () => {
 
           {/* Auction Grid */}
           <div className="space-y-6">
-            {currentAuctions.length > 0 ? (
+            {filteredAuctions.length > 0 ? (
               <Row gutter={[24, 24]}>
-                {currentAuctions.map((auctionData) => (
+                {filteredAuctions.map((auctionData) => (
                   <Col key={auctionData.auction.id} xs={24} md={12}>
                     <AuctionCard auctionData={auctionData} />
                   </Col>
