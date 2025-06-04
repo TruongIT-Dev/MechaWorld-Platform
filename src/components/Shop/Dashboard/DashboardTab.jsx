@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { message } from 'antd';
 
 import PieChart from './charts/PieChart';
-import ColumnChart from './charts/ColumnChart';
+// import ColumnChart from './charts/ColumnChart';
 import StatCards from './StatCards';
 import { SellerDashboard } from '../../../apis/Seller Profile/APISellerProfile';
 import { useSelector } from 'react-redux';
@@ -11,20 +11,21 @@ import { useSelector } from 'react-redux';
 
 const DashboardTab = ({ shopData }) => {
     // State to track filtered data for charts
-    const [columnData, setColumnData] = useState(Array.isArray(shopData) ? shopData : []);
+    // const [columnData, setColumnData] = useState(Array.isArray(shopData) ? shopData : []);
     const user = useSelector((state) => state.auth.user);
     const [statsData, setStatsData] = useState([]);
 
 
     // Chart interaction handlers
     const handlePieElementClick = (grade) => {
+        // eslint-disable-next-line no-unused-vars
         const filtered = shopData.filter((item) => item.grade === grade);
-        setColumnData(filtered);
+        // setColumnData(filtered);
         message.info(`Đang hiển thị dữ liệu cho loại sản phẩm: ${grade}`);
     };
 
     const handlePieElementDoubleClick = () => {
-        setColumnData(shopData);
+        // setColumnData(shopData);
         message.info('Đã khôi phục tất cả dữ liệu');
     };
 
@@ -78,9 +79,7 @@ const DashboardTab = ({ shopData }) => {
                         onElementDoubleClick={handlePieElementDoubleClick}
                     />
                 </Col>
-                <Col xs={24} lg={12}>
-                    <ColumnChart data={columnData} />
-                </Col>
+
               </Row>
             ))}
             
