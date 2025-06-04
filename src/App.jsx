@@ -50,6 +50,7 @@ import {
   AuctionDetail,
   AdminLayout,
   AdminDashboard,
+  AuctionParticipation,
 } from "./routes/router";
 
 import { verifyToken } from "./apis/Authentication/APIAuth";
@@ -135,6 +136,7 @@ function App() {
             <Route path="member/profile" element={<ProfilePage />}>
               <Route path="account" element={<UserProfile />} />
               <Route path="address-setting" element={<SettingAddress />} />
+              <Route path="auction-participation" element={<AuctionParticipation />} />
               <Route path="wallet" element={<WalletPage />} />
               <Route path="orders/regular-auction" index element={<OrderHistory />} />
               <Route path="orders/exchange" element={<OrderExchange />} />

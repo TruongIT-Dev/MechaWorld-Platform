@@ -40,10 +40,9 @@ export const WalletPage = React.lazy(() => import('../components/Wallet/WalletUs
 export const ProfilePage = React.lazy(() => import("../components/Profile/UserManagement/Profiles"));
 export const UserProfile = React.lazy(() => import("../components/Profile/UserManagement/UserProfile"));
 export const SettingAddress = React.lazy(() => import("../components/Profile/UserManagement/SettingAddress"));
-
+export const AuctionParticipation = React.lazy(() => import("../components/Profile/UserManagement/AuctionParticipation"));
 export const OrderHistory = React.lazy(() => import("../components/Profile/OrderManagement/OrderHistory"));
 export const OrderExchange = React.lazy(() => import("../components/Profile/OrderManagement/OrderExchange"));
-
 
 // Register Shop route
 export const ShopRegister = React.lazy(() => import("../components/RegisterShop/RegisterShop"));

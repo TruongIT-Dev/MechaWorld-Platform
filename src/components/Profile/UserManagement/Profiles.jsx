@@ -1,12 +1,13 @@
 import {
   ShoppingOutlined,
   UserOutlined,
-  BankOutlined,
-  WalletOutlined, EditOutlined
+  WalletOutlined, EditOutlined,
 } from '@ant-design/icons';
 import { Menu, Layout } from 'antd';
 import { useSelector } from 'react-redux';
 import { Outlet, Link, useLocation } from 'react-router-dom';
+import { RiAuctionLine } from "react-icons/ri";
+
 
 export default function Profile() {
 
@@ -34,6 +35,11 @@ export default function Profile() {
         { key: "/member/profile/orders/regular-auction", label: <Link to="/member/profile/orders/regular-auction">Mua bán & Đấu giá</Link> },
         { key: "/member/profile/orders/exchange", label: <Link to="/member/profile/orders/exchange">Trao đổi</Link> },
       ],
+    },
+    {
+      key: "/member/profile/auction-participation",
+      icon: <RiAuctionLine  className="text-lg text-green-500" />,
+      label: <Link to="/member/profile/auction-participation">Đấu giá đã tham gia </Link>,
     },
     {
       key: "/member/profile/wallet",
