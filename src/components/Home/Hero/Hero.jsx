@@ -8,21 +8,21 @@ const ImageList = [
   {
     id: 1,
     img: Image1,
-    title: "Upto 50% off on this collection",
+    title: "Gundam Bandai PG RX-78-2 2020 1/60",
     description:
       "Gundam Bandai PG RX-78-2 2020 1/60",
   },
   {
     id: 2,
     img: Image2,
-    title: "30% off on this collection",
+    title: "Gundam Bandai PG RX-78-2 2020 1/60",
     description:
       "Gundam Bandai PG RX-78-2 2020 1/60",
   },
   {
     id: 3,
     img: Image3,
-    title: "10% off on Pre-Order",
+    title: "Gundam Bandai PG RX-78-2 2020 1/60",
     description:
       "Gundam Bandai PG RX-78-2 2020 1/60",
   },
