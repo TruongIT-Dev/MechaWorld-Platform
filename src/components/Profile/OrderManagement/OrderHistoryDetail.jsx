@@ -25,6 +25,8 @@ const OrderHistoryDetail = ({ visible, onClose, orderData }) => {
         to_delivery_information
     } = orderData;
 
+    // console.log("orderData", orderData);
+    
 
     // Format currency
     const formatCurrency = (amount) => {
@@ -93,7 +95,7 @@ const OrderHistoryDetail = ({ visible, onClose, orderData }) => {
     };
 
     // Extract shop information from seller_info
-    const shopName = sender?.shop_name || 'Shop';
+    const shopName = sender?.full_name || '';
     const avatarUrl = sender?.avatar_url || '';
 
     const items = [
@@ -128,7 +130,6 @@ const OrderHistoryDetail = ({ visible, onClose, orderData }) => {
                                     <div className="flex-1">
                                         <p className="font-semibold text-base">{item.name}</p>
                                         <p className="text-gray-500">{item.grade} {item.scale}</p>
-                                        <p>Số lượng: {item.quantity}</p>
                                     </div>
                                     <div className="text-right">
                                         <p className="text-red-500 font-semibold">{formatCurrency(item.price)}</p>

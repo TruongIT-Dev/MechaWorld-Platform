@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Modal, message, Button, Tooltip, Badge, Avatar ,Alert} from "antd";
+import { Modal, message, Button, Tooltip, Badge, Avatar, Alert } from "antd";
 import { EyeOutlined, CheckCircleOutlined, UserOutlined, ClockCircleOutlined } from '@ant-design/icons';
 import { ParticipateInAuction } from "../../apis/Auction/APIAuction";
 import Cookies from 'js-cookie';
@@ -92,14 +92,16 @@ const AuctionSection = ({ auctions }) => {
 
   useEffect(() => {
     // Kiểm tra user đã tham gia các phiên đấu giá nào
-    if (currentUser && auctions.length > 0) {
+    if (currentUser && auctions?.length > 0) {
       const newMap = {};
       auctions.forEach(auctionData => {
-        const auction = auctionData.auction;
-        const participants = auctionData.auction_participants || [];
-        newMap[auction.id] = participants.some(
-          participant => participant.user_id === currentUser.id
-        );
+        const auction = auctionData?.auction;
+        if (auction) {
+          const participants = auctionData.auction_participants || [];
+          newMap[auction.id] = participants.some(
+            participant => participant.user_id === currentUser.id
+          );
+        }
       });
       setHasParticipatedMap(newMap);
     }
@@ -113,17 +115,17 @@ const AuctionSection = ({ auctions }) => {
       navigate(`/auction/${auction.id}`);
       return;
     }
-    
+
     Modal.warning({
-        title: 'Thông báo',
-        content: "Vui lòng nhấn 'Tham gia' để đăng ký trước khi xem chi tiết",
-        okText: 'Đã hiểu',
-        okButtonProps: {
-            style: {
-            color: '#1890ff',
-            borderColor: '#1890ff'
-            }
+      title: 'Thông báo',
+      content: "Vui lòng nhấn 'Tham gia' để đăng ký trước khi xem chi tiết",
+      okText: 'Đã hiểu',
+      okButtonProps: {
+        style: {
+          color: '#1890ff',
+          borderColor: '#1890ff'
         }
+      }
     });
   };
 
@@ -134,10 +136,10 @@ const AuctionSection = ({ auctions }) => {
         content: "Vui lòng đăng nhập để tham gia đấu giá.",
         okText: 'Đã hiểu',
         okButtonProps: {
-            style: {
+          style: {
             color: '#1890ff',
             borderColor: '#1890ff'
-            }
+          }
         }
       });
       return;
@@ -161,7 +163,7 @@ const AuctionSection = ({ auctions }) => {
       return;
     }
 
-    const deposit = auction.deposit_amount || 
+    const deposit = auction.deposit_amount ||
       Math.floor(auction.starting_price * parseFloat(auction.deposit_rate || "0.15"));
     setDepositAmountMap(prev => ({ ...prev, [auction.id]: deposit }));
     setIsModalOpenMap(prev => ({ ...prev, [auction.id]: true }));
@@ -187,18 +189,20 @@ const AuctionSection = ({ auctions }) => {
       scheduled: { color: 'blue', text: 'SẮP DIỄN RA' },
       completed: { color: 'purple', text: 'HOÀN THÀNH' }
     };
-    
+
     return statusConfig[status] || { color: 'default', text: 'UNKNOWN' };
   };
 
   if (loading) {
     return <div>Loading user data...</div>;
   }
-  
+
   return (
-    <div data-aos="zoom-in" data-duration="1000" data-aos-once="true" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {auctions.map((auctionData) => {
-        const auction = auctionData.auction;
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {(auctions || []).map((auctionData) => {
+        const auction = auctionData?.auction;
+        if (!auction) return null; // Skip nếu không có dữ liệu
+
         const statusBadge = getStatusBadge(auction.status);
         const hasParticipated = hasParticipatedMap[auction.id] || false;
         const isModalOpen = isModalOpenMap[auction.id] || false;
@@ -209,37 +213,37 @@ const AuctionSection = ({ auctions }) => {
           <div key={auction.id} className="relative">
             {/* Status Badge */}
             <div className="absolute top-2 right-2 z-10">
-              <Badge 
-                status={statusBadge.color} 
+              <Badge
+                status={statusBadge.color}
                 text={
                   <span className="bg-white/90 backdrop-blur-sm px-2 py-1 rounded-full text-xs font-medium">
                     {statusBadge.text}
                   </span>
-                } 
+                }
               />
             </div>
 
             <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 h-full flex flex-col">
               <div className="relative h-48 overflow-hidden">
-                <img 
-                  src={auction.gundam_snapshot.image_url} 
+                <img
+                  src={auction.gundam_snapshot.image_url}
                   alt={auction.gundam_snapshot.name}
                   className="w-full h-full object-cover"
                 />
               </div>
               <div className="p-4 flex-grow flex flex-col">
                 <h3 className="text-lg font-semibold mb-2">{auction.gundam_snapshot.name}</h3>
-                
+
                 <div className="flex justify-between mb-2">
                   <span className="text-gray-600 dark:text-gray-300">Giá hiện tại:</span>
                   <span className="font-bold">{auction.current_price} VNĐ</span>
                 </div>
-                
+
                 <div className="flex justify-between mb-2">
                   <span className="text-gray-600 dark:text-gray-300">Số lượt đấu giá:</span>
                   <span>{auction.total_bids}</span>
                 </div>
-                
+
                 <div className="flex justify-between mb-4">
                   <span className="text-gray-600 dark:text-gray-300">Kết thúc:</span>
                   <span>
@@ -247,7 +251,7 @@ const AuctionSection = ({ auctions }) => {
                     {new Date(auction.end_time).toLocaleString()}
                   </span>
                 </div>
-                
+
                 <div className="mt-auto flex space-x-2">
                   <Button
                     type={auction.status === "ended" ? "default" : "primary"}
@@ -257,7 +261,7 @@ const AuctionSection = ({ auctions }) => {
                   >
                     {auction.status === "ended" ? "Xem kết quả" : "Xem chi tiết"}
                   </Button>
-                  
+
                   {currentUser?.id === auction.seller_id ? (
                     <Button disabled className="flex-1">
                       Phiên của bạn
@@ -290,14 +294,14 @@ const AuctionSection = ({ auctions }) => {
                   Hủy
                 </Button>,
                 <Button
-                    type={isAuctionEnded ? "default" : hasParticipated ? "default" : "primary"}
-                    danger={!isAuctionEnded && !hasParticipated}
-                    icon={isAuctionEnded ? null : hasParticipated ? <CheckCircleOutlined /> : null}
-                    onClick={isAuctionEnded ? null : () => handleJoinAuction(auction)}
-                    disabled={isAuctionEnded || hasParticipated}
-                    className="flex-1"
-                    >
-                    {isAuctionEnded ? "Đã kết thúc" : hasParticipated ? "Đã tham gia" : "Tham gia"}
+                  type={isAuctionEnded ? "default" : hasParticipated ? "default" : "primary"}
+                  danger={!isAuctionEnded && !hasParticipated}
+                  icon={isAuctionEnded ? null : hasParticipated ? <CheckCircleOutlined /> : null}
+                  onClick={isAuctionEnded ? null : () => handleJoinAuction(auction)}
+                  disabled={isAuctionEnded || hasParticipated}
+                  className="flex-1"
+                >
+                  {isAuctionEnded ? "Đã kết thúc" : hasParticipated ? "Đã tham gia" : "Tham gia"}
                 </Button>
               ]}
               centered

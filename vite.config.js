@@ -8,7 +8,7 @@ export default defineConfig({
     port: 3000,
     proxy: {
       "/v1": {
-        target: "https://gundam-platform-api.fly.dev",
+        target: "http://localhost:8080",
         changeOrigin: true,
         secure: false,
         rewrite: (path) => path.replace(/^\/v1/, "/v1"), 

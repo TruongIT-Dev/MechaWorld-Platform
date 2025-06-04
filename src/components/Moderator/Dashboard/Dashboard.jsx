@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
     Card,
     Row,
@@ -12,10 +12,8 @@ import {
 } from 'antd';
 import {
     ShoppingCartOutlined,
-    TeamOutlined,
     TrophyOutlined,
-    SwapOutlined,
-    FileTextOutlined,
+    MoneyCollectOutlined,
 } from '@ant-design/icons';
 
 // import TradingDashboard from './TradingDashboard';
@@ -23,6 +21,7 @@ import {
 // import ExchangeDashboard from './ExchangeDashboard';
 // import UserDashboard from './UserDashboard';
 import OverallDashboard from './OverallDashboard';
+import { GetModeratorDashboard } from '../../../apis/Moderator/APIModerator';
 
 const { Title } = Typography;
 const { Option } = Select;
@@ -30,6 +29,16 @@ const { Option } = Select;
 const ModeratorDashboard = () => {
     const [selectedFlow, setSelectedFlow] = useState('trading');
     const [timeRange, setTimeRange] = useState('today');
+    const [dashboardMod, setDashboardMod] = useState({});
+
+    useEffect(() => {
+        const GetModDashboard = async () => {
+            const fetchDashboard = await GetModeratorDashboard();
+            setDashboardMod(fetchDashboard?.data)
+        }
+
+        GetModDashboard();
+    }, [])
 
     // Mock data - thay thế bằng API calls thực tế
     const dashboardData = {
@@ -74,12 +83,12 @@ const ModeratorDashboard = () => {
 
     const renderDashboardContent = () => {
         switch (selectedFlow) {
-            case 'overall': return <OverallDashboard dashboardData={dashboardData} getOrderCount={getOrderCount} />
+            case 'overall': return <OverallDashboard dashboardData={dashboardMod} getOrderCount={getOrderCount} />
             // case 'trading': return <TradingDashboard dashboardData={dashboardData} getOrderCount={getOrderCount} />;
             // case 'auction': return <AuctionDashboard dashboardData={dashboardData} />;
             // case 'exchange': return <ExchangeDashboard dashboardData={dashboardData} />;
             // case 'users': return <UserDashboard dashboardData={dashboardData} />;
-            default: return <OverallDashboard dashboardData={dashboardData} getOrderCount={getOrderCount} />;
+            default: return <OverallDashboard dashboardData={dashboardMod} getOrderCount={getOrderCount} />;
         }
     };
 
@@ -173,23 +182,13 @@ const ModeratorDashboard = () => {
             <Card className="mt-6" title="🚀 Thao tác nhanh">
                 <Row gutter={[16, 16]}>
                     <Col xs={24} sm={12} md={6}>
-                        <Button type="primary" block size="large" className="h-12">
-                            <FileTextOutlined /> Duyệt đơn hàng
-                        </Button>
-                    </Col>
-                    <Col xs={24} sm={12} md={6}>
                         <Button type="default" block size="large" className="h-12">
                             <TrophyOutlined /> Quản lý đấu giá
                         </Button>
                     </Col>
                     <Col xs={24} sm={12} md={6}>
                         <Button type="default" block size="large" className="h-12">
-                            <SwapOutlined /> Xử lý trao đổi
-                        </Button>
-                    </Col>
-                    <Col xs={24} sm={12} md={6}>
-                        <Button type="default" block size="large" className="h-12">
-                            <TeamOutlined /> Quản lý users
+                            <MoneyCollectOutlined /> Giao dịch và rút tiền
                         </Button>
                     </Col>
                 </Row>

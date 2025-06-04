@@ -25,18 +25,21 @@ export default function ModalOfferExchange({ isOpen, onClose, requestData, gunda
 
     // Gọi Api xem số dư ví
     useEffect(() => {
-        checkWallet(currentUser.id).then((response) => {
-            // console.log('API Response:', response.data);
-            setBalance(response.data.balance);
-        }).catch((error) => {
-            console.error('Lỗi API:', {
-                message: error.message,
-                response: error.response?.data,
-                config: error.config
+        if (currentUser?.id) {
+            checkWallet(currentUser.id).then((response) => {
+                setBalance(response.data.balance);
+            }).catch((error) => {
+                console.error('Lỗi API:', {
+                    message: error.message,
+                    response: error.response?.data,
+                    config: error.config
+                });
+                setBalance(0); // Set giá trị mặc định khi có lỗi
             });
-        });
-
-    }, []);
+        } else {
+            setBalance(0); // Reset balance khi không có user
+        }
+    }, [currentUser?.id]);
 
     const handleTabChange = (key) => {
         // Validate form trước khi chuyển sang tab khác

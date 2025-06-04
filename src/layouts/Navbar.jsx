@@ -157,7 +157,7 @@ const Navbar = () => {
           </div>
 
           {/* Search bar */}
-          <div className="hidden md:block flex-1 max-w-2xl">
+          <div className="hidden md:block flex-1">
             <AutoComplete
               value={searchValue}
               options={searchOptions}
@@ -201,7 +201,6 @@ const Navbar = () => {
                 }
               }}
             >
-
 
             </AutoComplete>
           </div>

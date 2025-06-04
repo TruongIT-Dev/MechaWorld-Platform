@@ -66,25 +66,30 @@ export default function ExchangeList() {
         setIsOfferModalOpen(true);
 
     };
+
+    
     useEffect(() => {
         getAllExchangePost().then((res) => {
             setListRequest(res.data);
-        })
-        GetGundamByID(user.id, "").then((res) => {
-            const conditionMap = {
-                "new": "Mới",
-                "open box": "Hộp đã mở",
-                "used": "Đã sử dụng"
-            };
+        });
 
-            const translatedGundams = res.data.map(gundam => ({
-                ...gundam,
-                displayCondition: conditionMap[gundam.condition] || gundam.condition
-            }));
+        if (user?.id) { // Kiểm tra user và id có tồn tại
+            GetGundamByID(user.id, "").then((res) => {
+                const conditionMap = {
+                    "new": "Mới",
+                    "open box": "Hộp đã mở",
+                    "used": "Đã sử dụng"
+                };
 
-            setYourGundamList(translatedGundams);
-        })
-    }, [])
+                const translatedGundams = res.data.map(gundam => ({
+                    ...gundam,
+                    displayCondition: conditionMap[gundam.condition] || gundam.condition
+                }));
+
+                setYourGundamList(translatedGundams);
+            });
+        }
+    }, [user?.id]);
 
     return (
         <>

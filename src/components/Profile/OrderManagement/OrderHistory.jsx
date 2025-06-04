@@ -63,7 +63,7 @@ const OrderHistory = () => {
     setLoading(true);
     try {
       const response = await GetListOrderHistory();
-      console.log("fetch res", response);
+      // console.log("fetch res", response);
 
       const ordersData = response.data;
 

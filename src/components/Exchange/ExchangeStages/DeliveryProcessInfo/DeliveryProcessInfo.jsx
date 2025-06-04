@@ -18,7 +18,8 @@ import {
   Badge,
   Avatar,
   Timeline,
-  Alert
+  Alert,
+  Spin
 } from "antd";
 import {
   SwapOutlined,
@@ -79,6 +80,7 @@ const DeliveryProcessInfo = ({
   const [isOrderDetailModalVisible, setIsOrderDetailModalVisible] = useState(false);
   const [imagePreviewVisible, setImagePreviewVisible] = useState(false);
   const [currentImage, setCurrentImage] = useState('');
+  const [isLoadingPackagingModal, setIsLoadingPackagingModal] = useState(false);
 
   // console.log("orderDetail", orderDetail);
 
@@ -171,26 +173,32 @@ const DeliveryProcessInfo = ({
     }
 
     setIsLoading(true);
-    // console.log("Submitting packaging confirmation with images:", fileList);
+    setIsLoadingPackagingModal(true);
+
     const formData = new FormData();
 
     fileList.forEach((file) => {
       formData.append("package_images", file.originFileObj);
     });
 
-    // Simulate API call with timeout
-    setTimeout(async () => {
-      await PackagingOrder(currentOrder.id, formData).then((res) => {
+    // Gọi API trực tiếp, không cần setTimeout
+    PackagingOrder(currentOrder.id, formData)
+      .then((res) => {
         if (res.status === 200) {
           message.success("Xác nhận đóng gói thành công");
           setPackagingModalVisible(false);
           setFileList([]);
           fetchExchangeDetails();
         }
-      }).finally(() => {
+      })
+      .catch((error) => {
+        console.error("Lỗi đóng gói:", error);
+        message.error("Có lỗi xảy ra khi đóng gói");
+      })
+      .finally(() => {
         setIsLoading(false);
+        setIsLoadingPackagingModal(false);
       });
-    }, 1000);
   };
 
   // Submit complaint
@@ -690,11 +698,20 @@ const DeliveryProcessInfo = ({
           </div>
         }
         open={packagingModalVisible}
-        onCancel={() => setPackagingModalVisible(false)}
+        onCancel={() => !isLoadingPackagingModal && setPackagingModalVisible(false)} // Disable cancel khi loading
         onOk={handlePackagingConfirm}
-        okText="Xác nhận"
+        okText={isLoadingPackagingModal ? "Đang xử lý..." : "Xác nhận"}
         cancelText="Hủy"
-        okButtonProps={{ className: 'bg-blue-500 hover:bg-blue-600' }}
+        okButtonProps={{
+          className: 'bg-blue-500 hover:bg-blue-600',
+          loading: isLoadingPackagingModal, // Hiển thị spinner trên nút OK
+          disabled: isLoadingPackagingModal || fileList.length === 0 // Disable khi loading hoặc không có file
+        }}
+        cancelButtonProps={{
+          disabled: isLoadingPackagingModal // Disable nút Cancel khi loading
+        }}
+        closable={!isLoadingPackagingModal} // Disable nút X khi loading
+        maskClosable={!isLoadingPackagingModal} // Disable click outside để đóng modal khi loading
         width={600}
         className="rounded-lg"
       >
@@ -710,13 +727,19 @@ const DeliveryProcessInfo = ({
           multiple
           maxCount={5}
           accept="image/*"
-          className="bg-gray-50 border-dashed border-gray-300 hover:border-blue-400 transition-colors duration-300"
+          disabled={isLoadingPackagingModal} // Disable upload khi loading
+          className={`bg-gray-50 border-dashed border-gray-300 hover:border-blue-400 transition-colors duration-300 ${isLoadingPackagingModal ? 'opacity-50 cursor-not-allowed' : ''
+            }`}
         >
           <p className="ant-upload-drag-icon">
             <InboxOutlined className="text-blue-500 text-4xl" />
           </p>
-          <p className="ant-upload-text">Nhấn hoặc kéo thả hình ảnh vào khu vực này</p>
-          <p className="ant-upload-hint text-gray-500">Hỗ trợ tải lên một hoặc nhiều hình ảnh (tối đa 5 hình)</p>
+          <p className="ant-upload-text">
+            {isLoadingPackagingModal ? "Đang xử lý..." : "Nhấn hoặc kéo thả hình ảnh vào khu vực này"}
+          </p>
+          <p className="ant-upload-hint text-gray-500">
+            {!isLoadingPackagingModal && "Hỗ trợ tải lên một hoặc nhiều hình ảnh (tối đa 5 hình)"}
+          </p>
         </Dragger>
 
         {fileList.length > 0 && (
@@ -724,6 +747,15 @@ const DeliveryProcessInfo = ({
             <Text strong className="flex items-center">
               <CheckCircleOutlined className="text-green-500 mr-2" />
               Đã chọn {fileList.length} hình ảnh
+            </Text>
+          </div>
+        )}
+
+        {isLoadingPackagingModal && (
+          <div className="mt-4 p-3 bg-yellow-50 rounded-lg">
+            <Text className="flex items-center text-orange-600">
+              <Spin size="small" className="mr-2" />
+              Đang xử lý yêu cầu đóng gói...
             </Text>
           </div>
         )}
