@@ -26,7 +26,11 @@ export const GetGundamsAuction = () => {
 }
 
 // 3. Retrieves detailed information about a specific Gundam model
-
+export const GetGundamById = (gundamID) => {
+    return axios.get(`gundams/${gundamID }`, {
+        gundamID: gundamID,
+    })
+}
 
 // 4. Retrieves a specific Gundam model by its unique slug
 export const GetGundamDetailBySlug = (slug) => {
@@ -41,11 +45,11 @@ export const DeleteGundam = (id, userID) => {
 }
 // 7. Update the basic information of a Gundam model
 
-export const UpdateGundam = (id,userID, data) => {
+export const UpdateGundam = (id, userID, data) => {
     return axios.patch(`/users/${userID}/gundams/${id}`, data);
 }
 // 8. Update the accessories of a Gundam model
-export const UpdateGundamAccessories = (id,userID, data) => {
+export const UpdateGundamAccessories = (id, userID, data) => {
     return axios.put(`/users/${userID}/gundams/${id}/accessories`, data);
 }
 // 9. Add secondary images to a Gundam model

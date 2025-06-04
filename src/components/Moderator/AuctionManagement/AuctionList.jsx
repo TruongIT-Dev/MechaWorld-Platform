@@ -77,6 +77,22 @@ const AuctionList = ({ searchTerm, filteredStatus }) => {
     }
   };
 
+  // Thêm hàm map status
+  const mapStatusText = (status) => {
+    switch (status) {
+      case 'scheduled':
+        return 'Sắp diễn ra';
+      case 'active':
+        return 'Đang diễn ra';
+      case 'completed':
+        return 'Đã hoàn thành';
+      case 'ended':
+        return 'Đã kết thúc';
+      default:
+        return status;
+    }
+  };
+
   const columns = [
     {
       title: 'Gundam',
@@ -94,44 +110,47 @@ const AuctionList = ({ searchTerm, filteredStatus }) => {
       ),
     },
     {
-      title: 'Starting Price',
+      title: 'Giá Khởi điểm',
       dataIndex: ['auction', 'starting_price'],
       key: 'starting_price',
       render: (value) => formatCurrency(value),
     },
     {
-      title: 'Current Price',
+      title: 'Giá hiện tại',
       dataIndex: ['auction', 'current_price'],
       key: 'current_price',
       render: (value) => formatCurrency(value),
     },
     {
-      title: 'Status',
+      title: 'Trạng thái',
       dataIndex: ['auction', 'status'],
       key: 'status',
       render: (status) => (
-        <span className={`capitalize ${status === 'scheduled' ? 'text-blue-500' : 
-                         status === 'ongoing' ? 'text-green-500' : 
-                         status === 'completed' ? 'text-purple-500' : 
-                         'text-gray-500'}`}>
-          {status}
+        <span className={`capitalize ${
+          status === 'scheduled' ? 'text-blue-500' : 
+          status === 'active' ? 'text-green-500' : 
+          status === 'completed' ? 'text-purple-500' : 
+          status === 'ended' ? 'text-red-500' :
+          'text-gray-500'
+        }`}>
+          {mapStatusText(status)}
         </span>
       ),
     },
     {
-      title: 'Start Time',
+      title: 'Thời gian Bắt đầu',
       dataIndex: ['auction', 'start_time'],
       key: 'start_time',
       render: (time) => dayjs(time).format('YYYY-MM-DD HH:mm'),
     },
     {
-      title: 'End Time',
+      title: 'Thời gian Kết thúc',
       dataIndex: ['auction', 'end_time'],
       key: 'end_time',
       render: (time) => dayjs(time).format('YYYY-MM-DD HH:mm'),
     },
     {
-      title: 'Actions',
+      title: 'Thao tác',
       key: 'actions',
       render: (_, record) => (
         <div className="flex space-x-2">
@@ -176,33 +195,33 @@ const AuctionList = ({ searchTerm, filteredStatus }) => {
       >
         {selectedAuction && (
           <Descriptions column={1} bordered>
-            <Descriptions.Item label="Gundam Name">
+            <Descriptions.Item label="Tên Gundam">
               {selectedAuction.gundam_snapshot.name}
             </Descriptions.Item>
             <Descriptions.Item label="Grade">{selectedAuction.gundam_snapshot.grade}</Descriptions.Item>
-            <Descriptions.Item label="Scale">{selectedAuction.gundam_snapshot.scale}</Descriptions.Item>
-            <Descriptions.Item label="Starting Price">
+            <Descriptions.Item label="Tỉ lệ">{selectedAuction.gundam_snapshot.scale}</Descriptions.Item>
+            <Descriptions.Item label="Giá Khởi điểm">
               {formatCurrency(selectedAuction.starting_price)}
             </Descriptions.Item>
-            <Descriptions.Item label="Current Price">
+            <Descriptions.Item label="Giá hien tại">
               {formatCurrency(selectedAuction.current_price)}
             </Descriptions.Item>
-            <Descriptions.Item label="Buy Now Price">
+            <Descriptions.Item label="Giá Mua Ngay">
               {formatCurrency(selectedAuction.buy_now_price)}
             </Descriptions.Item>
-            <Descriptions.Item label="Status">
-              <span className="capitalize">{selectedAuction.status}</span>
+            <Descriptions.Item label="Trạng thái">
+              <span className="capitalize">{mapStatusText(selectedAuction.status)}</span>
             </Descriptions.Item>
-            <Descriptions.Item label="Start Time">
+            <Descriptions.Item label="Thời gian bắt đầu">
               {dayjs(selectedAuction.start_time).format('YYYY-MM-DD HH:mm')}
             </Descriptions.Item>
-            <Descriptions.Item label="End Time">
+            <Descriptions.Item label="Thời gian kết thúc">
               {dayjs(selectedAuction.end_time).format('YYYY-MM-DD HH:mm')}
             </Descriptions.Item>
-            <Descriptions.Item label="Total Participants">
+            <Descriptions.Item label="Tổng người tham gia">
               {selectedAuction.total_participants}
             </Descriptions.Item>
-            <Descriptions.Item label="Total Bids">
+            <Descriptions.Item label="Tổng số lượt đấu giá">
               {selectedAuction.total_bids}
             </Descriptions.Item>
           </Descriptions>
@@ -211,7 +230,7 @@ const AuctionList = ({ searchTerm, filteredStatus }) => {
 
       {/* Update Time Modal */}
       <Modal
-        title="Update Auction Time"
+        title="Cập nhật Thời Gian Đấu Giá"
         visible={isModalVisible}
         onOk={handleSubmit}
         onCancel={() => setIsModalVisible(false)}
@@ -222,7 +241,7 @@ const AuctionList = ({ searchTerm, filteredStatus }) => {
           <Form.Item
             name="start_time"
             label="Start Time"
-            rules={[{ required: true, message: 'Please select start time' }]}
+            rules={[{ required: true, message: 'Hãy chọn thời điểm bắt đầu' }]}
           >
             <DatePicker 
               showTime 
@@ -233,7 +252,7 @@ const AuctionList = ({ searchTerm, filteredStatus }) => {
           <Form.Item
             name="end_time"
             label="End Time"
-            rules={[{ required: true, message: 'Please select end time' }]}
+            rules={[{ required: true, message: 'Hãy chọn thời điểm kết thúc' }]}
           >
             <DatePicker 
               showTime 

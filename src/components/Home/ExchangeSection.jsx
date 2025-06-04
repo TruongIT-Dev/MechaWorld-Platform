@@ -16,7 +16,7 @@ const ExchangeSection = ({ exchanges }) => {
     };
 
     return (
-        <div className="space-y-6">
+        <div data-aos="fade-right" data-duration="1000" data-aos-once="true" className="space-y-6">
             <h2 className="text-2xl font-bold text-center mb-6">BÀI VIẾT TRAO ĐỔI GUNDAM MỚI NHẤT</h2>
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

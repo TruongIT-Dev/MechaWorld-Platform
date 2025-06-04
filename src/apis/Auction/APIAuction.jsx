@@ -145,8 +145,12 @@ export const GetSellerAuction = (sellersID) => {
 }
 
 // 14. Cancer auction by seller
-export const CancelAuction = (auctionID,reason) => {
-    return axios.patch(`/sellers/me/auctions/${auctionID}/cancel`, {
-      reason: reason,
-    });
-}
+export const CancelAuction = (sellerID, auctionID, reason) => {
+  return axios.patch(`/sellers/${sellerID}/auctions/${auctionID}/cancel`, {
+    reason: reason.toString() // Đảm bảo reason là string
+  }, {
+    headers: {
+      'Content-Type': 'application/json' // Xác định rõ content type
+    }
+  });
+};

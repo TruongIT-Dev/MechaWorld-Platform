@@ -4,6 +4,7 @@ import { ReloadOutlined } from '@ant-design/icons';
 import { GetWithdrawalRequests, CompleteWithdrawalRequest, RejectWithdrawalRequest } from '../../../apis/Moderator/APIModerator';
 import WithdrawActionModal from './WithdrawActionModal';
 import { getWithdrawalColumns } from './withdrawalColumns';
+import WithdrawalDetailModal from './WithdrawalDetailModal';
 
 const { Text } = Typography;
 
@@ -12,6 +13,8 @@ const WithdrawalsTable = () => {
     const [loading, setLoading] = useState(false);
     const [modalVisible, setModalVisible] = useState(false);
     const [currentRecord, setCurrentRecord] = useState(null);
+    const [isDetailModalVisible, setIsDetailModalVisible] = useState(false);
+    const [selectedWithdrawal, setSelectedWithdrawal] = useState(null);
     
     const fetchWithdrawalRequests = async () => {
         try {
@@ -26,36 +29,30 @@ const WithdrawalsTable = () => {
     };
 
     const handleReject = async (id, reason) => {
-    try {
-        setLoading(true);
-        const response = await RejectWithdrawalRequest(id, reason);
-        if (response && response.data) {
+        try {
+            setLoading(true);
+            await RejectWithdrawalRequest(id, reason);
             message.success('Từ chối yêu cầu thành công');
             fetchWithdrawalRequests();
+        } catch (error) {
+            message.error(`Từ chối thất bại: ${error.response?.data?.message || error.message}`);
+        } finally {
+            setLoading(false);
         }
-    } catch (error) {
-        console.error('Chi tiết lỗi:', error.response?.data || error.message);
-        message.error(`Từ chối thất bại: ${error.response?.data?.message || 'Lỗi không xác định'}`);
-    } finally {
-        setLoading(false);
-    }
-};
+    };
 
-const handleComplete = async (id, transactionReference) => {
-    try {
-        setLoading(true);
-        const response = await CompleteWithdrawalRequest(id, transactionReference);
-        if (response && response.data) {
+    const handleComplete = async (id, transactionReference) => {
+        try {
+            setLoading(true);
+            await CompleteWithdrawalRequest(id, transactionReference);
             message.success('Chấp thuận yêu cầu thành công');
             fetchWithdrawalRequests();
+        } catch (error) {
+            message.error(`Chấp thuận thất bại: ${error.response?.data?.message || error.message}`);
+        } finally {
+            setLoading(false);
         }
-    } catch (error) {
-        console.error('Chi tiết lỗi:', error.response?.data || error.message);
-        message.error(`Chấp thuận thất bại: ${error.response?.data?.message || 'Lỗi không xác định'}`);
-    } finally {
-        setLoading(false);
-    }
-};
+    };
 
     const handleProcessRequest = (record) => {
         setCurrentRecord(record);
@@ -63,8 +60,9 @@ const handleComplete = async (id, transactionReference) => {
     };
 
     const handleViewDetails = (record) => {
-        // Xử lý xem chi tiết
-        console.log('Xem chi tiết:', record);
+        setSelectedWithdrawal(record);
+        setIsDetailModalVisible(true);
+        console.log('Viewing details for:', record);
     };
 
     useEffect(() => {
@@ -85,29 +83,12 @@ const handleComplete = async (id, transactionReference) => {
                     </Button>
                 }
             >
-                <div className="mb-4">
-                    <Text strong>
-                        Hiển thị {data.length} yêu cầu rút tiền
-                    </Text>
-                </div>
-
                 <Table
                     columns={getWithdrawalColumns(handleViewDetails, handleProcessRequest)}
                     dataSource={data}
                     loading={loading}
-                    pagination={{
-                        total: data.length,
-                        pageSize: 10,
-                        showSizeChanger: true,
-                        showQuickJumper: true,
-                        showTotal: (total, range) =>
-                            `${range[0]}-${range[1]} của ${total} yêu cầu`,
-                        pageSizeOptions: ['10', '20', '50'],
-                    }}
-                    scroll={{ x: 1400 }}
-                    className="overflow-hidden"
-                    size="middle"
                     rowKey="id"
+                    scroll={{ x: 1500 }}
                 />
             </Card>
 
@@ -117,6 +98,12 @@ const handleComplete = async (id, transactionReference) => {
                 onComplete={handleComplete}
                 onReject={handleReject}
                 currentRecord={currentRecord}
+            />
+
+            <WithdrawalDetailModal
+                visible={isDetailModalVisible}
+                onCancel={() => setIsDetailModalVisible(false)}
+                withdrawalData={selectedWithdrawal}
             />
         </>
     );

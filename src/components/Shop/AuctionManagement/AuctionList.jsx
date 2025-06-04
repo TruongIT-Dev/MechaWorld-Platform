@@ -41,7 +41,7 @@ const AuctionList = () => {
         user_id: user.id
       };
 
-      await CancelAuction(currentAuction.id, payload);
+      await CancelAuction(user.id,currentAuction.id, payload);
       message.success("Hủy đấu giá thành công");
       setCancelModalVisible(false);
       setCancelReason("");

@@ -34,16 +34,6 @@ const Product = () => {
                 // ❗️Lọc chỉ những Gundam có status là "published"
                 filteredData = filteredData.filter(gundam => gundam.status === "published");
 
-                // ❓Lọc thêm theo condition nếu cần
-                // if (filters.condition !== "all") {
-                //     filteredData = filteredData.filter(gundam => gundam.condition === filters.condition);
-                // }
-
-                // ❓Lọc theo khoảng giá nếu có
-                // filteredData = filteredData.filter(gundam =>
-                //     gundam.price >= filters.priceRange[0] * 1000 &&
-                //     gundam.price <= filters.priceRange[1] * 1000
-                // );
 
                 setGundams(filteredData);
             } catch (error) {
@@ -53,9 +43,6 @@ const Product = () => {
 
         fetchGundams();
     }, [filters]);
-
-
-    console.log("gundams", gundams);
 
 
     // Hàm nhận dữ liệu lọc từ FilterSidebar

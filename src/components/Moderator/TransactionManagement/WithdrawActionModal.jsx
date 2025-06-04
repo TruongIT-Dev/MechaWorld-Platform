@@ -43,6 +43,7 @@ const WithdrawActionModal = ({
           type={actionType === 'complete' ? 'primary' : 'default'} 
           onClick={() => setActionType('complete')}
           style={{ marginRight: 8 }}
+          className='text-[#1890ff] border-[#1890ff] hover:bg-blue-50'
         >
           Chấp nhận
         </Button>

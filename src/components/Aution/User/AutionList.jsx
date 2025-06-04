@@ -1,16 +1,14 @@
-import React, { useEffect, useState } from "react";
-import { NavLink, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { RiAuctionFill } from "react-icons/ri";
 import { GiTakeMyMoney } from "react-icons/gi";
-import { MdOutlineFavorite } from "react-icons/md";
 import { Caption, PrimaryButton } from "../Design";
-import { BankOutlined, CheckCircleOutlined, ClockCircleOutlined, DeleteOutlined, EyeOutlined, PlusOutlined, UserOutlined } from '@ant-design/icons';
-import { Input, Select, Card, Modal, message, Row, Col, Tabs, Empty, Typography, Space, Tag, Divider, Button, Tooltip, Alert, Avatar, Badge } from "antd";
+import { CheckCircleOutlined, ClockCircleOutlined, EyeOutlined, UserOutlined } from '@ant-design/icons';
+import { Card, Modal, Row, Col, Tabs, Empty, Typography, Space, Tag, Divider, Button, Tooltip, Alert, Avatar, Badge } from "antd";
 import { GetListAuction, ParticipateInAuction } from "../../../apis/Auction/APIAuction";
 import Cookies from 'js-cookie';
+import FilterSidebar from "../../Product/ProductFilter";
 
-const { Search } = Input;
-const { Option } = Select;
 const { Title, Text } = Typography;
 
 const formatDate = (dateString) => {
@@ -124,58 +122,6 @@ const getCurrentUserFromCookies = () => {
   }
 };
 
-
-// Filter Side Bar
-const FilterSidebar = () => {
-  const grades = ["High Grade", "Real Grade", "Master Grade", "Perfect Grade"];
-  const scales = ["1/144", "1/100", "1/60"];
-
-  return (
-    <div className="bg-white shadow-s1 rounded-xl p-6">
-      <div className="flex items-center gap-2 mb-6">
-        <Title level={5}>Bộ lọc Gundam</Title>
-      </div>
-
-      {/* Grade Filter */}
-      <div className="mb-6">
-        <Text level={6} className="mb-3 text-gray-700">Grade</Text>
-        <div className="space-y-2">
-          {grades.map(grade => (
-            <label key={grade} className="flex items-center gap-2 cursor-pointer hover:bg-gray-50 p-2 rounded">
-              <input
-                type="checkbox"
-                className="rounded border-gray-300 text-blue-500 focus:ring-blue-500"
-              />
-              <span className="text-sm text-gray-600">{grade}</span>
-            </label>
-          ))}
-        </div>
-      </div>
-
-      {/* Scale Filter */}
-      <div className="mb-6">
-        <Text level={4} className="mb-3 text-gray-700">Tỷ lệ (Scale)</Text>
-        <div className="space-y-2">
-          {scales.map(scale => (
-            <label key={scale} className="flex items-center gap-2 cursor-pointer hover:bg-gray-50 p-2 rounded">
-              <input
-                type="checkbox"
-                className="rounded border-gray-300 text-blue-500 focus:ring-blue-500"
-              />
-              <span className="text-sm text-gray-600">{scale}</span>
-            </label>
-          ))}
-        </div>
-      </div>
-
-      <button className="w-full bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium py-2 px-4 rounded-lg transition-colors">
-        Áp dụng bộ lọc
-      </button>
-    </div>
-  );
-};
-
-
 // Auction Card
 const AuctionCard = ({ auctionData }) => {
   const navigate = useNavigate();
@@ -193,8 +139,8 @@ const AuctionCard = ({ auctionData }) => {
   } = auctionData;
 
   useEffect(() => {
-    console.log("Participants data:", participants);
-    console.log("Auction data:", auction);
+    // console.log("Participants data:", participants);
+    // console.log("Auction data:", auction);
   }, [participants, auction]);
 
   useEffect(() => {
@@ -286,7 +232,8 @@ const AuctionCard = ({ auctionData }) => {
     Modal.warning({
       title: 'Thông báo',
       content: "Vui lòng nhấn 'Tham gia' để đăng ký trước khi xem chi tiết",
-      okText: 'Đã hiểu'
+      okText: 'Đã hiểu',
+      okButtonProps: { style: { color: "#1677ff", borderColor: "#1677ff" } }
     });
   };
 
@@ -295,7 +242,8 @@ const AuctionCard = ({ auctionData }) => {
       Modal.warning({
         title: 'Chưa đăng nhập',
         content: "Vui lòng đăng nhập để tham gia đấu giá.",
-        okText: 'Đã hiểu'
+        okText: 'Đã hiểu',
+        okButtonProps: { style: { color: "#1677ff", borderColor: "#1677ff" } }
       });
       return;
     }
@@ -304,7 +252,8 @@ const AuctionCard = ({ auctionData }) => {
       Modal.info({
         title: 'Thông báo',
         content: "Hiện tại phiên chưa bắt đầu nên chưa thể tham gia.",
-        okText: 'Đã hiểu'
+        okText: 'Đã hiểu',
+        okButtonProps: { style: { color: "#1677ff", borderColor: "#1677ff" } }
       });
       return;
     }
@@ -313,7 +262,8 @@ const AuctionCard = ({ auctionData }) => {
       Modal.warning({
         title: 'Không thể tham gia',
         content: "Bạn không thể tham gia phiên đấu giá của chính mình.",
-        okText: 'Đã hiểu'
+        okText: 'Đã hiểu',
+        okButtonProps: { style: { color: "#1677ff", borderColor: "#1677ff" } }
       });
       return;
     }
@@ -443,7 +393,7 @@ const AuctionCard = ({ auctionData }) => {
             type={status === "ended" ? "default" : "primary"}
             icon={<EyeOutlined />}
             onClick={() => handleClickedDetailAution(auction.id)}
-            className="flex-1 bg-blue-500"
+            className="flex-1 bg-blue-500 text-white"
             size="middle"
           >
             {status === "ended" ? "Xem kết quả" : "Xem chi tiết"}
@@ -528,6 +478,21 @@ const AuctionList = () => {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('active');
 
+  const [filters, setFilters] = useState({
+    selectedGrade: null,
+  });
+
+  const [searchText, setSearchText] = useState('');
+
+  // Thêm state cho sort
+  const [sortType, setSortType] = useState('newest');
+
+  // Filter Side Bar
+  // Hàm nhận dữ liệu lọc từ FilterSidebar
+  const handleFilterChange = (newFilters) => {
+    setFilters(newFilters);
+  };
+
   useEffect(() => {
     const fetchAuctions = async () => {
       try {
@@ -559,7 +524,7 @@ const AuctionList = () => {
   if (loading) {
     return (
       <div className="container mx-auto p-4 min-h-screen mt-14 flex justify-center items-center">
-        <div>Loading auctions...</div>
+        <div>Đang tải các phiên Đấu giá...</div>
       </div>
     );
   }
@@ -575,6 +540,41 @@ const AuctionList = () => {
 
   const currentAuctions = activeTab === 'active' ? activeAuctions : scheduledAuctions;
 
+  // Apply grade filter
+  const filteredAuctions = currentAuctions.filter(item => {
+    // Lọc theo grade
+    if (filters.selectedGrade && (!item.auction?.gundam_snapshot?.grade ||
+        item.auction.gundam_snapshot.grade.toLowerCase() !== filters.selectedGrade)) {
+      return false;
+    }
+    // Lọc theo search
+    if (searchText) {
+      const name = item.auction?.gundam_snapshot?.name?.toLowerCase() || '';
+      if (!name.includes(searchText.toLowerCase())) {
+        return false;
+      }
+    }
+    return true;
+  });
+
+  // Hàm sort
+  const sortAuctions = (auctions) => {
+    switch (sortType) {
+      case 'price-low':
+        return [...auctions].sort((a, b) => (a.auction.starting_price || 0) - (b.auction.starting_price || 0));
+      case 'price-high':
+        return [...auctions].sort((a, b) => (b.auction.starting_price || 0) - (a.auction.starting_price || 0));
+      case 'ending-soon':
+        return [...auctions].sort((a, b) => new Date(a.auction.end_time) - new Date(b.auction.end_time));
+      case 'newest':
+      default:
+        return [...auctions].sort((a, b) => new Date(b.auction.created_at) - new Date(a.auction.created_at));
+    }
+  };
+
+  // Thay filteredAuctions thành sortedAuctions
+  const sortedAuctions = sortAuctions(filteredAuctions);
+
   return (
     <div className="container mx-auto p-4 mb-5 min-h-screen mt-36">
       {/* Header */}
@@ -589,13 +589,19 @@ const AuctionList = () => {
               <input
                 type="text"
                 placeholder="Tìm kiếm Gundam..."
+                value={searchText}
+                onChange={e => setSearchText(e.target.value)}
                 className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none w-64"
               />
               <div className="absolute left-3 top-2.5 text-gray-400">
                 🔍
               </div>
             </div>
-            <select className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none">
+            <select
+              value={sortType}
+              onChange={e => setSortType(e.target.value)}
+              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+            >
               <option value="newest">Mới nhất</option>
               <option value="price-low">Giá thấp đến cao</option>
               <option value="price-high">Giá cao đến thấp</option>
@@ -605,11 +611,31 @@ const AuctionList = () => {
         </div>
       </div>
 
+      {/* Filter Status Display */}
+      {filters.selectedGrade && (
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
+          <div className="flex items-center justify-between">
+            <span className="text-blue-800">
+              Đang lọc theo Grade: <strong>{filters.selectedGrade}</strong>
+            </span>
+            <button
+              onClick={() => setFilters({ ...filters, selectedGrade: null })}
+              className="text-blue-600 hover:text-blue-800 text-sm underline"
+            >
+              Xóa bộ lọc
+            </button>
+          </div>
+          <div className="text-sm text-blue-600 mt-1">
+            Tìm thấy {filteredAuctions} phiên đấu giá
+          </div>
+        </div>
+      )}
+
       {/* Main Layout */}
       <Row gutter={32} className="">
         {/* Left Sidebar - Filters */}
         <Col xs={24} lg={6}>
-          <FilterSidebar />
+          <FilterSidebar onFilterChange={handleFilterChange} />
         </Col>
 
         {/* Center Content - Tabs and Auctions */}
@@ -628,7 +654,7 @@ const AuctionList = () => {
                 label: (
                   <div className="flex items-center justify-center gap-2 px-12 py-3 font-medium">
                     <RiAuctionFill className="text-lg" />
-                    <span>Đấu giá đang mở ({activeAuctions.length})</span>
+                    <span>Phiên Đấu giá đang diễn ra ({activeAuctions.length})</span>
                   </div>
                 ),
               },
@@ -636,7 +662,8 @@ const AuctionList = () => {
                 key: 'scheduled',
                 label: (
                   <div className="flex items-center justify-center gap-2 px-12 py-3 font-medium">
-                    <span>Sắp mở ({scheduledAuctions.length})</span>
+                    <ClockCircleOutlined className="text-lg"/>
+                    <span>Phiên Đấu giá sắp diễn ra ({scheduledAuctions.length})</span>
                   </div>
                 ),
               },
@@ -645,9 +672,9 @@ const AuctionList = () => {
 
           {/* Auction Grid */}
           <div className="space-y-6">
-            {currentAuctions.length > 0 ? (
+            {sortedAuctions.length > 0 ? (
               <Row gutter={[24, 24]}>
-                {currentAuctions.map((auctionData) => (
+                {sortedAuctions.map((auctionData) => (
                   <Col key={auctionData.auction.id} xs={24} md={12}>
                     <AuctionCard auctionData={auctionData} />
                   </Col>
