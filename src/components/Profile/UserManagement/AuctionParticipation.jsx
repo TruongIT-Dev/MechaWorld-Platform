@@ -60,9 +60,10 @@ const AuctionParticipation = () => {
     const getStatusInfo = (status) => {
         const statusMap = {
             'active': { text: 'Đang diễn ra', color: 'bg-green-100 text-green-800' },
-            'completed': { text: 'Đã kết thúc', color: 'bg-blue-100 text-blue-800' },
+            'completed': { text: 'Hoàn tất', color: 'bg-blue-100 text-blue-800' },
             'cancelled': { text: 'Đã hủy', color: 'bg-red-100 text-red-800' },
-            'pending': { text: 'Chờ bắt đầu', color: 'bg-yellow-100 text-yellow-800' }
+            'pending': { text: 'Chờ bắt đầu', color: 'bg-yellow-100 text-yellow-800' },
+            'ended': { text: 'Đã kết thúc', color: 'bg-yellow-100 text-yellow-800' }
         };
         return statusMap[status] || { text: status, color: 'bg-gray-100 text-gray-800' };
     };
