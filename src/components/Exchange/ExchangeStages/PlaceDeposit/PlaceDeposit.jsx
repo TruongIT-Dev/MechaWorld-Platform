@@ -222,7 +222,7 @@ export default function PlaceDeposit({
               </div>
 
               <TextArea
-                placeholder="Ghi chú cho người giao hàng"
+                placeholder="Ghi chú cho đối tác"
                 value={note || ""}
                 onChange={(e) => setNote(e.target.value)}
                 className="mt-2"

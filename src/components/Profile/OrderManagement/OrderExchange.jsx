@@ -20,6 +20,7 @@ import { GetListOrderHistory, GetOrderDetail, ConfirmOrderDelivered } from "../.
 import { GetShopInfoById } from "../../../apis/Seller Profile/APISellerProfile";
 import OrderHistoryDetail from "./OrderHistoryDetail";
 import { useSelector } from "react-redux";
+import { getUser } from "../../../apis/User/APIUser";
 
 const { Search } = Input;
 
@@ -64,8 +65,8 @@ const OrderExchange = () => {
         setLoading(true);
         try {
             const response = await GetListOrderHistory();
-            console.log("fetch res", response);
-
+            console.log("response", response);
+            
             const ordersData = response.data;
 
             // Lọc chỉ lấy orders có type "exchange"
@@ -74,94 +75,157 @@ const OrderExchange = () => {
                 return orderType === 'exchange';
             });
 
-            // Lấy user_id hiện tại
             const currentUserId = userId;
-
-            // Nhóm các đơn hàng exchange theo cặp
-            const exchangePairs = groupExchangeOrders(exchangeOrdersData, currentUserId);
 
             // Lấy danh sách user_id duy nhất để fetch thông tin
             const allUserIds = [...new Set(exchangeOrdersData.flatMap(item => [item.order.buyer_id, item.order.seller_id]))];
 
             // Gọi API lấy thông tin user cho tất cả users
             const userInfoMap = {};
+            const detailedUserInfoMap = {};
+
             await Promise.all(allUserIds.map(async (id) => {
-                const info = await fetchUserInfo(id);
+                const [info, detailedInfo] = await Promise.all([
+                    fetchUserInfo(id),
+                    getUser(id)
+                ]);
                 userInfoMap[id] = info;
+                detailedUserInfoMap[id] = detailedInfo;
             }));
 
-            // Xử lý dữ liệu đơn hàng trao đổi
-            const processedOrders = exchangePairs.map(pair => {
-                const { myOrder, partnerOrder } = pair;
-                const partnerUserId = myOrder.order.buyer_id === currentUserId ? myOrder.order.seller_id : myOrder.order.buyer_id;
+            // XỬ LÝ TRỰC TIẾP TỪNG ORDER - KHÔNG DÙNG GROUPING
+            const processedOrders = [];
+            const processedOrderIds = new Set();
+
+            for (const orderData of exchangeOrdersData) {
+                const order = orderData.order;
+
+                // Chỉ xử lý order mà user hiện tại tham gia
+                if (order.buyer_id !== currentUserId && order.seller_id !== currentUserId) {
+                    continue;
+                }
+
+                // Tránh xử lý order đã processed
+                if (processedOrderIds.has(order.id)) {
+                    continue;
+                }
+
+                // Tìm order đối tác
+                const partnerOrderData = exchangeOrdersData.find(otherOrderData => {
+                    const otherOrder = otherOrderData.order;
+                    return otherOrder.id !== order.id &&
+                        ((order.buyer_id === otherOrder.seller_id && order.seller_id === otherOrder.buyer_id));
+                });
+
+                // Xác định partner user ID
+                const partnerUserId = order.buyer_id === currentUserId ? order.seller_id : order.buyer_id;
                 const partnerInfo = userInfoMap[partnerUserId] || {};
+                const getPartnerInfo = detailedUserInfoMap[partnerUserId] || {};
 
-                console.log("partnerOrder", partnerOrder);
-
-
-                // Trạng thái tổng thể của giao dịch trao đổi
-                const exchangeStatus = getExchangeStatus(myOrder.order.status, partnerOrder?.order.status);
+                // Trạng thái tổng thể
+                const exchangeStatus = getExchangeStatus(order.status, partnerOrderData?.order.status);
                 const statusInfo = getExchangeStatusInfo(exchangeStatus);
 
-                return {
-                    id: myOrder.order.id,
-                    exchangeId: `EX-${myOrder.order.id.slice(0, 8)}`,
-                    code: myOrder.order.code,
-                    partnerCode: partnerOrder?.order.code || 'N/A',
+                const processedOrder = {
+                    id: order.id,
+                    exchangeId: `EX-${order.id.slice(0, 8)}`,
+                    code: order.code,
+                    partnerCode: partnerOrderData?.order.code || 'N/A',
 
-                    // Thông tin đối tác trao đổi
+                    // Thông tin đối tác
                     partnerId: partnerUserId,
-                    partnerOrderId: partnerOrder?.order?.id,
-                    partnerName: partnerInfo.shopName || partnerInfo.fullName || `User ${partnerUserId.slice(0, 4)}...`,
-                    partnerAvatar: partnerInfo.avatarUrl || '',
+                    partnerOrderId: partnerOrderData?.order?.id,
+                    partnerName: getPartnerInfo?.data?.full_name || partnerInfo.shopName || partnerInfo.full_name,
+                    partnerAvatar: partnerInfo.avatar_url || getPartnerInfo?.data?.avatar_url || '',
 
                     // Trạng thái
                     status: exchangeStatus,
-                    myOrderStatus: myOrder.order.status,
-                    partnerOrderStatus: partnerOrder?.order.status || 'unknown',
-                    statusText: statusInfo.text,
-                    statusColor: statusInfo.color,
-                    statusIcon: statusInfo.icon,
+                    myOrderStatus: order.buyer_id === currentUserId ? partnerOrderData?.order.status || 'unknown' : order.status,
+                    partnerOrderStatus: order.buyer_id === currentUserId ? order.status : partnerOrderData?.order.status || 'unknown',
+                    statusText: statusInfo?.text,
+                    statusColor: statusInfo?.color,
+                    statusIcon: statusInfo?.icon,
 
                     // Thông tin đơn hàng
-                    isPackaged: myOrder.order.is_packaged,
-                    partnerIsPackaged: partnerOrder?.order.is_packaged || false,
-                    deliveryFee: myOrder.order.delivery_fee,
-                    totalAmount: myOrder.order.total_amount,
-                    formattedTotal: formatCurrency(myOrder.order.total_amount),
-                    paymentMethod: formatPaymentMethod(myOrder.order.payment_method),
-                    createdAt: new Date(myOrder.order.created_at).toLocaleDateString('vi-VN'),
-                    note: myOrder.order.note,
+                    isPackaged: order.is_packaged,
+                    partnerIsPackaged: partnerOrderData?.order.is_packaged || false,
+                    deliveryFee: order.delivery_fee,
+                    totalAmount: order.total_amount,
+                    formattedTotal: formatCurrency(order.total_amount),
+                    paymentMethod: formatPaymentMethod(order.payment_method),
+                    createdAt: new Date(order.created_at).toLocaleDateString('vi-VN'),
+                    note: order.note,
 
                     // Thông tin hủy đơn
-                    canceledBy: myOrder.order.canceled_by,
-                    canceledReason: myOrder.order.canceled_reason,
+                    canceledBy: order.canceled_by,
+                    canceledReason: order.canceled_reason,
 
-                    // Items của tôi (những gì tôi gửi cho đối tác)
-                    myItems: myOrder.order_items.map(item => ({
-                        id: item.id,
-                        name: item.name,
-                        grade: item.grade,
-                        scale: item.scale,
-                        quantity: item.quantity,
-                        price: item.price,
-                        formattedPrice: formatCurrency(item.price),
-                        imageUrl: item.image_url
-                    })),
+                    // Items của tôi (order hiện tại)
+                    myItems: order.buyer_id === currentUserId
+                        ? (partnerOrderData?.order_items.map(item => ({
+                            id: item.id,
+                            name: item.name,
+                            grade: item.grade,
+                            scale: item.scale,
+                            quantity: item.quantity,
+                            price: item.price,
+                            formattedPrice: formatCurrency(item.price),
+                            imageUrl: item.image_url
+                        })) || [])
+                        : orderData.order_items.map(item => ({
+                            id: item.id,
+                            name: item.name,
+                            grade: item.grade,
+                            scale: item.scale,
+                            quantity: item.quantity,
+                            price: item.price,
+                            formattedPrice: formatCurrency(item.price),
+                            imageUrl: item.image_url
+                        })),
 
-                    // Items của đối tác (những gì tôi nhận từ đối tác)
-                    partnerItems: partnerOrder?.order_items.map(item => ({
-                        id: item.id,
-                        name: item.name,
-                        grade: item.grade,
-                        scale: item.scale,
-                        quantity: item.quantity,
-                        price: item.price,
-                        formattedPrice: formatCurrency(item.price),
-                        imageUrl: item.image_url
-                    })) || []
+                    partnerItems: order.buyer_id === currentUserId
+                        ? orderData.order_items.map(item => ({
+                            id: item.id,
+                            name: item.name,
+                            grade: item.grade,
+                            scale: item.scale,
+                            quantity: item.quantity,
+                            price: item.price,
+                            formattedPrice: formatCurrency(item.price),
+                            imageUrl: item.image_url
+                        }))
+                        : (partnerOrderData?.order_items.map(item => ({
+                            id: item.id,
+                            name: item.name,
+                            grade: item.grade,
+                            scale: item.scale,
+                            quantity: item.quantity,
+                            price: item.price,
+                            formattedPrice: formatCurrency(item.price),
+                            imageUrl: item.image_url
+                    })) || [])
                 };
-            });
+
+                // console.log("processedOrder",processedOrder);
+                
+
+                processedOrders.push(processedOrder);
+                processedOrderIds.add(order.id);
+                if (partnerOrderData) {
+                    processedOrderIds.add(partnerOrderData.order.id);
+                }
+            }
+
+            // processedOrders.forEach((order, index) => {
+            //     console.log(`Order ${index}:`, {
+            //         id: order.id,
+            //         partnerId: order.partnerId,
+            //         myItemsCount: order.myItems.length,
+            //         partnerItemsCount: order.partnerItems.length,
+            //         myItems: order.myItems.map(i => i.name),
+            //         partnerItems: order.partnerItems.map(i => i.name)
+            //     });
+            // });
 
             setOrders(processedOrders);
         } catch (error) {
@@ -176,38 +240,7 @@ const OrderExchange = () => {
 
 
     // Hàm nhóm các đơn hàng exchange theo cặp
-    const groupExchangeOrders = (ordersData, currentUserId) => {
-        const pairs = [];
-        const processedOrders = new Set();
-
-        ordersData.forEach(orderData => {
-            const order = orderData.order;
-
-            if (processedOrders.has(order.id)) return;
-
-            // Tìm đơn hàng cặp (đối tác)
-            const partnerOrder = ordersData.find(otherOrderData => {
-                const otherOrder = otherOrderData.order;
-                return otherOrder.id !== order.id &&
-                    ((order.buyer_id === otherOrder.seller_id && order.seller_id === otherOrder.buyer_id));
-            });
-
-            // Chỉ thêm nếu user hiện tại là buyer hoặc seller của đơn hàng này
-            if (order.buyer_id === currentUserId || order.seller_id === currentUserId) {
-                pairs.push({
-                    myOrder: orderData,
-                    partnerOrder: partnerOrder
-                });
-
-                processedOrders.add(order.id);
-                if (partnerOrder) {
-                    processedOrders.add(partnerOrder.order.id);
-                }
-            }
-        });
-
-        return pairs;
-    };
+    
 
     // Hàm xác định trạng thái tổng thể của giao dịch trao đổi
     const getExchangeStatus = (myStatus, partnerStatus) => {
@@ -297,10 +330,10 @@ const OrderExchange = () => {
 
     const tabItems = [
         { key: "all", label: "Tất cả" },
-        { key: "pending", label: "Chờ xử lý" },
-        { key: "packaging", label: "Chuẩn bị hàng" },
-        { key: "delivering", label: "Vận chuyển" },
-        { key: "both_delivered", label: "Đã giao" },
+        { key: "pending", label: "Chờ xác nhận" },
+        { key: "packaging", label: "Đang đóng gói" },
+        { key: "delivering", label: "Đang vận chuyển" },
+        { key: "both_delivered", label: "Đã giao hàng" },
         { key: "completed", label: "Hoàn tất" },
         { key: "canceled", label: "Đã hủy" },
         { key: "failed", label: "Thất bại" },
@@ -425,177 +458,209 @@ const OrderExchange = () => {
     };
 
     // Hàm render card trao đổi compact
-    const renderExchangeCard = (order) => (
-        <Card key={order.id} className="border rounded-lg shadow-sm mb-4 hover:shadow-md transition-shadow">
-            {/* Header compact */}
-            <div className="flex justify-between items-center mb-4">
-                <div className="flex items-center gap-3">
-                    <div className="relative">
-                        <Avatar size={36} src={order.partnerAvatar} icon={<UserOutlined />} />
-                        <SwapOutlined className="absolute -bottom-1 -right-1 bg-blue-500 text-white rounded-full p-1 text-xs" />
-                    </div>
-                    <div>
-                        <span className="font-semibold text-base">{order.partnerName}</span>
-                        <p className="text-xs text-gray-500">{order.createdAt}</p>
+    const renderExchangeCard = (order) => {
+        // XÁC ĐỊNH ORDER NÀO LÀ CỦA USER HIỆN TẠI
+        const currentUserId = userId;
+
+        // console.log("=== RENDER DEBUG ===");
+        // console.log("Current User ID:", currentUserId);
+        // console.log("Order ID:", order.id);
+        // console.log("Partner ID:", order.partnerId);
+        // console.log("Should swap?", currentUserId === order.partnerId);
+        // console.log("My Items:", order.myItems.map(i => i.name));
+        // console.log("Partner Items:", order.partnerItems.map(i => i.name));
+
+        // Xác định ai gửi ai nhận dựa trên userId
+        let myItems, partnerItems, myStatus, partnerStatus, myCode, partnerCode;
+
+        if (currentUserId === order.partnerId) {
+            // Nếu currentUser là partner thì đảo ngược
+            myItems = order.partnerItems;
+            partnerItems = order.myItems;
+            myStatus = order.partnerOrderStatus;
+            partnerStatus = order.myOrderStatus;
+            myCode = order.partnerCode;
+            partnerCode = order.code;
+        } else {
+            // Nếu currentUser là chính chủ order
+            myItems = order.myItems;
+            partnerItems = order.partnerItems;
+            myStatus = order.myOrderStatus;
+            partnerStatus = order.partnerOrderStatus;
+            myCode = order.code;
+            partnerCode = order.partnerCode;
+        }
+
+        // console.log("order", order);
+        
+
+        return (
+            <Card key={order.id} className="border rounded-lg shadow-sm mb-4 hover:shadow-md transition-shadow">
+                {/* Header compact */}
+                <div className="flex justify-between items-center mb-4">
+                    <div className="flex items-center gap-3">
+                        <div className="relative">
+                            <Avatar size={36} src={order.partnerAvatar} icon={<UserOutlined />} />
+                            <SwapOutlined className="absolute -bottom-1 -right-1 bg-blue-500 text-white rounded-full p-1 text-xs" />
+                        </div>
+                        <div>
+                            <span className="font-semibold text-base">{order.partnerName}</span>
+                            <p className="text-xs text-gray-500">{order.createdAt}</p>
+                        </div>
                     </div>
                 </div>
-                {/* <Tag color={order.statusColor} icon={order.statusIcon} className="px-2 py-1">
-                    {order.statusText}
-                </Tag> */}
-            </div>
 
-            {/* Layout chia đôi cho 2 đơn hàng */}
-            <div className="grid grid-cols-2 gap-4">
-                {/* Bên trái - Đơn của bạn */}
-                <div className="border-r border-gray-200 pr-4">
-                    <div className="flex justify-between">
-                        <div className="flex items-center gap-2 mb-3">
-                            <SendOutlined className="text-blue-500 text-sm" />
-                            <span className="text-sm font-medium text-blue-700">Bạn gửi</span>
-                            <Tag size="small" color={getStatusColor(order.myOrderStatus)}>
-                                {convertStatus(order.myOrderStatus)}
-                            </Tag>
-                        </div>
-                        <Button
-                            type="primary"
-                            ghost
-                            className="bg-blue-500"
-                            onClick={() => showOrderDetail(order.id)}
-                            loading={loadingOrderDetail}
-                            icon={<EyeOutlined />}
-                            size="small"
-                        >
-                            Chi tiết
-                        </Button>
-                    </div>
-
-                    <div className="space-y-2 mb-3">
-                        {order.myItems.slice(0, 2).map((item, index) => (
-                            <div key={item.id} className="flex items-center gap-2">
-                                <Image
-                                    width={32}
-                                    height={32}
-                                    src={item.imageUrl}
-                                    alt={item.name}
-                                    fallback="https://source.unsplash.com/32x32/?gundam"
-                                    className="rounded border flex-shrink-0"
-                                />
-                                <div className="flex-1 min-w-0">
-                                    <p className="text-xs font-medium truncate">{item.name}</p>
-                                    <p className="text-xs text-gray-500">{item.grade}</p>
-                                </div>
+                {/* Layout chia đôi cho 2 đơn hàng */}
+                <div className="grid grid-cols-2 gap-4">
+                    {/* Bên trái - Đơn của bạn */}
+                    <div className="border-r border-gray-200 pr-4">
+                        <div className="flex justify-between">
+                            <div className="flex items-center gap-2 mb-3">
+                                <SendOutlined className="text-blue-500 text-sm" />
+                                <span className="text-sm font-medium text-blue-700">Bạn gửi</span>
+                                <Tag size="small" color={getStatusColor(myStatus)}>
+                                    {convertStatus(myStatus)}
+                                </Tag>
                             </div>
-                        ))}
-                        {order.myItems.length > 2 && (
-                            <p className="text-xs text-gray-500 pl-2">+{order.myItems.length - 2} sản phẩm khác</p>
-                        )}
-                    </div>
-
-                    <div className="text-xs text-gray-600 space-y-1">
-                        <p><span className="font-medium">Mã:</span> {order.code}</p>
-                        {/* <p><span className="font-medium">Đóng gói:</span> {order.isPackaged ? 'Đã xong' : 'Chưa xong'}</p> */}
-                    </div>
-                </div>
-
-                {/* Bên phải - Đơn đối tác */}
-                <div className="pl-4">
-                    <div className="flex justify-between">
-                        <div className="flex items-center gap-2 mb-3">
-                            <InboxOutlined className="text-green-500 text-sm" />
-                            <span className="text-sm font-medium text-green-700">Bạn nhận</span>
-                            <Tag size="small" color={getStatusColor(order.partnerOrderStatus)}>
-                                {convertStatus(order.partnerOrderStatus)}
-                            </Tag>
+                            <Button
+                                type="primary"
+                                ghost
+                                className="bg-blue-500"
+                                onClick={() => showOrderDetail(currentUserId === order.partnerId ? order.partnerOrderId : order.id)}
+                                loading={loadingOrderDetail}
+                                icon={<EyeOutlined />}
+                                size="small"
+                            >
+                                Chi tiết
+                            </Button>
                         </div>
-                        <Button
-                            type="primary"
-                            ghost
-                            className="bg-blue-500"
-                            onClick={() => showOrderDetail(order.partnerOrderId)}
-                            loading={loadingOrderDetail}
-                            icon={<EyeOutlined />}
-                            size="small"
-                        >
-                            Chi tiết
-                        </Button>
-                    </div>
 
-                    <div className="space-y-2 mb-3">
-                        {order.partnerItems.length > 0 ? (
-                            <>
-                                {order.partnerItems.slice(0, 2).map((item, index) => (
-                                    <div key={item.id} className="flex items-center gap-2">
-                                        <Image
-                                            width={32}
-                                            height={32}
-                                            src={item.imageUrl}
-                                            alt={item.name}
-                                            fallback="https://source.unsplash.com/32x32/?gundam"
-                                            className="rounded border flex-shrink-0"
-                                        />
-                                        <div className="flex-1 min-w-0">
-                                            <p className="text-xs font-medium truncate">{item.name}</p>
-                                            <p className="text-xs text-gray-500">{item.grade}</p>
-                                        </div>
+                        <div className="space-y-2 mb-3">
+                            {myItems.slice(0, 2).map((item, index) => (
+                                <div key={item.id} className="flex items-center gap-2">
+                                    <Image
+                                        width={32}
+                                        height={32}
+                                        src={item.imageUrl}
+                                        alt={item.name}
+                                        fallback="https://source.unsplash.com/32x32/?gundam"
+                                        className="rounded border flex-shrink-0"
+                                    />
+                                    <div className="flex-1 min-w-0">
+                                        <p className="text-xs font-medium truncate">{item.name}</p>
+                                        <p className="text-xs text-gray-500">{item.grade}</p>
                                     </div>
-                                ))}
-                                {order.partnerItems.length > 2 && (
-                                    <p className="text-xs text-gray-500 pl-2">+{order.partnerItems.length - 2} sản phẩm khác</p>
-                                )}
-                            </>
-                        ) : (
-                            <div className="text-center py-2">
-                                <Spin size="small" />
-                                <p className="text-xs text-gray-500 mt-1">Đang tải...</p>
+                                </div>
+                            ))}
+                            {myItems.length > 2 && (
+                                <p className="text-xs text-gray-500 pl-2">+{myItems.length - 2} sản phẩm khác</p>
+                            )}
+                        </div>
+
+                        <div className="text-xs text-gray-600 space-y-1">
+                            <p><span className="font-medium">Mã:</span> {myCode}</p>
+                        </div>
+                    </div>
+
+                    {/* Bên phải - Đơn đối tác */}
+                    <div className="pl-4">
+                        <div className="flex justify-between">
+                            <div className="flex items-center gap-2 mb-3">
+                                <InboxOutlined className="text-green-500 text-sm" />
+                                <span className="text-sm font-medium text-green-700">Bạn nhận</span>
+                                <Tag size="small" color={getStatusColor(partnerStatus)}>
+                                    {convertStatus(partnerStatus)}
+                                </Tag>
                             </div>
+                            <Button
+                                type="primary"
+                                ghost
+                                className="bg-blue-500"
+                                onClick={() => showOrderDetail(currentUserId === order.partnerId ? order.id : order.partnerOrderId)}
+                                loading={loadingOrderDetail}
+                                icon={<EyeOutlined />}
+                                size="small"
+                            >
+                                Chi tiết
+                            </Button>
+                        </div>
+
+                        <div className="space-y-2 mb-3">
+                            {partnerItems.length > 0 ? (
+                                <>
+                                    {partnerItems.slice(0, 2).map((item, index) => (
+                                        <div key={item.id} className="flex items-center gap-2">
+                                            <Image
+                                                width={32}
+                                                height={32}
+                                                src={item.imageUrl}
+                                                alt={item.name}
+                                                fallback="https://source.unsplash.com/32x32/?gundam"
+                                                className="rounded border flex-shrink-0"
+                                            />
+                                            <div className="flex-1 min-w-0">
+                                                <p className="text-xs font-medium truncate">{item.name}</p>
+                                                <p className="text-xs text-gray-500">{item.grade}</p>
+                                            </div>
+                                        </div>
+                                    ))}
+                                    {partnerItems.length > 2 && (
+                                        <p className="text-xs text-gray-500 pl-2">+{partnerItems.length - 2} sản phẩm khác</p>
+                                    )}
+                                </>
+                            ) : (
+                                <div className="text-center py-2">
+                                    <Spin size="small" />
+                                    <p className="text-xs text-gray-500 mt-1">Đang tải...</p>
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="text-xs text-gray-600 space-y-1">
+                            <p><span className="font-medium">Mã:</span> {partnerCode}</p>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Footer compact - giữ nguyên */}
+                <div className="flex justify-between items-center mt-4 pt-3 border-t">
+                    <div className="flex flex-col gap-4 text-sm">
+                        <span className="text-gray-600">
+                            Phí ship: <span className="font-semibold text-red-600">{order.formattedTotal}</span>
+                        </span>
+                        <span className="text-gray-600">
+                            Mã đơn Trao đổi: <strong>{order.exchangeId}</strong>
+                        </span>
+                    </div>
+
+                    <div className="flex gap-2">
+                        {shouldShowConfirmButton(order.status) && (
+                            <Button
+                                type="primary"
+                                danger
+                                onClick={() => showConfirmDeliveredModal(order.id)}
+                                icon={<CheckCircleOutlined />}
+                                size="small"
+                            >
+                                Hoàn tất
+                            </Button>
+                        )}
+                        {shouldShowCancelReasonButton(order.status, order.canceledReason) && (
+                            <Button
+                                type="default"
+                                danger
+                                onClick={() => showCancelReasonModal(order)}
+                                icon={<InfoCircleOutlined />}
+                                size="small"
+                            >
+                                Lý do hủy
+                            </Button>
                         )}
                     </div>
-
-                    <div className="text-xs text-gray-600 space-y-1">
-                        <p><span className="font-medium">Mã:</span> {order.partnerCode}</p>
-                        {/* <p><span className="font-medium">Đóng gói:</span> {order.partnerIsPackaged ? 'Đã xong' : 'Chưa xong'}</p> */}
-                    </div>
                 </div>
-            </div>
-
-            {/* Footer compact */}
-            <div className="flex justify-between items-center mt-4 pt-3 border-t">
-                <div className="flex flex-col gap-4 text-sm">
-                    <span className="text-gray-600">
-                        Phí ship: <span className="font-semibold text-red-600">{order.formattedTotal}</span>
-                    </span>
-                    <span className="text-gray-600">
-                        Mã đơn Trao đổi: <strong>{order.exchangeId}</strong>
-                    </span>
-                </div>
-
-                <div className="flex gap-2">
-                    {shouldShowConfirmButton(order.status) && (
-                        <Button
-                            type="primary"
-                            danger
-                            onClick={() => showConfirmDeliveredModal(order.id)}
-                            icon={<CheckCircleOutlined />}
-                            size="small"
-                        >
-                            Hoàn tất
-                        </Button>
-                    )}
-                    {shouldShowCancelReasonButton(order.status, order.canceledReason) && (
-                        <Button
-                            type="default"
-                            danger
-                            onClick={() => showCancelReasonModal(order)}
-                            icon={<InfoCircleOutlined />}
-                            size="small"
-                        >
-                            Lý do hủy
-                        </Button>
-                    )}
-                </div>
-            </div>
-        </Card>
-    );
+            </Card>
+        );
+    };
 
     return (
         <div className="mx-auto p-6">

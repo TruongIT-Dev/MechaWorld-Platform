@@ -5,6 +5,7 @@ import {
     LeftOutlined,
     RightOutlined,
     PlusOutlined,
+    EditOutlined,
 } from '@ant-design/icons';
 // import { getGradeColor } from './utils';
 
@@ -85,7 +86,7 @@ const DetailModal = ({ visible, product, onCancel, toggleFavorite, toggleWishlis
                 <Button key="back" onClick={onCancel}>
                     Đóng
                 </Button>,
-                <Button key="edit" type="primary" className='bg-blue-500' icon={<PlusOutlined />} onClick={() => {handleUpdate()}}>
+                <Button key="edit" type="primary" className='bg-blue-500' icon={<EditOutlined />} onClick={() => {handleUpdate()}}>
                     Chỉnh sửa
                 </Button>
             ]}

@@ -233,9 +233,8 @@ export default function PostModal({ onClose, onSuccess, currentUser }) {
                                     <Card.Meta
                                         title={gundam.name}
                                         description={
-                                            <div>
-                                                <div className="text-xs">{gundam.series}</div>
-                                                <div className="text-green-600 text-xs">{gundam.condition}</div>
+                                            <div className="w-full overflow-hidden">
+                                                <div className="text-xs w-full truncate">{gundam.series}</div>
                                             </div>
                                         }
                                     />

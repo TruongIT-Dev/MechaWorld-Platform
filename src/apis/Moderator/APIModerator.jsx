@@ -88,3 +88,7 @@ export const CompleteWithdrawalRequest = (requestID, transactionReference) => {
         transaction_reference: transactionReference,
     });
 };
+
+export const GetModeratorDashboard = () => {
+    return axios.get(`/mod/dashboard`);
+}

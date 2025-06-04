@@ -2,7 +2,7 @@ import { useSelector } from 'react-redux';
 import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { EnvironmentOutlined, ShopOutlined, MoneyCollectOutlined, InfoCircleOutlined, PlusCircleOutlined } from '@ant-design/icons';
-import { Card, Button, Radio, Divider, message, Table, Modal, Form, Select, Input, Checkbox, Empty, Tabs, notification } from 'antd';
+import { Card, Button, Radio, Divider, message, Table, Modal, Form, Select, Input, Checkbox, Empty, Tabs, notification, InputNumber } from 'antd';
 
 import { useCart } from '../../context/CartContext';
 import { checkWallet } from '../../apis/User/APIUser';
@@ -341,7 +341,7 @@ const Checkout = () => {
       // Cerrar notificación de carga y mostrar éxito
       message.destroy("orderProcessing");
       // message.success("Đặt hàng thành công!");
-      navigate('/member/profile/orderHistory');
+      navigate('/member/profile/orders/regular-auction');
     } catch (error) {
       // Cerrar notificación de carga
       message.destroy("orderProcessing");
@@ -383,7 +383,7 @@ const Checkout = () => {
               className="ml-auto text-red-400 text-base"
               onClick={() => setIsAddressModalVisible(true)}
             >
-             Cập nhật
+              Cập nhật
             </Button>
           </div>
         </Card>
@@ -514,11 +514,32 @@ const Checkout = () => {
                   <Input placeholder="Ví dụ: Số nhà, tên đường..." />
                 </Form.Item>
 
-                <Form.Item label="Số điện thoại" name="phone_number" rules={[{ required: true }]} tooltip={{
-                  title: 'Số điện thoại dùng để xác nhận bên vận chuyển khi giao hàng. Để trống sẽ mặc định lấy sđt của người dùng.',
-                  icon: <InfoCircleOutlined />,
-                }}>
-                  <Input placeholder="Nhập số điện thoại" />
+                <Form.Item
+                  label="Số điện thoại"
+                  name="phone_number"
+                  rules={[
+                    { required: true, message: 'Vui lòng nhập số điện thoại' },
+                  ]}
+                  tooltip={{
+                    title: 'Số điện thoại dùng để xác nhận bên vận chuyển khi giao hàng. Để trống sẽ mặc định lấy sđt của người dùng.',
+                    icon: <InfoCircleOutlined />,
+                  }}
+                >
+                  <Input
+                    placeholder="Nhập số điện thoại"
+                    maxLength={10}
+                    onKeyPress={(e) => {
+                      // Chỉ cho phép nhập số
+                      if (!/[0-9]/.test(e.key)) {
+                        e.preventDefault();
+                      }
+                    }}
+                    onChange={(e) => {
+                      // Loại bỏ ký tự không phải số nhưng giữ nguyên số 0 đầu
+                      const value = e.target.value.replace(/[^0-9]/g, '');
+                      e.target.value = value;
+                    }}
+                  />
                 </Form.Item>
 
                 <Form.Item className="col-span-2 -mt-2">

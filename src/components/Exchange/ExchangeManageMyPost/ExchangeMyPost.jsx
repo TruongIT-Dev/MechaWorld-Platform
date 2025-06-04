@@ -208,8 +208,8 @@ export default function ExchangeMyPost() {
     }, []);
 
     return (
-        <Layout className="min-h-screen bg-gray-100 mt-5">
-            <Content className="max-w-7xl mx-auto mt-24 px-4 py-6">
+        <Layout className="min-h-screen mx-auto bg-gray-100 mt-5">
+            <Content className="w-[1200px] mx-auto mt-24 px-4 py-6">
                 <Card className="shadow-md">
                     <Title level={3} className="text-center mb-6 uppercase">Quản Lý Bài Viết Trao Đổi Gundam</Title>
 
