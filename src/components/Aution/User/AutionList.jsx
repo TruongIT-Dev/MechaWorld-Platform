@@ -232,7 +232,8 @@ const AuctionCard = ({ auctionData }) => {
     Modal.warning({
       title: 'Thông báo',
       content: "Vui lòng nhấn 'Tham gia' để đăng ký trước khi xem chi tiết",
-      okText: 'Đã hiểu'
+      okText: 'Đã hiểu',
+      okButtonProps: { style: { color: "#1677ff", borderColor: "#1677ff" } }
     });
   };
 
@@ -241,7 +242,8 @@ const AuctionCard = ({ auctionData }) => {
       Modal.warning({
         title: 'Chưa đăng nhập',
         content: "Vui lòng đăng nhập để tham gia đấu giá.",
-        okText: 'Đã hiểu'
+        okText: 'Đã hiểu',
+        okButtonProps: { style: { color: "#1677ff", borderColor: "#1677ff" } }
       });
       return;
     }
@@ -250,7 +252,8 @@ const AuctionCard = ({ auctionData }) => {
       Modal.info({
         title: 'Thông báo',
         content: "Hiện tại phiên chưa bắt đầu nên chưa thể tham gia.",
-        okText: 'Đã hiểu'
+        okText: 'Đã hiểu',
+        okButtonProps: { style: { color: "#1677ff", borderColor: "#1677ff" } }
       });
       return;
     }
@@ -259,7 +262,8 @@ const AuctionCard = ({ auctionData }) => {
       Modal.warning({
         title: 'Không thể tham gia',
         content: "Bạn không thể tham gia phiên đấu giá của chính mình.",
-        okText: 'Đã hiểu'
+        okText: 'Đã hiểu',
+        okButtonProps: { style: { color: "#1677ff", borderColor: "#1677ff" } }
       });
       return;
     }
@@ -478,6 +482,11 @@ const AuctionList = () => {
     selectedGrade: null,
   });
 
+  const [searchText, setSearchText] = useState('');
+
+  // Thêm state cho sort
+  const [sortType, setSortType] = useState('newest');
+
   // Filter Side Bar
   // Hàm nhận dữ liệu lọc từ FilterSidebar
   const handleFilterChange = (newFilters) => {
@@ -533,23 +542,38 @@ const AuctionList = () => {
 
   // Apply grade filter
   const filteredAuctions = currentAuctions.filter(item => {
-    // Nếu không có grade filter được chọn, hiển thị tất cả
-    if (!filters.selectedGrade) {
-      return true;
-    }
-
-    // Kiểm tra xem auction có gundam_snapshot và grade không
-    if (!item.auction?.gundam_snapshot?.grade) {
+    // Lọc theo grade
+    if (filters.selectedGrade && (!item.auction?.gundam_snapshot?.grade ||
+        item.auction.gundam_snapshot.grade.toLowerCase() !== filters.selectedGrade)) {
       return false;
     }
-
-    //Trong gundam_snapshow.grade: data: Entry Grade
-    // nhưng filter thì lại đang entry-grade
-    // có cách nào để chỉnh lại data:grade để phù hợp với
-
-    // So sánh grade (không phân biệt hoa thường)
-    return item.auction.gundam_snapshot.grade.toLowerCase() === filters.selectedGrade;
+    // Lọc theo search
+    if (searchText) {
+      const name = item.auction?.gundam_snapshot?.name?.toLowerCase() || '';
+      if (!name.includes(searchText.toLowerCase())) {
+        return false;
+      }
+    }
+    return true;
   });
+
+  // Hàm sort
+  const sortAuctions = (auctions) => {
+    switch (sortType) {
+      case 'price-low':
+        return [...auctions].sort((a, b) => (a.auction.starting_price || 0) - (b.auction.starting_price || 0));
+      case 'price-high':
+        return [...auctions].sort((a, b) => (b.auction.starting_price || 0) - (a.auction.starting_price || 0));
+      case 'ending-soon':
+        return [...auctions].sort((a, b) => new Date(a.auction.end_time) - new Date(b.auction.end_time));
+      case 'newest':
+      default:
+        return [...auctions].sort((a, b) => new Date(b.auction.created_at) - new Date(a.auction.created_at));
+    }
+  };
+
+  // Thay filteredAuctions thành sortedAuctions
+  const sortedAuctions = sortAuctions(filteredAuctions);
 
   return (
     <div className="container mx-auto p-4 mb-5 min-h-screen mt-36">
@@ -565,13 +589,19 @@ const AuctionList = () => {
               <input
                 type="text"
                 placeholder="Tìm kiếm Gundam..."
+                value={searchText}
+                onChange={e => setSearchText(e.target.value)}
                 className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none w-64"
               />
               <div className="absolute left-3 top-2.5 text-gray-400">
                 🔍
               </div>
             </div>
-            <select className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none">
+            <select
+              value={sortType}
+              onChange={e => setSortType(e.target.value)}
+              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+            >
               <option value="newest">Mới nhất</option>
               <option value="price-low">Giá thấp đến cao</option>
               <option value="price-high">Giá cao đến thấp</option>
@@ -642,9 +672,9 @@ const AuctionList = () => {
 
           {/* Auction Grid */}
           <div className="space-y-6">
-            {filteredAuctions.length > 0 ? (
+            {sortedAuctions.length > 0 ? (
               <Row gutter={[24, 24]}>
-                {filteredAuctions.map((auctionData) => (
+                {sortedAuctions.map((auctionData) => (
                   <Col key={auctionData.auction.id} xs={24} md={12}>
                     <AuctionCard auctionData={auctionData} />
                   </Col>
