@@ -1,9 +1,30 @@
-Enjoy the Free code + Assets 😍
+# 🤖 Gundam Platform Website
 
-  - Support us on YouTube Channel: https://www.youtube.com/channel/UC1H-a1MKEFXRiFlGNLcy7gQ
+**Gundam Platform Website** is an online marketplace and community platform for Gundam enthusiasts.  
+It allows users to:
+- Buy and sell Gundam model kits
+- Post listings for trading/collecting
+- Participate in live auctions
+- Explore detailed information about Gundam models
 
+## 🌐 Demo
+👉 [View Demo](https://mecha-world.vercel.app/)
 
-Currently, two official plugins are available:
+## ⚙️ Tech Stack
+- React + Vite + Tailwind CSS + Ant Design
+- Golang (Backend)
+- PostgreSQL (Database)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 🚀 Getting Started (Local)
+1. Clone the repository:
+   git clone https://github.com/TruongIT-Dev/MechaWorld-Platform.git
+Install dependencies:
+
+bash
+Copy code
+npm install
+Run the project:
+
+bash
+Copy code
+npm run dev
